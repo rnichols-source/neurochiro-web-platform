@@ -17,14 +17,13 @@ function tone(status: string) {
   return 'new' as const;
 }
 
-function Rows({ rows, empty }: { rows: ReferralRow[]; empty: string }) {
+function Rows({ rows, empty, sentence }: { rows: ReferralRow[]; empty: string; sentence: string }) {
   if (!rows.length) {
     return (
       <EmptyState
         icon={Users}
         title={empty}
-        sentence={empty.startsWith('No referrals') ? 'When a doctor sends you a patient, it shows up here.' : 'Send a patient to a doctor you trust.'}
-        action={{ label: 'Refer a patient', href: '/doctor/referrals?again=1' }}
+        sentence={sentence}
       />
     );
   }
@@ -64,7 +63,11 @@ export default async function ReferralsPage({ searchParams }: { searchParams: Pr
         <Link href="/doctor/referrals?tab=received" className={`min-h-11 inline-flex items-center px-4 rounded-lg text-sm font-bold ${tab === 'received' ? 'bg-portal-ink text-white' : 'bg-white border border-portal-border'}`}>Received</Link>
         <Link href="/doctor/referrals?tab=sent" className={`min-h-11 inline-flex items-center px-4 rounded-lg text-sm font-bold ${tab === 'sent' ? 'bg-portal-ink text-white' : 'bg-white border border-portal-border'}`}>Sent</Link>
       </div>
-      <Rows rows={rows} empty={tab === 'received' ? 'No referrals yet.' : "You haven't referred anyone yet."} />
+      <Rows
+        rows={rows}
+        empty={tab === 'received' ? 'No referrals yet' : 'No referrals sent'}
+        sentence={tab === 'received' ? 'When a doctor sends you a patient, it shows up here.' : 'Use Refer a patient above to send your first one.'}
+      />
     </div>
   );
 }

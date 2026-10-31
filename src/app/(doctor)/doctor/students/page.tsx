@@ -8,6 +8,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 import PageHeader from "@/components/portal/PageHeader";
 import EmptyState from "@/components/portal/EmptyState";
 import HiringTabs from "../jobs/HiringTabs";
+import { classYearOptions } from "@/lib/portal/class-years";
 
 export default function StudentsPage() {
   return (
@@ -19,6 +20,7 @@ export default function StudentsPage() {
 
 function StudentsContent() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [classYear, setClassYear] = useState<number | "all">("all");
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
@@ -44,6 +46,8 @@ function StudentsContent() {
       .finally(() => setLoading(false));
   }, [searchTerm]);
 
+  const visibleStudents = students.filter((student) => classYear === "all" || student.gradYear === String(classYear));
+
   return (
     <div className="space-y-6">
       <HiringTabs />
@@ -62,17 +66,21 @@ function StudentsContent() {
           />
         </div>
         <div className="flex gap-2 flex-wrap">
-          {['All', '2025', '2026', '2027', '2028'].map((year) => (
+          <button
+            type="button"
+            onClick={() => setClassYear("all")}
+            className={`min-h-11 px-3 rounded-lg text-sm font-bold ${classYear === "all" ? "bg-portal-ink text-white" : "bg-white border border-portal-border text-portal-ink"}`}
+          >
+            All
+          </button>
+          {classYearOptions(new Date(), students.map((student) => ({ graduation_year: student.gradYear }))).map((year) => (
             <button
               key={year}
-              onClick={() => setSearchTerm(year === 'All' ? '' : year)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                (year === 'All' && !searchTerm) || searchTerm === year
-                  ? 'bg-neuro-navy text-white'
-                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-              }`}
+              type="button"
+              onClick={() => setClassYear(year)}
+              className={`min-h-11 px-3 rounded-lg text-sm font-bold ${classYear === year ? "bg-portal-ink text-white" : "bg-white border border-portal-border text-portal-ink"}`}
             >
-              {year === 'All' ? 'All Students' : `Class of ${year}`}
+              Class of {year}
             </button>
           ))}
         </div>
@@ -83,11 +91,11 @@ function StudentsContent() {
         <div className="flex items-center justify-center h-48">
           <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
         </div>
-      ) : students.length === 0 ? (
+      ) : visibleStudents.length === 0 ? (
         <EmptyState icon={GraduationCap} title="No students found" sentence="Try another search, or check back when more students join." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {students.map((student) => (
+          {visibleStudents.map((student) => (
             <button
               key={student.id}
               onClick={() => setSelectedStudent(student)}

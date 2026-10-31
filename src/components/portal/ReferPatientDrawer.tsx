@@ -219,7 +219,7 @@ export default function ReferPatientDrawer({
                 className="min-h-11 px-3 rounded-lg border border-portal-border text-base bg-white"
               />
             </div>
-            <p className="text-xs text-portal-muted">Technique uses specialty tags. There is no separate technique field. Distances match the directory. This view is a list.</p>
+            <p className="text-sm text-portal-ink-2">Based on the doctor&apos;s listed specialties.</p>
             <button type="button" onClick={() => runSearch(query)} className="min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold" disabled={busy}>
               {busy ? 'Searching' : 'Search'}
             </button>

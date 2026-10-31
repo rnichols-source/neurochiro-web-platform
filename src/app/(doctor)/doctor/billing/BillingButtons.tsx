@@ -22,7 +22,7 @@ export function ManageBillingButton() {
           setLoading(false);
         }
       }}
-      className="min-h-11 px-4 rounded-lg bg-portal-ink text-white text-sm font-bold"
+      className="min-h-11 w-full px-4 rounded-lg bg-portal-ink text-white text-sm font-bold sm:w-auto"
     >
       {loading ? 'Opening…' : 'Manage billing'}
     </button>

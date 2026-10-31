@@ -61,6 +61,7 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: "#0B1118",
+  interactiveWidget: "resizes-content" as const,
 };
 
 import { RegionProvider } from "@/context/RegionContext";

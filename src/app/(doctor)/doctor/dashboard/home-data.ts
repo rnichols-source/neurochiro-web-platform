@@ -4,6 +4,41 @@ import type { AttentionItem, SetupFields } from './home-types';
 
 export type { AttentionItem, SetupFields };
 
+function scheduleLabel(status?: string | null, date?: string | null): string {
+  const value = (status || "not_scheduled").toLowerCase();
+  if (value === "completed" || value === "done") return "Done";
+  if (value === "scheduled" || value === "booked") {
+    if (date) {
+      const parsed = new Date(date);
+      if (!Number.isNaN(parsed.getTime())) {
+        const label = new Intl.DateTimeFormat("en-US", {
+          month: "short",
+          day: "numeric",
+          timeZone: "America/New_York",
+        }).format(parsed);
+        return `Scheduled ${label}`;
+      }
+    }
+    return "Scheduled";
+  }
+  return "Not scheduled yet. We'll reach out.";
+}
+
+export async function getSpotlight(doctorId: string): Promise<{ spotlight: string; content: string }> {
+  const fallback = "Not scheduled yet. We'll reach out.";
+  const admin = createAdminClient() as any;
+  const { data, error } = await admin
+    .from("doctors")
+    .select("spotlight_status, spotlight_date, live_feature_status, live_feature_date")
+    .eq("id", doctorId)
+    .maybeSingle();
+  if (error || !data) return { spotlight: fallback, content: fallback };
+  return {
+    spotlight: scheduleLabel(data.spotlight_status, data.spotlight_date),
+    content: scheduleLabel(data.live_feature_status, data.live_feature_date),
+  };
+}
+
 export async function getSetupFields(doctorId: string): Promise<SetupFields> {
   const admin = createAdminClient() as any;
   const { data, error } = await admin
@@ -21,15 +56,25 @@ export async function getSetupFields(doctorId: string): Promise<SetupFields> {
   };
 }
 
-export async function getAttention(doctorId: string, userId: string): Promise<AttentionItem[]> {
+export async function getAttention(doctorId: string, unreadMessages: number): Promise<AttentionItem[]> {
   const admin = createAdminClient() as any;
+  const staleBefore = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const [contacts, leads] = await Promise.all([
+    admin
+      .from('contact_requests')
+      .select('id, name, phone, note, contact_outcome, created_at')
+      .eq('doctor_id', doctorId)
+      .order('created_at', { ascending: false })
+      .limit(6),
+    admin
+      .from('leads')
+      .select('id, name, created_at')
+      .eq('doctor_id', doctorId)
+      .eq('stage', 'new')
+      .lt('created_at', staleBefore)
+      .limit(4),
+  ]);
   const items: AttentionItem[] = [];
-  const contacts = await admin
-    .from('contact_requests')
-    .select('id, name, phone, note, contact_outcome, created_at')
-    .eq('doctor_id', doctorId)
-    .order('created_at', { ascending: false })
-    .limit(6);
   if (!contacts.error && Array.isArray(contacts.data)) {
     for (const row of contacts.data) {
       if (row.contact_outcome === 'patient_contacted_confirmed') continue;
@@ -42,14 +87,6 @@ export async function getAttention(doctorId: string, userId: string): Promise<At
       });
     }
   }
-  const staleBefore = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
-  const leads = await admin
-    .from('leads')
-    .select('id, name, created_at')
-    .eq('doctor_id', doctorId)
-    .eq('stage', 'new')
-    .lt('created_at', staleBefore)
-    .limit(4);
   if (!leads.error && Array.isArray(leads.data)) {
     for (const row of leads.data) {
       items.push({
@@ -61,15 +98,10 @@ export async function getAttention(doctorId: string, userId: string): Promise<At
       });
     }
   }
-  const messages = await admin
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('recipient_id', userId)
-    .is('read_at', null);
-  if ((messages.count || 0) > 0) {
+  if (unreadMessages > 0) {
     items.unshift({
       id: 'messages',
-      title: `${messages.count} unread message${messages.count === 1 ? '' : 's'}`,
+      title: `${unreadMessages} unread message${unreadMessages === 1 ? '' : 's'}`,
       detail: 'Open messages',
       kind: 'message',
       href: '/doctor/messages',

@@ -11,7 +11,7 @@ const TOPICS = ['Profile', 'Patient requests', 'Billing', 'Seminars', 'Bug', 'Ot
 const FAQ = [
   { q: 'How do patients find me?', a: 'Your profile is on neurochiro.co. Patients search by city, then request an appointment from your page.' },
   { q: 'When do I see a patient request?', a: 'Requests show under Patient requests. Call them back while they are still deciding.' },
-  { q: 'How do I change my plan?', a: 'Open Plan and billing and use Manage billing. You can update the card or cancel there.' },
+  { q: 'How do I change my plan?', a: "If you pay by card, open Plan & billing and tap Manage billing to update your card, see invoices or cancel. Founding members have Pro included, so there's nothing to manage. Email support@neurochirodirectory.com with any plan question." },
   { q: 'How do seminars work?', a: 'Create one, share the link, and see who registered. Hosting prices are on the Seminars page.' },
   { q: 'Who do I email?', a: 'Email support@neurochirodirectory.com. We read every message.' },
   { q: 'Can I preview what patients see?', a: 'Open My profile and use View live profile. It opens your directory page in a new tab.' },

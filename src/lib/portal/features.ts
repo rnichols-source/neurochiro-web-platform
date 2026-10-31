@@ -1,5 +1,6 @@
-import { PORTAL_FEATURES, type FeatureState, type PortalFeature } from '@/config/portal-features';
-import type { Membership } from '@/lib/portal/membership';
+import { PORTAL_FEATURES, type FeatureState, type PortalFeature } from '../../config/portal-features.ts';
+import type { Membership } from './membership.ts';
+import { billingNavSubtitle } from './billing-view.ts';
 
 export type PortalNavContext = {
   membership: Membership;
@@ -41,13 +42,14 @@ export function isVisible(feature: PortalFeature, ctx: PortalNavContext): boolea
 }
 
 export function navFor(ctx: PortalNavContext): PortalNavItem[] {
-  return PORTAL_FEATURES.filter((feature) => feature.key !== 'notifications' && isVisible(feature, ctx) && effectiveState(feature, ctx) !== 'coming_soon').map((feature) => {
+  return PORTAL_FEATURES.filter((feature) => feature.key !== 'notifications' && feature.key !== 'students' && isVisible(feature, ctx) && effectiveState(feature, ctx) !== 'coming_soon').map((feature) => {
     const state = effectiveState(feature, ctx);
     const item: PortalNavItem = {
       ...feature,
       effectiveState: state,
       locked: !requirementMet(feature, ctx),
     };
+    if (feature.key === 'billing') item.subtitle = billingNavSubtitle(ctx.membership);
     if (feature.key === 'messages') item.badge = ctx.unreadMessages;
     if (feature.key === 'referrals') item.badge = ctx.unreadReferrals;
     if (feature.key === 'leads') item.badge = undefined;

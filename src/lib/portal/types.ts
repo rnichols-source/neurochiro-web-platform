@@ -15,6 +15,7 @@ export type PortalDoctor = {
   city: string | null;
   state: string | null;
   country: string | null;
+  specialties: string[];
 };
 
 /** Serializable portal context. Safe to pass into client components. */
@@ -23,6 +24,7 @@ export type PortalContextValue = {
   email: string | null;
   fullName: string | null;
   initials: string;
+  role: string | null;
   doctor: PortalDoctor | null;
   membership: Membership;
   unreadNotifications: number;

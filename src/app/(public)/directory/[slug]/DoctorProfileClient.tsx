@@ -51,7 +51,7 @@ function Section({ bg = "white", children, id, style: extra }: { bg?: "white" | 
   );
 }
 
-export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [] }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[] }) {
+export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [], badgeIds = [] }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[]; badgeIds?: string[] }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -98,7 +98,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const languages = d.languages as string[] | null;
   const hours = d.hours as string | null;
   const acceptedPayment = d.accepted_payment as string[] | null;
-  const faq = d.faq as { question: string; answer: string }[] | null;
+  const faq = Array.isArray(d.faq)
+    ? (d.faq as { question?: string; answer?: string }[]).filter((item) => {
+        const question = typeof item?.question === 'string' ? item.question.trim() : '';
+        const answer = typeof item?.answer === 'string' ? item.answer.trim() : '';
+        return question.length > 0 && answer.length > 0;
+      })
+    : [];
   const galleryImages = d.gallery_images as string[] | null;
   const bookingUrl = d.booking_url as string | null;
   const firstVisitInfo = d.first_visit_info as string | null;
@@ -760,9 +766,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               </div>
             )}
           </div>
-          {doctor.user_id && (
+          {badgeIds.length > 0 && (
             <div style={{ marginTop: 32 }}>
-              <PublicBadges doctorUserId={doctor.user_id} />
+              <PublicBadges badgeIds={badgeIds} />
             </div>
           )}
         </Section>

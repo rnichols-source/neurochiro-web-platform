@@ -1,6 +1,8 @@
 "use client";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 import { saveToolData, loadToolData } from "../tool-data-actions";
+import ExampleBanner from "@/components/portal/ExampleBanner";
+import { EXAMPLE_CARE_PHASES, isUntouchedCarePlanDefault } from "@/lib/portal/tool-examples";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -31,8 +33,8 @@ interface ScoringCategory {
 interface PlanPhase {
   id: string;
   name: string;
-  visitsPerWeek: number;
-  weeks: number;
+  visitsPerWeek: number | null;
+  weeks: number | null;
 }
 
 interface Supplement {
@@ -59,7 +61,7 @@ interface CarePlanState {
   useScoring: boolean;
   scoringCategories: ScoringCategory[];
   // Step 2
-  perVisitFee: number;
+  perVisitFee: number | null;
   phases: PlanPhase[];
   discount: number;
   notesToPatient: string;
@@ -86,11 +88,17 @@ const DEFAULT_SCORING: ScoringCategory[] = [
   { id: uid(), name: "Daily Function", score: 0 },
 ];
 
-const DEFAULT_PHASES: PlanPhase[] = [
-  { id: uid(), name: "Intensive", visitsPerWeek: 3, weeks: 4 },
-  { id: uid(), name: "Corrective", visitsPerWeek: 2, weeks: 8 },
-  { id: uid(), name: "Stabilization", visitsPerWeek: 1, weeks: 12 },
-];
+function blankPhase(): PlanPhase {
+  return { id: uid(), name: "", visitsPerWeek: null, weeks: null };
+}
+
+function examplePhases(): PlanPhase[] {
+  return EXAMPLE_CARE_PHASES.map((phase) => ({ ...phase, id: uid() }));
+}
+
+function num(value: number | null | undefined): number {
+  return value == null || Number.isNaN(value) ? 0 : value;
+}
 
 const DEFAULT_SUPPLEMENTS: Supplement[] = [
   { id: uid(), name: "Omega-3", price: 35, qty: 1, selected: false },
@@ -120,8 +128,8 @@ const INITIAL_STATE: CarePlanState = {
   practiceName: "[PRACTICE NAME]",
   useScoring: false,
   scoringCategories: DEFAULT_SCORING,
-  perVisitFee: 65,
-  phases: DEFAULT_PHASES,
+  perVisitFee: null,
+  phases: [blankPhase()],
   discount: 0,
   notesToPatient: "",
   showAdvanced: false,
@@ -178,6 +186,7 @@ export default function CarePlanBuilder() {
 function CarePlanContent() {
   const [state, setState] = useState<CarePlanState>(INITIAL_STATE);
   const [loaded, setLoaded] = useState(false);
+  const [usingExample, setUsingExample] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Load from Supabase on mount (localStorage fallback)
@@ -185,21 +194,18 @@ function CarePlanContent() {
     async function load() {
       try {
         const cloud = await loadToolData('care_plan');
-        if (cloud) {
-          setState((prev) => ({ ...prev, ...cloud }));
-        } else {
-          // Fallback: migrate from localStorage if exists
+        const saved = !cloud && typeof localStorage !== 'undefined' ? localStorage.getItem(LS_KEY) : null;
+        const parsed = cloud || (saved ? JSON.parse(saved) as Partial<CarePlanState> : null);
+        if (parsed && !isUntouchedCarePlanDefault(parsed)) {
+          setState((prev) => ({ ...prev, ...parsed }));
+        }
+      } catch {
+        try {
           const saved = localStorage.getItem(LS_KEY);
           if (saved) {
             const parsed = JSON.parse(saved) as Partial<CarePlanState>;
-            setState((prev) => ({ ...prev, ...parsed }));
+            if (!isUntouchedCarePlanDefault(parsed)) setState((prev) => ({ ...prev, ...parsed }));
           }
-        }
-      } catch {
-        // Offline fallback
-        try {
-          const saved = localStorage.getItem(LS_KEY);
-          if (saved) setState((prev) => ({ ...prev, ...JSON.parse(saved) }));
         } catch {}
       }
       setLoaded(true);
@@ -236,10 +242,12 @@ function CarePlanContent() {
       ? scoredCategories.reduce((s, c) => s + c.score, 0) / scoredCategories.length
       : 0;
 
-  const totalVisits = state.phases.reduce((s, p) => s + p.visitsPerWeek * p.weeks, 0);
-  const totalWeeks = state.phases.reduce((s, p) => s + p.weeks, 0);
+  const totalVisits = state.phases.reduce((s, p) => s + num(p.visitsPerWeek) * num(p.weeks), 0);
+  const totalWeeks = state.phases.reduce((s, p) => s + num(p.weeks), 0);
+  const fee = state.perVisitFee ?? 0;
+  const showTotals = state.perVisitFee != null && state.phases.some((phase) => num(phase.visitsPerWeek) > 0 && num(phase.weeks) > 0);
   const totalMonths = Math.ceil(totalWeeks / 4);
-  const grossTotal = totalVisits * state.perVisitFee;
+  const grossTotal = totalVisits * fee;
   const discountAmount = Math.round(grossTotal * (state.discount / 100));
   const netTotal = grossTotal - discountAmount;
 
@@ -281,28 +289,34 @@ function CarePlanContent() {
     if (state.currentStep > 1) goToStep(state.currentStep - 1);
   };
 
-  const templateActive =
-    state.phases.length === DEFAULT_PHASES.length &&
-    state.phases.every((phase, index) => phase.name === DEFAULT_PHASES[index]?.name) &&
-    state.supplements.length === DEFAULT_SUPPLEMENTS.length &&
-    state.supplements.every((item, index) => item.name === DEFAULT_SUPPLEMENTS[index]?.name);
-
   const startBlank = () => {
+    setUsingExample(false);
     setState((prev) => ({
       ...prev,
-      phases: [{ id: uid(), name: "", visitsPerWeek: 1, weeks: 1 }],
-      supplements: [],
+      perVisitFee: null,
+      phases: [blankPhase()],
+    }));
+  };
+
+  const loadExamplePlan = () => {
+    setUsingExample(true);
+    setState((prev) => ({
+      ...prev,
+      perVisitFee: 65,
+      currentStep: prev.currentStep < 2 ? 2 : prev.currentStep,
+      phases: examplePhases(),
     }));
   };
 
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
     saveToolData('care_plan', null).catch(() => {});
+    setUsingExample(false);
     setState({
       ...INITIAL_STATE,
       date: today(),
       scoringCategories: DEFAULT_SCORING.map((c) => ({ ...c, id: uid(), score: 0 })),
-      phases: DEFAULT_PHASES.map((p) => ({ ...p, id: uid() })),
+      phases: [blankPhase()],
       supplements: DEFAULT_SUPPLEMENTS.map((s) => ({ ...s, id: uid(), selected: false })),
       lifestyleRecs: DEFAULT_LIFESTYLE.map((l) => ({ ...l, id: uid(), checked: false, details: "" })),
     });
@@ -310,7 +324,7 @@ function CarePlanContent() {
 
   // ─── Phase helpers ───────────────────────────────────────────────────────
 
-  const updatePhase = (id: string, field: keyof PlanPhase, value: string | number) => {
+  const updatePhase = (id: string, field: keyof PlanPhase, value: string | number | null) => {
     set(
       "phases",
       state.phases.map((p) => (p.id === id ? { ...p, [field]: value } : p))
@@ -442,7 +456,7 @@ function CarePlanContent() {
                 ? "bg-green-600 text-white"
                 : clickable
                 ? "bg-white text-gray-500 hover:bg-gray-50 cursor-pointer"
-                : "bg-gray-50 text-gray-300 cursor-not-allowed"
+                : "bg-gray-50 text-portal-muted cursor-not-allowed"
             }`}
           >
             <span className="flex items-center justify-center gap-1.5">
@@ -487,7 +501,7 @@ function CarePlanContent() {
   const TimelineBar = ({ height = "h-12" }: { height?: string }) => (
     <div className={`timeline-bar flex rounded-xl overflow-hidden ${height} mb-4`}>
       {state.phases.map((phase, i) => {
-        const pct = totalWeeks > 0 ? (phase.weeks / totalWeeks) * 100 : 100 / state.phases.length;
+        const pct = totalWeeks > 0 ? (num(phase.weeks) / totalWeeks) * 100 : 100 / state.phases.length;
         return (
           <div
             key={phase.id}
@@ -568,9 +582,9 @@ function CarePlanContent() {
               Use Dysfunction Scoring
             </span>
             {state.useScoring ? (
-              <ChevronUp className="w-5 h-5 text-gray-400" />
+              <ChevronUp className="w-5 h-5 text-portal-muted" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-gray-400" />
+              <ChevronDown className="w-5 h-5 text-portal-muted" />
             )}
           </button>
 
@@ -588,7 +602,7 @@ function CarePlanContent() {
                     {state.scoringCategories.length > 1 && (
                       <button
                         onClick={() => removeCategory(cat.id)}
-                        className="text-gray-300 hover:text-red-400 transition-colors"
+                        className="text-portal-muted hover:text-red-400 transition-colors"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -648,7 +662,7 @@ function CarePlanContent() {
         </div>
         {state.useScoring && avgScore > 0 && (
           <div className="p-6 border-b border-gray-100">
-            <h4 className="text-xs font-bold text-gray-400 tracking-wide mb-3">
+            <h4 className="text-xs font-bold text-portal-muted tracking-wide mb-3">
               Dysfunction Score
             </h4>
             <div className="flex items-center gap-4">
@@ -682,7 +696,7 @@ function CarePlanContent() {
           </div>
         )}
         {!state.useScoring && (
-          <div className="p-8 text-center text-gray-300 text-sm">
+          <div className="p-8 text-center text-portal-muted text-sm">
             Patient info will appear in the final care plan.
             <br />
             Enable scoring to see a live assessment preview.
@@ -705,12 +719,17 @@ function CarePlanContent() {
             <h3 className="text-sm font-bold text-neuro-navy tracking-wide">Per-Visit Fee</h3>
           </div>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-portal-muted font-bold">$</span>
             <input
-              type="number"
-              value={state.perVisitFee}
-              onChange={(e) => set("perVisitFee", Number(e.target.value) || 0)}
-              className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange transition-colors"
+              type="text"
+              inputMode="decimal"
+              placeholder="e.g. 65"
+              value={state.perVisitFee ?? ""}
+              onChange={(e) => {
+                const raw = e.target.value.trim();
+                set("perVisitFee", raw === "" || Number.isNaN(Number(raw)) ? null : Number(raw));
+              }}
+              className="w-full pl-8 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-base font-bold focus:outline-none focus:border-neuro-orange transition-colors"
             />
           </div>
         </div>
@@ -718,17 +737,17 @@ function CarePlanContent() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex flex-wrap items-center gap-2 mb-4">
             <h3 className="text-sm font-bold text-neuro-navy">Care Phases</h3>
-            {templateActive ? (
-              <span className="inline-flex items-center min-h-11 px-3 rounded-full bg-portal-warning-bg text-sm font-bold text-portal-ink">Template: edit to match your practice</span>
-            ) : null}
-            {templateActive ? (
-              <button type="button" onClick={startBlank} className="min-h-11 px-3 rounded-lg bg-white border border-portal-border text-sm font-bold">Start blank</button>
-            ) : null}
+            {usingExample ? (
+              <span className="inline-flex items-center min-h-11 px-3 rounded-full bg-portal-warning-bg text-sm font-bold text-portal-ink">Example</span>
+            ) : (
+              <button type="button" onClick={loadExamplePlan} className="min-h-11 px-3 rounded-lg bg-white border border-portal-border text-sm font-bold text-portal-ink">Load example plan</button>
+            )}
           </div>
           <div className="space-y-3">
+            {usingExample ? <ExampleBanner onClear={startBlank} /> : null}
             {state.phases.map((phase, i) => {
-              const phaseVisits = phase.visitsPerWeek * phase.weeks;
-              const phaseCost = phaseVisits * state.perVisitFee;
+              const phaseVisits = num(phase.visitsPerWeek) * num(phase.weeks);
+              const phaseCost = phaseVisits * fee;
               return (
                 <div
                   key={phase.id}
@@ -745,7 +764,7 @@ function CarePlanContent() {
                     {state.phases.length > 1 && (
                       <button
                         onClick={() => removePhase(phase.id)}
-                        className="text-gray-300 hover:text-red-400 transition-colors"
+                        className="text-portal-muted hover:text-red-400 transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -753,36 +772,37 @@ function CarePlanContent() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase">Visits/Week</label>
+                      <label className="text-xs font-bold text-portal-muted uppercase">Visits/Week</label>
                       <input
-                        type="number"
-                        min={1}
-                        max={7}
-                        value={phase.visitsPerWeek}
-                        onChange={(e) =>
-                          updatePhase(phase.id, "visitsPerWeek", Math.max(1, Number(e.target.value) || 1))
-                        }
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold focus:outline-none focus:border-neuro-orange mt-1"
+                        type="text"
+                        inputMode="decimal"
+                        value={phase.visitsPerWeek ?? ""}
+                        onChange={(e) => {
+                          const raw = e.target.value.trim();
+                          updatePhase(phase.id, "visitsPerWeek", raw === "" || Number.isNaN(Number(raw)) ? null : Number(raw));
+                        }}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-base font-bold focus:outline-none focus:border-neuro-orange mt-1"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase">Weeks</label>
+                      <label className="text-xs font-bold text-portal-muted uppercase">Weeks</label>
                       <input
-                        type="number"
-                        min={1}
-                        max={52}
-                        value={phase.weeks}
-                        onChange={(e) =>
-                          updatePhase(phase.id, "weeks", Math.max(1, Number(e.target.value) || 1))
-                        }
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-sm font-bold focus:outline-none focus:border-neuro-orange mt-1"
+                        type="text"
+                        inputMode="decimal"
+                        value={phase.weeks ?? ""}
+                        onChange={(e) => {
+                          const raw = e.target.value.trim();
+                          updatePhase(phase.id, "weeks", raw === "" || Number.isNaN(Number(raw)) ? null : Number(raw));
+                        }}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-100 rounded-lg text-base font-bold focus:outline-none focus:border-neuro-orange mt-1"
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">
-                    {phaseVisits} visits over {phase.weeks} weeks &middot;{" "}
-                    <span className="font-bold text-neuro-navy">${fmt(phaseCost)}</span>
-                  </p>
+                  {showTotals ? (
+                    <p className="text-xs text-portal-ink-2 mt-2">
+                      {phaseVisits} visits over {num(phase.weeks)} weeks · ${fmt(phaseCost)}
+                    </p>
+                  ) : null}
                 </div>
               );
             })}
@@ -801,13 +821,13 @@ function CarePlanContent() {
             onClick={() => set("showAdvanced", !state.showAdvanced)}
             className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
           >
-            <span className="text-xs font-bold text-gray-400 tracking-wide">
+            <span className="text-xs font-bold text-portal-muted tracking-wide">
               Advanced Options
             </span>
             {state.showAdvanced ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
+              <ChevronUp className="w-4 h-4 text-portal-muted" />
             ) : (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-portal-muted" />
             )}
           </button>
           {state.showAdvanced && (
@@ -844,8 +864,9 @@ function CarePlanContent() {
 
       {/* Right: Live Preview */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
+        {showTotals ? (<>
         <div className="p-6 border-b border-gray-100">
-          <h3 className="text-xs font-bold text-gray-400 tracking-wide mb-4">
+          <h3 className="text-xs font-bold text-portal-muted tracking-wide mb-4">
             Care Journey Timeline
           </h3>
           <TimelineBar />
@@ -853,8 +874,8 @@ function CarePlanContent() {
 
         <div className="p-6 space-y-3">
           {state.phases.map((phase, i) => {
-            const pv = phase.visitsPerWeek * phase.weeks;
-            const pc = pv * state.perVisitFee;
+            const pv = num(phase.visitsPerWeek) * num(phase.weeks);
+            const pc = pv * fee;
             return (
               <div key={phase.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <div
@@ -865,13 +886,13 @@ function CarePlanContent() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-neuro-navy text-sm">{phase.name}</p>
-                  <p className="text-gray-400 text-xs">
+                  <p className="text-portal-muted text-xs">
                     {phase.visitsPerWeek}x/week for {phase.weeks} weeks
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="font-bold text-neuro-navy text-sm">{pv} visits</p>
-                  <p className="text-gray-400 text-xs">${fmt(pc)}</p>
+                  <p className="text-portal-muted text-xs">${fmt(pc)}</p>
                 </div>
               </div>
             );
@@ -902,7 +923,7 @@ function CarePlanContent() {
 
         {/* Payment Options Preview */}
         <div className="px-6 pb-6 space-y-3">
-          <h4 className="text-xs font-bold text-gray-400 tracking-wide">Payment Options</h4>
+          <h4 className="text-xs font-bold text-portal-muted tracking-wide">Payment Options</h4>
           <div className="grid grid-cols-3 gap-2">
             <div className="border-2 border-neuro-orange rounded-xl p-3 relative">
               <span className="absolute -top-2 left-2 bg-neuro-orange text-white text-xs font-bold px-2 py-0.5 rounded-full">
@@ -916,20 +937,23 @@ function CarePlanContent() {
               <p className="text-xs font-bold text-neuro-navy">Monthly</p>
               <p className="text-lg font-bold text-neuro-navy">
                 ${fmt(monthlyPayment)}
-                <span className="text-xs text-gray-400 font-normal">/ea</span>
+                <span className="text-xs text-portal-muted font-normal">/ea</span>
               </p>
-              <p className="text-xs text-gray-400">{totalMonths} payments</p>
+              <p className="text-xs text-portal-muted">{totalMonths} payments</p>
             </div>
             <div className="border border-gray-200 rounded-xl p-3">
               <p className="text-xs font-bold text-neuro-navy">Bi-Weekly</p>
               <p className="text-lg font-bold text-neuro-navy">
                 ${fmt(biWeeklyPayment)}
-                <span className="text-xs text-gray-400 font-normal">/2wk</span>
+                <span className="text-xs text-portal-muted font-normal">/2wk</span>
               </p>
-              <p className="text-xs text-gray-400">{biWeeklyPeriods} payments</p>
+              <p className="text-xs text-portal-muted">{biWeeklyPeriods} payments</p>
             </div>
           </div>
         </div>
+        </>) : (
+          <p className="p-6 text-sm text-portal-ink-2">Add your per-visit fee and a phase to see the total</p>
+        )}
       </div>
     </div>
   );
@@ -948,7 +972,6 @@ function CarePlanContent() {
         >
           <span className="text-sm font-bold text-neuro-navy flex items-center gap-2">
             <Pill className="w-4 h-4 text-neuro-orange" /> Supplement Recommendations
-            {templateActive ? <span className="font-bold text-portal-ink-2">Template: edit to match your practice</span> : null}
           </span>
           <div
             className={`w-11 h-6 rounded-full relative transition-colors ${
@@ -987,7 +1010,7 @@ function CarePlanContent() {
                   className="flex-1 text-sm font-bold text-neuro-navy bg-transparent focus:outline-none border-b border-transparent focus:border-neuro-orange"
                 />
                 <div className="flex items-center gap-1">
-                  <span className="text-xs text-gray-400">$</span>
+                  <span className="text-xs text-portal-muted">$</span>
                   <input
                     type="number"
                     value={sup.price}
@@ -996,8 +1019,8 @@ function CarePlanContent() {
                     }
                     className="w-14 text-sm font-bold text-right bg-transparent border-b border-gray-200 focus:outline-none focus:border-neuro-orange"
                   />
-                  <span className="text-xs text-gray-400 mr-2">/ea</span>
-                  <span className="text-xs text-gray-400">x</span>
+                  <span className="text-xs text-portal-muted mr-2">/ea</span>
+                  <span className="text-xs text-portal-muted">x</span>
                   <input
                     type="number"
                     min={1}
@@ -1134,7 +1157,7 @@ function CarePlanContent() {
         </button>
         <button
           onClick={resetAll}
-          className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-400 rounded-xl hover:bg-gray-50 hover:text-red-500 transition-colors"
+          className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-portal-muted rounded-xl hover:bg-gray-50 hover:text-red-500 transition-colors"
         >
           <RotateCcw className="w-4 h-4" /> Start New Plan
         </button>
@@ -1201,6 +1224,8 @@ function CarePlanContent() {
             </section>
           )}
 
+          {showTotals ? (
+          <>
           {/* Care Journey Section */}
           <section>
             <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
@@ -1214,8 +1239,8 @@ function CarePlanContent() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
               {state.phases.map((phase, i) => {
-                const pv = phase.visitsPerWeek * phase.weeks;
-                const pc = pv * state.perVisitFee;
+                const pv = num(phase.visitsPerWeek) * num(phase.weeks);
+                const pc = pv * fee;
                 return (
                   <div
                     key={phase.id}
@@ -1267,7 +1292,7 @@ function CarePlanContent() {
 
             <div className="space-y-2 mb-6">
               <div className="flex justify-between text-sm py-1 border-b border-gray-100">
-                <span className="text-gray-600">Care Plan Subtotal ({totalVisits} visits x ${state.perVisitFee})</span>
+                <span className="text-gray-600">Care Plan Subtotal ({totalVisits} visits x ${fee})</span>
                 <span className="font-bold text-neuro-navy">${fmt(grossTotal)}</span>
               </div>
               {state.discount > 0 && (
@@ -1308,23 +1333,27 @@ function CarePlanContent() {
                 <p className="font-bold text-neuro-navy text-sm">Monthly</p>
                 <p className="text-2xl font-bold text-neuro-navy mt-1">
                   ${fmt(monthlyPayment)}
-                  <span className="text-xs text-gray-400 font-normal">/ea</span>
+                  <span className="text-xs text-portal-muted font-normal">/ea</span>
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{totalMonths} payments</p>
+                <p className="text-xs text-portal-muted mt-1">{totalMonths} payments</p>
               </div>
               <div className="border border-gray-200 rounded-xl p-4">
                 <p className="font-bold text-neuro-navy text-sm">Bi-Weekly</p>
                 <p className="text-2xl font-bold text-neuro-navy mt-1">
                   ${fmt(biWeeklyPayment)}
-                  <span className="text-xs text-gray-400 font-normal">/2wk</span>
+                  <span className="text-xs text-portal-muted font-normal">/2wk</span>
                 </p>
-                <p className="text-xs text-gray-400 mt-1">{biWeeklyPeriods} payments</p>
+                <p className="text-xs text-portal-muted mt-1">{biWeeklyPeriods} payments</p>
               </div>
             </div>
-            <p className="text-xs text-gray-400 text-center mt-3">
+            <p className="text-xs text-portal-muted text-center mt-3">
               Per visit: ${totalVisits > 0 ? fmt(Math.round(netTotal / totalVisits)) : 0}
             </p>
           </section>
+          </>
+          ) : (
+            <p className="text-sm text-portal-ink-2">Add your per-visit fee and a phase to see the total</p>
+          )}
 
           {/* Recommendations Section */}
           {(hasSupplements || hasLifestyle) && (
@@ -1406,25 +1435,25 @@ function CarePlanContent() {
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="sig-line border-b-2 border-neuro-navy h-8" />
-                <p className="text-xs text-gray-400 mt-1">Patient Signature</p>
+                <p className="text-xs text-portal-muted mt-1">Patient Signature</p>
                 <div className="border-b border-gray-300 h-6 mt-4" />
-                <p className="text-xs text-gray-400 mt-1">Print Name</p>
+                <p className="text-xs text-portal-muted mt-1">Print Name</p>
               </div>
               <div>
                 <div className="sig-line border-b-2 border-neuro-navy h-8" />
-                <p className="text-xs text-gray-400 mt-1">Date</p>
+                <p className="text-xs text-portal-muted mt-1">Date</p>
                 <div className="border-b border-gray-300 h-6 mt-4" />
-                <p className="text-xs text-gray-400 mt-1">Doctor Signature / Date</p>
+                <p className="text-xs text-portal-muted mt-1">Doctor Signature / Date</p>
               </div>
             </div>
           </section>
 
         {/* Report Footer */}
         <div className="px-6 sm:px-10 py-3 border-t border-gray-100 bg-gray-50">
-          <p className="text-center text-xs text-gray-400 italic mb-1">
+          <p className="text-center text-xs text-portal-muted italic mb-1">
             Your care plan is designed around your specific needs. Consistency is key to lasting correction.
           </p>
-          <div className="flex justify-between text-xs text-gray-300">
+          <div className="flex justify-between text-xs text-portal-muted">
             <span>{state.practiceName}</span>
             <span>{state.doctorName}</span>
             <span>{state.date}</span>
@@ -1511,7 +1540,7 @@ function CarePlanContent() {
         </div>
         <button
           onClick={resetAll}
-          className="px-3 py-2 text-gray-400 hover:text-neuro-navy text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5"
+          className="px-3 py-2 text-portal-muted hover:text-neuro-navy text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Reset
         </button>

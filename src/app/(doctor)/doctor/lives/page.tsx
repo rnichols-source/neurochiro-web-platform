@@ -6,9 +6,6 @@ import PageHeader from "@/components/portal/PageHeader";
 import { nextWeeklyShow } from "@/lib/portal/weekly-show";
 
 // Show details
-const SHOW_NAME = "The Weekly Adjustment";
-const SHOW_DAY = "Thursday";
-const SHOW_TIME = "8:00 PM EST";
 const SHOW_TAGLINE = "Real questions. Real doctors. Every Thursday.";
 
 // Next guest — update weekly
@@ -30,21 +27,19 @@ export default function WeeklyAdjustmentPage() {
       <PageHeader title="The Weekly Adjustment" description={SHOW_TAGLINE} />
 
       {/* Next Episode Card */}
-      <div className="bg-gradient-to-r from-neuro-orange/20 to-neuro-orange/5 border border-neuro-orange/30 rounded-2xl p-6">
+      <div className="bg-white border border-portal-border rounded-xl p-6">
         <div className="flex items-start gap-4">
-          <div className="w-14 h-14 bg-neuro-orange/20 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Video className="w-7 h-7 text-neuro-orange" />
+          <div className="w-14 h-14 bg-portal-accent-50 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Video className="w-7 h-7 text-portal-accent" />
           </div>
           <div className="flex-1">
-            <p className="text-neuro-orange text-xs font-bold tracking-[0.2em] mb-1">Next Episode</p>
-            <h2 className="text-xl font-bold text-white">
-              {SHOW_DAY} at {SHOW_TIME}
-            </h2>
-            <p className="text-white/50 text-sm mt-1">{nextShow.label}</p>
+            <p className="text-sm font-bold text-portal-accent mb-1">Next episode</p>
+            <h2 className="text-xl font-bold text-portal-ink">Thursday · 8 PM ET</h2>
+            <p className="text-portal-ink-2 text-sm mt-1">{nextShow.label}</p>
             {NEXT_GUEST.name && (
               <div className="mt-3 bg-white/[0.06] rounded-xl px-4 py-3 inline-flex items-center gap-2">
                 <Mic2 className="w-4 h-4 text-neuro-orange" />
-                <span className="text-sm text-white/70">This week's guest: <strong className="text-white">{NEXT_GUEST.name}</strong> from {NEXT_GUEST.city}</span>
+                <span className="text-sm text-portal-ink-2">This week&apos;s guest: <strong className="text-portal-ink">{NEXT_GUEST.name}</strong> from {NEXT_GUEST.city}</span>
               </div>
             )}
           </div>

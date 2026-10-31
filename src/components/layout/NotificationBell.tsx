@@ -35,9 +35,11 @@ export default function NotificationBell({
   unreadOverride,
   includeAnnouncements = true,
   variant = 'dark',
+  viewAllHref,
 }: {
   unreadOverride?: number;
   includeAnnouncements?: boolean;
+  viewAllHref?: string;
   variant?: 'light' | 'dark';
 } = {}) {
   const [isOpen, setIsOpen] = useState(false);
@@ -356,13 +358,19 @@ export default function NotificationBell({
                 )}
               </div>
 
-              <Link
-                href="/dashboard"
-                className="block p-4 bg-gray-50 hover:bg-gray-100 text-center text-[10px] font-black text-neuro-navy uppercase tracking-widest border-t border-gray-100 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                View All Notifications
-              </Link>
+              {viewAllHref ? (
+                <Link
+                  href={viewAllHref}
+                  className={
+                    variant === "light"
+                      ? "flex min-h-11 items-center justify-center border-t border-portal-border bg-white px-4 text-sm font-bold text-portal-ink"
+                      : "block p-4 bg-gray-50 hover:bg-gray-100 text-center text-[10px] font-black text-neuro-navy uppercase tracking-widest border-t border-gray-100 transition-colors"
+                  }
+                  onClick={() => setIsOpen(false)}
+                >
+                  {variant === "light" ? "View all notifications" : "View All Notifications"}
+                </Link>
+              ) : null}
             </motion.div>
           </>
         )}

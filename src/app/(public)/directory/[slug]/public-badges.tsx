@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { User, Eye, Users, Calendar, Briefcase, Award, Shuffle, Trophy, Star, Gift } from "lucide-react";
 import { BADGE_DEFINITIONS } from "@/lib/badges";
 
@@ -14,25 +11,17 @@ const COLOR_MAP: Record<string, string> = {
   amber: "bg-amber-50 text-amber-500 border-amber-200",
 };
 
-export default function PublicBadges({ doctorUserId }: { doctorUserId: string }) {
-  const [badges, setBadges] = useState<string[]>([]);
+export default function PublicBadges({ badgeIds }: { badgeIds: string[] }) {
+  if (!badgeIds.length) return null;
 
-  useEffect(() => {
-    fetch(`/api/doctor-badges?userId=${doctorUserId}`)
-      .then(r => r.json())
-      .then(d => setBadges(d.badges || []))
-      .catch(() => {});
-  }, [doctorUserId]);
-
-  if (badges.length === 0) return null;
-
-  const earnedBadges = BADGE_DEFINITIONS.filter(b => badges.includes(b.id));
+  const earnedBadges = BADGE_DEFINITIONS.filter((badge) => badgeIds.includes(badge.id));
+  if (!earnedBadges.length) return null;
 
   return (
     <div className="mt-4">
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Achievements</p>
+      <p className="text-xs font-bold text-gray-500 mb-2">Achievements</p>
       <div className="flex flex-wrap gap-2">
-        {earnedBadges.map(badge => {
+        {earnedBadges.map((badge) => {
           const Icon = ICON_MAP[badge.icon] || Award;
           const colors = COLOR_MAP[badge.color] || COLOR_MAP.blue;
           return (

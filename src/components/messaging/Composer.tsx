@@ -12,6 +12,7 @@ export function Composer(props: {
   showCanned: boolean;
   onToggleCanned: () => void;
   onPickCanned: (value: string) => void;
+  includeSafeArea?: boolean;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
@@ -23,17 +24,17 @@ export function Composer(props: {
   }, [props.value]);
 
   return (
-    <div className="sticky bottom-0 border-t border-gray-200 bg-white px-3 pt-3 shrink-0" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }} data-composer>
+    <div className="border-t border-portal-border bg-white px-3 pt-3 shrink-0" style={{ paddingBottom: props.includeSafeArea ? 'calc(env(safe-area-inset-bottom) + 12px)' : 12 }} data-composer>
       {props.showCanned && props.canned.length > 0 ? (
-        <div className="mb-2 bg-gray-50 border border-gray-200 rounded-xl p-2 space-y-1">
+        <div className="mb-2 bg-portal-surface border border-portal-border rounded-xl p-2 space-y-1">
           {props.canned.map((reply) => (
-            <button key={reply} type="button" onClick={() => props.onPickCanned(reply)} className="w-full text-left min-h-11 px-3 rounded-lg text-sm text-gray-800">{reply}</button>
+            <button key={reply} type="button" onClick={() => props.onPickCanned(reply)} className="w-full text-left min-h-11 px-3 rounded-lg text-sm text-portal-ink">{reply}</button>
           ))}
         </div>
       ) : null}
       <div className="flex items-end gap-2">
         {props.canned.length > 0 ? (
-          <button type="button" onClick={props.onToggleCanned} className="min-h-11 min-w-11 inline-flex items-center justify-center text-gray-500" aria-label="Quick replies" title="Quick replies">
+          <button type="button" onClick={props.onToggleCanned} className="min-h-11 min-w-11 inline-flex items-center justify-center text-portal-muted" aria-label="Quick replies" title="Quick replies">
             <Zap className="w-4 h-4" />
           </button>
         ) : null}
@@ -49,10 +50,10 @@ export function Composer(props: {
             }
           }}
           placeholder="Type a message"
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-base text-gray-900 resize-none"
+          className="flex-1 bg-portal-surface border border-portal-border rounded-xl px-4 py-3 text-base text-portal-ink resize-none"
           style={{ fontSize: 16 }}
         />
-        <button type="button" onClick={props.onSend} disabled={props.sending || !props.value.trim()} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-xl text-white bg-[#B4501A] disabled:opacity-40" aria-label="Send message" title="Send message" data-send>
+        <button type="button" onClick={props.onSend} disabled={props.sending || !props.value.trim()} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-xl text-white bg-portal-accent disabled:opacity-40" aria-label="Send message" title="Send message" data-send>
           <Send className="w-4 h-4" />
         </button>
       </div>
