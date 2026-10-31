@@ -4,7 +4,9 @@ import {
   countIntroductions,
   countPatientRequests,
   marketRank,
+  patientRequestSources,
   rangeStart,
+  sourceLabel,
   summarizeLeads,
 } from './stats.ts';
 
@@ -27,6 +29,27 @@ test('dashboard and leads use the same patient-request count', () => {
   const leadsPage = countPatientRequests(leads, contacts, start);
   assert.deepEqual(dashboard, leadsPage);
   assert.deepEqual(dashboard, { total: 4, new: 2, contacted: 1, booked: 1 });
+});
+
+test('request sources add up to patient requests', () => {
+  const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const leads = [
+    { id: 'l1', stage: 'new', created_at: recent, email: 'a@example.com', source: 'appointment_request' },
+    { id: 'l2', stage: 'contacted', created_at: recent, email: 'a@example.com', source: 'quiz' },
+    { id: 'l3', stage: 'new', created_at: recent, source: 'dm_outreach' },
+    { id: 'l4', stage: 'new', created_at: old, source: 'quiz' },
+  ];
+  const contacts = [
+    { id: 'c1', stage: 'new', created_at: recent, source: null },
+  ];
+  const counts = countPatientRequests(leads, contacts, start);
+  const sources = patientRequestSources(leads, contacts, start);
+  assert.equal(sourceLabel('dm_outreach'), 'NeuroChiro introduction');
+  assert.equal(sourceLabel(null), 'Directory profile');
+  assert.equal(sourceLabel('appointment_request'), 'Appointment request');
+  assert.equal(sources.reduce((sum, row) => sum + row.count, 0), counts.total);
+  assert.equal(sources.find((row) => row.label === 'NeuroChiro introduction')?.count, 1);
+  assert.equal(sources.find((row) => row.label === 'Quiz')?.count, 1);
 });
 
 test('market rank needs at least 3 verified doctors', () => {

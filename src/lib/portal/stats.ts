@@ -18,6 +18,7 @@ export type PortalStats = {
   profileClicks: number | null;
   referralsSent: number | null;
   referralsReceived: number | null;
+  requestSources: { label: string; count: number }[] | null;
   market: { rank: number; total: number; avgViews: number } | null;
 };
 
@@ -233,6 +234,47 @@ export function countPatientRequests(
   const counts: RequestCounts = { total: rows.length, new: 0, contacted: 0, booked: 0 };
   for (const row of rows) counts[stageBucket(row.stage)] += 1;
   return counts;
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  dm_outreach: 'NeuroChiro introduction',
+  appointment_request: 'Appointment request',
+  quiz: 'Quiz',
+  profile: 'Directory profile',
+  directory: 'Directory profile',
+  doctor_joined: 'Doctor joined',
+  coverage_result: 'Coverage search',
+  contact_form: 'Contact form',
+};
+
+/** Plain label for a stored lead or contact-request source. Blank means the directory profile. */
+export function sourceLabel(source: string | null | undefined): string {
+  const key = (source || '').trim().toLowerCase();
+  if (!key) return 'Directory profile';
+  if (SOURCE_LABELS[key]) return SOURCE_LABELS[key];
+  return key
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+/** One count per person, same rows as countPatientRequests, so the labels add up to the total. */
+export function patientRequestSources(
+  leads: LeadLike[],
+  contactRequests: LeadLike[],
+  start: Date | null,
+): { label: string; count: number }[] {
+  const rows = dedupePatientRequests(
+    [...leads, ...contactRequests].filter((row) => inRange(row.created_at, start)),
+  );
+  const counts = new Map<string, number>();
+  for (const row of rows) {
+    const label = sourceLabel(row.source);
+    counts.set(label, (counts.get(label) || 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([label, count]) => ({ label, count }))
+    .filter((row) => row.count > 0)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
 export function summarizeLeads(

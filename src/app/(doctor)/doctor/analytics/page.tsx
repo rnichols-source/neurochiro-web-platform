@@ -26,7 +26,22 @@ export default async function DoctorAnalytics() {
   const patientRequests = stats.patientRequests?.total ?? null;
   const profileClicks = stats.profileClicks;
   const introductions = stats.introductions;
-  const empty = profileViews === 0 && patientRequests === 0 && profileClicks === 0 && introductions === 0;
+  const referrals = stats.referralsReceived;
+  const sourceSum = (stats.requestSources || []).reduce((sum, row) => sum + row.count, 0);
+  const foundRows = [
+    ...(stats.requestSources || []).filter((row) => row.count > 0).map((row) => ({
+      label: row.label,
+      value: String(row.count),
+      hint: 'Patient requests from this source in the last 30 days. Each person is counted once.',
+    })),
+    ...(introductions != null && introductions > 0
+      ? [{ label: 'Directory introductions', value: String(introductions), hint: 'Introductions the directory sent, separate from a patient request.' }]
+      : []),
+    ...(referrals != null && referrals > 0
+      ? [{ label: 'Referrals from doctors', value: String(referrals), hint: 'Patients other doctors referred to you in the last 30 days.' }]
+      : []),
+  ];
+  const empty = profileViews === 0 && patientRequests === 0 && profileClicks === 0 && (introductions === 0 || introductions == null) && (referrals === 0 || referrals == null) && foundRows.length === 0;
   const viewRow = displayCount(
     profileViews,
     viewsKnown
@@ -57,6 +72,14 @@ export default async function DoctorAnalytics() {
           ]}
         />
       )}
+      {foundRows.length > 0 ? (
+        <div className="space-y-2">
+          <StatList title="How patients found you · last 30 days" rows={foundRows} />
+          {patientRequests != null && stats.requestSources && sourceSum !== patientRequests ? (
+            <p className="text-sm text-portal-ink-2">These sources do not add up to patient requests because some people were counted once.</p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

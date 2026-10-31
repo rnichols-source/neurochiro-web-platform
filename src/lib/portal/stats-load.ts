@@ -5,6 +5,7 @@ import {
   countIntroductions,
   countPatientRequests,
   earliestIso,
+  patientRequestSources,
   marketRank,
   rangeStart,
   type LeadLike,
@@ -81,6 +82,7 @@ export async function getDoctorPortalStats(input: {
     profileClicks: countDatedRows(clicksRes, start),
     referralsSent: countDatedRows(sentRes, start),
     referralsReceived: countDatedRows(receivedRes, start),
+    requestSources: requestsKnown ? patientRequestSources(leadsRes.data || [], contacts, start) : null,
     market,
   };
 }
