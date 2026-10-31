@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Users, Loader2, ChevronRight, MessageSquare, Phone, Mail, Calendar, CheckCircle2 } from "lucide-react";
+import { Loader2, ChevronRight, MessageSquare, Phone, Mail, Calendar, CheckCircle2 } from "lucide-react";
 import { getLeadPipeline, updateLeadStage, updateLeadNotes } from "./actions";
 import { pipelineTab, summarizeLeads } from "@/lib/portal/stats";
+import PageHeader from "@/components/portal/PageHeader";
 import LeadsHeader from "./LeadsHeader";
 
 const STAGES = [
@@ -66,13 +67,7 @@ export default function LeadsBoard({ initial, timeZone }: { initial: any; timeZo
     <div className="space-y-4">
       <LeadsHeader total={month.total} fresh={month.new} contacted={month.contacted} booked={month.booked} />
       <div className="flex items-end justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Users className="w-6 h-6 text-portal-accent" aria-hidden />
-            <h1 className="text-[26px] leading-8 font-bold text-portal-ink">Patient Leads</h1>
-          </div>
-          <p className="mt-1 text-[15px] leading-6 text-portal-ink-2">Track every lead from first contact to converted patient.</p>
-        </div>
+        <PageHeader title="Patient requests" description="Track every lead from first contact to converted patient." />
         {data?.conversionRate != null && (
           <div className="text-right">
             <p className="text-2xl font-bold text-portal-success">{data.conversionRate}%</p>
