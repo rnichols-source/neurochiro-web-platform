@@ -45,3 +45,7 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'settings', label: 'Settings', href: '/doctor/settings', group: 'account', subtitle: 'Notifications, account', state: 'live', icon: 'Settings' },
   { key: 'help', label: 'Help', href: '/doctor/help', group: 'account', subtitle: 'Ask us anything', state: 'live', icon: 'CircleHelp' },
 ];
+
+// RAYMOND: flip to 'live' after supabase/migrations/20261103000000_messaging_hardening.sql has been run.
+// Beta turns on the inbox, search, and idempotent send paths. The send safety checks stay on either way.
+export const messagingV2: FeatureState = 'beta';
