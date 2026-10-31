@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { parseSeminarDates, timezoneForCity } from '@/lib/seminars/dates';
+import { certificateIssuedAt } from '@/lib/portal/ce';
 import { checkinWindow } from '@/lib/seminars/checkin-window';
 import crypto from 'crypto';
 
@@ -129,6 +130,7 @@ export async function POST(request: NextRequest) {
         registration_id: registration.id,
         ce_hours: ceHours,
         certificate_number: certNumber,
+        issued_at: certificateIssuedAt(new Date(), seminar).toISOString(),
       });
 
       return NextResponse.json({
