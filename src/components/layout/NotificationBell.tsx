@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase";
 import { isMissingRelation } from "@/lib/missing-table";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { isHiddenNotification } from "@/lib/portal/notifications";
 
 export type Notification = {
   id: string;
@@ -66,7 +67,7 @@ export default function NotificationBell({
       .limit(20);
 
     if (notifs) {
-      const visible = notifs.filter((n: Notification) => n.type !== 'portal_login' && n.type !== 'message');
+      const visible = notifs.filter((n: Notification) => n.type !== 'message' && !isHiddenNotification(n));
       setNotifications(visible);
       if (typeof unreadOverride !== 'number') {
         setUnreadCount(visible.filter((n: Notification) => !n.read_at).length);
@@ -147,7 +148,9 @@ export default function NotificationBell({
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
         }, (payload: any) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
+          const incoming = payload.new as Notification;
+          if (incoming.type === 'message' || isHiddenNotification(incoming)) return;
+          setNotifications(prev => [incoming, ...prev]);
           setUnreadCount(prev => prev + 1);
         })
         .subscribe((status) => {
