@@ -35,6 +35,7 @@ import {
 } from "./pl-data";
 import PageHeader from "@/components/portal/PageHeader";
 import ExampleBanner from "@/components/portal/ExampleBanner";
+import { matchesPlExample, plainPlValues } from "@/lib/portal/tool-examples";
 
 // =============================================================================
 // Types
@@ -506,6 +507,8 @@ function PLAnalyzerContent() {
   const [tooltipItem, setTooltipItem] = useState<string | null>(null);
   const [exampleId, setExampleId] = useState<string | null>(null);
   const [showExamples, setShowExamples] = useState(false);
+  const [draftReady, setDraftReady] = useState(false);
+  const [exampleKept, setExampleKept] = useState(false);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftBeforeExample = useRef<Record<string, number> | null>(null);
@@ -553,41 +556,63 @@ function PLAnalyzerContent() {
 
   // ---- Load from Supabase (localStorage fallback) ----
   useEffect(() => {
+    let cancelled = false;
+    setDraftReady(false);
     setExampleId(null);
     setShowExamples(false);
     draftBeforeExample.current = null;
     const key = `pl_draft_${month}`;
+    const applySaved = (saved: Record<string, unknown> | null) => {
+      if (cancelled) return;
+      if (!saved) {
+        setValues({});
+        setExampleId(null);
+        setDraftReady(true);
+        return;
+      }
+      const match = matchesPlExample(saved, SCALING_EXAMPLES);
+      setExampleId(match);
+      setExampleKept(Boolean(match));
+      setValues(plainPlValues(saved));
+      setDraftReady(true);
+    };
     loadToolData(key).then((cloud) => {
-      if (cloud) {
-        setValues(cloud);
-      } else {
+      if (cloud) applySaved(cloud as Record<string, unknown>);
+      else {
         try {
           const saved = localStorage.getItem(key);
-          if (saved) setValues(JSON.parse(saved));
-        } catch {}
+          applySaved(saved ? JSON.parse(saved) : null);
+        } catch {
+          applySaved(null);
+        }
       }
     }).catch(() => {
       try {
         const saved = localStorage.getItem(key);
-        if (saved) setValues(JSON.parse(saved));
-      } catch {}
+        applySaved(saved ? JSON.parse(saved) : null);
+      } catch {
+        applySaved(null);
+      }
     });
+    return () => { cancelled = true; };
   }, [month]);
 
   // ---- Auto-save to Supabase + localStorage (debounced) ----
   useEffect(() => {
-    if (exampleId) return;
+    if (!draftReady) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(() => {
       const key = `pl_draft_${month}`;
-      const data = valuesRef.current;
+      const data = exampleId
+        ? { ...valuesRef.current, __example: exampleId }
+        : valuesRef.current;
       saveToolData(key, data).catch(() => {});
       try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
     }, 1000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [values, month, exampleId]);
+  }, [values, month, exampleId, draftReady]);
 
   // ---- Computed values ----
   const incomeSection = PL_SECTIONS.find((s) => s.type === "income")!;
@@ -740,22 +765,39 @@ function PLAnalyzerContent() {
   const applyScalingExample = useCallback((example: (typeof SCALING_EXAMPLES)[0]) => {
     if (!exampleId) draftBeforeExample.current = { ...valuesRef.current };
     setExampleId(example.id);
+    setExampleKept(false);
     setShowExamples(false);
     setValues(example.lineItems);
   }, [exampleId]);
 
   const clearExample = useCallback(() => {
-    const draft = draftBeforeExample.current;
+    const key = `pl_draft_${month}`;
     draftBeforeExample.current = null;
     setExampleId(null);
+    setExampleKept(false);
     setShowExamples(false);
-    setValues(draft || {});
-  }, []);
+    setValues({});
+    saveToolData(key, null).catch(() => {});
+    try { localStorage.removeItem(key); } catch {}
+  }, [month]);
 
   const keepExample = useCallback(() => {
+    const key = `pl_draft_${month}`;
+    const plain = plainPlValues(valuesRef.current);
     draftBeforeExample.current = null;
+    if (!exampleKept && exampleId) {
+      const marked = { ...plain, __example: exampleId };
+      saveToolData(key, marked).catch(() => {});
+      try { localStorage.setItem(key, JSON.stringify(marked)); } catch {}
+      setExampleKept(true);
+      return;
+    }
     setExampleId(null);
-  }, []);
+    setExampleKept(false);
+    setValues(plain);
+    saveToolData(key, plain).catch(() => {});
+    try { localStorage.setItem(key, JSON.stringify(plain)); } catch {}
+  }, [month, exampleKept, exampleId]);
 
   const toggleCategory = useCallback((id: string) => {
     setExpandedCategories((prev) =>
@@ -921,7 +963,7 @@ function PLAnalyzerContent() {
         </div>
 
         <div className="mb-6 no-print space-y-3">
-          {exampleId ? <ExampleBanner onClear={clearExample} onKeep={keepExample} /> : null}
+          {exampleId ? <ExampleBanner onClear={clearExample} onKeep={keepExample} keepLabel={exampleKept ? "This is my data" : "Keep example"} /> : null}
           {!showExamples && !exampleId ? (
             <button
               type="button"
