@@ -272,8 +272,8 @@ async function inboxFallback(userId: string, limit: number, before: string | nul
   const db = admin();
   const cols = 'id, participant_one_id, participant_two_id, last_message_at, context_type, context_id';
   const [one, two] = await Promise.all([
-    db.from('conversations').select(cols).eq('participant_one_id', userId).order('last_message_at', { ascending: false }).limit(limit),
-    db.from('conversations').select(cols).eq('participant_two_id', userId).order('last_message_at', { ascending: false }).limit(limit),
+    db.from('conversations').select(cols).eq('participant_one_id', userId).is('archived_at', null).order('last_message_at', { ascending: false }).limit(limit),
+    db.from('conversations').select(cols).eq('participant_two_id', userId).is('archived_at', null).order('last_message_at', { ascending: false }).limit(limit),
   ]);
   let rows = [...(one.data || []), ...(two.data || [])];
   if (before) rows = rows.filter((row) => row.last_message_at && row.last_message_at < before);
