@@ -24,6 +24,7 @@ export function sentToReceiverEmail(input: {
   patientInitial: string;
   reason: string;
   urgency: string;
+  messageUrl?: string | null;
 }): { subject: string; html: string } {
   const who = patientLabel(input.patientFirst, input.patientInitial);
   const subject = `${input.referrerName} sent you a patient`;
@@ -34,6 +35,7 @@ export function sentToReceiverEmail(input: {
     <p>Urgency: ${esc(input.urgency === 'urgent' ? 'Urgent' : 'Routine')}</p>
     <p>This link opens the referral. It does not accept it for you.</p>
     ${button(referralLink(input.id), 'Accept or decline')}
+    ${input.messageUrl ? button(input.messageUrl, `Message ${input.referrerName}`) : ''}
   `);
   return { subject, html };
 }

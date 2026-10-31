@@ -68,18 +68,10 @@ export async function getPortalShellData(): Promise<PortalShellData | null> {
     .eq('user_id', user.id)
     .maybeSingle() as { data: DoctorRow | null };
 
-  const { count: unreadNotifications } = await admin
-    .from('notifications')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', user.id)
-    .is('read_at', null)
-    .neq('type', 'portal_login');
-
-  const { count: unreadMessages } = await admin
-    .from('messages')
-    .select('id', { count: 'exact', head: true })
-    .eq('recipient_id', user.id)
-    .is('read_at', null);
+  const { countUnread } = await import('@/lib/messaging/db');
+  const unread = await countUnread(user.id);
+  const unreadNotifications = unread.notificationsExcludingMessages;
+  const unreadMessages = unread.messages;
 
   const fullName = profile?.full_name ?? null;
 

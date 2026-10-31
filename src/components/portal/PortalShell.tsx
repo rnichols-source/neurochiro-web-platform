@@ -80,7 +80,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
                       {item.subtitle ? <span className="block text-xs text-white/60 leading-4">{item.subtitle}</span> : null}
                     </span>
                     {item.locked ? <span className="text-xs text-white/80 inline-flex items-center gap-1"><Lock className="w-3 h-3" aria-hidden /> Pro</span> : null}
-                    {badge ? <span className="min-w-5 h-5 px-1 rounded-full bg-portal-accent text-white text-xs font-bold inline-flex items-center justify-center">{badge}</span> : null}
+                    {badge ? <span className="min-w-5 h-5 px-1 rounded-full bg-portal-accent text-white text-xs font-bold inline-flex items-center justify-center" {...(item.key === 'messages' ? { 'data-messages-badge': item.badge || 0 } : {})}>{badge}</span> : null}
                   </>
                 );
                 if (item.locked) {
@@ -160,7 +160,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
             <Link key={item.name} href={item.href} className={`flex-1 min-h-11 py-2 flex flex-col items-center justify-center text-xs ${active ? 'text-portal-accent' : 'text-white/70'}`}>
               <span className="relative">
                 <item.icon className="w-5 h-5" aria-hidden />
-                {badge ? <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 rounded-full bg-portal-accent text-white text-xs font-bold inline-flex items-center justify-center">{badge}</span> : null}
+                {badge ? <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 rounded-full bg-portal-accent text-white text-xs font-bold inline-flex items-center justify-center" {...(item.name === 'Messages' ? { 'data-messages-badge': item.badge || 0 } : {})}>{badge}</span> : null}
               </span>
               {item.name}
             </Link>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { deleteAccount } from "@/app/actions/account";
+import { listBlockedPeople, saveNotificationPrefs, unblockUser } from "@/app/actions/messaging-actions";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
 
@@ -25,6 +26,7 @@ export default function SettingsPage() {
   });
   const [savingPrefs, setSavingPrefs] = useState(false);
   const [prefsSaved, setPrefsSaved] = useState(false);
+  const [blocked, setBlocked] = useState<{ id: string; full_name: string }[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -38,16 +40,13 @@ export default function SettingsPage() {
       if (data?.notification_preferences) {
         setNotifPrefs(prev => ({ ...prev, ...(data.notification_preferences as any) }));
       }
+      setBlocked(await listBlockedPeople());
     });
   }, []);
 
   const handleSavePrefs = async () => {
     setSavingPrefs(true);
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('profiles').update({ notification_preferences: notifPrefs }).eq('id', user.id);
-    }
+    await saveNotificationPrefs(notifPrefs);
     setSavingPrefs(false);
     setPrefsSaved(true);
     setTimeout(() => setPrefsSaved(false), 2000);
@@ -131,6 +130,23 @@ export default function SettingsPage() {
         >
           {prefsSaved ? 'Saved!' : savingPrefs ? 'Saving...' : 'Save Preferences'}
         </button>
+      </div>
+
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide mb-4">Blocked people</h2>
+        {blocked.length === 0 ? <p className="text-sm text-gray-500">No one is blocked.</p> : (
+          <ul className="space-y-2">
+            {blocked.map((person) => (
+              <li key={person.id} className="flex items-center justify-between gap-3">
+                <span className="text-sm font-bold text-neuro-navy">{person.full_name}</span>
+                <button type="button" className="min-h-11 px-3 text-sm font-bold text-neuro-orange" onClick={async () => {
+                  await unblockUser(person.id);
+                  setBlocked((prev) => prev.filter((row) => row.id !== person.id));
+                }}>Unblock</button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Password */}
