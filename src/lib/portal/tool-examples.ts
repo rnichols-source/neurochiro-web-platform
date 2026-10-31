@@ -4,14 +4,23 @@ export const EXAMPLE_CARE_PHASES = [
   { name: 'Stabilization', visitsPerWeek: 1, weeks: 12 },
 ] as const;
 
+export function cleanPracticeField(value: unknown, fallback: string): string {
+  const text = String(value ?? '').trim();
+  if (!text || text.includes('[')) return fallback;
+  return text;
+}
+
 export function isUntouchedCarePlanDefault(state: {
   perVisitFee?: number | null;
   patientName?: string | null;
   phases?: { name?: string | null; visitsPerWeek?: number | null; weeks?: number | null }[] | null;
+  __example?: unknown;
+  __confirmed?: unknown;
 } | null | undefined): boolean {
   if (!state) return false;
+  if (state.__confirmed === true) return false;
+  if (state.__example === true) return true;
   if (state.perVisitFee !== 65) return false;
-  if ((state.patientName || '').trim()) return false;
   const phases = state.phases || [];
   if (phases.length !== EXAMPLE_CARE_PHASES.length) return false;
   return phases.every((phase, index) => {
@@ -49,9 +58,21 @@ export function matchesPlExample(
 export function plainPlValues(values: Record<string, unknown>): Record<string, number> {
   const plain: Record<string, number> = {};
   for (const [key, value] of Object.entries(values)) {
-    if (key === '__example') continue;
+    if (key.startsWith('__')) continue;
     const amount = Number(value);
     if (!Number.isNaN(amount)) plain[key] = amount;
   }
   return plain;
+}
+
+/** A saved example without a confirmation opens blank, with undo still available. */
+export function plInitialView(
+  saved: Record<string, unknown> | null | undefined,
+  examples: { id: string; lineItems: Record<string, number> }[],
+): { mode: 'blank' | 'saved'; exampleId: string | null; cleared: boolean } {
+  if (!saved) return { mode: 'blank', exampleId: null, cleared: false };
+  if (saved.__confirmed === true) return { mode: 'saved', exampleId: null, cleared: false };
+  const match = matchesPlExample(saved, examples);
+  if (match && saved.__confirmed !== true) return { mode: 'blank', exampleId: match, cleared: true };
+  return { mode: 'saved', exampleId: null, cleared: false };
 }

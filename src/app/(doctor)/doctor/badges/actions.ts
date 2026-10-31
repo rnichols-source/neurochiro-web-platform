@@ -24,7 +24,7 @@ export async function checkAndAwardBadges() {
   const { data: existing } = await admin.from('doctor_badges').select('badge_id').eq('user_id', user.id);
   const existingIds = new Set((existing || []).map((b: any) => b.badge_id));
 
-  // Award new badges
+  // Award new badges. This writes doctor_badges only. It does not insert a notification.
   const newlyEarned: string[] = [];
   for (const badgeId of earned) {
     if (!existingIds.has(badgeId)) {

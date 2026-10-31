@@ -1,4 +1,5 @@
 import 'server-only';
+import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 import {
@@ -32,9 +33,9 @@ export async function loadDoctorSeminars(userId: string) {
   return data || [];
 }
 
-export async function loadRecommendedSeminars(userId: string, focus: DoctorFocus) {
-  const supabase = createServerSupabase() as any;
-  const { data: seminars } = await supabase
+async function fetchRecommendedSeminars(userId: string, focus: DoctorFocus) {
+  const admin = createAdminClient() as any;
+  const { data: seminars } = await admin
     .from('seminars')
     .select('id, title, dates, city, country, location, description, tags, ce_hours, host_id, is_past')
     .eq('is_approved', true)
@@ -63,15 +64,34 @@ export async function loadRecommendedSeminars(userId: string, focus: DoctorFocus
   }));
 }
 
-export async function loadEnhancedSeminarAnalytics(userId: string) {
+/** Approved seminars other doctors are hosting. Cached 10 minutes per city, state, and specialties. */
+export function loadRecommendedSeminars(userId: string, focus: DoctorFocus) {
+  const city = focus.city || '';
+  const state = focus.state || '';
+  const specialties = [...(focus.specialties || [])];
+  const specialtyKey = specialties.map((item) => item.toLowerCase()).sort().join('|');
+  return unstable_cache(
+    () => fetchRecommendedSeminars(userId, { city, state, specialties }),
+    ['recommended-seminars', userId, city.toLowerCase(), state.toLowerCase(), specialtyKey],
+    { revalidate: 600 },
+  )();
+}
+
+async function hostSeminarIds(userId: string): Promise<string[]> {
+  const admin = createAdminClient();
+  const { data } = await admin.from('seminars').select('id').eq('host_id', userId);
+  return (data || []).map((row) => row.id);
+}
+
+const EMPTY_ANALYTICS = { totalSeminars: 0, totalAttendees: 0, avgRating: 0, reviewCount: 0, totalCEDelivered: 0 };
+
+/** Pass the host's seminar ids when the page already loaded them. A user id fetches those ids once. */
+export async function loadEnhancedSeminarAnalytics(userIdOrIds: string | string[]) {
+  const seminarIds = Array.isArray(userIdOrIds) ? userIdOrIds : await hostSeminarIds(userIdOrIds);
+  if (seminarIds.length === 0) return EMPTY_ANALYTICS;
+
   const supabase = createServerSupabase();
   const sb = supabase as any;
-  const { data: seminars } = await supabase.from('seminars').select('id, title').eq('host_id', userId);
-  if (!seminars || seminars.length === 0) {
-    return { totalSeminars: 0, totalAttendees: 0, avgRating: 0, reviewCount: 0, totalCEDelivered: 0 };
-  }
-
-  const seminarIds = seminars.map((seminar) => seminar.id);
   const [attendees, reviews, certs] = await Promise.all([
     supabase.from('seminar_registrations').select('id', { count: 'exact', head: true }).in('seminar_id', seminarIds),
     sb.from('seminar_reviews').select('rating').in('seminar_id', seminarIds),
@@ -86,7 +106,7 @@ export async function loadEnhancedSeminarAnalytics(userId: string) {
   const totalCEDelivered = (certs.data || []).reduce((sum: number, row: { ce_hours?: number }) => sum + (row.ce_hours || 0), 0);
 
   return {
-    totalSeminars: seminars.length,
+    totalSeminars: seminarIds.length,
     totalAttendees: attendees.count || 0,
     avgRating,
     reviewCount,

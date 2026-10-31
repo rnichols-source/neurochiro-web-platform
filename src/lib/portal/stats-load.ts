@@ -1,13 +1,17 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase-admin';
 import {
+  collapseRecommendations,
   countFromHead,
   countPatientRequests,
+  distinctRecommendationClicks,
   patientRequestSources,
   marketRank,
   rangeStart,
+  RECOMMENDATION_TEMPLATES,
   type LeadLike,
   type PortalStats,
+  type RecommendationRow,
 } from '@/lib/portal/stats';
 
 export async function getDoctorPortalStats(input: {
@@ -32,11 +36,13 @@ export async function getDoctorPortalStats(input: {
     since(
       admin
         .from('reply_logs')
-        .select('id', { count: 'exact', head: true })
+        .select('id, created_at, demand_mention_id, redirect_code, searched_city, template_id')
         .eq('doctor_id', input.doctorId)
-        .or('template_id.is.null,template_id.not.in.(waitlist_comment,waitlist_dm)'),
+        .in('template_id', [...RECOMMENDATION_TEMPLATES]),
     ),
-    since(admin.from('link_clicks').select('id', { count: 'exact', head: true }).eq('doctor_id', input.doctorId).eq('destination', 'profile')),
+    (startIso
+      ? admin.from('link_clicks').select('reply_log_id').eq('doctor_id', input.doctorId).eq('destination', 'profile').gte('clicked_at', startIso)
+      : admin.from('link_clicks').select('reply_log_id').eq('doctor_id', input.doctorId).eq('destination', 'profile')),
     since(admin.from('doctor_referrals').select('id', { count: 'exact', head: true }).eq('referring_doctor_id', input.doctorId)),
     since(admin.from('doctor_referrals').select('id', { count: 'exact', head: true }).eq('receiving_doctor_id', input.doctorId)),
     since(
@@ -90,8 +96,12 @@ export async function getDoctorPortalStats(input: {
     profileViews: viewsRes.data?.profile_views ?? input.profileViews ?? 0,
     viewsInRange,
     viewsTrackedSince,
-    introductions: countFromHead(introRes),
-    profileClicks: countFromHead(clicksRes),
+    recommendationsSent: introRes.error
+      ? null
+      : collapseRecommendations((introRes.data || []) as RecommendationRow[]).length,
+    recommendationClicks: clicksRes.error
+      ? null
+      : distinctRecommendationClicks(clicksRes.data || []),
     referralsSent: countFromHead(sentRes),
     referralsReceived: countFromHead(receivedRes),
     requestSources: requestsKnown ? patientRequestSources(leadsRes.data || [], contacts, start) : null,

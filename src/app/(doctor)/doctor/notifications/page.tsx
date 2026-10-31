@@ -8,6 +8,7 @@ import Link from "next/link";
 import { formatDistanceToNow, isThisWeek, isToday } from "date-fns";
 import PageHeader from "@/components/portal/PageHeader";
 import EmptyState from "@/components/portal/EmptyState";
+import { isHiddenNotification } from "@/lib/portal/notifications";
 
 type Notification = {
   id: string;
@@ -49,7 +50,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     getNotifications().then((data) => {
-      setNotifications((data as Notification[]).filter((item) => item.type !== "portal_login"));
+      setNotifications((data as Notification[]).filter((item) => !isHiddenNotification(item)));
       setLoading(false);
     });
   }, []);
@@ -68,7 +69,7 @@ export default function NotificationsPage() {
     );
   };
 
-  const visible = notifications.filter((n) => n.type !== "portal_login");
+  const visible = notifications.filter((n) => !isHiddenNotification(n));
   const filtered = filter === "unread" ? visible.filter((n) => n.read_at == null) : visible;
   const unreadCount = visible.filter((n) => n.read_at == null).length;
   const grouped = GROUPS.map((label) => ({

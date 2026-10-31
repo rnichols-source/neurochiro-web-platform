@@ -20,3 +20,15 @@ PR E additions, still not run:
 11. The 2017 New Beginnings seminar. Fix the date in admin. Do not delete the row.
 12. The seminar review "Thank you so much!" from Raymond on the public profile. There is no hide column, so the suggestion is a commented delete.
 13. Stored achievement rows on this doctor. The public page no longer reads them. The list is for information only.
+
+PR F file is `sql/portal_cleanup_F.sql`. Run Step 1, then only the Step 2 blocks you agree with.
+
+14. **ASK FIRST.** The Test Test Test thread with Dr. John Caruso. Deleting it removes the thread from his inbox too. Soft-delete is the other option.
+15. The Hey Ray thread between this login and a profile named Raymond Nichols. That is the same person messaging himself.
+16. The testimonial "Thank you so much!" from Raymond. Check patient stories and seminar reviews. Delete only the row you confirm.
+17. The Raymond Nichols lead from September 27, 2026. **ASK FIRST** for Brooke, the NeuroChiro introduction. She may be a real patient.
+18. The job titled Associate Job Test. Delete it only if nobody applied. Otherwise mark it Closed.
+19. **ASK FIRST.** The 2017 New Beginnings seminar. Archive it, or delete it only if nobody registered. Fixing the year in admin is still the safer choice.
+20. Seeded notification rows on this login, including "Badge earned". Other doctors' copies of those titles are **ASK FIRST**.
+21. A CE certificate whose issued date is before the event ended. The Adelaide row is the one to correct.
+22. **ASK FIRST.** Saved P&L drafts that are still marked as examples.

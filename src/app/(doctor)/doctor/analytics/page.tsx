@@ -27,24 +27,15 @@ export default async function DoctorAnalytics() {
   const viewsKnown = stats.viewsTrackedSince != null && stats.viewsInRange != null;
   const profileViews = viewsKnown ? stats.viewsInRange : null;
   const patientRequests = stats.patientRequests?.total ?? null;
-  const profileClicks = stats.profileClicks;
-  const introductions = stats.introductions;
+  const recommendationClicks = stats.recommendationClicks;
+  const recommendationsSent = stats.recommendationsSent;
   const referrals = stats.referralsReceived;
-  const sourceSum = (stats.requestSources || []).reduce((sum, row) => sum + row.count, 0);
-  const foundRows = [
-    ...(stats.requestSources || []).filter((row) => row.count > 0).map((row) => ({
-      label: row.label,
-      value: String(row.count),
-      hint: 'Patient requests from this source in the last 30 days. Each person is counted once.',
-    })),
-    ...(introductions != null && introductions > 0
-      ? [{ label: 'Directory introductions', value: String(introductions), hint: 'Introductions the directory sent, separate from a patient request.' }]
-      : []),
-    ...(referrals != null && referrals > 0
-      ? [{ label: 'Referrals from doctors', value: String(referrals), hint: 'Patients other doctors referred to you in the last 30 days.' }]
-      : []),
-  ];
-  const empty = profileViews === 0 && patientRequests === 0 && profileClicks === 0 && (introductions === 0 || introductions == null) && (referrals === 0 || referrals == null) && foundRows.length === 0;
+  const foundRows = (stats.requestSources || []).filter((row) => row.count > 0).map((row) => ({
+    label: row.label,
+    value: String(row.count),
+    hint: 'Patient requests from this source in the last 30 days. Each person is counted once.',
+  }));
+  const empty = profileViews === 0 && patientRequests === 0 && recommendationClicks === 0 && (recommendationsSent === 0 || recommendationsSent == null) && (referrals === 0 || referrals == null) && foundRows.length === 0;
   const viewRow = displayCount(
     profileViews,
     viewsKnown
@@ -52,8 +43,8 @@ export default async function DoctorAnalytics() {
       : `Profile views for the last 30 days start once view events exist. All-time total: ${stats.profileViews.toLocaleString()}. ${UNAVAILABLE_HINT}`,
   );
   const requestRow = displayCount(patientRequests, PATIENT_REQUESTS_HINT);
-  const clickRow = displayCount(profileClicks, 'Profile clicks: times someone clicked through to your profile in the last 30 days.');
-  const introRow = displayCount(introductions, 'Patients the directory sent you: introductions from the directory in the last 30 days. This is separate from doctor-to-doctor referrals.');
+  const clickRow = displayCount(recommendationClicks, 'Opened your profile from our link: someone followed a NeuroChiro recommendation link to your profile.');
+  const introRow = displayCount(recommendationsSent, 'Times NeuroChiro recommended you: our team suggested your profile to someone looking for a chiropractor (Instagram comments and DMs). Not every one becomes a patient.');
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -70,18 +61,23 @@ export default async function DoctorAnalytics() {
           rows={[
             { label: 'Profile views', value: viewRow.value, hint: viewRow.hint },
             { label: 'Patient requests', value: requestRow.value, hint: requestRow.hint },
-            { label: 'Profile clicks', value: clickRow.value, hint: clickRow.hint },
-            { label: 'Patients the directory sent you', value: introRow.value, hint: introRow.hint },
+            { label: 'Times NeuroChiro recommended you', value: introRow.value, hint: introRow.hint },
+            { label: 'Opened your profile from our link', value: clickRow.value, hint: clickRow.hint },
           ]}
         />
       )}
       {foundRows.length > 0 ? (
-        <div className="space-y-2">
-          <StatList title="How patients found you · last 30 days" rows={foundRows} />
-          {patientRequests != null && stats.requestSources && sourceSum !== patientRequests ? (
-            <p className="text-sm text-portal-ink-2">These sources do not add up to patient requests because some people were counted once.</p>
-          ) : null}
-        </div>
+        <StatList title="How patients found you · last 30 days" rows={foundRows} />
+      ) : null}
+      {referrals != null && referrals > 0 ? (
+        <StatList
+          title="Referrals from doctors"
+          rows={[{
+            label: 'Referrals from doctors',
+            value: String(referrals),
+            hint: 'Patients other doctors referred to you in the last 30 days. These are separate from patient requests.',
+          }]}
+        />
       ) : null}
     </div>
   );

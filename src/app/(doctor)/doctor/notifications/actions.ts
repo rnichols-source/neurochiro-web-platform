@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { isHiddenNotification } from '@/lib/portal/notifications'
 
 export async function getNotifications() {
   const supabase = createServerSupabase()
@@ -19,7 +20,7 @@ export async function getNotifications() {
     return []
   }
 
-  return (data || []).filter((row) => row.type !== 'portal_login')
+  return (data || []).filter((row) => !isHiddenNotification(row))
 }
 
 export async function markNotificationRead(notificationId: string) {

@@ -138,8 +138,8 @@ function ScreeningsContent() {
           <Target className="w-3.5 h-3.5" />
           Premium Tool
         </div>
-        <h1 className="text-3xl font-bold text-white mb-2">{kit.title}</h1>
-        <p className="text-white/40 max-w-lg mx-auto">{kit.subtitle}</p>
+        <h1 className="text-3xl font-bold text-portal-ink mb-2">{kit.title}</h1>
+        <p className="text-portal-ink-2 max-w-lg mx-auto">{kit.subtitle}</p>
       </div>
 
       {/* Expected Results */}

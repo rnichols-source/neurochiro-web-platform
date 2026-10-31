@@ -388,7 +388,7 @@ export default function MessagingSystem({
       </div>
       <div className={showList ? 'hidden md:flex flex-1 min-h-0 flex-col' : 'flex flex-1 min-w-0 min-h-0 flex-col'}>
         {selected ? (
-          <div className="flex flex-1 flex-col min-w-0">
+          <div className="flex flex-1 min-h-0 min-w-0 flex-col">
             <Thread
               ref={threadRef}
               item={selected}

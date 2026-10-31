@@ -35,7 +35,7 @@ import {
 } from "./pl-data";
 import PageHeader from "@/components/portal/PageHeader";
 import ExampleBanner from "@/components/portal/ExampleBanner";
-import { matchesPlExample, plainPlValues } from "@/lib/portal/tool-examples";
+import { plInitialView, plainPlValues } from "@/lib/portal/tool-examples";
 
 // =============================================================================
 // Types
@@ -509,6 +509,7 @@ function PLAnalyzerContent() {
   const [showExamples, setShowExamples] = useState(false);
   const [draftReady, setDraftReady] = useState(false);
   const [exampleKept, setExampleKept] = useState(false);
+  const [clearedExampleId, setClearedExampleId] = useState<string | null>(null);
 
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftBeforeExample = useRef<Record<string, number> | null>(null);
@@ -564,16 +565,11 @@ function PLAnalyzerContent() {
     const key = `pl_draft_${month}`;
     const applySaved = (saved: Record<string, unknown> | null) => {
       if (cancelled) return;
-      if (!saved) {
-        setValues({});
-        setExampleId(null);
-        setDraftReady(true);
-        return;
-      }
-      const match = matchesPlExample(saved, SCALING_EXAMPLES);
-      setExampleId(match);
-      setExampleKept(Boolean(match));
-      setValues(plainPlValues(saved));
+      const view = plInitialView(saved, SCALING_EXAMPLES);
+      setClearedExampleId(view.cleared ? view.exampleId : null);
+      setExampleId(null);
+      setExampleKept(saved?.__confirmed === true);
+      setValues(view.mode === 'blank' ? {} : plainPlValues(saved || {}));
       setDraftReady(true);
     };
     loadToolData(key).then((cloud) => {
@@ -605,14 +601,16 @@ function PLAnalyzerContent() {
       const key = `pl_draft_${month}`;
       const data = exampleId
         ? { ...valuesRef.current, __example: exampleId }
-        : valuesRef.current;
+        : exampleKept
+          ? { ...valuesRef.current, __confirmed: true }
+          : valuesRef.current;
       saveToolData(key, data).catch(() => {});
       try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
     }, 1000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [values, month, exampleId, draftReady]);
+  }, [values, month, exampleId, exampleKept, draftReady]);
 
   // ---- Computed values ----
   const incomeSection = PL_SECTIONS.find((s) => s.type === "income")!;
@@ -775,6 +773,7 @@ function PLAnalyzerContent() {
     draftBeforeExample.current = null;
     setExampleId(null);
     setExampleKept(false);
+    setClearedExampleId(null);
     setShowExamples(false);
     setValues({});
     saveToolData(key, null).catch(() => {});
@@ -785,18 +784,13 @@ function PLAnalyzerContent() {
     const key = `pl_draft_${month}`;
     const plain = plainPlValues(valuesRef.current);
     draftBeforeExample.current = null;
-    if (!exampleKept && exampleId) {
-      const marked = { ...plain, __example: exampleId };
-      saveToolData(key, marked).catch(() => {});
-      try { localStorage.setItem(key, JSON.stringify(marked)); } catch {}
-      setExampleKept(true);
-      return;
-    }
+    const marked = { ...plain, __confirmed: true };
     setExampleId(null);
-    setExampleKept(false);
+    setExampleKept(true);
+    setClearedExampleId(null);
     setValues(plain);
-    saveToolData(key, plain).catch(() => {});
-    try { localStorage.setItem(key, JSON.stringify(plain)); } catch {}
+    saveToolData(key, marked).catch(() => {});
+    try { localStorage.setItem(key, JSON.stringify(marked)); } catch {}
   }, [month, exampleKept, exampleId]);
 
   const toggleCategory = useCallback((id: string) => {
@@ -963,7 +957,23 @@ function PLAnalyzerContent() {
         </div>
 
         <div className="mb-6 no-print space-y-3">
-          {exampleId ? <ExampleBanner onClear={clearExample} onKeep={keepExample} keepLabel={exampleKept ? "This is my data" : "Keep example"} /> : null}
+          {exampleId ? <ExampleBanner onClear={clearExample} onKeep={keepExample} keepLabel="This is my data" /> : null}
+          {clearedExampleId && !exampleId ? (
+            <p className="text-sm text-portal-ink-2 flex flex-wrap items-center gap-3">
+              We cleared the example numbers from {getMonthLabel(month)}. Load an example any time.
+              <button
+                type="button"
+                onClick={() => {
+                  const example = SCALING_EXAMPLES.find((item) => item.id === clearedExampleId);
+                  if (example) applyScalingExample(example);
+                  setClearedExampleId(null);
+                }}
+                className="min-h-11 px-3 rounded-lg border border-portal-border bg-white text-sm font-bold text-portal-ink"
+              >
+                Undo
+              </button>
+            </p>
+          ) : null}
           {!showExamples && !exampleId ? (
             <button
               type="button"

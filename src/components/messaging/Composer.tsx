@@ -20,7 +20,9 @@ export function Composer(props: {
     if (!el) return;
     el.style.height = 'auto';
     const line = 24;
-    el.style.height = `${Math.min(el.scrollHeight, line * 5)}px`;
+    const max = line * 5 + 26;
+    el.style.height = `${Math.min(el.scrollHeight + (el.offsetHeight - el.clientHeight), max)}px`;
+    el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden';
   }, [props.value]);
 
   return (
@@ -50,7 +52,7 @@ export function Composer(props: {
             }
           }}
           placeholder="Type a message"
-          className="flex-1 bg-portal-surface border border-portal-border rounded-xl px-4 py-3 text-base text-portal-ink resize-none"
+          className="flex-1 bg-portal-surface border border-portal-border rounded-xl px-4 py-3 text-base text-portal-ink resize-none overflow-hidden"
           style={{ fontSize: 16 }}
         />
         <button type="button" onClick={props.onSend} disabled={props.sending || !props.value.trim()} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-xl text-white bg-portal-accent disabled:opacity-40" aria-label="Send message" title="Send message" data-send>

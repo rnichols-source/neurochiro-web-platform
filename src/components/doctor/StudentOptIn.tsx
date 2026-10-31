@@ -42,7 +42,7 @@ export default function StudentOptIn() {
   return (
     <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
       <h2 className="text-lg font-bold text-portal-ink">Students</h2>
-      <p className="mt-1 text-sm text-portal-ink-2">Students only see this if you turn it on.</p>
+      <p className="mt-1 text-sm text-portal-ink-2">Students only see this if you turn it on. Message settings are under Availability above.</p>
       <form className="mt-3 space-y-2" action={async (formData) => {
         const result = await saveStudentOptIn(formData);
         setMessage(result.error || 'Saved.');

@@ -82,7 +82,7 @@ function CandidatesContent() {
       </Link>
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-white">Rank Candidates</h1>
+        <h1 className="text-2xl font-bold text-portal-ink">Rank Candidates</h1>
         {candidates.length > 0 && (
           <button
             onClick={handleSave}

@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { saveReport, getReportHistory, getReport } from "./actions";
 import { getPortalShellData } from "../portal-actions";
+import { cleanPracticeField } from "@/lib/portal/tool-examples";
+import { publicDoctorName } from "@/lib/portal/greeting";
 import PageHeader from "@/components/portal/PageHeader";
 import ExampleBanner from "@/components/portal/ExampleBanner";
 
@@ -226,11 +228,7 @@ function isSeededSample(data: Partial<FormData>): boolean {
   );
 }
 
-function cleanPracticeField(value: unknown, fallback: string): string {
-  const text = String(value || "").trim();
-  if (!text || text.includes("[DOCTOR NAME]") || text.includes("[PRACTICE NAME]")) return fallback;
-  return text;
-}
+
 
 const STEP_LABELS = ["1. Scan Data", "2. Preview & Edit", "3. Final & Print"];
 
@@ -463,7 +461,7 @@ function ScanReportContent() {
     let cancelled = false;
     (async () => {
       const shell = await getPortalShellData().catch(() => null);
-      const doctorName = shell?.fullName?.trim() || "";
+      const doctorName = publicDoctorName(shell?.doctor, shell?.fullName);
       const practiceName = shell?.doctor?.clinic_name?.trim() || "";
       identityRef.current = { doctorName, practiceName };
       let next = blankForm(doctorName, practiceName);

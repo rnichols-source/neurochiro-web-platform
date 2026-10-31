@@ -58,7 +58,7 @@ export const Thread = forwardRef<ThreadScroller, {
   }), []);
   const lastMine = [...props.messages].reverse().find((message) => message.sender_id === props.currentUserId && !message.pending && !message.failed && message.message_type !== 'system');
   return (
-    <div className="flex flex-1 flex-col min-w-0 h-full bg-white" data-thread>
+    <div className="flex flex-1 flex-col min-w-0 min-h-0 bg-white" data-thread>
       <header className="px-3 py-2 border-b border-portal-border flex items-center justify-between gap-2 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <button type="button" onClick={props.onBack} className="min-h-11 min-w-11 inline-flex items-center justify-center md:hidden" aria-label="Back to conversations" title="Back to conversations">

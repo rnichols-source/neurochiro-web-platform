@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Bell, X, Check, ExternalLink, Settings, Info, AlertTriangle, Zap, Megaphone, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase";
 import { isMissingRelation } from "@/lib/missing-table";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { isHiddenNotification } from "@/lib/portal/notifications";
+
+let realtimeNoticeLogged = false;
 
 export type Notification = {
   id: string;
@@ -48,6 +51,8 @@ export default function NotificationBell({
   const [unreadCount, setUnreadCount] = useState(unreadOverride || 0);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+  const unreadOverrideRef = useRef(unreadOverride);
+  unreadOverrideRef.current = unreadOverride;
 
   useEffect(() => {
     if (typeof unreadOverride === 'number') setUnreadCount(unreadOverride);
@@ -66,9 +71,9 @@ export default function NotificationBell({
       .limit(20);
 
     if (notifs) {
-      const visible = notifs.filter((n: Notification) => n.type !== 'portal_login' && n.type !== 'message');
+      const visible = notifs.filter((n: Notification) => n.type !== 'message' && !isHiddenNotification(n));
       setNotifications(visible);
-      if (typeof unreadOverride !== 'number') {
+      if (typeof unreadOverrideRef.current !== 'number') {
         setUnreadCount(visible.filter((n: Notification) => !n.read_at).length);
       }
     }
@@ -113,11 +118,11 @@ export default function NotificationBell({
     const activeAnncs = anncsResult.data?.filter((a: Announcement) => !dismissedIds.includes(a.id)) || [];
 
     setAnnouncements(activeAnncs);
-    if (typeof unreadOverride !== 'number') {
+    if (typeof unreadOverrideRef.current !== 'number') {
       setUnreadCount(prev => prev + activeAnncs.length);
     }
     setLoading(false);
-  }, [supabase, includeAnnouncements, unreadOverride]);
+  }, [supabase, includeAnnouncements]);
 
   useEffect(() => {
     let cancelled = false;
@@ -147,11 +152,17 @@ export default function NotificationBell({
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
         }, (payload: any) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
+          const incoming = payload.new as Notification;
+          if (incoming.type === 'message' || isHiddenNotification(incoming)) return;
+          setNotifications(prev => [incoming, ...prev]);
           setUnreadCount(prev => prev + 1);
         })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            if (status === 'CHANNEL_ERROR' && !realtimeNoticeLogged) {
+              realtimeNoticeLogged = true;
+              console.info('[notifications] realtime unavailable, polling every 60s');
+            }
             if (!poll) poll = setInterval(() => { fetchNotifications(); }, 60_000);
             return;
           }
