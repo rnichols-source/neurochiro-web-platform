@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase";
+import { useReferralOptional } from "@/components/portal/ReferralProvider";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendMessage, markMessagesRead, searchUsersForMessage, blockUser, muteConversation, unmuteConversation, reportMessage, deleteMessage } from "@/app/actions/messaging-actions";
 
@@ -202,6 +203,7 @@ export default function MessagingSystem({
   userRole,
   initialOtherUserId,
 }: MessagingSystemProps) {
+  const referral = useReferralOptional();
   // State
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -836,6 +838,15 @@ export default function MessagingSystem({
             >
               View Profile
             </a>
+            {referral && otherUser.role === "doctor" ? (
+              <button
+                type="button"
+                className="min-h-11 text-sm font-bold text-portal-accent"
+                onClick={() => referral.openReferral({ userId: otherUser.id })}
+              >
+                Refer a patient
+              </button>
+            ) : null}
           </div>
         </div>
         <div className="relative">

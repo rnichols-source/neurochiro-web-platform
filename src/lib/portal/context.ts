@@ -18,6 +18,7 @@ export function toNavContext(ctx: PortalContextValue): PortalNavContext {
     chiroMatchOpen: ctx.chiroMatchOpen,
     unreadMessages: ctx.unreadMessages,
     unreadNotifications: ctx.unreadNotifications,
+    unreadReferrals: ctx.unreadReferrals,
   };
 }
 
@@ -52,6 +53,16 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
     });
   }
 
+  let unreadReferrals = 0;
+  if (shell.doctor?.id) {
+    const waiting = await (supabase as any)
+      .from('doctor_referrals')
+      .select('id', { count: 'exact', head: true })
+      .eq('receiving_doctor_id', shell.doctor.id)
+      .in('status', ['pending', 'sent', 'viewed']);
+    if (!waiting.error) unreadReferrals = waiting.count || 0;
+  }
+
   const ctx = {
     membership,
     neurosTier: shell.doctor?.neuros_tier || null,
@@ -59,6 +70,7 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
     chiroMatchOpen,
     unreadMessages: shell.unreadMessages,
     unreadNotifications: count || 0,
+    unreadReferrals,
   };
 
   const nav = navFor(ctx);
@@ -73,6 +85,7 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
     membership,
     unreadNotifications: count || 0,
     unreadMessages: shell.unreadMessages,
+    unreadReferrals,
     hasPurchase,
     chiroMatchOpen,
     nav,
