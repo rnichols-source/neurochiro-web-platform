@@ -46,8 +46,9 @@ export default function PortalShell({ children }: { children: React.ReactNode })
     });
   }
 
-  function itemActive(href: string) {
-    return pathname === href || (href !== '/doctor/dashboard' && pathname.startsWith(href));
+  function itemActive(href: string, match: string[] = []) {
+    const hit = (value: string) => pathname === value || pathname.startsWith(`${value}/`);
+    return hit(href) || match.some(hit);
   }
 
   const sidebar = (
@@ -71,7 +72,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
             <div key={group} className="mb-3">
               {GROUP_LABEL[group] ? <p className="px-3 pt-2 pb-1 text-xs text-white/60">{GROUP_LABEL[group]}</p> : null}
               {items.map((item) => {
-                const active = itemActive(item.href);
+                const active = itemActive(item.href, item.match);
                 const badge = badgeText(item.badge);
                 const className = `w-full min-h-11 px-3 py-2 rounded-lg flex items-center gap-3 text-left ${active ? 'bg-portal-sidebar-active text-white' : 'text-white/80 hover:bg-portal-sidebar-active'}`;
                 const body = (

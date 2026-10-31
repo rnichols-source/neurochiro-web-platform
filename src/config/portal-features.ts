@@ -17,6 +17,7 @@ export type PortalFeature = {
   requires?: 'pro' | 'practice_tools' | 'neuros' | 'owned_purchase';
   comingSoonBlurb?: string;
   icon: string;
+  match?: string[];
 };
 
 export const PORTAL_FEATURES: PortalFeature[] = [
@@ -35,7 +36,7 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'referrals', label: 'Referrals', href: '/doctor/referrals', group: 'grow', subtitle: 'Refer a patient to another doctor', state: 'live', requires: 'pro', icon: 'Users' },
   { key: 'community', label: 'Community', href: '/doctor/community', group: 'grow', subtitle: 'Private doctor community', state: 'coming_soon', comingSoonBlurb: 'A private place for doctors in the network. We will tell you when it opens.', icon: 'Users' },
   { key: 'marketplace', label: 'Marketplace', href: '/doctor/marketplace', group: 'grow', subtitle: 'Vetted vendors with member deals', state: 'beta', icon: 'ShoppingBag' },
-  { key: 'practice_tools', label: 'Practice tools', href: '/doctor/tools', group: 'tools', subtitle: 'Care plan, scan reports, KPIs, P&L, CE, billing guide', state: 'live', requires: 'practice_tools', icon: 'Wrench' },
+  { key: 'practice_tools', label: 'Practice tools', href: '/doctor/tools', group: 'tools', subtitle: 'Care plan, scan reports, KPIs, P&L, CE, billing guide', state: 'live', requires: 'practice_tools', icon: 'Wrench', match: ['/doctor/care-plan', '/doctor/scan-report', '/doctor/kpi', '/doctor/pl-analyzer', '/doctor/ce-tracker', '/doctor/billing-guide'] },
   { key: 'care_plan_closer', label: 'Services from Dr. Ray', href: '/doctor/care-plan-closer', group: 'tools', subtitle: 'Done-for-you care plan setup', state: 'live', icon: 'Calculator' },
   { key: 'purchases', label: 'My purchases', href: '/doctor/purchases', group: 'tools', subtitle: 'Kits you have bought', state: 'live', requires: 'owned_purchase', icon: 'ShoppingBag' },
   { key: 'badges', label: 'Achievements', href: '/doctor/badges', group: 'tools', subtitle: '', state: 'hidden', icon: 'Award' },
