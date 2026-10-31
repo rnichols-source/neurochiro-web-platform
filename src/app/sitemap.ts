@@ -3,6 +3,7 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { REGIONS } from '@/lib/regions';
 import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
 import { getProducts } from '@/lib/shopify';
+import { EUROPEAN_ISO, toDirectoryCountry } from '@/lib/directory-countries';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,31 @@ async function fetchPublishedDoctors(supabase: ReturnType<typeof createServerSup
   return doctors;
 }
 
+async function directoryRegionCounts(supabase: ReturnType<typeof createServerSupabase>) {
+  const counts: Record<string, number> = {};
+  const pageSize = 1000;
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('doctors')
+      .select('country')
+      .in('verification_status', ['verified', 'pending'])
+      .range(from, from + pageSize - 1);
+
+    if (error || !data?.length) break;
+    for (const row of data) {
+      const iso = String(row.country || 'US').toUpperCase();
+      const code = toDirectoryCountry(iso);
+      counts[code] = (counts[code] || 0) + 1;
+      if (EUROPEAN_ISO.includes(iso)) counts.EU = (counts.EU || 0) + 1;
+      counts.ALL = (counts.ALL || 0) + 1;
+    }
+    if (data.length < pageSize) break;
+  }
+
+  return counts;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServerSupabase();
   const doctors = await fetchPublishedDoctors(supabase);
@@ -66,7 +92,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.8,
   }));
 
-  const regionalRoutes = Object.keys(REGIONS).map((code) => ({
+  const regionCounts = await directoryRegionCounts(supabase);
+  const regionalRoutes = Object.keys(REGIONS).filter((code) => (regionCounts[code.toUpperCase()] || 0) > 0).map((code) => ({
     url: `${BASE_URL}/directory/locations/${code.toLowerCase()}`,
     lastModified: new Date().toISOString(),
     changeFrequency: 'weekly' as const,

@@ -29,6 +29,10 @@ interface GlobalNetworkMapProps {
   highlightedDoctorId?: string | null;
   onMarkerClick?: (doctor: Record<string, any>) => void;
   onMarkerDeselect?: () => void;
+  patientMode?: boolean;
+  userLocation?: { lat: number; lng: number } | null;
+  emptyLabel?: string;
+  onUserMove?: (bounds: [number, number, number, number]) => void;
 }
 
 export default function GlobalNetworkMap({
@@ -41,6 +45,10 @@ export default function GlobalNetworkMap({
   highlightedDoctorId = null,
   onMarkerClick,
   onMarkerDeselect,
+  patientMode = false,
+  userLocation = null,
+  emptyLabel = "",
+  onUserMove,
 }: GlobalNetworkMapProps) {
   const router = useRouter();
   const { region } = useRegion();
@@ -129,7 +137,8 @@ export default function GlobalNetworkMap({
 
   // Build marker data — include extra props for preview card
   const buildMarkerData = useCallback(() => {
-    return (initialDoctors || []).map(doc => {
+    const source = patientMode ? listDoctors : (initialDoctors || []);
+    return source.map(doc => {
       const lat = Number(doc.latitude);
       const lng = Number(doc.longitude);
       if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
@@ -153,7 +162,7 @@ export default function GlobalNetworkMap({
         }
       };
     }).filter((f): f is NonNullable<typeof f> => f !== null);
-  }, [initialDoctors, listDoctors, externalSearchQuery, externalLocationQuery]);
+  }, [initialDoctors, listDoctors, externalSearchQuery, externalLocationQuery, patientMode]);
 
   // Sync markers to iframe
   // force-raw-markers (with fit-to-bounds) when the doctor list changes from a new search
@@ -162,10 +171,9 @@ export default function GlobalNetworkMap({
   useEffect(() => {
     if (!mapReady || !iframeRef.current?.contentWindow) return;
     const dataToSend = buildMarkerData();
-    if (dataToSend.length === 0) return;
 
     // Detect if the underlying doctor set changed (new search) vs just filter changes
-    const newIds = initialDoctors.map(d => d.id).sort().join(',');
+    const newIds = (patientMode ? listDoctors : initialDoctors).map(d => d.id).sort().join(',');
     const doctorsChanged = newIds !== prevDoctorIds.current;
     prevDoctorIds.current = newIds;
 
@@ -175,6 +183,19 @@ export default function GlobalNetworkMap({
     }, window.location.origin);
   }, [initialDoctors, listDoctors, mapReady, buildMarkerData]);
 
+  useEffect(() => {
+    if (!mapReady || !iframeRef.current?.contentWindow) return;
+    iframeRef.current.contentWindow.postMessage({
+      type: "set-user-location",
+      lat: userLocation?.lat ?? null,
+      lng: userLocation?.lng ?? null,
+    }, window.location.origin);
+    iframeRef.current.contentWindow.postMessage({
+      type: "set-mobile",
+      mobile: patientMode && window.innerWidth < 1024,
+    }, window.location.origin);
+  }, [mapReady, userLocation, patientMode]);
+
   // Handle iframe messages
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
@@ -183,7 +204,8 @@ export default function GlobalNetworkMap({
       } else if (e.data.type === 'map-move') {
         currentBounds.current = e.data.bounds;
         currentZoom.current = e.data.zoom;
-        updateMapData(e.data.bounds, e.data.zoom);
+        if (patientMode) onUserMove?.(e.data.bounds);
+        else updateMapData(e.data.bounds, e.data.zoom);
       } else if (e.data.type === 'marker-click') {
         setSelectedPin(e.data.data);
         onMarkerClick?.(e.data.data);
@@ -194,7 +216,7 @@ export default function GlobalNetworkMap({
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [updateMapData, onMarkerClick, onMarkerDeselect]);
+  }, [updateMapData, onMarkerClick, onMarkerDeselect, patientMode, onUserMove]);
 
   useEffect(() => {
     if (initialDoctors && initialDoctors.length > 0) setDoctors(initialDoctors);
@@ -228,8 +250,14 @@ export default function GlobalNetworkMap({
         title="Global Network Map"
       />
 
-      {/* Layer toggles — desktop only */}
-      <div className="absolute bottom-6 right-6 z-10 hidden lg:flex flex-col gap-2">
+      {emptyLabel && (
+        <div className="absolute left-1/2 top-16 z-20 -translate-x-1/2 rounded-xl bg-[#1c1c1e]/95 px-4 py-3 text-sm font-semibold text-white">
+          {emptyLabel}
+        </div>
+      )}
+
+      {/* Layer toggles stay off the patient directory. */}
+      {!patientMode && <div className="absolute bottom-6 right-6 z-10 hidden lg:flex flex-col gap-2">
         {[
           { id: "all", label: "Doctors", icon: MapPin, bg: "bg-neuro-orange" },
           { id: "student", label: "Students", icon: GraduationCap, bg: "bg-blue-500" },
@@ -250,11 +278,11 @@ export default function GlobalNetworkMap({
             </div>
           </motion.button>
         ))}
-      </div>
+      </div>}
 
-      {/* Selected pin slide-out — desktop only */}
+      {/* Selected pin slide-out stays on internal maps. Patient search uses the list and peek card. */}
       <AnimatePresence>
-        {selectedPin && (
+        {!patientMode && selectedPin && (
           <motion.div
             initial={{ x: "100%", opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}

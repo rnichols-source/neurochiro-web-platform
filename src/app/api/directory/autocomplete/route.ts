@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { resolveStateCode } from '@/lib/resolve-state';
+import { EUROPEAN_ISO } from '@/lib/directory-countries';
 
 export const revalidate = 300; // Cache 5 min
 
@@ -8,6 +9,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const q = (searchParams.get('q') || '').replace(/[%_(),.*\\'";\[\]{}]/g, '').trim().slice(0, 50);
   const type = searchParams.get('type') || 'all'; // all, location, name
+  const country = (searchParams.get('country') || '').toUpperCase();
 
   if (!q || q.length < 2) {
     return NextResponse.json({ cities: [], doctors: [], specialties: [] });
@@ -24,12 +26,15 @@ export async function GET(request: NextRequest) {
 
     if (type === 'all' || type === 'location') {
       // Get matching cities with count
-      const { data: cityData } = await supabase
+      let cityQuery = supabase
         .from('doctors')
         .select('city, state, country')
         .ilike('city', `${q}%`)
-        .eq('verification_status', 'verified')
-        .limit(50);
+        .eq('verification_status', 'verified');
+      if (country === 'EU') cityQuery = cityQuery.in('country', EUROPEAN_ISO);
+      else if (country === 'US') cityQuery = cityQuery.or('country.is.null,country.eq.US');
+      else if (country && country !== 'ALL') cityQuery = cityQuery.eq('country', country === 'UK' ? 'GB' : country);
+      const { data: cityData } = await cityQuery.limit(50);
 
       if (cityData) {
         // Deduplicate and count
@@ -75,12 +80,15 @@ export async function GET(request: NextRequest) {
 
     if (type !== 'location') {
       // Get matching doctor names (skip when searching by location only)
-      const { data: nameData } = await supabase
+      let nameQuery = supabase
         .from('doctors')
         .select('first_name, last_name, slug, clinic_name, city, state, photo_url')
         .eq('verification_status', 'verified')
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,clinic_name.ilike.%${q}%`)
-        .limit(5);
+        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,clinic_name.ilike.%${q}%`);
+      if (country === 'EU') nameQuery = nameQuery.in('country', EUROPEAN_ISO);
+      else if (country === 'US') nameQuery = nameQuery.or('country.is.null,country.eq.US');
+      else if (country && country !== 'ALL') nameQuery = nameQuery.eq('country', country === 'UK' ? 'GB' : country);
+      const { data: nameData } = await nameQuery.limit(5);
 
       results.doctors = (nameData || []).map(d => ({
         name: `Dr. ${d.first_name} ${d.last_name}`,

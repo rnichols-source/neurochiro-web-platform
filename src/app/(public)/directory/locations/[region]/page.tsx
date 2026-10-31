@@ -74,7 +74,7 @@ export default async function RegionalDirectoryPage({ params }: Props) {
   return (
     <>
       <SchemaMarkup data={jsonLd} />
-      <DirectoryContent initialData={initialData} />
+      <DirectoryContent initialData={initialData} forcedRegion={regionKey} />
     </>
   );
 }
