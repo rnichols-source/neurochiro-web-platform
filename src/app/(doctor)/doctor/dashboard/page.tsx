@@ -14,7 +14,8 @@ import SetupChecklist from './setup-checklist';
 import AttentionList from './attention-list';
 import InviteColleague from './invite-colleague';
 import { ReferButton } from '@/components/portal/ReferralProvider';
-import { getAttention, getSetupFields, getViewSeries } from './home-data';
+import { getAttention, getSetupFields, getSpotlight, getViewSeries } from './home-data';
+import StatusPill from '@/components/portal/StatusPill';
 
 function Card({ children }: { children: React.ReactNode }) {
   return <section className="bg-white border border-portal-border rounded-xl p-4">{children}</section>;
@@ -27,7 +28,7 @@ async function DashboardBody() {
   const timeZone = getDoctorTimezone(doctor.state, doctor.country, 'America/New_York') || 'America/New_York';
   const hello = `${greeting(new Date(), timeZone)}, Dr. ${firstName(ctx.fullName)}`;
   const profilePath = doctor.slug ? `/directory/${doctor.slug}` : '/doctor/profile';
-  const [stats, fields, attention, points] = await Promise.all([
+  const [stats, fields, attention, points, spotlight] = await Promise.all([
     getDoctorPortalStats({
       doctorId: doctor.id,
       userId: ctx.userId,
@@ -39,6 +40,7 @@ async function DashboardBody() {
     getSetupFields(doctor.id),
     getAttention(doctor.id, ctx.userId),
     getViewSeries(doctor.id),
+    getSpotlight(doctor.id),
   ]);
   const monthViews = monthlyViewsDisplay({
     viewsInRange: stats.viewsInRange,
@@ -96,10 +98,9 @@ async function DashboardBody() {
             <p className="text-sm text-portal-ink-2 mt-1">Your plan: {plan}</p>
             <ul className="mt-3 space-y-2 text-sm text-portal-ink-2">
               <li>Network profile, so patients can find you on neurochiro.co.</li>
-              <li>{requestCount.value} patient request{stats.patientRequests?.total === 1 ? '' : 's'} this month.</li>
               {showLives ? <li>The Weekly Adjustment. Thursday at 8 PM ET.</li> : null}
-              <li>Spotlight interview. We will reach out to schedule.</li>
-              <li>Content rotation. We will reach out to schedule.</li>
+              <li className="flex flex-wrap items-center gap-2">Spotlight interview <StatusPill tone="info" label={spotlight.spotlight} /></li>
+              <li className="flex flex-wrap items-center gap-2">Content rotation <StatusPill tone="info" label={spotlight.content} /></li>
             </ul>
             <Link href="/doctor/billing" className="mt-3 min-h-11 inline-flex items-center text-sm font-bold text-portal-accent">Plan and billing</Link>
           </Card>
