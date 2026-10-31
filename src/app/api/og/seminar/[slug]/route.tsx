@@ -1,6 +1,6 @@
 import { ImageResponse } from "@vercel/og";
 import { parseSeminarDates, timezoneForCity } from "@/lib/seminars/dates";
-import { countryCode, currencyForCountry, formatDateRange, priceLabel } from "@/lib/seminars/format";
+import { countryCode, currencyForCountry, formatDateRange, formatSeminarLocation, priceLabel } from "@/lib/seminars/format";
 import { isUuid, seminarSlug } from "@/lib/seminars/slug";
 
 export const runtime = "edge";
@@ -33,6 +33,8 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
   const zone = timezoneForCity(String(seminar.city || ""), String(seminar.country || ""));
   const when = formatDateRange(parsed?.start || null, parsed?.end || null, zone, String(seminar.dates || ""));
   const code = countryCode(String(seminar.country || ""));
+  const place = formatSeminarLocation({ city: String(seminar.city || ""), country: String(seminar.country || ""), countryCode: code });
+  const showPlace = place && !String(seminar.title || "").toLowerCase().includes(String(seminar.city || "").toLowerCase());
   const price = priceLabel({ price: seminar.price == null ? null : Number(seminar.price), currency: currencyForCountry(String(seminar.country || "")), country: code });
   return new ImageResponse(
     (
@@ -40,7 +42,7 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
         <div style={{ display: "flex", fontSize: 28, letterSpacing: 4, color: "#D66829" }}>NEUROCHIRO.CO</div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ display: "flex", fontSize: format === "story" ? 72 : 56, fontWeight: 800, lineHeight: 1.05 }}>{String(seminar.title || "Seminar")}</div>
-          <div style={{ display: "flex", marginTop: 24, fontSize: 32 }}>{when}{seminar.city ? ` · ${seminar.city}` : ""} {code}</div>
+          <div style={{ display: "flex", marginTop: 24, fontSize: 32 }}>{when}{showPlace ? ` · ${place}` : ""}</div>
           <div style={{ display: "flex", marginTop: 16, fontSize: 28, color: "#D66829" }}>{price}{seminar.ce_hours ? ` · ${seminar.ce_hours} CE` : ""}</div>
         </div>
       </div>

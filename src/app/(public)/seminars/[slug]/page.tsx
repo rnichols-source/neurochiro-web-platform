@@ -4,7 +4,10 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { getRelated, getSeminarBySlug } from "@/lib/seminars/queries";
 import { isUuid, slugify } from "@/lib/seminars/slug";
-import { flagEmoji, formatDateRange, priceLabel, seatsLeftLabel } from "@/lib/seminars/format";
+import { displayVenueName, formatDateRange, formatSeminarAddress, formatSeminarLocation, priceLabel, seatsLeftLabel, seminarMetaTitle } from "@/lib/seminars/format";
+import { extractSponsors, normalizeAgenda } from "@/lib/seminars/agenda";
+import { resolveSeminarCoordinates } from "@/lib/seminars/geo";
+import { resolveSeminarHost } from "@/lib/seminars/host";
 import { breadcrumbJsonLd, seminarJsonLd } from "@/lib/seminars/jsonld";
 import { googleCalendarUrl } from "@/lib/seminars/ics";
 import { SeminarCard } from "@/components/seminars/SeminarCard";
@@ -32,8 +35,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const seminar = await getSeminarBySlug(slug);
   if (!seminar) return { title: "Seminar | NeuroChiro" };
   const when = formatDateRange(seminar.startDate, seminar.endDate, seminar.timeZone, seminar.dates);
-  const place = seminar.city || (seminar.format === "virtual" ? "Virtual" : "");
-  const title = `${seminar.title} — ${[place, when].filter(Boolean).join(" · ")} | NeuroChiro Seminars`;
+  const place = formatSeminarLocation(seminar);
+  const title = seminarMetaTitle(seminar.title, place, when);
   const description = (seminar.tagline || seminar.description || `${seminar.title} on NeuroChiro.`).replace(/\s+/g, " ").slice(0, 155);
   const image = `https://www.neurochiro.co/api/og/seminar/${seminar.slug}`;
   return {
@@ -56,22 +59,27 @@ export default async function SeminarLanding({ params, searchParams }: { params:
   const when = formatDateRange(seminar.startDate, seminar.endDate, seminar.timeZone, seminar.dates);
   const price = priceLabel({ price: seminar.price, priceFrom: seminar.priceFrom, currency: seminar.currency, country: seminar.countryCode });
   const seats = seatsLeftLabel(seminar.capacity, seminar.seatsSold);
-  const hostName = seminar.hostDoctor
-    ? [seminar.hostDoctor.first_name, seminar.hostDoctor.last_name].filter(Boolean).join(" ")
-    : seminar.instructorName;
-  const place = seminar.format === "virtual" ? "Virtual" : [seminar.city, seminar.state, flagEmoji(seminar.countryCode)].filter(Boolean).join(" ");
+  const host = resolveSeminarHost(seminar);
+  const hostName = host.name;
+  const place = formatSeminarLocation(seminar);
   const registerHref = seminar.registrationLink ? `/go/seminar/${seminar.slug}` : "#tickets";
   const calendar = googleCalendarUrl(seminar);
   const outcomes = seminar.outcomes || [];
   const included = seminar.whatsIncluded || [];
-  const schedule = rows(seminar.schedule);
+  const agenda = normalizeAgenda(seminar.schedule);
+  const sponsors = extractSponsors(seminar.schedule, seminar.sponsors);
   const speakers = rows(seminar.speakers);
   const faqs = rows(seminar.faq);
   const audiences = strings(seminar.audiences).concat(strings(seminar.raw.target_audience));
-  const mapQuery = [seminar.venueName, seminar.venueAddress, seminar.city, seminar.country].filter(Boolean).join(", ");
+  const coords = resolveSeminarCoordinates(seminar);
+  const venueLabel = displayVenueName(seminar.venueName, seminar.city);
+  const mapQuery = venueLabel === "Venue TBA" ? place : formatSeminarAddress(seminar);
   const staticKey = process.env.GOOGLE_MAPS_STATIC_KEY;
-  const staticMap = staticKey && seminar.latitude && seminar.longitude
-    ? `https://maps.googleapis.com/maps/api/staticmap?center=${seminar.latitude},${seminar.longitude}&zoom=13&size=640x320&scale=2&key=${staticKey}`
+  const staticMap = staticKey && coords
+    ? `https://maps.googleapis.com/maps/api/staticmap?center=${coords.lat},${coords.lng}&zoom=12&size=640x320&scale=2&markers=color:0xD66829|${coords.lat},${coords.lng}&key=${staticKey}`
+    : null;
+  const fallbackMap = !staticMap && coords
+    ? `https://www.openstreetmap.org/export/embed.html?bbox=${coords.lng - 0.08}%2C${coords.lat - 0.05}%2C${coords.lng + 0.08}%2C${coords.lat + 0.05}&layer=mapnik&marker=${coords.lat}%2C${coords.lng}`
     : null;
   const days = seminar.startDate ? Math.ceil((new Date(`${seminar.startDate}T12:00:00Z`).getTime() - Date.now()) / 86400000) : null;
   const member = memberTicketPrice({
@@ -90,15 +98,15 @@ export default async function SeminarLanding({ params, searchParams }: { params:
           <SeminarImage src={seminar.heroImageUrl} alt="" priority />
         </div>
         <div className="mx-auto max-w-3xl px-5 pb-10 pt-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-neuro-orange">{when}{place ? ` · ${place}` : ""}</p>
-          <h1 className="mt-2 text-3xl font-black leading-tight md:text-5xl">{seminar.title}</h1>
+          <p className="text-xs font-bold uppercase tracking-widest text-white">{when}{place ? ` · ${place}` : ""}</p>
+          <h1 className="mt-2 text-3xl font-black leading-tight text-white md:text-5xl">{seminar.title}</h1>
           {seminar.tagline ? <p className="mt-3 text-lg text-white/80">{seminar.tagline}</p> : null}
-          {hostName && seminar.hostDoctor?.slug ? (
-            <Link href={`/directory/${seminar.hostDoctor.slug}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-white">{hostName}</Link>
-          ) : hostName ? <p className="mt-3 text-sm font-bold">{hostName}</p> : null}
-          <p className="mt-4 text-xl font-black text-neuro-orange">{price}</p>
+          {host.verified && host.profileSlug ? (
+            <Link href={`/directory/${host.profileSlug}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-white">{hostName}</Link>
+          ) : hostName ? <p className="mt-3 text-sm font-bold text-white">{hostName}</p> : null}
+          <p className="mt-4 text-xl font-black text-white">{price}</p>
           <div className="mt-5 flex flex-wrap gap-2">
-            {seminar.upcoming && seminar.registrationLink ? <a href={registerHref} className="inline-flex min-h-11 items-center rounded-xl bg-neuro-orange px-5 text-sm font-bold">Register</a> : null}
+            {seminar.upcoming && seminar.registrationLink ? <a id="hero-register" href={registerHref} className="inline-flex min-h-11 items-center rounded-xl bg-neuro-orange-ink px-5 text-sm font-bold text-white">Register</a> : null}
             <ShareBar title={seminar.title} url={shareUrl} />
             {calendar ? <a href={calendar} className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-4 text-sm font-bold">Google Calendar</a> : null}
             {seminar.startDate ? <a href={`/seminars/${seminar.slug}/calendar.ics`} className="inline-flex min-h-11 items-center rounded-xl border border-white/20 px-4 text-sm font-bold">Add to calendar</a> : null}
@@ -111,7 +119,7 @@ export default async function SeminarLanding({ params, searchParams }: { params:
         {seminar.ceHours ? <p className="rounded-2xl bg-white p-4 text-sm font-bold text-neuro-navy">{seminar.ceHours} CE hours{seminar.ceApprovingBody ? ` · ${seminar.ceApprovingBody}` : ""}</p> : null}
         {seats ? <p className="rounded-2xl bg-white p-4 text-sm font-bold text-neuro-navy">{seats}</p> : null}
         {seminar.upcoming && days != null && days >= 0 ? <p className="rounded-2xl bg-white p-4 text-sm font-bold text-neuro-navy">{days} days to go</p> : null}
-        {seminar.hostDoctor ? <p className="rounded-2xl bg-white p-4 text-sm font-bold text-neuro-navy">Verified host</p> : null}
+        {host.verified ? <p className="rounded-2xl bg-white p-4 text-sm font-bold text-neuro-navy">Verified host</p> : null}
       </section>
 
       <div className="mx-auto max-w-3xl space-y-10 px-5">
@@ -128,18 +136,38 @@ export default async function SeminarLanding({ params, searchParams }: { params:
             <ul className="mt-3 flex flex-wrap gap-2">{audiences.map((item) => <li key={item} className="rounded-full bg-white px-3 py-2 text-sm font-bold text-neuro-navy">{item}</li>)}</ul>
           </section>
         )}
-        {schedule.length > 0 && (
+        {agenda.length > 0 && (
           <section>
             <h2 className="text-2xl font-black text-neuro-navy">Agenda</h2>
-            <ol className="mt-3 space-y-3">
-              {schedule.map((item, index) => (
-                <li key={index} className="rounded-2xl bg-white p-4">
-                  <p className="text-xs font-bold uppercase tracking-wide text-neuro-orange">{String(item.time || item.day || item.date || "")}</p>
-                  <p className="font-black text-neuro-navy">{String(item.title || item.name || "Session")}</p>
-                  {item.description ? <p className="mt-1 text-sm text-gray-600">{String(item.description)}</p> : null}
+            <div className="mt-3 space-y-6">
+              {agenda.map((day) => (
+                <div key={day.label}>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-neuro-orange-ink">{day.label}</h3>
+                  <ol className="mt-3 space-y-3 border-l-2 border-neuro-orange/20 pl-4">
+                    {day.items.map((item) => (
+                      <li key={`${day.label}-${item.time}-${item.title}`} className="rounded-2xl bg-white p-4">
+                        {item.time ? <p className="text-xs font-bold uppercase tracking-wide text-neuro-orange-ink">{item.time}</p> : null}
+                        <p className="font-black text-neuro-navy">{item.title}</p>
+                        {item.description ? <p className="mt-1 text-sm text-gray-600">{item.description}</p> : null}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+        {sponsors.length > 0 && (
+          <section>
+            <h2 className="text-2xl font-black text-neuro-navy">Sponsors</h2>
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+              {sponsors.map((sponsor) => (
+                <li key={sponsor.name} className="rounded-2xl bg-white p-4">
+                  <p className="font-black text-neuro-navy">{sponsor.name}</p>
+                  <p className="text-sm text-gray-600">{sponsor.context}</p>
                 </li>
               ))}
-            </ol>
+            </ul>
           </section>
         )}
         {speakers.length > 0 && (
@@ -160,13 +188,13 @@ export default async function SeminarLanding({ params, searchParams }: { params:
             </ul>
           </section>
         )}
-        {seminar.hostDoctor && (
+        {hostName && (
           <section className="rounded-3xl bg-white p-5">
             <h2 className="text-2xl font-black text-neuro-navy">Host</h2>
             <p className="mt-2 font-bold">{hostName}</p>
-            {seminar.hostDoctor.clinic_name ? <p className="text-sm text-gray-600">{seminar.hostDoctor.clinic_name}</p> : null}
+            {host.verified && seminar.hostDoctor?.clinic_name ? <p className="text-sm text-gray-600">{seminar.hostDoctor.clinic_name}</p> : null}
             {seminar.instructorBio ? <p className="mt-3 text-sm text-gray-700">{seminar.instructorBio}</p> : null}
-            <Link href={`/directory/${seminar.hostDoctor.slug}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange">View profile</Link>
+            {host.verified && host.profileSlug ? <Link href={`/directory/${host.profileSlug}`} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink">View profile</Link> : null}
           </section>
         )}
         {included.length > 0 && (
@@ -179,12 +207,12 @@ export default async function SeminarLanding({ params, searchParams }: { params:
         <section id="tickets" className="rounded-3xl bg-white p-5">
           <h2 className="text-2xl font-black text-neuro-navy">{seminar.upcoming ? "Tickets" : "This event has ended"}</h2>
           {seminar.priceNote ? <p className="mt-2 text-sm text-gray-600">{seminar.priceNote}</p> : null}
-          <p className="mt-3 text-lg font-black text-neuro-orange">{price}</p>
+          <p className="mt-3 text-lg font-black text-neuro-orange-ink">{price}</p>
           {seminar.upcoming && Number(seminar.priceFrom || 0) > 0 ? (
-            <p className="mt-2 text-sm text-gray-600">Members save about {formatMemberSave(seminar.priceFrom, member.amount, seminar.currency)}. <Link href={`/pricing/doctors?return=/seminars/${seminar.slug}`} className="font-bold text-neuro-orange">Join NeuroChiro</Link></p>
+            <p className="mt-2 text-sm text-gray-600">Members save about {formatMemberSave(seminar.priceFrom, member.amount, seminar.currency)}. <Link href={`/pricing/doctors?return=/seminars/${seminar.slug}`} className="font-bold text-neuro-orange-ink">Join NeuroChiro</Link></p>
           ) : null}
           {seminar.upcoming && seminar.registrationLink ? (
-            <a href={registerHref} className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-neuro-orange px-5 text-sm font-bold text-white">Register</a>
+            <a href={registerHref} className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-neuro-orange-ink px-5 text-sm font-bold text-white">Register</a>
           ) : null}
           {seminar.upcoming ? (
             <div className="mt-6 border-t border-black/5 pt-4">
@@ -197,12 +225,13 @@ export default async function SeminarLanding({ params, searchParams }: { params:
         {(seminar.venueName || seminar.venueAddress || seminar.city) && seminar.format !== "virtual" && (
           <section>
             <h2 className="text-2xl font-black text-neuro-navy">Venue</h2>
-            <p className="mt-2 text-gray-700">{[seminar.venueName, seminar.venueAddress, seminar.city, seminar.country].filter(Boolean).join(", ")}</p>
-            {staticMap ? <img src={staticMap} alt={`Map of ${seminar.venueName || seminar.city}`} className="mt-4 w-full rounded-2xl" /> : null}
+            <p className="mt-2 text-gray-700">{venueLabel === "Venue TBA" ? `Venue TBA${place ? ` · ${place}` : ""}` : formatSeminarAddress(seminar)}</p>
+            {staticMap ? <img src={staticMap} alt={`Map of ${venueLabel === "Venue TBA" ? seminar.city : venueLabel}`} className="mt-4 w-full rounded-2xl" /> : null}
+            {fallbackMap ? <iframe title={`Map of ${seminar.city || "the venue"}`} src={fallbackMap} className="mt-4 h-56 w-full rounded-2xl border-0" loading="lazy" /> : null}
             {mapQuery ? (
               <p className="mt-3 flex gap-4 text-sm font-bold">
-                <a className="min-h-11 text-neuro-orange" href={`https://maps.apple.com/?q=${encodeURIComponent(mapQuery)}`}>Apple Maps</a>
-                <a className="min-h-11 text-neuro-orange" href={`https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`}>Google Maps</a>
+                <a className="inline-flex min-h-11 items-center text-neuro-orange-ink" href={`https://maps.apple.com/?q=${encodeURIComponent(mapQuery)}`}>Apple Maps</a>
+                <a className="inline-flex min-h-11 items-center text-neuro-orange-ink" href={`https://maps.google.com/?q=${encodeURIComponent(mapQuery)}`}>Google Maps</a>
               </p>
             ) : null}
             {typeof seminar.travelInfo === "string" && seminar.travelInfo ? <p className="mt-3 whitespace-pre-wrap text-sm text-gray-700">{seminar.travelInfo}</p> : null}
