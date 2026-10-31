@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Briefcase, Trash2, CheckCircle2, XCircle, Clock, Search } from "lucide-react";
-import { getAdminJobPostings, updateJobStatus, deleteJobPosting } from "./actions";
+import { getAdminJobPostings, updateJobStatus, deleteJobPosting, approveJobPost, rejectJobPost } from "./actions";
+import { adminQueue, paidAmountLabel, type AdminQueue } from "@/lib/jobs/posting-pure";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 
@@ -10,6 +11,7 @@ export default function AdminJobsPage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [queue, setQueue] = useState<AdminQueue>("pending");
 
   useEffect(() => {
     getAdminJobPostings().then((data) => {
@@ -29,7 +31,15 @@ export default function AdminJobsPage() {
     setJobs((prev) => prev.filter((j) => j.id !== jobId));
   };
 
+  const counts = {
+    pending: jobs.filter((j) => adminQueue(j, Date.now()) === "pending").length,
+    live: jobs.filter((j) => adminQueue(j, Date.now()) === "live").length,
+    expired: jobs.filter((j) => adminQueue(j, Date.now()) === "expired").length,
+    rejected: jobs.filter((j) => adminQueue(j, Date.now()) === "rejected").length,
+  };
+
   const filtered = jobs.filter((j) => {
+    if (adminQueue(j, Date.now()) !== queue) return false;
     if (!search.trim()) return true;
     const q = search.toLowerCase();
     return (
@@ -59,7 +69,14 @@ export default function AdminJobsPage() {
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">Job Postings</h1>
-          <p className="text-gray-500 mt-1">{statusCounts.all} total &middot; {statusCounts.open} open &middot; {statusCounts.closed} closed</p>
+          <p className="text-gray-500 mt-1">Pending {counts.pending} · Live {counts.live} · Expired {counts.expired} · Rejected {counts.rejected}. The admin sidebar was left unchanged.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {(["pending", "live", "expired", "rejected"] as AdminQueue[]).map((tab) => (
+              <button key={tab} type="button" onClick={() => setQueue(tab)} className={cn("min-h-11 rounded-lg px-3 text-sm", queue === tab ? "bg-[#14212E] text-white" : "bg-white border")}>
+                {tab === "pending" ? "Pending" : tab === "live" ? "Live" : tab === "expired" ? "Expired" : "Rejected"} ({counts[tab]})
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -98,7 +115,7 @@ export default function AdminJobsPage() {
                   </span>
                 </div>
                 <p className="text-gray-500 text-sm mt-1">
-                  {job.doctor ? `Dr. ${job.doctor.first_name} ${job.doctor.last_name} — ${job.doctor.clinic_name}` : "Unknown Doctor"}
+                  {job.clinic_name || job.doctor?.clinic_name || "Clinic"} · {job.poster_type || "member"} · {paidAmountLabel(job)}
                 </p>
                 <p className="text-gray-400 text-xs mt-1">
                   Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
@@ -107,6 +124,23 @@ export default function AdminJobsPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                {job.approval_status === "pending" ? (
+                  <>
+                    <button type="button" className="min-h-11 rounded-lg bg-[#14212E] px-3 text-sm text-white" onClick={async () => {
+                      const result = await approveJobPost(job.id);
+                      if (result.error) return;
+                      setJobs((prev) => prev.map((j) => j.id === job.id ? { ...j, approval_status: "approved", status: "Active" } : j));
+                    }}>Approve</button>
+                    <button type="button" className="min-h-11 rounded-lg border px-3 text-sm" onClick={async () => {
+                      const reason = window.prompt("Why is this post rejected?");
+                      if (!reason) return;
+                      const result = await rejectJobPost(job.id, reason);
+                      if (result.error) return;
+                      setJobs((prev) => prev.map((j) => j.id === job.id ? { ...j, approval_status: "rejected", rejected_reason: reason } : j));
+                    }}>Reject + refund</button>
+                  </>
+                ) : null}
+                <a href={`/jobs/${job.id}`} className="min-h-11 inline-flex items-center px-2 text-sm">Preview</a>
                 {(job.status === "open" || job.status === "Active") ? (
                   <button
                     onClick={() => handleStatusChange(job.id, "closed")}

@@ -2,74 +2,20 @@
 
 import { createServerSupabase } from "@/lib/supabase-server";
 import { Automations } from "@/lib/automations";
+import { loadPublicBoard, loadPublicJob } from "@/lib/jobs/board";
 
 export async function getPublicJobs(filters: { category?: string; employment_type?: string }) {
-  const supabase = createServerSupabase();
-
-  let query = supabase
-    .from("job_postings")
-    .select("*")
-    .in("status", ["Active", "open"]);
-
-  if (filters.category) query = query.eq("category", filters.category);
-  if (filters.employment_type) query = query.eq("employment_type", filters.employment_type);
-
-  // Exclude expired listings
-  query = query.or("expires_at.is.null,expires_at.gt." + new Date().toISOString());
-  query = query.order("created_at", { ascending: false }).limit(100);
-
-  const { data, error } = await query;
-  if (error) {
-    console.error("Error fetching public jobs:", error);
-    return [];
-  }
-
-  if (data && data.length > 0) {
-    const doctorIds = [...new Set(data.map((j) => j.doctor_id))];
-    const { data: doctors } = await supabase
-      .from("doctors")
-      .select("user_id, clinic_name, city, state, slug")
-      .in("user_id", doctorIds);
-
-    const clinicMap = new Map(
-      (doctors || []).map((d) => [
-        d.user_id,
-        { clinic_name: d.clinic_name, city: d.city, state: d.state, slug: d.slug },
-      ])
-    );
-    return data.map((j) => {
-      const doc = clinicMap.get(j.doctor_id) || { clinic_name: "", city: "", state: "", slug: "" };
-      return { ...j, clinic_name: doc.clinic_name, clinic_city: doc.city, clinic_state: doc.state, slug: doc.slug };
-    });
-  }
-
-  return data || [];
+  const rows = await loadPublicBoard({});
+  return rows.filter((job) => {
+    const row = job as { category?: string | null; employment_type?: string | null };
+    if (filters.category && row.category !== filters.category) return false;
+    if (filters.employment_type && row.employment_type !== filters.employment_type) return false;
+    return true;
+  });
 }
 
 export async function getJobById(id: string) {
-  const supabase = createServerSupabase();
-
-  const { data: job, error } = await supabase
-    .from("job_postings")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error || !job) return null;
-
-  const { data: doctor } = await supabase
-    .from("doctors")
-    .select("user_id, clinic_name, city, state, slug")
-    .eq("user_id", job.doctor_id)
-    .single();
-
-  return {
-    ...job,
-    clinic_name: doctor?.clinic_name || "",
-    clinic_city: doctor?.city || "",
-    clinic_state: doctor?.state || "",
-    slug: doctor?.slug || "",
-  };
+  return loadPublicJob(id);
 }
 
 export async function applyToJob(

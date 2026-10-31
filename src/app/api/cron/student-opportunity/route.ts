@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 import { getSupabaseSecretKey } from '@/lib/supabase-secret';
 import { SUPABASE_URL } from '@/lib/supabase-env';
 import { Resend } from 'resend';
+import { deriveStudentMembership } from '@/lib/students/membership-pure';
+import { missingSchema } from '@/lib/students/schema';
+import { digestMonth, escapeHtml, receivesMonthlyDigest } from '@/lib/jobs/posting-pure';
 
 export const maxDuration = 300;
 
@@ -16,9 +19,9 @@ const getSupabase = () => createClient(
 const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
 
 /**
- * STUDENT OPPORTUNITY — Runs every Wednesday at 9 AM EST
- * Checks for new job postings and seminars added in the last 7 days.
- * Sends a digest to all students so they don't miss opportunities.
+ * Monthly student digest. Schedule is 0 13 1 * * (13:00 UTC on the 1st).
+ * The path stays /api/cron/student-opportunity so the cron list does not change.
+ * It used to run every Wednesday and email every role=student.
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -30,96 +33,115 @@ export async function GET(req: Request) {
   try {
     const supabase = getSupabase();
     const resend = getResend();
-    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const now = new Date();
+    const month = digestMonth(now.toISOString());
+    const monthStart = `${month}-01T00:00:00.000Z`;
 
-    // Get new jobs this week
-    const { data: newJobs, count: jobCount } = await supabase
-      .from('jobs')
-      .select('title, clinic_name, city, state', { count: 'exact' })
-      .gte('created_at', oneWeekAgo)
-      .eq('status', 'active')
-      .limit(5);
-
-    // Get new seminars this week
-    const { data: newSeminars, count: seminarCount } = await supabase
-      .from('seminars')
-      .select('title, location, date', { count: 'exact' })
-      .gte('created_at', oneWeekAgo)
-      .eq('status', 'approved')
-      .limit(5);
-
-    const totalNew = (jobCount || 0) + (seminarCount || 0);
-    if (totalNew === 0) {
-      return NextResponse.json({ success: true, message: 'No new opportunities this week', sent: 0 });
+    const probe = await (supabase as any).from('student_email_sends').select('user_id').limit(1);
+    if (probe.error && missingSchema(probe.error)) {
+      return NextResponse.json({ success: false, message: 'student_email_sends is not ready', sent: 0 });
     }
 
-    // Get all students
-    const { data: students } = await supabase
+    const featuredQuery = await (supabase as any)
+      .from('job_postings')
+      .select('title, clinic_name, city, state, featured_until')
+      .in('status', ['Active', 'open'])
+      .gt('featured_until', now.toISOString())
+      .limit(5);
+    const featured = featuredQuery.error ? [] : (featuredQuery.data || []);
+
+    const newQuery = await (supabase as any)
+      .from('job_postings')
+      .select('title, clinic_name, city, state, created_at')
+      .in('status', ['Active', 'open'])
+      .gte('created_at', monthStart)
+      .limit(5);
+    const fresh = newQuery.error ? [] : (newQuery.data || []);
+
+    const callQuery = await (supabase as any)
+      .from('student_calls')
+      .select('starts_at, topic')
+      .eq('status', 'scheduled')
+      .gt('starts_at', now.toISOString())
+      .order('starts_at', { ascending: true })
+      .limit(1);
+    const nextCall = callQuery.error ? null : callQuery.data?.[0];
+
+    let studentsQuery = await (supabase as any)
       .from('profiles')
-      .select('email, full_name')
+      .select('id, email, full_name, role, tier, created_at, student_past_due_since')
       .eq('role', 'student');
-
-    if (!students || students.length === 0) {
-      return NextResponse.json({ success: true, message: 'No students to email', sent: 0 });
+    if (studentsQuery.error && missingSchema(studentsQuery.error)) {
+      studentsQuery = await (supabase as any).from('profiles').select('id, email, full_name, role, tier, created_at').eq('role', 'student');
     }
+    const students = (studentsQuery.data || []).filter((row: { role?: string; tier?: string; created_at?: string; student_past_due_since?: string | null }) => {
+      const membership = deriveStudentMembership({
+        role: row.role,
+        tier: row.tier,
+        createdAt: row.created_at,
+        pastDueSince: row.student_past_due_since,
+        now: now.toISOString(),
+      });
+      return receivesMonthlyDigest(membership.status);
+    });
 
-    // Build job list HTML
-    const jobsHtml = (newJobs || []).length > 0
-      ? `<h3 style="font-size: 16px; color: #D66829; margin: 20px 0 12px;">New Jobs (${jobCount})</h3>
-         ${(newJobs as any[]).map(j => `<div style="background: #F5F3EF; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;">
-           <strong style="color: #1E2D3B;">${j.title}</strong><br>
-           <span style="font-size: 13px; color: #4B5563;">${j.clinic_name} — ${j.city}, ${j.state}</span>
-         </div>`).join('')}`
-      : '';
+    const card = (row: { title?: string; clinic_name?: string; city?: string; state?: string }) =>
+      `<div style="background:#F5F3EF;border-radius:10px;padding:12px 16px;margin-bottom:8px;"><strong>${escapeHtml(row.title || 'Associateship')}</strong><br><span>${escapeHtml([row.clinic_name, row.city, row.state].filter(Boolean).join(' · '))}</span></div>`;
 
-    const seminarsHtml = (newSeminars || []).length > 0
-      ? `<h3 style="font-size: 16px; color: #D66829; margin: 20px 0 12px;">New Seminars (${seminarCount})</h3>
-         ${(newSeminars as any[]).map(s => `<div style="background: #F5F3EF; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;">
-           <strong style="color: #1E2D3B;">${s.title}</strong><br>
-           <span style="font-size: 13px; color: #4B5563;">${s.location} — ${s.date ? new Date(s.date).toLocaleDateString() : 'TBD'}</span>
-         </div>`).join('')}`
-      : '';
-
-    const CHUNK_SIZE = 100;
     let sent = 0;
+    for (const student of students) {
+      if (!student.email || !student.id) continue;
+      const inserted = await (supabase as any).from('student_email_sends').insert({
+        month,
+        user_id: student.id,
+        kind: 'monthly_digest',
+      });
+      if (inserted.error) continue;
 
-    for (let i = 0; i < students.length; i += CHUNK_SIZE) {
-      const chunk = students.slice(i, i + CHUNK_SIZE);
-      const emails = chunk.map((s: any) => ({
-        from: 'NeuroChiro <support@neurochirodirectory.com>',
-        to: s.email,
-        subject: `${totalNew} new opportunities this week on NeuroChiro`,
-        html: wrapEmail(`
-          <p>Hi ${s.full_name?.split(' ')[0] || 'Student'},</p>
-          <p>Here's what's new on NeuroChiro this week:</p>
-          ${jobsHtml}
-          ${seminarsHtml}
-          <p style="margin-top: 20px;"><a href="https://neurochiro.co/student/dashboard" style="display: inline-block; background: #D66829; color: white; padding: 14px 28px; border-radius: 12px; font-weight: 900; text-decoration: none; font-size: 14px;">Browse All Opportunities</a></p>
-        `),
-      }));
+      const { data: studentRow } = await (supabase as any).from('students').select('state, location_city').eq('id', student.id).maybeSingle();
+      let shadowNote = '';
+      if (studentRow?.state) {
+        const { data: doctors } = await (supabase as any)
+          .from('doctors')
+          .select('clinic_name, city, state')
+          .eq('offers_shadowing', true)
+          .eq('state', studentRow.state)
+          .limit(3);
+        if (doctors?.length) {
+          shadowNote = `<h3>Doctors open to shadowing in ${escapeHtml(studentRow.state)}</h3>${doctors.map((doctor: { clinic_name?: string; city?: string; state?: string }) => card({ title: doctor.clinic_name, city: doctor.city, state: doctor.state })).join('')}`;
+        }
+      }
+
+      const callNote = nextCall
+        ? `<p>Next mentorship call: ${escapeHtml(nextCall.topic || 'Monthly call')} on ${escapeHtml(new Date(nextCall.starts_at).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }))}.</p>`
+        : '<p>The next mentorship call is not on the calendar yet.</p>';
 
       try {
-        await resend.batch.send(emails);
-        sent += emails.length;
-      } catch (err) {
-        console.error('[STUDENT OPPORTUNITY] Batch failed:', err);
+        await resend.emails.send({
+          from: 'NeuroChiro <support@neurochirodirectory.com>',
+          to: student.email,
+          subject: 'Associateships and the monthly call',
+          html: wrapEmail(`
+            <p>Hi ${escapeHtml(student.full_name?.split(' ')[0] || 'there')},</p>
+            <h3>Featured associateships</h3>
+            ${featured.length ? featured.map(card).join('') : '<p>No featured posts this month.</p>'}
+            <h3>New this month</h3>
+            ${fresh.length ? fresh.map(card).join('') : '<p>No new posts yet this month.</p>'}
+            ${callNote}
+            ${shadowNote}
+            <p><a href="https://neurochiro.co/jobs">See associateships</a></p>
+          `),
+        });
+        sent += 1;
+      } catch {
+        console.error('[STUDENT OPPORTUNITY] Send failed');
       }
     }
 
-    await supabase.from('audit_logs').insert({
-      category: 'AUTOMATION',
-      event: `Student Opportunity: ${sent} digests sent (${jobCount} jobs, ${seminarCount} seminars)`,
-      user_name: 'System',
-      target: 'all_students',
-      status: 'Success',
-      severity: 'Low',
-      metadata: { sent, jobCount, seminarCount },
-    });
-
-    return NextResponse.json({ success: true, message: `Student Opportunity: ${sent} digests sent`, sent });
-  } catch (err: any) {
-    console.error('[STUDENT OPPORTUNITY ERROR]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ success: true, message: `Monthly digest: ${sent} sent`, sent });
+  } catch (err: unknown) {
+    console.error('[STUDENT OPPORTUNITY ERROR]');
+    const message = err instanceof Error ? err.message : 'Digest failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

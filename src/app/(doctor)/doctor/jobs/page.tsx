@@ -39,6 +39,7 @@ import {
   updateApplicantRating,
   updateApplicantNotes,
   getApplicationWithHistory,
+  openJobApplicationThread,
 } from "./actions";
 import {
   PIPELINE_STAGES,
@@ -357,7 +358,7 @@ function JobsPageInner() {
             <Check className="w-5 h-5 text-green-600" />
             <div>
               <p className="text-sm font-bold text-green-800">Job posted successfully!</p>
-              <p className="text-xs text-green-600">Your listing is now live for 30 days. Applications will arrive in your dashboard and by email.</p>
+              <p className="text-sm text-green-600">Your listing is live for 60 days. Applications show up here and by email.</p>
             </div>
           </div>
           <button type="button" onClick={() => setShowPostedBanner(false)} className="text-green-400 hover:text-green-600" aria-label="Dismiss" title="Dismiss"><X className="w-4 h-4" /></button>
@@ -459,7 +460,31 @@ function JobsPageInner() {
                       </span>
                       <span>{new Date(job.created_at).toLocaleDateString()}</span>
                     </div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      {typeof job.view_count === "number" ? `${job.view_count} views · ` : ""}
+                      {count} applications
+                      {job.featured_until ? ` · Featured until ${new Date(job.featured_until).toLocaleDateString()}` : ""}
+                      {job.expires_at ? ` · Expires ${new Date(job.expires_at).toLocaleDateString()}` : ""}
+                    </p>
                   </button>
+                  {isOpen ? (
+                    <button
+                      type="button"
+                      className="min-h-11 shrink-0 px-3 text-sm font-bold text-[#B4501A]"
+                      onClick={async () => {
+                        const res = await fetch("/api/jobs/feature", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ jobId: job.id }),
+                        });
+                        const data = await res.json();
+                        if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+                        else if (data.error) window.alert(data.error);
+                      }}
+                    >
+                      Feature for $49
+                    </button>
+                  ) : null}
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
@@ -594,12 +619,16 @@ function JobsPageInner() {
                             </button>
                             {/* Quick links */}
                             {app.candidateId && (
-                              <a
-                                href={`/doctor/messages?to=${app.candidateId}`}
-                                className="text-xs font-bold text-neuro-orange hover:underline"
+                              <button
+                                type="button"
+                                className="min-h-11 px-2 text-sm font-bold text-[#B4501A]"
+                                onClick={async () => {
+                                  const result = await openJobApplicationThread(app.id);
+                                  if (result.conversationId) window.location.href = `/doctor/messages?c=${result.conversationId}`;
+                                }}
                               >
                                 Message
-                              </a>
+                              </button>
                             )}
                             {app.resumeUrl && (
                               <a
@@ -1317,10 +1346,14 @@ function PostJobModal({
         }),
       })
       const data = await res.json()
-      if (data.checkoutUrl) {
+      if (data.posted) {
+        window.location.href = '/doctor/jobs?posted=success'
+      } else if (data.href) {
+        window.location.href = data.href
+      } else if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl
       } else {
-        setError(data.error || 'Checkout failed.')
+        setError(data.error || 'Could not post.')
         setPosting(false)
       }
     } catch {
@@ -1333,7 +1366,7 @@ function PostJobModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
       <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
-          <h2 className="text-lg font-semibold">{step === 'form' ? 'Post a Job' : 'Review & Pay'}</h2>
+          <h2 className="text-lg font-semibold">{step === 'form' ? 'Post a job' : 'Review'}</h2>
           <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close"><X className="w-5 h-5" /></button>
         </div>
 
@@ -1441,9 +1474,8 @@ function PostJobModal({
 
             {/* Pricing */}
             <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-xl p-4 text-center">
-              <p className="text-2xl font-bold text-neuro-navy">$99</p>
-              <p className="text-sm text-gray-500">for 30 days on the NeuroChiro Job Board</p>
-              <p className="text-xs text-gray-400 mt-2">Your listing will be visible to all verified chiropractic students. Applications go to your dashboard and email. You can edit the listing while it's active.</p>
+              <p className="text-base font-bold text-neuro-navy">Members post 2 associateships free.</p>
+              <p className="text-sm text-gray-500 mt-1">Outside clinics pay $149 after we review the post. A featured boost is $49 for 30 days.</p>
             </div>
 
             {error && (
@@ -1458,7 +1490,7 @@ function PostJobModal({
               </button>
               <button onClick={handleCheckout} disabled={posting}
                 className="flex-1 py-3 bg-neuro-orange text-white rounded-lg text-sm font-bold hover:bg-neuro-orange/90 disabled:opacity-50 min-h-[44px]">
-                {posting ? 'Redirecting to checkout...' : 'Pay $99 & Post'}
+                {posting ? 'Posting...' : 'Post'}
               </button>
             </div>
           </div>

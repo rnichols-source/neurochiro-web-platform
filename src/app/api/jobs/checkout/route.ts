@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { canPostFree, insertMemberPost } from '@/lib/jobs/posting'
+import { LIMIT_MESSAGE } from '@/lib/jobs/posting-pure'
 
 /**
  * POST /api/jobs/checkout
- * Creates a draft job posting and redirects to Stripe checkout.
- * On payment success, the webhook activates the post.
+ * Members under the limit post free. Everyone else is sent to /jobs/post.
+ * This route no longer creates a $99 Checkout session.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -14,78 +16,45 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { title, description, employmentType, compensationMin, compensationMax, compensationType, city, state, whatLookingFor, applyEmail } = body
+    const { title, description, employmentType, compensationMin, compensationMax, city, state, whatLookingFor, applyEmail } = body
 
-    // Validate required fields
     if (!title?.trim()) return NextResponse.json({ error: 'Title is required.' }, { status: 400 })
     if (!description?.trim()) return NextResponse.json({ error: 'Description is required.' }, { status: 400 })
-    if (!compensationMin || !compensationMax) return NextResponse.json({ error: 'Compensation range is required.' }, { status: 400 })
-    if (compensationMin < 0 || compensationMax < compensationMin) return NextResponse.json({ error: 'Invalid compensation range.' }, { status: 400 })
 
     const admin = createAdminClient()
-
-    // Verify the user is a verified doctor
     const { data: doctor } = await admin.from('doctors')
-      .select('id, first_name, last_name, clinic_name, city, state, verification_status')
+      .select('id, clinic_name, city, state')
       .eq('user_id', user.id)
-      .eq('verification_status', 'verified')
       .maybeSingle()
 
-    if (!doctor) return NextResponse.json({ error: 'Only verified doctors can post jobs.' }, { status: 403 })
+    if (!doctor) return NextResponse.json({ error: 'Only doctors can post jobs.' }, { status: 403 })
 
-    // Create draft job posting
-    const { data: job, error: insertError } = await (admin as any).from('job_postings').insert({
-      doctor_id: user.id,
-      title: title.trim(),
-      description: description.trim(),
-      employment_type: employmentType || 'Full-time',
-      compensation_min: compensationMin,
-      compensation_max: compensationMax,
-      compensation_type: compensationType || 'salary',
-      city: city?.trim() || doctor.city || null,
-      state: state?.trim() || doctor.state || null,
-      what_looking_for: whatLookingFor?.trim() || null,
-      apply_email: applyEmail?.trim() || user.email || null,
-      status: 'Draft',
-      is_paid: false,
-    }).select('id').single()
-
-    if (insertError || !job) {
-      console.error('Job insert error:', insertError)
-      return NextResponse.json({ error: 'Failed to create job posting.' }, { status: 500 })
+    const decision = await canPostFree(user.id)
+    if (!decision.ok && decision.reason === 'limit') {
+      return NextResponse.json({ error: LIMIT_MESSAGE }, { status: 409 })
+    }
+    if (!decision.ok) {
+      return NextResponse.json({ href: '/jobs/post' })
     }
 
-    // Create Stripe checkout session
-    const Stripe = (await import('stripe')).default
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'Job Posting — 30 Days',
-            description: `"${title.trim()}" on NeuroChiro Job Board`,
-          },
-          unit_amount: 9900, // $99.00
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/doctor/jobs?posted=success&job_id=${job.id}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'}/doctor/jobs?posted=cancelled`,
-      metadata: {
-        job_posting_id: job.id,
-        doctor_user_id: user.id,
-        type: 'job_posting',
-      },
-      customer_email: user.email || undefined,
+    const posted = await insertMemberPost({
+      doctorUserId: user.id,
+      title,
+      description,
+      employmentType,
+      salaryMin: Number(compensationMin) || null,
+      salaryMax: Number(compensationMax) || null,
+      city: city?.trim() || doctor.city || null,
+      state: state?.trim() || doctor.state || null,
+      clinicName: doctor.clinic_name,
+      applyEmail: applyEmail?.trim() || user.email || null,
+      whatLookingFor: whatLookingFor?.trim() || null,
     })
-
-    return NextResponse.json({ checkoutUrl: session.url, jobId: job.id })
-  } catch (err: any) {
-    console.error('Job checkout error:', err)
-    return NextResponse.json({ error: err.message || 'Checkout failed.' }, { status: 500 })
+    if ('error' in posted) return NextResponse.json({ error: posted.error }, { status: 400 })
+    return NextResponse.json({ posted: true, jobId: posted.jobId })
+  } catch (err: unknown) {
+    console.error('Job post error')
+    const message = err instanceof Error ? err.message : 'Post failed.'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
