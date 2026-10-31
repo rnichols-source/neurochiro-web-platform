@@ -57,7 +57,7 @@ export default function NeurOSDashboard() {
   const tools = [
     { name: "Care Plan Closer", desc: "Build professional care plans with insurance billing intelligence", href: "/doctor/neuros/care-plan", icon: Calculator, color: "bg-orange-500/10 text-orange-500" },
     { name: "Profit Pulse", desc: "Monthly P&L tracking built for chiropractic", href: "/doctor/pl-analyzer", icon: DollarSign, color: "bg-green-500/10 text-green-500" },
-    { name: "Daily Scorecard", desc: "Track visits, collections, and KPIs in 60 seconds", href: "/doctor/kpi", icon: TrendingUp, color: "bg-blue-500/10 text-blue-500" },
+    { name: "Daily Scorecard", desc: "Track visits, collections, and KPIs in 60 seconds", href: "/doctor/kpi", icon: TrendingUp, color: "bg-portal-info-bg text-blue-500" },
     { name: "Patient Converter", desc: "Generate patient-facing scan reports", href: "/doctor/scan-report", icon: Activity, color: "bg-purple-500/10 text-purple-500" },
     { name: "Compliance Shield", desc: "CE tracking with renewal reminders", href: "/doctor/ce-tracker", icon: Award, color: "bg-yellow-500/10 text-yellow-500" },
     { name: "Revenue Maximizer", desc: "Insurance fee schedules and billing intelligence", href: "/doctor/billing-guide", icon: Receipt, color: "bg-cyan-500/10 text-cyan-500" },
@@ -75,7 +75,7 @@ export default function NeurOSDashboard() {
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 mb-6 text-white cursor-pointer hover:from-blue-700 hover:to-blue-800 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-black">Complete Your Practice Setup</h3>
+                <h3 className="text-lg font-bold">Complete Your Practice Setup</h3>
                 <p className="text-blue-200 text-sm mt-1">Configure your fee schedules, supplements, and branding so your NeurOS tools are customized for your practice.</p>
               </div>
               <ArrowRight className="w-6 h-6 text-blue-200" />
@@ -91,29 +91,29 @@ export default function NeurOSDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Care Plans</p>
-          <p className="text-3xl font-black text-[#1E2D3B] mt-1">{stats.thisMonth}</p>
+          <p className="text-xs font-bold text-gray-400 tracking-wider">Care Plans</p>
+          <p className="text-3xl font-bold text-[#1E2D3B] mt-1">{stats.thisMonth}</p>
           <p className="text-xs text-gray-400 mt-1">this month ({stats.total} total)</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Value</p>
-          <p className="text-3xl font-black text-green-600 mt-1">{formatCurrency(stats.totalValue)}</p>
+          <p className="text-xs font-bold text-gray-400 tracking-wider">Total Value</p>
+          <p className="text-3xl font-bold text-green-600 mt-1">{formatCurrency(stats.totalValue)}</p>
           <p className="text-xs text-gray-400 mt-1">all care plans presented</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Accepted</p>
-          <p className="text-3xl font-black text-blue-600 mt-1">{stats.accepted}</p>
+          <p className="text-xs font-bold text-gray-400 tracking-wider">Accepted</p>
+          <p className="text-3xl font-bold text-blue-600 mt-1">{stats.accepted}</p>
           <p className="text-xs text-gray-400 mt-1">{stats.total > 0 ? `${Math.round((stats.accepted / stats.total) * 100)}%` : "0%"} acceptance rate</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Avg Plan Value</p>
-          <p className="text-3xl font-black text-[#D66829] mt-1">{stats.total > 0 ? formatCurrency(stats.totalValue / stats.total) : "$0"}</p>
+          <p className="text-xs font-bold text-gray-400 tracking-wider">Avg Plan Value</p>
+          <p className="text-3xl font-bold text-[#D66829] mt-1">{stats.total > 0 ? formatCurrency(stats.totalValue / stats.total) : "$0"}</p>
           <p className="text-xs text-gray-400 mt-1">per care plan</p>
         </div>
       </div>
 
       {/* Tools Grid */}
-      <h2 className="text-lg font-black text-[#1E2D3B] mb-4">Your NeurOS Tools</h2>
+      <h2 className="text-lg font-bold text-[#1E2D3B] mb-4">Your NeurOS Tools</h2>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tools.map((tool) => (
           <Link key={tool.href} href={tool.href}>

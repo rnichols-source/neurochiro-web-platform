@@ -19,7 +19,7 @@ interface ContractTemplate {
 }
 
 const CATEGORY_META = {
-  employment: { label: "Employment & Associates", icon: Users, color: "text-blue-500 bg-blue-50" },
+  employment: { label: "Employment & Associates", icon: Users, color: "text-blue-500 bg-portal-info-bg" },
   patient: { label: "Patient Agreements", icon: Shield, color: "text-green-500 bg-green-50" },
   operations: { label: "Practice Operations", icon: Building2, color: "text-purple-500 bg-purple-50" },
   clause: { label: "Clause Library", icon: Puzzle, color: "text-orange-500 bg-orange-50" },
@@ -137,7 +137,7 @@ function ContractsContent() {
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
+        <h1 className="text-2xl font-heading font-bold text-neuro-navy flex items-center gap-3">
           <FileText className="w-7 h-7 text-neuro-orange" /> Contract Templates
         </h1>
         <p className="text-gray-500 text-sm mt-1">Professionally drafted, chiropractic-specific legal templates. Customize and use.</p>
@@ -157,14 +157,14 @@ function ContractsContent() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-5 h-5 text-neuro-orange" />
-                <span className="text-xs font-black uppercase tracking-widest text-neuro-orange">Complete Bundle</span>
+                <span className="text-xs font-bold tracking-widest text-neuro-orange">Complete Bundle</span>
               </div>
-              <h2 className="text-xl font-black text-white mb-1">All 12 Templates + Clause Library</h2>
+              <h2 className="text-xl font-bold text-white mb-1">All 12 Templates + Clause Library</h2>
               <p className="text-gray-400 text-sm">Everything you need to legally protect your practice. Use forever.</p>
               <div className="flex items-center gap-3 mt-3">
-                <span className="text-3xl font-black text-white">$99</span>
+                <span className="text-3xl font-bold text-white">$99</span>
                 <span className="text-gray-400 line-through">${totalIndividualPrice}</span>
-                <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-black px-2 py-0.5 rounded-full">Save ${totalIndividualPrice - 99}</span>
+                <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-bold px-2 py-0.5 rounded-full">Save ${totalIndividualPrice - 99}</span>
               </div>
             </div>
             <button
@@ -173,7 +173,7 @@ function ContractsContent() {
                 if (result.url) window.location.href = result.url;
                 else alert(result.error);
               }}
-              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
             >
               Get the Bundle — $99
             </button>
@@ -239,20 +239,20 @@ function ContractsContent() {
                     <h3 className="font-bold text-neuro-navy">{item.title}</h3>
                     <p className="text-gray-500 text-xs mt-0.5">{item.description}</p>
                     <div className="flex items-center gap-3 mt-2">
-                      <span className="text-[10px] font-bold text-gray-400">{item.wordCount.toLocaleString()} words</span>
-                      <span className="text-[10px] font-bold text-gray-400">~{item.pageEstimate} pages</span>
+                      <span className="text-xs font-bold text-gray-400">{item.wordCount.toLocaleString()} words</span>
+                      <span className="text-xs font-bold text-gray-400">~{item.pageEstimate} pages</span>
                       <div className="flex gap-1.5">
                         {item.tags.slice(0, 3).map(tag => (
-                          <span key={tag} className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">{tag}</span>
+                          <span key={tag} className="text-xs font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">{tag}</span>
                         ))}
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
                     {unlocked ? (
-                      <span className="text-[10px] font-black text-green-500 bg-green-50 px-2 py-1 rounded">Owned</span>
+                      <span className="text-xs font-bold text-green-500 bg-green-50 px-2 py-1 rounded">Owned</span>
                     ) : (
-                      <span className="font-black text-neuro-navy">${item.price}</span>
+                      <span className="font-bold text-neuro-navy">${item.price}</span>
                     )}
                     <ChevronDown className={`w-4 h-4 text-gray-300 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                   </div>
@@ -336,9 +336,9 @@ function ContractsContent() {
       {showClauses && clauses.length > 0 && (
         <div>
           {activeTab === 'all' && (
-            <h2 className="text-sm font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <h2 className="text-sm font-bold text-gray-400 tracking-widest mb-4 flex items-center gap-2">
               <Puzzle className="w-4 h-4 text-neuro-orange" /> Clause Library
-              <span className="text-[10px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded-full normal-case tracking-normal">Free with Bundle</span>
+              <span className="text-xs font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded-full normal-case tracking-normal">Free with Bundle</span>
             </h2>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -374,7 +374,7 @@ function ContractsContent() {
                       </div>
                       <button
                         onClick={() => handleCopy(item.id, item.content)}
-                        className="px-3 py-1.5 bg-neuro-navy text-white rounded-lg font-bold text-[10px] hover:bg-neuro-navy/90 transition-colors flex items-center gap-1"
+                        className="px-3 py-1.5 bg-neuro-navy text-white rounded-lg font-bold text-xs hover:bg-neuro-navy/90 transition-colors flex items-center gap-1"
                       >
                         {copiedId === item.id ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy Clause</>}
                       </button>
@@ -396,7 +396,7 @@ function ContractsContent() {
 
       {/* Bottom Disclaimer */}
       <div className="mt-8 text-center">
-        <p className="text-[10px] text-gray-300 max-w-lg mx-auto leading-relaxed">
+        <p className="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed">
           All templates include [BRACKETED PLACEHOLDERS] for customization. Replace all placeholders with your specific information before use. Have an attorney in your state review any contract before execution.
         </p>
       </div>

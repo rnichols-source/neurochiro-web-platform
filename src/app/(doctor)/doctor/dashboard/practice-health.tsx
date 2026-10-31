@@ -4,7 +4,7 @@ import type { PracticeHealthResult } from "@/lib/practice-health";
 
 const GRADE_COLORS: Record<string, { ring: string; text: string; bg: string }> = {
   A: { ring: "stroke-green-400", text: "text-green-400", bg: "bg-green-400/10" },
-  B: { ring: "stroke-blue-400", text: "text-blue-400", bg: "bg-blue-400/10" },
+  B: { ring: "stroke-blue-400", text: "text-blue-400", bg: "bg-portal-info-bg" },
   C: { ring: "stroke-yellow-400", text: "text-yellow-400", bg: "bg-yellow-400/10" },
   D: { ring: "stroke-orange-400", text: "text-orange-400", bg: "bg-orange-400/10" },
   F: { ring: "stroke-red-400", text: "text-red-400", bg: "bg-red-400/10" },
@@ -40,7 +40,7 @@ export default function PracticeHealthGauge({ data }: { data: PracticeHealthResu
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-black text-white">{totalScore}</span>
+          <span className="text-2xl font-bold text-white">{totalScore}</span>
           <span className={`text-xs font-bold ${colors.text}`}>{grade}</span>
         </div>
       </div>
@@ -50,8 +50,8 @@ export default function PracticeHealthGauge({ data }: { data: PracticeHealthResu
         {Object.values(breakdown).map((cat) => (
           <div key={cat.label}>
             <div className="flex items-center justify-between mb-0.5">
-              <span className="text-[11px] text-white/60">{cat.label}</span>
-              <span className="text-[10px] text-white/40 tabular-nums">{cat.score}%</span>
+              <span className="text-xs text-white/60">{cat.label}</span>
+              <span className="text-xs text-white/40 tabular-nums">{cat.score}%</span>
             </div>
             <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
               <div className={`h-full rounded-full ${getBarColor(cat.score)} transition-all duration-700`} style={{ width: `${Math.max(cat.score, 2)}%` }} />

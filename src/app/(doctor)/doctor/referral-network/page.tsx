@@ -15,6 +15,8 @@ import {
 } from "./actions";
 import { formatDistance } from "@/lib/geo";
 import { useSearchParams } from "next/navigation";
+import PageHeader from "@/components/portal/PageHeader";
+import EmptyState from "@/components/portal/EmptyState";
 
 // ── Shared styles ────────────────────────────────────────────────────────────
 
@@ -212,10 +214,7 @@ function ReferralNetworkContent() {
   return (
     <div style={{ padding: "16px", maxWidth: 800, margin: "0 auto" }}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <Send style={{ width: 24, height: 24, color: "#D66829" }} />
-        <h1 style={{ fontSize: 22, fontWeight: 900, color: "#fff", margin: 0 }}>Referral Network</h1>
-      </div>
+      <PageHeader title="Referral network" description="Refer patients to doctors you trust." />
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: 4, marginBottom: 20, background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 4 }}>
@@ -659,11 +658,7 @@ function SentTab({ referrals, loading }: { referrals: ReferralRecord[]; loading:
 
   if (referrals.length === 0) {
     return (
-      <div style={{ ...cardStyle, textAlign: "center", padding: 40 }}>
-        <Send style={{ width: 32, height: 32, color: "rgba(255,255,255,0.2)", margin: "0 auto 12px" }} />
-        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>No referrals sent yet.</p>
-        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>Search for a doctor to send your first referral.</p>
-      </div>
+      <EmptyState icon={Send} title="No referrals sent yet" sentence="Search for a doctor to send your first referral." />
     );
   }
 
@@ -743,11 +738,7 @@ function ReceivedTab({
 
   if (referrals.length === 0) {
     return (
-      <div style={{ ...cardStyle, textAlign: "center", padding: 40 }}>
-        <Send style={{ width: 32, height: 32, color: "rgba(255,255,255,0.2)", margin: "0 auto 12px", transform: "scaleX(-1)" }} />
-        <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 14 }}>No referrals received yet.</p>
-        <p style={{ color: "rgba(255,255,255,0.3)", fontSize: 12 }}>When another doctor refers a patient to you, it will appear here.</p>
-      </div>
+      <EmptyState icon={Send} title="No referrals received yet" sentence="When another doctor refers a patient to you, it will appear here." />
     );
   }
 

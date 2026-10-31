@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bell, Check, CheckCheck, Mail, Briefcase, Calendar, Users, AlertCircle, ChevronRight } from "lucide-react";
+import { Bell, Mail, Briefcase, Calendar, Users, AlertCircle } from "lucide-react";
 import { getNotifications, markNotificationRead, markAllNotificationsRead } from "./actions";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, isThisWeek, isToday } from "date-fns";
+import PageHeader from "@/components/portal/PageHeader";
+import EmptyState from "@/components/portal/EmptyState";
 
 type Notification = {
   id: string;
@@ -18,7 +20,7 @@ type Notification = {
   created_at: string;
 };
 
-const typeIcons: Record<string, any> = {
+const typeIcons: Record<string, typeof Bell> = {
   message: Mail,
   job: Briefcase,
   seminar: Calendar,
@@ -26,15 +28,28 @@ const typeIcons: Record<string, any> = {
   system: AlertCircle,
 };
 
+const GROUPS = ["Today", "This week", "Earlier"] as const;
+
+function groupOf(createdAt: string) {
+  const date = new Date(createdAt);
+  if (isToday(date)) return "Today";
+  if (isThisWeek(date, { weekStartsOn: 0 })) return "This week";
+  return "Earlier";
+}
+
+function destination(link: string | null) {
+  const href = link && link.trim() ? link.trim() : "/doctor/dashboard";
+  return { href, external: /^https?:\/\//.test(href) };
+}
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread">("all");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     getNotifications().then((data) => {
-      setNotifications(data as Notification[]);
+      setNotifications((data as Notification[]).filter((item) => item.type !== "portal_login"));
       setLoading(false);
     });
   }, []);
@@ -53,115 +68,98 @@ export default function NotificationsPage() {
     );
   };
 
-  const filtered = filter === "unread" ? notifications.filter((n) => !n.read_at) : notifications;
-  const unreadCount = notifications.filter((n) => !n.read_at).length;
+  const visible = notifications.filter((n) => n.type !== "portal_login");
+  const filtered = filter === "unread" ? visible.filter((n) => n.read_at == null) : visible;
+  const unreadCount = visible.filter((n) => n.read_at == null).length;
+  const grouped = GROUPS.map((label) => ({
+    label,
+    items: filtered.filter((item) => groupOf(item.created_at) === label),
+  })).filter((group) => group.items.length > 0);
 
   if (loading) {
     return (
-      <div className="p-8 flex flex-col items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+      <div className="flex flex-col items-center justify-center min-h-[40vh]">
+        <div className="w-10 h-10 border-4 border-portal-accent border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-heading font-black text-white uppercase tracking-tight">Notifications</h1>
-          <p className="text-white/30 mt-1">
-            {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
-          </p>
+    <div className="space-y-6 pb-20">
+      <PageHeader title="Notifications" description="Updates about your account." />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2">
+          {(["all", "unread"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setFilter(tab)}
+              className={cn(
+                "min-h-11 px-4 rounded-lg text-sm font-bold",
+                filter === tab ? "bg-portal-accent text-white" : "bg-white border border-portal-border text-portal-ink"
+              )}
+            >
+              {tab === "all" ? "All" : `Unread (${unreadCount})`}
+            </button>
+          ))}
         </div>
         {unreadCount > 0 && (
           <button
+            type="button"
             onClick={handleMarkAllRead}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest text-neuro-orange hover:bg-neuro-orange/5 rounded-xl transition-colors"
+            className="min-h-11 px-4 rounded-lg border border-portal-border bg-white text-sm font-bold text-portal-ink"
           >
-            <CheckCheck className="w-4 h-4" /> Mark All Read
+            Mark all read
           </button>
         )}
       </div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2">
-        {(["all", "unread"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setFilter(tab)}
-            className={cn(
-              "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
-              filter === tab
-                ? "bg-white/10 text-white"
-                : "bg-white/[0.04] text-white/40 hover:bg-white/[0.08]"
-            )}
-          >
-            {tab === "all" ? "All" : `Unread (${unreadCount})`}
-          </button>
-        ))}
-      </div>
-
-      {/* Notification list */}
-      {filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-          <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center">
-            <Bell className="w-8 h-8 text-gray-300" />
-          </div>
-          <p className="text-gray-400 font-bold text-sm">
-            {filter === "unread" ? "No unread notifications" : "No notifications yet"}
-          </p>
-        </div>
+      {visible.length === 0 ? (
+        <EmptyState icon={Bell} title="No notifications" sentence="Updates about your account will show up here." />
+      ) : filtered.length === 0 ? (
+        <EmptyState icon={Bell} title="No unread notifications" sentence="You are caught up." />
       ) : (
-        <div className="space-y-2">
-          {filtered.map((notif) => {
-            const Icon = typeIcons[notif.type || "system"] || Bell;
-            const isUnread = !notif.read_at;
-
-            const content = (
-              <div
-                className={cn(
-                  "flex items-start gap-4 p-5 rounded-2xl border transition-all cursor-pointer",
-                  isUnread
-                    ? "bg-neuro-orange/5 border-neuro-orange/20 hover:border-neuro-orange/40"
-                    : "bg-white/[0.03] border-white/[0.06] hover:border-white/[0.1]"
-                )}
-                onClick={() => {
-                  setExpandedId(expandedId === notif.id ? null : notif.id);
-                  if (isUnread) handleMarkRead(notif.id);
-                }}
-              >
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                    isUnread ? "bg-neuro-orange/10 text-neuro-orange" : "bg-white/[0.06] text-white/30"
-                  )}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className={cn("text-sm font-black", isUnread ? "text-white" : "text-white/50")}>
-                      {notif.title}
-                    </p>
-                    {isUnread && <span className="w-2 h-2 bg-neuro-orange rounded-full flex-shrink-0" />}
-                  </div>
-                  <p className={cn("text-white/40 text-sm mt-0.5", expandedId === notif.id ? "" : "line-clamp-2")}>{notif.body}</p>
-                  <p className="text-white/20 text-xs mt-2">
-                    {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
-                  </p>
-                </div>
-                {notif.link && <ChevronRight className="w-5 h-5 text-white/20 flex-shrink-0 mt-2" />}
-              </div>
-            );
-
-            return notif.link ? (
-              <Link key={notif.id} href={notif.link}>
-                {content}
-              </Link>
-            ) : (
-              <div key={notif.id}>{content}</div>
-            );
-          })}
+        <div className="space-y-6">
+          {grouped.map((group) => (
+            <section key={group.label} className="space-y-2">
+              <h2 className="text-lg font-bold text-portal-ink">{group.label}</h2>
+              {group.items.map((notif) => {
+                const Icon = typeIcons[notif.type || "system"] || Bell;
+                const isUnread = notif.read_at == null;
+                const target = destination(notif.link);
+                const className = cn(
+                  "flex items-start gap-4 p-4 rounded-xl border",
+                  isUnread ? "bg-portal-accent-50 border-portal-border" : "bg-white border-portal-border"
+                );
+                const body = (
+                  <>
+                    <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0", isUnread ? "bg-white text-portal-accent" : "bg-portal-surface text-portal-muted")}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("text-sm font-bold", isUnread ? "text-portal-ink" : "text-portal-ink-2")}>{notif.title}</p>
+                      <p className="text-sm text-portal-ink-2 mt-0.5 line-clamp-2">{notif.body}</p>
+                      <p className="text-sm text-portal-muted mt-2">
+                        {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                  </>
+                );
+                if (target.external) {
+                  return (
+                    <a key={notif.id} href={target.href} className={className} onClick={() => { if (isUnread) void handleMarkRead(notif.id); }}>
+                      {body}
+                    </a>
+                  );
+                }
+                return (
+                  <Link key={notif.id} href={target.href} className={className} onClick={() => { if (isUnread) void handleMarkRead(notif.id); }}>
+                    {body}
+                  </Link>
+                );
+              })}
+            </section>
+          ))}
         </div>
       )}
     </div>

@@ -36,7 +36,7 @@ export default function PatientHistory({ onEdit }: PatientHistoryProps) {
 
   const statusColors: Record<string, string> = {
     draft: "bg-gray-100 text-gray-600",
-    presented: "bg-blue-100 text-blue-700",
+    presented: "bg-portal-info-bg text-blue-700",
     accepted: "bg-green-100 text-green-700",
     archived: "bg-gray-100 text-gray-400",
   };
@@ -78,7 +78,7 @@ export default function PatientHistory({ onEdit }: PatientHistoryProps) {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-[#1E2D3B] text-sm">{plan.patient_name || "Unnamed"}</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${statusColors[plan.status] || ""}`}>{plan.status}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase ${statusColors[plan.status] || ""}`}>{plan.status}</span>
                 </div>
                 <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
                   <span>{new Date(plan.date).toLocaleDateString()}</span>

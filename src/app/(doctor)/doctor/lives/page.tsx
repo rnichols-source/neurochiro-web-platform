@@ -1,7 +1,9 @@
 "use client";
 
-import { Video, Clock, Play, ExternalLink, MessageSquare, Users, Calendar, Mic2 } from "lucide-react";
+import { Video, Play, ExternalLink, MessageSquare, Users, Calendar, Mic2 } from "lucide-react";
 import Link from "next/link";
+import PageHeader from "@/components/portal/PageHeader";
+import { nextWeeklyShow } from "@/lib/portal/weekly-show";
 
 // Show details
 const SHOW_NAME = "The Weekly Adjustment";
@@ -20,30 +22,12 @@ const PAST_EPISODES: { episode: number; date: string; guest: string; city: strin
   // { episode: 1, date: "2026-09-04", guest: "Dr. Sarah Johnson", city: "Charlotte, NC", youtubeUrl: "https://youtube.com/watch?v=..." },
 ];
 
-function getNextShowDate() {
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const targetDay = days.indexOf(SHOW_DAY);
-  const now = new Date();
-  let daysUntil = targetDay - now.getDay();
-  if (daysUntil < 0) daysUntil += 7;
-  const nextDate = new Date(now);
-  nextDate.setDate(now.getDate() + daysUntil);
-  return nextDate;
-}
-
 export default function WeeklyAdjustmentPage() {
-  const nextShow = getNextShowDate();
-  const now = new Date();
-  const daysUntil = Math.ceil((nextShow.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const nextShow = nextWeeklyShow(new Date());
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-1">Live Show</p>
-        <h1 className="text-2xl font-bold text-white">{SHOW_NAME}</h1>
-        <p className="text-white/40 text-sm mt-1">{SHOW_TAGLINE}</p>
-      </div>
+      <PageHeader title="The Weekly Adjustment" description={SHOW_TAGLINE} />
 
       {/* Next Episode Card */}
       <div className="bg-gradient-to-r from-neuro-orange/20 to-neuro-orange/5 border border-neuro-orange/30 rounded-2xl p-6">
@@ -52,13 +36,11 @@ export default function WeeklyAdjustmentPage() {
             <Video className="w-7 h-7 text-neuro-orange" />
           </div>
           <div className="flex-1">
-            <p className="text-neuro-orange text-[10px] font-black uppercase tracking-[0.2em] mb-1">Next Episode</p>
+            <p className="text-neuro-orange text-xs font-bold tracking-[0.2em] mb-1">Next Episode</p>
             <h2 className="text-xl font-bold text-white">
               {SHOW_DAY} at {SHOW_TIME}
             </h2>
-            <p className="text-white/50 text-sm mt-1">
-              {daysUntil === 0 ? "Today!" : daysUntil === 1 ? "Tomorrow" : `In ${daysUntil} days`} — {nextShow.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
-            </p>
+            <p className="text-white/50 text-sm mt-1">{nextShow.label}</p>
             {NEXT_GUEST.name && (
               <div className="mt-3 bg-white/[0.06] rounded-xl px-4 py-3 inline-flex items-center gap-2">
                 <Mic2 className="w-4 h-4 text-neuro-orange" />
@@ -84,7 +66,7 @@ export default function WeeklyAdjustmentPage() {
           ].map((segment, i) => (
             <div key={i} className="flex items-start gap-4">
               <div className="w-12 text-right flex-shrink-0">
-                <span className="text-[11px] text-white/25 font-mono">{segment.time}</span>
+                <span className="text-xs text-white/25 font-mono">{segment.time}</span>
               </div>
               <div className="w-8 h-8 bg-white/[0.06] rounded-lg flex items-center justify-center flex-shrink-0">
                 <segment.icon className="w-4 h-4 text-neuro-orange" />
@@ -113,25 +95,19 @@ export default function WeeklyAdjustmentPage() {
         </a>
       </div>
 
-      {/* Past Episodes */}
+      {PAST_EPISODES.length > 0 ? (
       <div>
-        <h3 className="text-sm font-bold text-white mb-4">Past Episodes</h3>
-        {PAST_EPISODES.length === 0 ? (
-          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-8 text-center">
-            <Clock className="w-8 h-8 text-white/15 mx-auto mb-3" />
-            <p className="text-white/30 text-sm">First episode coming soon. Check back after {SHOW_DAY}!</p>
-          </div>
-        ) : (
+        <h3 className="text-sm font-bold text-portal-ink mb-4">Past episodes</h3>
           <div className="space-y-3">
             {PAST_EPISODES.map((ep, i) => (
               <div key={i} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-xl border border-white/[0.08] p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-neuro-orange/10 rounded-lg flex items-center justify-center">
-                    <span className="text-neuro-orange font-black text-sm">{ep.episode}</span>
+                    <span className="text-neuro-orange font-bold text-sm">{ep.episode}</span>
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">EP {ep.episode}: {ep.guest}</p>
-                    <p className="text-[11px] text-white/30">{ep.city} — {new Date(ep.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="text-xs text-white/30">{ep.city} — {new Date(ep.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 </div>
                 {ep.youtubeUrl && (
@@ -142,8 +118,8 @@ export default function WeeklyAdjustmentPage() {
               </div>
             ))}
           </div>
-        )}
       </div>
+      ) : null}
     </div>
   );
 }

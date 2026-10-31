@@ -32,7 +32,7 @@ export default function WeeklyInsight() {
           <Lightbulb className="w-4 h-4 text-[#D66829]" />
         </div>
         <div>
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#D66829] font-semibold mb-1">Weekly Insight</p>
+          <p className="text-xs tracking-[0.2em] text-[#D66829] font-semibold mb-1">Weekly Insight</p>
           <p className="text-sm text-white/70 leading-relaxed">{insight}</p>
         </div>
       </div>

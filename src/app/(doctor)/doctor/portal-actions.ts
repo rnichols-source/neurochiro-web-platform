@@ -14,6 +14,9 @@ export type PortalShellDoctor = {
   is_approved: boolean;
   onboarding_call_status: string | null;
   profile_views: number;
+  city: string | null;
+  state: string | null;
+  country: string | null;
 };
 
 export type PortalShellData = {
@@ -36,6 +39,9 @@ type DoctorRow = {
   is_approved: boolean | null;
   onboarding_call_status: string | null;
   profile_views: number | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
 };
 
 function initialsFrom(fullName: string | null): string {
@@ -58,7 +64,7 @@ export async function getPortalShellData(): Promise<PortalShellData | null> {
     .maybeSingle();
 
   const { data: doctorRow } = await (admin.from('doctors') as any)
-    .select('id, slug, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views')
+    .select('id, slug, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views, city, state, country')
     .eq('user_id', user.id)
     .maybeSingle() as { data: DoctorRow | null };
 
@@ -66,7 +72,8 @@ export async function getPortalShellData(): Promise<PortalShellData | null> {
     .from('notifications')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .is('read_at', null);
+    .is('read_at', null)
+    .neq('type', 'portal_login');
 
   const { count: unreadMessages } = await admin
     .from('messages')
@@ -91,6 +98,9 @@ export async function getPortalShellData(): Promise<PortalShellData | null> {
           is_approved: doctorRow.is_approved === true,
           onboarding_call_status: doctorRow.onboarding_call_status ?? null,
           profile_views: doctorRow.profile_views || 0,
+          city: doctorRow.city ?? null,
+          state: doctorRow.state ?? null,
+          country: doctorRow.country ?? null,
         }
       : null,
     profileTier: profile?.tier ?? null,

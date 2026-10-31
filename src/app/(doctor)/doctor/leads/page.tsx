@@ -6,7 +6,7 @@ import { getLeadPipeline, updateLeadStage, updateLeadNotes } from "./actions";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 const STAGES = [
-  { key: 'new', label: 'New', color: 'bg-blue-500', border: 'border-blue-500/20' },
+  { key: 'new', label: 'New', color: 'bg-portal-info-bg', border: 'border-blue-500/20' },
   { key: 'contacted', label: 'Contacted', color: 'bg-amber-500', border: 'border-amber-500/20' },
   { key: 'scheduled', label: 'Scheduled', color: 'bg-violet-500', border: 'border-violet-500/20' },
   { key: 'converted', label: 'Converted', color: 'bg-emerald-500', border: 'border-emerald-500/20' },
@@ -67,8 +67,8 @@ function LeadsPipelineContent() {
         </div>
         {data?.conversionRate != null && (
           <div className="text-right">
-            <p className="text-2xl font-black text-emerald-400">{data.conversionRate}%</p>
-            <p className="text-[10px] text-white/30 uppercase tracking-widest">Conversion Rate</p>
+            <p className="text-2xl font-bold text-emerald-400">{data.conversionRate}%</p>
+            <p className="text-xs text-white/30 tracking-widest">Conversion Rate</p>
           </div>
         )}
       </div>
@@ -116,7 +116,7 @@ function LeadsPipelineContent() {
                       </div>
                       <div>
                         <p className="font-bold text-white text-sm">{lead.first_name} {lead.last_name || ''}</p>
-                        <div className="flex items-center gap-3 text-[10px] text-white/30">
+                        <div className="flex items-center gap-3 text-xs text-white/30">
                           <span className="capitalize">{lead.source || 'direct'}</span>
                           <span>{new Date(lead.created_at).toLocaleDateString()}</span>
                         </div>

@@ -23,6 +23,9 @@ import {
 } from "lucide-react";
 import { logDailyEntry, getTodayEntry, getWeeklyData, getDailyEntries, getStreak } from "./actions";
 import type { KpiEntry, WeeklySummary } from "./actions";
+import PageHeader from "@/components/portal/PageHeader";
+import { getDoctorTimezone } from "@/lib/doctor-timezone";
+import { getPortalShellData } from "../portal-actions";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -80,13 +83,6 @@ const WORKING_DAYS_DEFAULT = [true, true, true, true, true, false, false];
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getGreeting(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
-
 function formatDate(d: Date): string {
   return d.toLocaleDateString("en-US", {
     weekday: "long",
@@ -109,11 +105,50 @@ function getMonday(d: Date): Date {
   return date;
 }
 
-function formatWeekLabel(monday: Date): string {
-  const friday = new Date(monday);
-  friday.setDate(friday.getDate() + 4);
-  const opts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-  return `${monday.toLocaleDateString("en-US", opts)} - ${friday.toLocaleDateString("en-US", opts)}`;
+function zonedYmd(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).formatToParts(date);
+  const bag: Record<string, string> = {};
+  for (const part of parts) bag[part.type] = part.value;
+  const weekdayIndex = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(bag.weekday);
+  return { year: Number(bag.year), month: Number(bag.month), day: Number(bag.day), weekdayIndex: weekdayIndex < 0 ? 0 : weekdayIndex };
+}
+
+function shiftUtcDate(year: number, month: number, day: number, delta: number) {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  date.setUTCDate(date.getUTCDate() + delta);
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
+}
+
+function ymdString(year: number, month: number, day: number) {
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function weekDatesFor(now: Date, timeZone: string, weekOffset: number) {
+  const zoned = zonedYmd(now, timeZone);
+  const mondayOffset = zoned.weekdayIndex === 0 ? -6 : 1 - zoned.weekdayIndex;
+  const monday = shiftUtcDate(zoned.year, zoned.month, zoned.day, mondayOffset + weekOffset * 7);
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = shiftUtcDate(monday.year, monday.month, monday.day, index);
+    return ymdString(day.year, day.month, day.day);
+  });
+}
+
+function weekRangeLabel(now: Date, timeZone: string, weekOffset: number) {
+  const dates = weekDatesFor(now, timeZone, weekOffset);
+  const format = (iso: string) => new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${iso}T00:00:00Z`));
+  const prefix = weekOffset === 0 ? "This week · " : "";
+  return `${prefix}Mon ${format(dates[0])} – Sun ${format(dates[6])}`;
+}
+
+function isWeekend(now: Date, timeZone: string) {
+  const weekday = zonedYmd(now, timeZone).weekdayIndex;
+  return weekday === 0 || weekday === 6;
 }
 
 function getStatusColor(value: number, target: number, invert: boolean): string {
@@ -158,6 +193,10 @@ function KpiTrackerContent() {
 
   // Form state
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const [timeZone, setTimeZone] = useState(() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York"; }
+    catch { return "America/New_York"; }
+  });
 
   // Goals state
   const [goals, setGoals] = useState<Goals>(DEFAULT_GOALS);
@@ -193,6 +232,13 @@ function KpiTrackerContent() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    getPortalShellData().then((shell) => {
+      const zone = getDoctorTimezone(shell?.doctor?.state || null, shell?.doctor?.country || null);
+      if (zone) setTimeZone(zone);
+    }).catch(() => {});
+  }, []);
 
   // Load goals from Supabase (localStorage fallback)
   useEffect(() => {
@@ -313,22 +359,12 @@ function KpiTrackerContent() {
   // Weekly data for the weekly scorecard
   const weeklyScorecard = useMemo(() => {
     const now = new Date();
-    const targetMonday = getMonday(now);
-    targetMonday.setDate(targetMonday.getDate() + weekOffset * 7);
-
-    const weekDates: string[] = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(targetMonday);
-      d.setDate(d.getDate() + i);
-      weekDates.push(d.toISOString().slice(0, 10));
-    }
-
+    const weekDates = weekDatesFor(now, timeZone, weekOffset);
     const dayEntries: (KpiEntry | null)[] = weekDates.map(date =>
       entries.find(e => e.date === date) ?? null
     );
-
-    return { monday: targetMonday, weekDates, dayEntries };
-  }, [entries, weekOffset]);
+    return { weekDates, dayEntries, label: weekRangeLabel(now, timeZone, weekOffset) };
+  }, [entries, weekOffset, timeZone]);
 
   // Trend data
   const trendData = useMemo(() => {
@@ -456,15 +492,19 @@ function KpiTrackerContent() {
   // Section renderers (called as functions, not JSX components)
   // -----------------------------------------------------------------------
 
+  const weekend = isWeekend(new Date(), timeZone);
+
   const TopBar = () => (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-4">
-      <div>
-        <h1 className="text-xl font-black text-neuro-navy">
-          {getGreeting()}, Doc
-        </h1>
+    <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+      <div className="flex-1">
+        <PageHeader title="KPI tracker" description="Log your weekly numbers to see your trend." />
+        <p className="text-sm text-portal-ink-2 -mt-4">{weeklyScorecard.label}</p>
         <p className="text-sm text-gray-500">{formatDate(new Date())}</p>
       </div>
-      <div className="flex items-center gap-3">
+      {weekend ? (
+        <a href="#kpi-log" className="min-h-11 inline-flex items-center px-4 rounded-lg bg-portal-accent text-sm font-bold text-white mb-6">Log today</a>
+      ) : null}
+      <div className="flex items-center gap-3 mb-6">
         {streak.current > 0 && (
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 border border-orange-200 rounded-full text-sm font-bold text-neuro-navy">
             <Flame className="w-4 h-4 text-neuro-orange" />
@@ -478,15 +518,15 @@ function KpiTrackerContent() {
   // ─── Section 1: Log Today's Numbers ─────────────────────────────────────
 
   const Section1 = () => (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-      <h2 className="text-lg font-black text-neuro-navy mb-5">
+    <div id="kpi-log" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <h2 className="text-lg font-bold text-neuro-navy mb-5">
         {todayEntry ? "Update Today\u2019s Log" : "Log Today\u2019s Numbers"}
       </h2>
 
       {/* Core metrics grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Patient Visits</label>
+          <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Patient Visits</label>
           <input
             type="number"
             inputMode="numeric"
@@ -497,7 +537,7 @@ function KpiTrackerContent() {
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">New Patients</label>
+          <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">New Patients</label>
           <input
             type="number"
             inputMode="numeric"
@@ -508,7 +548,7 @@ function KpiTrackerContent() {
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Collections ($)</label>
+          <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Collections ($)</label>
           <input
             type="number"
             inputMode="decimal"
@@ -519,7 +559,7 @@ function KpiTrackerContent() {
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">No-Shows</label>
+          <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">No-Shows</label>
           <input
             type="number"
             inputMode="numeric"
@@ -530,7 +570,7 @@ function KpiTrackerContent() {
           />
         </div>
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Referrals</label>
+          <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Referrals</label>
           <input
             type="number"
             inputMode="numeric"
@@ -553,7 +593,7 @@ function KpiTrackerContent() {
       {showMoreMetrics && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Reactivations</label>
+            <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Reactivations</label>
             <input
               type="number"
               inputMode="numeric"
@@ -564,7 +604,7 @@ function KpiTrackerContent() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Case Acceptance %</label>
+            <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Case Acceptance %</label>
             <input
               type="number"
               inputMode="numeric"
@@ -577,7 +617,7 @@ function KpiTrackerContent() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Services per Visit</label>
+            <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Services per Visit</label>
             <input
               type="number"
               inputMode="decimal"
@@ -593,7 +633,7 @@ function KpiTrackerContent() {
 
       {/* Energy emoji row */}
       <div className="mb-5">
-        <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Energy Level</label>
+        <label className="text-xs font-bold text-gray-500 tracking-wide mb-2 block">Energy Level</label>
         <div className="flex items-center gap-2">
           {ENERGY_EMOJIS.map((emoji, i) => (
             <button
@@ -616,11 +656,11 @@ function KpiTrackerContent() {
       <button
         onClick={handleSubmit}
         disabled={submitting || form.energyLevel === 0}
-        className="w-full py-4 bg-neuro-orange text-white font-black text-lg rounded-xl hover:bg-neuro-orange/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+        className={`w-full min-h-11 py-4 text-white font-bold text-lg rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all ${weekend ? "bg-portal-accent" : "bg-neuro-orange hover:bg-neuro-orange/90"}`}
       >
         {submitting ? "Saving..." : showSuccess ? (
           <span className="inline-flex items-center gap-2"><Check className="w-5 h-5" /> Saved!</span>
-        ) : todayEntry ? "Update Today\u2019s Log" : "Log Today"}
+        ) : weekend || !todayEntry ? "Log today" : "Update Today\u2019s Log"}
       </button>
 
       {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
@@ -634,7 +674,7 @@ function KpiTrackerContent() {
     if (!today) {
       return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-black text-neuro-navy mb-3">Today&apos;s Scorecard</h2>
+          <h2 className="text-lg font-bold text-neuro-navy mb-3">Today&apos;s Scorecard</h2>
           <p className="text-sm text-gray-400 text-center py-6">Log today&apos;s numbers to see your scorecard.</p>
         </div>
       );
@@ -677,20 +717,20 @@ function KpiTrackerContent() {
 
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h2 className="text-lg font-black text-neuro-navy mb-4">Today&apos;s Scorecard</h2>
+        <h2 className="text-lg font-bold text-neuro-navy mb-4">Today&apos;s Scorecard</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {cards.map(card => {
             const statusColor = getStatusColor(card.value, card.target, card.invert);
             return (
               <div key={card.label} className="bg-gray-50 rounded-xl p-4">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1">{card.label}</p>
-                <p className="text-2xl font-black text-neuro-navy">{card.format(card.value)}</p>
+                <p className="text-xs font-bold text-gray-400 tracking-wide mb-1">{card.label}</p>
+                <p className="text-2xl font-bold text-neuro-navy">{card.format(card.value)}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
-                  <span className="text-[10px] text-gray-500">Target: {card.format(card.target)}</span>
+                  <span className="text-xs text-gray-500">Target: {card.format(card.target)}</span>
                 </div>
                 {thirtyDayAvg && (
-                  <p className="text-[10px] text-gray-400 mt-1">30d avg: {card.format(card.avg)}</p>
+                  <p className="text-xs text-gray-400 mt-1">30d avg: {card.format(card.avg)}</p>
                 )}
               </div>
             );
@@ -703,8 +743,9 @@ function KpiTrackerContent() {
   // ─── Section 3: Weekly Scorecard ────────────────────────────────────────
 
   const Section3 = () => {
-    const { monday, weekDates, dayEntries } = weeklyScorecard;
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const { weekDates, dayEntries, label } = weeklyScorecard;
+    const todayParts = zonedYmd(new Date(), timeZone);
+    const todayStr = ymdString(todayParts.year, todayParts.month, todayParts.day);
     const todayDayIndex = weekDates.indexOf(todayStr);
 
     // Calculate totals and averages from logged days only
@@ -736,13 +777,13 @@ function KpiTrackerContent() {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-black text-neuro-navy">Weekly Scorecard</h2>
+          <h2 className="text-lg font-bold text-neuro-navy">Weekly Scorecard</h2>
           <div className="flex items-center gap-2">
             <button onClick={() => setWeekOffset(prev => prev - 1)} className="p-1 rounded hover:bg-gray-100">
               <ChevronLeft className="w-4 h-4 text-gray-500" />
             </button>
-            <span className="text-xs font-bold text-gray-600 min-w-[130px] text-center">
-              {formatWeekLabel(monday)}
+            <span className="text-sm font-bold text-portal-ink min-w-[220px] text-center">
+              {label}
             </span>
             <button
               onClick={() => setWeekOffset(prev => Math.min(prev + 1, 0))}
@@ -806,7 +847,7 @@ function KpiTrackerContent() {
                       </td>
                     );
                   })}
-                  <td className="py-2 px-2 text-center font-black text-neuro-navy">
+                  <td className="py-2 px-2 text-center font-bold text-neuro-navy">
                     {row.key === "energy_level"
                       ? (loggedCount > 0 ? ENERGY_EMOJIS[Math.min(Math.round(loggedEntries.reduce((s, e) => s + e.energy_level, 0) / loggedCount) - 1, 4)] : "\u2014")
                       : row.key === "collections"
@@ -847,7 +888,7 @@ function KpiTrackerContent() {
     if (trendData.length === 0) {
       return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h2 className="text-lg font-black text-neuro-navy mb-4">Trends</h2>
+          <h2 className="text-lg font-bold text-neuro-navy mb-4">Trends</h2>
           <div className="text-center py-12">
             <BarChart3 className="w-12 h-12 text-gray-200 mx-auto mb-3" />
             <p className="text-sm text-gray-400 font-bold">Log your first day to see trends!</p>
@@ -964,7 +1005,7 @@ function KpiTrackerContent() {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-black text-neuro-navy">Trends</h2>
+          <h2 className="text-lg font-bold text-neuro-navy">Trends</h2>
           <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-0.5">
             {([7, 30, 60, 90] as const).map(d => (
               <button
@@ -983,35 +1024,35 @@ function KpiTrackerContent() {
         <div className="space-y-6">
           {/* Collections chart */}
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Collections</p>
+            <p className="text-xs font-bold text-gray-500 tracking-wide mb-2">Collections</p>
             {buildLineChart(collectionsData, goals.collections, (v) => fmtDollars(v), "#e97325")}
           </div>
 
           {/* Visits chart */}
           <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Patient Visits</p>
+            <p className="text-xs font-bold text-gray-500 tracking-wide mb-2">Patient Visits</p>
             {buildLineChart(visitsData, goals.visits, (v) => String(v), "#1a2744")}
           </div>
 
           {/* Metric summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-gray-100">
             <div className="text-center">
-              <p className="text-[10px] text-gray-400 uppercase font-bold">Period Total</p>
-              <p className="text-sm font-black text-neuro-navy">{fmtDollars(periodTotal)}</p>
+              <p className="text-xs text-gray-400 uppercase font-bold">Period Total</p>
+              <p className="text-sm font-bold text-neuro-navy">{fmtDollars(periodTotal)}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-gray-400 uppercase font-bold">Daily Avg</p>
-              <p className="text-sm font-black text-neuro-navy">{fmtDollars(dailyAvg)}</p>
+              <p className="text-xs text-gray-400 uppercase font-bold">Daily Avg</p>
+              <p className="text-sm font-bold text-neuro-navy">{fmtDollars(dailyAvg)}</p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-gray-400 uppercase font-bold">Best Day</p>
-              <p className="text-sm font-black text-neuro-navy">
+              <p className="text-xs text-gray-400 uppercase font-bold">Best Day</p>
+              <p className="text-sm font-bold text-neuro-navy">
                 {bestDay ? `${fmtDollars(bestDay.collections)} (${bestDay.date.slice(5)})` : "\u2014"}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-[10px] text-gray-400 uppercase font-bold">Trend</p>
-              <p className={`text-sm font-black ${trendPct !== null ? (trendPct >= 0 ? "text-green-600" : "text-red-500") : "text-gray-400"}`}>
+              <p className="text-xs text-gray-400 uppercase font-bold">Trend</p>
+              <p className={`text-sm font-bold ${trendPct !== null ? (trendPct >= 0 ? "text-green-600" : "text-red-500") : "text-gray-400"}`}>
                 {trendPct !== null ? `${trendPct > 0 ? "+" : ""}${trendPct}%` : "\u2014"}
               </p>
             </div>
@@ -1030,7 +1071,7 @@ function KpiTrackerContent() {
     const alertStyles = {
       green: "border-l-green-500 bg-green-50",
       orange: "border-l-orange-500 bg-orange-50",
-      blue: "border-l-blue-500 bg-blue-50",
+      blue: "border-l-blue-500 bg-portal-info-bg",
     };
 
     const alertIcons = {
@@ -1042,7 +1083,7 @@ function KpiTrackerContent() {
 
     return (
       <div className="space-y-3">
-        <h2 className="text-lg font-black text-neuro-navy">Coaching Alerts</h2>
+        <h2 className="text-lg font-bold text-neuro-navy">Coaching Alerts</h2>
         {alerts.map((alert, i) => {
           if (dismissedAlerts.has(i)) return null;
           return (
@@ -1076,7 +1117,7 @@ function KpiTrackerContent() {
         onClick={() => setShowGoals(!showGoals)}
         className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
       >
-        <span className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+        <span className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2">
           <Settings className="w-4 h-4 text-neuro-orange" /> Goals &amp; Settings
         </span>
         <span className="text-xs text-gray-400">{showGoals ? "\u25B2" : "\u25BC"}</span>
@@ -1086,7 +1127,7 @@ function KpiTrackerContent() {
         <div className="px-5 pb-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily Visit Target</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Daily Visit Target</label>
               <input
                 type="number"
                 value={goals.visits}
@@ -1095,7 +1136,7 @@ function KpiTrackerContent() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily New Patient Target</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Daily New Patient Target</label>
               <input
                 type="number"
                 value={goals.newPatients}
@@ -1104,7 +1145,7 @@ function KpiTrackerContent() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily Collections Target ($)</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Daily Collections Target ($)</label>
               <input
                 type="number"
                 value={goals.collections / 100}
@@ -1113,7 +1154,7 @@ function KpiTrackerContent() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily No-Show Goal (stay below)</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Daily No-Show Goal (stay below)</label>
               <input
                 type="number"
                 value={goals.noShows}
@@ -1122,7 +1163,7 @@ function KpiTrackerContent() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Daily Referral Target</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Daily Referral Target</label>
               <input
                 type="number"
                 value={goals.referrals}
@@ -1131,7 +1172,7 @@ function KpiTrackerContent() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1 block">Monthly Revenue Goal ($)</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-1 block">Monthly Revenue Goal ($)</label>
               <input
                 type="number"
                 value={monthlyRevenueGoal}
@@ -1146,7 +1187,7 @@ function KpiTrackerContent() {
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
               />
               {monthlyRevenueGoal && (
-                <p className="text-[10px] text-gray-400 mt-1">
+                <p className="text-xs text-gray-400 mt-1">
                   = {fmtDollars(Math.round((parseFloat(monthlyRevenueGoal) / 22) * 100))}/day
                 </p>
               )}
@@ -1155,7 +1196,7 @@ function KpiTrackerContent() {
 
           {/* Working days */}
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Working Days</label>
+            <label className="text-xs font-bold text-gray-500 tracking-wide mb-2 block">Working Days</label>
             <div className="flex gap-2">
               {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, i) => (
                 <button

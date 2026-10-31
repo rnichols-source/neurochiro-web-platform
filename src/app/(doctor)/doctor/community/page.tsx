@@ -16,7 +16,7 @@ const ANNOUNCEMENTS: { date: string; title: string; body: string; link?: string;
 const TYPE_CONFIG = {
   announcement: { icon: Megaphone, color: "text-neuro-orange", bg: "bg-neuro-orange/10", label: "Announcement" },
   spotlight: { icon: Star, color: "text-yellow-400", bg: "bg-yellow-400/10", label: "Member Spotlight" },
-  event: { icon: Calendar, color: "text-blue-400", bg: "bg-blue-400/10", label: "Event" },
+  event: { icon: Calendar, color: "text-blue-400", bg: "bg-portal-info-bg", label: "Event" },
 };
 
 export default function CommunityPage() {
@@ -24,7 +24,7 @@ export default function CommunityPage() {
     <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Community</p>
+        <p className="text-xs tracking-[0.2em] text-neuro-orange font-semibold mb-1">Community</p>
         <h1 className="text-2xl font-bold text-white">Network Feed</h1>
         <p className="text-white/40 text-sm mt-1">Announcements, member spotlights, and updates from Dr. Ray.</p>
       </div>
@@ -57,8 +57,8 @@ export default function CommunityPage() {
                     <config.icon className={`w-4 h-4 ${config.color}`} />
                   </div>
                   <div>
-                    <span className={`text-[10px] font-black uppercase tracking-[0.15em] ${config.color}`}>{config.label}</span>
-                    <p className="text-[11px] text-white/25">{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    <span className={`text-xs font-bold tracking-[0.15em] ${config.color}`}>{config.label}</span>
+                    <p className="text-xs text-white/25">{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">{post.title}</h3>
@@ -81,7 +81,7 @@ export default function CommunityPage() {
 
       {/* Coming Soon */}
       <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-6 text-center">
-        <p className="text-white/20 text-xs font-bold uppercase tracking-widest mb-2">Coming Soon</p>
+        <p className="text-white/20 text-xs font-bold tracking-widest mb-2">Coming Soon</p>
         <p className="text-white/40 text-sm">Member wins, discussion threads, and peer networking. This space will grow as the community grows.</p>
       </div>
     </div>

@@ -45,7 +45,7 @@ export async function getSeminarAnalytics() {
   const currentYear = new Date().getFullYear()
   const startOfYear = `${currentYear}-01-01T00:00:00Z`
   
-  const { data: registrations, error: regError } = await supabase
+  const { data: registrations } = await supabase
     .from('seminar_registrations')
     .select('amount_paid, seminar_id, seminar:seminars(host_id)')
     .eq('payment_status', 'paid')
@@ -54,31 +54,9 @@ export async function getSeminarAnalytics() {
   const userRegistrations = (registrations || []).filter((r: any) => r.seminar?.host_id === user.id)
   const grossRevenue = userRegistrations.reduce((sum: number, r: any) => sum + (Number(r.amount_paid) || 0), 0)
 
-  // 2. Get Clinical Authority Index
-  // Formula: (Num Published Seminars * 25) + (Avg Rating * 50) + (Total Attendees * 10)
-  const { data: seminars, error: semError } = await supabase
-    .from('seminars')
-    .select('id')
-    .eq('host_id', user.id)
-    .eq('is_approved', true)
-
-  const { data: doctor, error: docError } = await supabase
-    .from('doctors')
-    .select('rating')
-    .eq('user_id', user.id)
-    .single()
-
-  const numSeminars = seminars?.length || 0
-  const avgRating = doctor?.rating || 5.0
-  const totalAttendees = userRegistrations.length
-  
-  const authorityIndex = Math.round((numSeminars * 25) + (avgRating * 50) + (totalAttendees * 10))
-
   return {
     grossRevenue,
-    authorityIndex,
-    avgRating,
-    totalAttendees
+    totalAttendees: userRegistrations.length,
   }
 }
 
@@ -273,7 +251,7 @@ export async function createSeminarAction(formData: FormData) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: `📢 **SEMINAR SUBMITTED**\n\n**Title:** ${title}\n**Host:** Dr. ${user.email?.split('@')[0] || 'Unknown'}\n**Location:** ${location}\n**Date:** ${dates}\n**Status:** Submitted for review`,
+          content: ` **SEMINAR SUBMITTED**\n\n**Title:** ${title}\n**Host:** Dr. ${user.email?.split('@')[0] || 'Unknown'}\n**Location:** ${location}\n**Date:** ${dates}\n**Status:** Submitted for review`,
         }),
       }).catch(() => {});
     }

@@ -281,6 +281,20 @@ function CarePlanContent() {
     if (state.currentStep > 1) goToStep(state.currentStep - 1);
   };
 
+  const templateActive =
+    state.phases.length === DEFAULT_PHASES.length &&
+    state.phases.every((phase, index) => phase.name === DEFAULT_PHASES[index]?.name) &&
+    state.supplements.length === DEFAULT_SUPPLEMENTS.length &&
+    state.supplements.every((item, index) => item.name === DEFAULT_SUPPLEMENTS[index]?.name);
+
+  const startBlank = () => {
+    setState((prev) => ({
+      ...prev,
+      phases: [{ id: uid(), name: "", visitsPerWeek: 1, weeks: 1 }],
+      supplements: [],
+    }));
+  };
+
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
     saveToolData('care_plan', null).catch(() => {});
@@ -500,11 +514,11 @@ function CarePlanContent() {
       {/* Left: Inputs */}
       <div className="space-y-5">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+          <h3 className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2">
             <Stethoscope className="w-4 h-4 text-neuro-orange" /> Patient Information
           </h3>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Patient Name *</label>
+            <label className="text-xs font-bold text-gray-500 tracking-wide">Patient Name *</label>
             <input
               type="text"
               value={state.patientName}
@@ -514,7 +528,7 @@ function CarePlanContent() {
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Date</label>
+            <label className="text-xs font-bold text-gray-500 tracking-wide">Date</label>
             <input
               type="date"
               value={state.date}
@@ -524,7 +538,7 @@ function CarePlanContent() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Doctor Name</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Doctor Name</label>
               <input
                 type="text"
                 value={state.doctorName}
@@ -533,7 +547,7 @@ function CarePlanContent() {
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Practice Name</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Practice Name</label>
               <input
                 type="text"
                 value={state.practiceName}
@@ -550,7 +564,7 @@ function CarePlanContent() {
             onClick={() => set("useScoring", !state.useScoring)}
             className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
           >
-            <span className="text-sm font-black text-neuro-navy uppercase tracking-wide">
+            <span className="text-sm font-bold text-neuro-navy tracking-wide">
               Use Dysfunction Scoring
             </span>
             {state.useScoring ? (
@@ -569,7 +583,7 @@ function CarePlanContent() {
                       type="text"
                       value={cat.name}
                       onChange={(e) => renameCategory(cat.id, e.target.value)}
-                      className="text-xs font-bold text-gray-600 uppercase tracking-wide bg-transparent border-b border-transparent focus:border-neuro-orange focus:outline-none"
+                      className="text-xs font-bold text-gray-600 tracking-wide bg-transparent border-b border-transparent focus:border-neuro-orange focus:outline-none"
                     />
                     {state.scoringCategories.length > 1 && (
                       <button
@@ -610,8 +624,8 @@ function CarePlanContent() {
                   className="rounded-xl p-5 text-center text-white"
                   style={{ backgroundColor: scoreColor(avgScore) }}
                 >
-                  <p className="text-xs uppercase tracking-wide opacity-70 mb-1">Average Score</p>
-                  <p className="text-4xl font-black">{avgScore.toFixed(1)}</p>
+                  <p className="text-xs tracking-wide opacity-70 mb-1">Average Score</p>
+                  <p className="text-4xl font-bold">{avgScore.toFixed(1)}</p>
                   <p className="text-sm mt-2 opacity-80">{getScoreRecommendation(avgScore)}</p>
                 </div>
               )}
@@ -623,8 +637,8 @@ function CarePlanContent() {
       {/* Right: Live Preview */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
         <div className="bg-neuro-navy p-6">
-          <p className="text-xs text-white/50 uppercase tracking-wide font-bold">Live Preview</p>
-          <h2 className="text-xl font-heading font-black text-white mt-2">
+          <p className="text-xs text-white/50 tracking-wide font-bold">Live Preview</p>
+          <h2 className="text-xl font-heading font-bold text-white mt-2">
             {state.patientName || "Patient Name"}
           </h2>
           <p className="text-white/60 text-sm mt-1">
@@ -634,12 +648,12 @@ function CarePlanContent() {
         </div>
         {state.useScoring && avgScore > 0 && (
           <div className="p-6 border-b border-gray-100">
-            <h4 className="text-xs font-black text-gray-400 uppercase tracking-wide mb-3">
+            <h4 className="text-xs font-bold text-gray-400 tracking-wide mb-3">
               Dysfunction Score
             </h4>
             <div className="flex items-center gap-4">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center text-white font-black text-2xl"
+                className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl"
                 style={{ backgroundColor: scoreColor(avgScore) }}
               >
                 {avgScore.toFixed(1)}
@@ -688,7 +702,7 @@ function CarePlanContent() {
       <div className="space-y-5">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide">Per-Visit Fee</h3>
+            <h3 className="text-sm font-bold text-neuro-navy tracking-wide">Per-Visit Fee</h3>
           </div>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
@@ -702,7 +716,15 @@ function CarePlanContent() {
         </div>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide mb-4">Care Phases</h3>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <h3 className="text-sm font-bold text-neuro-navy">Care Phases</h3>
+            {templateActive ? (
+              <span className="inline-flex items-center min-h-11 px-3 rounded-full bg-portal-warning-bg text-sm font-bold text-portal-ink">Template: edit to match your practice</span>
+            ) : null}
+            {templateActive ? (
+              <button type="button" onClick={startBlank} className="min-h-11 px-3 rounded-lg bg-white border border-portal-border text-sm font-bold">Start blank</button>
+            ) : null}
+          </div>
           <div className="space-y-3">
             {state.phases.map((phase, i) => {
               const phaseVisits = phase.visitsPerWeek * phase.weeks;
@@ -731,7 +753,7 @@ function CarePlanContent() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Visits/Week</label>
+                      <label className="text-xs font-bold text-gray-400 uppercase">Visits/Week</label>
                       <input
                         type="number"
                         min={1}
@@ -744,7 +766,7 @@ function CarePlanContent() {
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] font-bold text-gray-400 uppercase">Weeks</label>
+                      <label className="text-xs font-bold text-gray-400 uppercase">Weeks</label>
                       <input
                         type="number"
                         min={1}
@@ -779,7 +801,7 @@ function CarePlanContent() {
             onClick={() => set("showAdvanced", !state.showAdvanced)}
             className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
           >
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+            <span className="text-xs font-bold text-gray-400 tracking-wide">
               Advanced Options
             </span>
             {state.showAdvanced ? (
@@ -791,7 +813,7 @@ function CarePlanContent() {
           {state.showAdvanced && (
             <div className="px-5 pb-5 space-y-4">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                <label className="text-xs font-bold text-gray-500 tracking-wide">
                   Care Plan Discount %
                 </label>
                 <input
@@ -804,7 +826,7 @@ function CarePlanContent() {
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                <label className="text-xs font-bold text-gray-500 tracking-wide">
                   Notes to Patient
                 </label>
                 <textarea
@@ -823,7 +845,7 @@ function CarePlanContent() {
       {/* Right: Live Preview */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
         <div className="p-6 border-b border-gray-100">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-wide mb-4">
+          <h3 className="text-xs font-bold text-gray-400 tracking-wide mb-4">
             Care Journey Timeline
           </h3>
           <TimelineBar />
@@ -836,7 +858,7 @@ function CarePlanContent() {
             return (
               <div key={phase.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                   style={{ backgroundColor: PHASE_COLORS[i % PHASE_COLORS.length] }}
                 >
                   {i + 1}
@@ -848,7 +870,7 @@ function CarePlanContent() {
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="font-black text-neuro-navy text-sm">{pv} visits</p>
+                  <p className="font-bold text-neuro-navy text-sm">{pv} visits</p>
                   <p className="text-gray-400 text-xs">${fmt(pc)}</p>
                 </div>
               </div>
@@ -859,17 +881,17 @@ function CarePlanContent() {
         <div className="px-6 pb-6 space-y-2 border-t border-gray-100 pt-4">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Total Visits</span>
-            <span className="font-black text-neuro-navy">{totalVisits}</span>
+            <span className="font-bold text-neuro-navy">{totalVisits}</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Duration</span>
-            <span className="font-black text-neuro-navy">
+            <span className="font-bold text-neuro-navy">
               {totalWeeks} weeks / {totalMonths} months
             </span>
           </div>
           <div className="flex justify-between text-sm pt-2 border-t border-gray-100">
             <span className="font-bold text-neuro-navy">Total Investment</span>
-            <span className="text-xl font-black text-neuro-navy">${fmt(netTotal)}</span>
+            <span className="text-xl font-bold text-neuro-navy">${fmt(netTotal)}</span>
           </div>
           {state.discount > 0 && (
             <p className="text-xs text-green-600 font-bold text-right">
@@ -880,31 +902,31 @@ function CarePlanContent() {
 
         {/* Payment Options Preview */}
         <div className="px-6 pb-6 space-y-3">
-          <h4 className="text-xs font-black text-gray-400 uppercase tracking-wide">Payment Options</h4>
+          <h4 className="text-xs font-bold text-gray-400 tracking-wide">Payment Options</h4>
           <div className="grid grid-cols-3 gap-2">
             <div className="border-2 border-neuro-orange rounded-xl p-3 relative">
-              <span className="absolute -top-2 left-2 bg-neuro-orange text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+              <span className="absolute -top-2 left-2 bg-neuro-orange text-white text-xs font-bold px-2 py-0.5 rounded-full">
                 Best Value
               </span>
-              <p className="text-[10px] font-bold text-neuro-navy mt-1">Pay in Full</p>
-              <p className="text-lg font-black text-neuro-navy">${fmt(pifTotal)}</p>
-              <p className="text-[10px] text-green-600 font-bold">Save ${fmt(pifDiscount)}</p>
+              <p className="text-xs font-bold text-neuro-navy mt-1">Pay in Full</p>
+              <p className="text-lg font-bold text-neuro-navy">${fmt(pifTotal)}</p>
+              <p className="text-xs text-green-600 font-bold">Save ${fmt(pifDiscount)}</p>
             </div>
             <div className="border border-gray-200 rounded-xl p-3">
-              <p className="text-[10px] font-bold text-neuro-navy">Monthly</p>
-              <p className="text-lg font-black text-neuro-navy">
+              <p className="text-xs font-bold text-neuro-navy">Monthly</p>
+              <p className="text-lg font-bold text-neuro-navy">
                 ${fmt(monthlyPayment)}
-                <span className="text-[10px] text-gray-400 font-normal">/ea</span>
+                <span className="text-xs text-gray-400 font-normal">/ea</span>
               </p>
-              <p className="text-[10px] text-gray-400">{totalMonths} payments</p>
+              <p className="text-xs text-gray-400">{totalMonths} payments</p>
             </div>
             <div className="border border-gray-200 rounded-xl p-3">
-              <p className="text-[10px] font-bold text-neuro-navy">Bi-Weekly</p>
-              <p className="text-lg font-black text-neuro-navy">
+              <p className="text-xs font-bold text-neuro-navy">Bi-Weekly</p>
+              <p className="text-lg font-bold text-neuro-navy">
                 ${fmt(biWeeklyPayment)}
-                <span className="text-[10px] text-gray-400 font-normal">/2wk</span>
+                <span className="text-xs text-gray-400 font-normal">/2wk</span>
               </p>
-              <p className="text-[10px] text-gray-400">{biWeeklyPeriods} payments</p>
+              <p className="text-xs text-gray-400">{biWeeklyPeriods} payments</p>
             </div>
           </div>
         </div>
@@ -924,8 +946,9 @@ function CarePlanContent() {
           onClick={() => set("useSupplements", !state.useSupplements)}
           className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
         >
-          <span className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+          <span className="text-sm font-bold text-neuro-navy flex items-center gap-2">
             <Pill className="w-4 h-4 text-neuro-orange" /> Supplement Recommendations
+            {templateActive ? <span className="font-bold text-portal-ink-2">Template: edit to match your practice</span> : null}
           </span>
           <div
             className={`w-11 h-6 rounded-full relative transition-colors ${
@@ -1021,7 +1044,7 @@ function CarePlanContent() {
           onClick={() => set("useLifestyle", !state.useLifestyle)}
           className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
         >
-          <span className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+          <span className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2">
             <ClipboardList className="w-4 h-4 text-neuro-orange" /> Lifestyle Recommendations
           </span>
           <div
@@ -1121,12 +1144,12 @@ function CarePlanContent() {
       <div ref={printRef} className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Report Header */}
         <div className="print-header bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
-          <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">
+          <p className="text-white/50 text-xs font-bold tracking-[0.2em]">
             {state.practiceName}
           </p>
-          <h1 className="font-heading text-2xl sm:text-3xl font-black text-white mt-2">
+          <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white mt-2">
             {state.patientName || "Patient"}
-          </h1>
+          </h2>
           <div className="flex items-center gap-3 mt-2">
             <span className="text-white/60 text-sm">Personalized Care Plan</span>
             <span className="text-white/30">|</span>
@@ -1142,7 +1165,7 @@ function CarePlanContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
                 <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-neuro-orange tracking-widest">
                   Your Assessment
                 </h3>
               </div>
@@ -1151,8 +1174,8 @@ function CarePlanContent() {
                   className="w-24 h-24 rounded-2xl flex flex-col items-center justify-center text-white flex-shrink-0"
                   style={{ backgroundColor: scoreColor(avgScore) }}
                 >
-                  <span className="text-3xl font-black">{avgScore.toFixed(1)}</span>
-                  <span className="text-[10px] uppercase tracking-wide opacity-80">Score</span>
+                  <span className="text-3xl font-bold">{avgScore.toFixed(1)}</span>
+                  <span className="text-xs tracking-wide opacity-80">Score</span>
                 </div>
                 <div className="flex-1 space-y-2">
                   {scoredCategories.map((cat) => (
@@ -1182,7 +1205,7 @@ function CarePlanContent() {
           <section>
             <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
               <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-              <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <h3 className="text-xs font-bold text-neuro-orange tracking-widest">
                 Your Care Journey
               </h3>
             </div>
@@ -1200,12 +1223,12 @@ function CarePlanContent() {
                     style={{ borderColor: PHASE_COLORS[i % PHASE_COLORS.length] + "40" }}
                   >
                     <p
-                      className="text-xs font-black uppercase tracking-wide mb-1"
+                      className="text-xs font-bold tracking-wide mb-1"
                       style={{ color: PHASE_COLORS[i % PHASE_COLORS.length] }}
                     >
                       {phase.name}
                     </p>
-                    <p className="font-heading text-xl font-black text-neuro-navy">{pv} visits</p>
+                    <p className="font-heading text-xl font-bold text-neuro-navy">{pv} visits</p>
                     <p className="text-xs text-gray-500">
                       {phase.visitsPerWeek}x/week &middot; {phase.weeks} weeks
                     </p>
@@ -1228,7 +1251,7 @@ function CarePlanContent() {
               </div>
               <div className="flex justify-between text-base pt-2 border-t border-gray-200">
                 <span className="font-bold text-neuro-navy">Total Investment</span>
-                <span className="text-xl font-black text-neuro-navy">${fmt(netTotal)}</span>
+                <span className="text-xl font-bold text-neuro-navy">${fmt(netTotal)}</span>
               </div>
             </div>
           </section>
@@ -1237,7 +1260,7 @@ function CarePlanContent() {
           <section>
             <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
               <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-              <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+              <h3 className="text-xs font-bold text-neuro-orange tracking-widest">
                 Your Investment
               </h3>
             </div>
@@ -1266,24 +1289,24 @@ function CarePlanContent() {
                 </div>
               )}
               <div className="flex justify-between text-base pt-2 border-t-2 border-neuro-navy">
-                <span className="font-black text-neuro-navy">Grand Total</span>
-                <span className="text-xl font-black text-neuro-navy">${fmt(grandTotal)}</span>
+                <span className="font-bold text-neuro-navy">Grand Total</span>
+                <span className="text-xl font-bold text-neuro-navy">${fmt(grandTotal)}</span>
               </div>
             </div>
 
             {/* Payment Option Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="border-2 border-neuro-orange rounded-xl p-4 relative bg-neuro-orange/5">
-                <span className="absolute -top-2.5 left-3 bg-neuro-orange text-white text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                <span className="absolute -top-2.5 left-3 bg-neuro-orange text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
                   Best Value
                 </span>
                 <p className="font-bold text-neuro-navy text-sm mt-1">Pay in Full</p>
-                <p className="text-2xl font-black text-neuro-navy mt-1">${fmt(pifTotal)}</p>
+                <p className="text-2xl font-bold text-neuro-navy mt-1">${fmt(pifTotal)}</p>
                 <p className="text-xs text-green-600 font-bold mt-1">Save ${fmt(pifDiscount)}</p>
               </div>
               <div className="border border-gray-200 rounded-xl p-4">
                 <p className="font-bold text-neuro-navy text-sm">Monthly</p>
-                <p className="text-2xl font-black text-neuro-navy mt-1">
+                <p className="text-2xl font-bold text-neuro-navy mt-1">
                   ${fmt(monthlyPayment)}
                   <span className="text-xs text-gray-400 font-normal">/ea</span>
                 </p>
@@ -1291,7 +1314,7 @@ function CarePlanContent() {
               </div>
               <div className="border border-gray-200 rounded-xl p-4">
                 <p className="font-bold text-neuro-navy text-sm">Bi-Weekly</p>
-                <p className="text-2xl font-black text-neuro-navy mt-1">
+                <p className="text-2xl font-bold text-neuro-navy mt-1">
                   ${fmt(biWeeklyPayment)}
                   <span className="text-xs text-gray-400 font-normal">/2wk</span>
                 </p>
@@ -1308,7 +1331,7 @@ function CarePlanContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
                 <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-neuro-orange tracking-widest">
                   Recommendations
                 </h3>
               </div>
@@ -1363,7 +1386,7 @@ function CarePlanContent() {
             <section>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-neuro-orange/30">
                 <div className="w-2 h-2 rounded-full bg-neuro-orange" />
-                <h3 className="text-xs font-black text-neuro-orange uppercase tracking-widest">
+                <h3 className="text-xs font-bold text-neuro-orange tracking-widest">
                   Doctor&apos;s Notes
                 </h3>
               </div>
@@ -1383,15 +1406,15 @@ function CarePlanContent() {
             <div className="grid grid-cols-2 gap-8">
               <div>
                 <div className="sig-line border-b-2 border-neuro-navy h-8" />
-                <p className="text-[10px] text-gray-400 mt-1">Patient Signature</p>
+                <p className="text-xs text-gray-400 mt-1">Patient Signature</p>
                 <div className="border-b border-gray-300 h-6 mt-4" />
-                <p className="text-[10px] text-gray-400 mt-1">Print Name</p>
+                <p className="text-xs text-gray-400 mt-1">Print Name</p>
               </div>
               <div>
                 <div className="sig-line border-b-2 border-neuro-navy h-8" />
-                <p className="text-[10px] text-gray-400 mt-1">Date</p>
+                <p className="text-xs text-gray-400 mt-1">Date</p>
                 <div className="border-b border-gray-300 h-6 mt-4" />
-                <p className="text-[10px] text-gray-400 mt-1">Doctor Signature / Date</p>
+                <p className="text-xs text-gray-400 mt-1">Doctor Signature / Date</p>
               </div>
             </div>
           </section>
@@ -1401,7 +1424,7 @@ function CarePlanContent() {
           <p className="text-center text-xs text-gray-400 italic mb-1">
             Your care plan is designed around your specific needs. Consistency is key to lasting correction.
           </p>
-          <div className="flex justify-between text-[10px] text-gray-300">
+          <div className="flex justify-between text-xs text-gray-300">
             <span>{state.practiceName}</span>
             <span>{state.doctorName}</span>
             <span>{state.date}</span>
@@ -1479,7 +1502,7 @@ function CarePlanContent() {
       {/* Page Header */}
       <div className="no-print flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
+          <h1 className="text-2xl font-heading font-bold text-neuro-navy flex items-center gap-3">
             <ClipboardList className="w-7 h-7 text-neuro-orange" /> Care Plan Builder
           </h1>
           <p className="text-gray-500 text-sm mt-1">

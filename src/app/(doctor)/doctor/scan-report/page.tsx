@@ -16,38 +16,40 @@ import {
   Check,
   FileText,
   Clock,
-  Search,
   X,
-  ClipboardList,
+  Info,
 } from "lucide-react";
-import { saveReport, getReportHistory, getReport, getReportCount } from "./actions";
+import { saveReport, getReportHistory, getReport } from "./actions";
+import { getPortalShellData } from "../portal-actions";
+import PageHeader from "@/components/portal/PageHeader";
+import ExampleBanner from "@/components/portal/ExampleBanner";
 
 /* ─── Types ─── */
 
 interface FormData {
   patientFirstName: string;
-  patientAge: number;
+  patientAge: number | null;
   scanDate: string;
   scanType: "Initial Scan" | "Progress Scan" | "Re-Evaluation" | "Wellness Check";
   doctorName: string;
   practiceName: string;
-  semgPattern: "Symmetric/Normal" | "Mild Asymmetry" | "Moderate Asymmetry" | "Severe Asymmetry";
+  semgPattern: string;
   semgRegion: string;
-  semgEnergy: "Normal" | "Moderate Exhaustion" | "Significant Exhaustion";
+  semgEnergy: string;
   semgNotes: string;
-  thermoPattern: "Balanced" | "Mild Imbalance" | "Moderate Imbalance" | "Significant Imbalance";
+  thermoPattern: string;
   thermoRegion: string;
-  thermoMaxDiff: number;
-  thermoConsistency: "First scan" | "Improving" | "Stable" | "Worsening";
-  hrvSDNN: number;
-  hrvLFHF: number;
-  hrvRMSSD: number;
-  hrvTotalPower: number;
-  prevSDNN: number;
+  thermoMaxDiff: number | null;
+  thermoConsistency: string;
+  hrvSDNN: number | null;
+  hrvLFHF: number | null;
+  hrvRMSSD: number | null;
+  hrvTotalPower: number | null;
+  prevSDNN: number | null;
   prevSemgPattern: string;
-  prevThermoDiff: number;
-  visitsCompleted: number;
-  weeksInCare: number;
+  prevThermoDiff: number | null;
+  visitsCompleted: number | null;
+  weeksInCare: number | null;
   editSummary: string;
   doctorNotes: string;
   showProgress: boolean;
@@ -122,56 +124,142 @@ const todayStr = () => {
 
 const LS_KEY = "neurochiro-scan-report";
 
-const DEFAULT_FORM: FormData = {
-  patientFirstName: "",
-  patientAge: 35,
-  scanDate: todayStr(),
-  scanType: "Initial Scan",
-  doctorName: "[DOCTOR NAME]",
-  practiceName: "[PRACTICE NAME]",
-  semgPattern: "Symmetric/Normal",
-  semgRegion: "Upper Cervical (C1-C2)",
-  semgEnergy: "Normal",
-  semgNotes: "",
-  thermoPattern: "Balanced",
-  thermoRegion: "Upper Cervical (C1-C2)",
-  thermoMaxDiff: 0.5,
-  thermoConsistency: "First scan",
-  hrvSDNN: 55,
-  hrvLFHF: 1.5,
-  hrvRMSSD: 35,
-  hrvTotalPower: 1200,
-  prevSDNN: 0,
-  prevSemgPattern: "Symmetric/Normal",
-  prevThermoDiff: 0,
-  visitsCompleted: 12,
-  weeksInCare: 6,
-  editSummary: "",
-  doctorNotes: "",
-  showProgress: true,
-  showNotes: true,
-  currentStep: 1,
-};
+const TERM_HELP = {
+  sEMG: "Surface EMG reads muscle activity along the spine. A typical side-to-side difference at rest is under about 30 percent, and devices differ.",
+  Thermography: "Thermography compares skin temperature on each side of the spine. A typical difference is under about 0.5°C.",
+  HRV: "Heart rate variability is the beat-to-beat change in heart timing. Many adult short recordings fall around 50–100 ms SDNN.",
+  SDNN: "SDNN is the standard deviation of the time between heartbeats. A typical resting range is about 50–100 ms.",
+  RMSSD: "RMSSD summarizes successive differences between heartbeats. A typical resting range is about 20–50 ms.",
+  "LF/HF": "LF/HF compares two frequency bands of heart-rate variation. A typical resting ratio is about 0.5–2.0.",
+  "Total Power": "Total power is the combined size of those heart-rate frequency bands. A typical short recording is about 1,000–3,000 ms², and devices differ.",
+} as const;
+
+function TermInfo({ term }: { term: keyof typeof TERM_HELP }) {
+  return (
+    <button type="button" className="no-print min-h-11 min-w-11 inline-flex items-center justify-center text-portal-muted" aria-label={TERM_HELP[term]} title={TERM_HELP[term]}>
+      <Info className="w-4 h-4" aria-hidden />
+    </button>
+  );
+}
+
+function optionalNumber(raw: string): number | null {
+  if (raw.trim() === "") return null;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : null;
+}
+
+function blankForm(doctorName = "", practiceName = ""): FormData {
+  return {
+    patientFirstName: "",
+    patientAge: null,
+    scanDate: todayStr(),
+    scanType: "Initial Scan",
+    doctorName,
+    practiceName,
+    semgPattern: "",
+    semgRegion: "",
+    semgEnergy: "",
+    semgNotes: "",
+    thermoPattern: "",
+    thermoRegion: "",
+    thermoMaxDiff: null,
+    thermoConsistency: "",
+    hrvSDNN: null,
+    hrvLFHF: null,
+    hrvRMSSD: null,
+    hrvTotalPower: null,
+    prevSDNN: null,
+    prevSemgPattern: "",
+    prevThermoDiff: null,
+    visitsCompleted: null,
+    weeksInCare: null,
+    editSummary: "",
+    doctorNotes: "",
+    showProgress: false,
+    showNotes: false,
+    currentStep: 1,
+  };
+}
+
+function exampleForm(doctorName = "", practiceName = ""): FormData {
+  return {
+    patientFirstName: "",
+    patientAge: 35,
+    scanDate: todayStr(),
+    scanType: "Initial Scan",
+    doctorName,
+    practiceName,
+    semgPattern: "Symmetric/Normal",
+    semgRegion: "Upper Cervical (C1-C2)",
+    semgEnergy: "Normal",
+    semgNotes: "",
+    thermoPattern: "Balanced",
+    thermoRegion: "Upper Cervical (C1-C2)",
+    thermoMaxDiff: 0.5,
+    thermoConsistency: "First scan",
+    hrvSDNN: 55,
+    hrvLFHF: 1.5,
+    hrvRMSSD: 35,
+    hrvTotalPower: 1200,
+    prevSDNN: 0,
+    prevSemgPattern: "Symmetric/Normal",
+    prevThermoDiff: 0,
+    visitsCompleted: 12,
+    weeksInCare: 6,
+    editSummary: "",
+    doctorNotes: "",
+    showProgress: true,
+    showNotes: true,
+    currentStep: 1,
+  };
+}
+
+function isSeededSample(data: Partial<FormData>): boolean {
+  const doctor = String(data.doctorName || "");
+  const practice = String(data.practiceName || "");
+  return (
+    !String(data.patientFirstName || "").trim() &&
+    (doctor.includes("[DOCTOR NAME]") || practice.includes("[PRACTICE NAME]")) &&
+    data.patientAge === 35 &&
+    data.hrvSDNN === 55 &&
+    data.visitsCompleted === 12
+  );
+}
+
+function cleanPracticeField(value: unknown, fallback: string): string {
+  const text = String(value || "").trim();
+  if (!text || text.includes("[DOCTOR NAME]") || text.includes("[PRACTICE NAME]")) return fallback;
+  return text;
+}
 
 const STEP_LABELS = ["1. Scan Data", "2. Preview & Edit", "3. Final & Print"];
 
 /* ─── Score Calculation ─── */
 
-function calcScores(fd: FormData) {
+type Scores = { total: number; semgScore: number; thermoScore: number; hrvScore: number; label: string; color: string };
+
+function scoreReady(fd: FormData): boolean {
+  return Boolean(fd.semgPattern) && Boolean(fd.thermoPattern) && fd.thermoMaxDiff != null && fd.hrvSDNN != null;
+}
+
+function calcScores(fd: FormData): Scores | null {
+  if (!scoreReady(fd)) return null;
   const semgMap: Record<string, number> = { "Symmetric/Normal": 35, "Mild Asymmetry": 25, "Moderate Asymmetry": 15, "Severe Asymmetry": 5 };
   const thermoMap: Record<string, number> = { "Balanced": 35, "Mild Imbalance": 25, "Moderate Imbalance": 15, "Significant Imbalance": 5 };
+  const diff = fd.thermoMaxDiff ?? 0;
+  const sdnn = fd.hrvSDNN ?? 0;
 
   const semgScore = semgMap[fd.semgPattern] ?? 15;
   let thermoScore = thermoMap[fd.thermoPattern] ?? 15;
-  if (fd.thermoMaxDiff > 2.0) thermoScore -= 5;
-  else if (fd.thermoMaxDiff > 1.5) thermoScore -= 3;
+  if (diff > 2.0) thermoScore -= 5;
+  else if (diff > 1.5) thermoScore -= 3;
   thermoScore = Math.max(0, thermoScore);
 
   let hrvScore = 3;
-  if (fd.hrvSDNN >= 80) hrvScore = 30;
-  else if (fd.hrvSDNN >= 60) hrvScore = 25;
-  else if (fd.hrvSDNN >= 40) hrvScore = 18;
-  else if (fd.hrvSDNN >= 20) hrvScore = 10;
+  if (sdnn >= 80) hrvScore = 30;
+  else if (sdnn >= 60) hrvScore = 25;
+  else if (sdnn >= 40) hrvScore = 18;
+  else if (sdnn >= 20) hrvScore = 10;
 
   const total = Math.min(100, semgScore + thermoScore + hrvScore);
 
@@ -188,25 +276,27 @@ function calcScores(fd: FormData) {
 
 function calcPrevScore(fd: FormData): number | null {
   if (fd.scanType !== "Progress Scan" && fd.scanType !== "Re-Evaluation") return null;
-  if (!fd.prevSDNN && !fd.prevSemgPattern && !fd.prevThermoDiff) return null;
+  if (!fd.prevSDNN && !fd.prevSemgPattern && fd.prevThermoDiff == null) return null;
   const semgMap: Record<string, number> = { "Symmetric/Normal": 35, "Mild Asymmetry": 25, "Moderate Asymmetry": 15, "Severe Asymmetry": 5 };
+  const prevDiff = fd.prevThermoDiff ?? 0;
+  const prevSdnn = fd.prevSDNN ?? 0;
   const prevSemg = semgMap[fd.prevSemgPattern] ?? 15;
-  let prevThermo = fd.prevThermoDiff <= 0.3 ? 35 : fd.prevThermoDiff <= 0.7 ? 25 : fd.prevThermoDiff <= 1.2 ? 15 : 5;
-  if (fd.prevThermoDiff > 2.0) prevThermo -= 5;
-  else if (fd.prevThermoDiff > 1.5) prevThermo -= 3;
+  let prevThermo = prevDiff <= 0.3 ? 35 : prevDiff <= 0.7 ? 25 : prevDiff <= 1.2 ? 15 : 5;
+  if (prevDiff > 2.0) prevThermo -= 5;
+  else if (prevDiff > 1.5) prevThermo -= 3;
   prevThermo = Math.max(0, prevThermo);
   let prevHrv = 3;
-  if (fd.prevSDNN >= 80) prevHrv = 30;
-  else if (fd.prevSDNN >= 60) prevHrv = 25;
-  else if (fd.prevSDNN >= 40) prevHrv = 18;
-  else if (fd.prevSDNN >= 20) prevHrv = 10;
+  if (prevSdnn >= 80) prevHrv = 30;
+  else if (prevSdnn >= 60) prevHrv = 25;
+  else if (prevSdnn >= 40) prevHrv = 18;
+  else if (prevSdnn >= 20) prevHrv = 10;
   return Math.min(100, prevSemg + prevThermo + prevHrv);
 }
 
 /* ─── Summary Generation ─── */
 
-function generateSummary(fd: FormData, scores: ReturnType<typeof calcScores>): string {
-  const age = fd.patientAge;
+function generateSummary(fd: FormData, scores: Scores): string {
+  const age = fd.patientAge ?? 0;
   const prefix = age <= 12 ? "Your child's" : "Your";
   const symptoms = REGION_SYMPTOMS[fd.semgRegion] || "various symptoms";
 
@@ -224,9 +314,10 @@ function generateSummary(fd: FormData, scores: ReturnType<typeof calcScores>): s
   else semgDesc = `There is a significant imbalance in muscle activity around the ${fd.semgRegion.toLowerCase()} area, strongly associated with ${symptoms}.`;
 
   let hrvDesc = "";
-  if (fd.hrvSDNN >= 80) hrvDesc = "Your heart rate variability shows excellent adaptability and resilience.";
-  else if (fd.hrvSDNN >= 60) hrvDesc = "Your heart rate variability is in a good range, showing healthy nervous system adaptability.";
-  else if (fd.hrvSDNN >= 40) hrvDesc = "Your heart rate variability indicates your body is working harder than normal to adapt to daily stressors.";
+  const sdnn = fd.hrvSDNN ?? 0;
+  if (sdnn >= 80) hrvDesc = "Your heart rate variability shows excellent adaptability and resilience.";
+  else if (sdnn >= 60) hrvDesc = "Your heart rate variability is in a good range, showing healthy nervous system adaptability.";
+  else if (sdnn >= 40) hrvDesc = "Your heart rate variability indicates your body is working harder than normal to adapt to daily stressors.";
   else hrvDesc = "Your heart rate variability is low, indicating significant stress on your nervous system's ability to adapt.";
 
   let ageNote = "";
@@ -312,7 +403,8 @@ function SpineDiagram({ region, severity }: { region: string; severity: string }
   );
 }
 
-function SDNNBar({ value }: { value: number }) {
+function SDNNBar({ value }: { value: number | null }) {
+  if (value == null) return <p className="text-sm text-portal-ink-2">Enter SDNN to see the zones.</p>;
   // Zones: Critical <20, Low 20-40, Below Avg 40-60, Normal 60-80, Optimal 80+
   // Map to 0-100% width: each zone = 20%
   const zones = [
@@ -332,7 +424,7 @@ function SDNNBar({ value }: { value: number }) {
       <div className="relative h-6 rounded-full overflow-hidden flex">
         {zones.map((z) => (
           <div key={z.label} className="h-full flex items-center justify-center" style={{ width: `${((z.max - z.min) / 120) * 100}%`, backgroundColor: z.color }}>
-            <span className="text-[8px] text-white font-bold">{z.label}</span>
+            <span className="text-xs text-white font-bold">{z.label}</span>
           </div>
         ))}
       </div>
@@ -356,48 +448,63 @@ export default function ScanReportGenerator() {
 }
 
 function ScanReportContent() {
-  const [state, setState] = useState<FormData>(DEFAULT_FORM);
+  const [state, setState] = useState<FormData>(() => blankForm());
   const [loaded, setLoaded] = useState(false);
+  const [showingExample, setShowingExample] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [progressOpen, setProgressOpen] = useState(false);
+  const identityRef = useRef({ doctorName: "", practiceName: "" });
 
-  // Load from Supabase (localStorage fallback)
   useEffect(() => {
-    loadToolData('scan_report').then((cloud) => {
-      if (cloud) {
-        setState((prev) => ({ ...prev, ...cloud }));
-      } else {
-        try {
-          const saved = localStorage.getItem(LS_KEY);
-          if (saved) setState((prev) => ({ ...prev, ...JSON.parse(saved) }));
-        } catch {}
-      }
-      setLoaded(true);
-    }).catch(() => {
+    let cancelled = false;
+    (async () => {
+      const shell = await getPortalShellData().catch(() => null);
+      const doctorName = shell?.fullName?.trim() || "";
+      const practiceName = shell?.doctor?.clinic_name?.trim() || "";
+      identityRef.current = { doctorName, practiceName };
+      let next = blankForm(doctorName, practiceName);
       try {
-        const saved = localStorage.getItem(LS_KEY);
-        if (saved) setState((prev) => ({ ...prev, ...JSON.parse(saved) }));
-      } catch {}
-      setLoaded(true);
-    });
+        const cloud = await loadToolData("scan_report");
+        let saved = cloud as Partial<FormData> | null;
+        if (!saved) {
+          const raw = localStorage.getItem(LS_KEY);
+          if (raw) saved = JSON.parse(raw) as Partial<FormData>;
+        }
+        if (saved && !isSeededSample(saved)) {
+          next = {
+            ...next,
+            ...saved,
+            doctorName: cleanPracticeField(saved.doctorName, doctorName),
+            practiceName: cleanPracticeField(saved.practiceName, practiceName),
+          };
+        }
+      } catch {
+        /* start blank */
+      }
+      if (!cancelled) {
+        setState(next);
+        setLoaded(true);
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  // Save to Supabase + localStorage (debounced)
+  // Save to Supabase + localStorage (debounced). Example data is not saved.
   const stateRef = useRef(state);
   stateRef.current = state;
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || showingExample) return;
     const timer = setTimeout(() => {
       const data = stateRef.current;
       saveToolData('scan_report', data).catch(() => {});
       try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
     }, 1000);
     return () => clearTimeout(timer);
-  }, [state, loaded]);
+  }, [state, loaded, showingExample]);
 
   const set = useCallback(<K extends keyof FormData>(key: K, value: FormData[K]) => {
     setState((prev) => ({ ...prev, [key]: value }));
@@ -407,7 +514,21 @@ function ScanReportContent() {
   const scores = calcScores(state);
   const prevScoreVal = calcPrevScore(state);
   const isProgressType = state.scanType === "Progress Scan" || state.scanType === "Re-Evaluation";
-  const summary = state.editSummary || generateSummary(state, scores);
+  const summary = scores ? (state.editSummary || generateSummary(state, scores)) : "";
+  const ExampleMark = () => showingExample ? <span className="ml-2 text-sm font-bold text-portal-ink">Example</span> : null;
+
+  const loadExample = () => {
+    const { doctorName, practiceName } = identityRef.current;
+    setShowingExample(true);
+    setState(exampleForm(doctorName, practiceName));
+  };
+
+  const clearExample = () => {
+    const { doctorName, practiceName } = identityRef.current;
+    setShowingExample(false);
+    setState(blankForm(doctorName, practiceName));
+    setSaveSuccess(null);
+  };
 
   // Navigation
   const goToStep = (step: number) => set("currentStep", step as FormData["currentStep"]);
@@ -417,7 +538,9 @@ function ScanReportContent() {
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
     saveToolData('scan_report', null).catch(() => {});
-    setState({ ...DEFAULT_FORM, scanDate: todayStr() });
+    const { doctorName, practiceName } = identityRef.current;
+    setShowingExample(false);
+    setState(blankForm(doctorName, practiceName));
     setSaveSuccess(null);
   };
 
@@ -428,11 +551,11 @@ function ScanReportContent() {
     try {
       const result = await saveReport({
         patientName: state.patientFirstName,
-        patientAge: state.patientAge,
+        patientAge: state.patientAge ?? 0,
         scanDate: state.scanDate,
         scanType: state.scanType,
-        reportData: { ...state, score: scores.total, scoreLabel: scores.label } as unknown as Record<string, unknown>,
-        score: scores.total,
+        reportData: { ...state, score: scores?.total ?? null, scoreLabel: scores?.label ?? null } as unknown as Record<string, unknown>,
+        score: scores?.total ?? 0,
       });
       if ("id" in result) {
         setSaveSuccess(result.id);
@@ -457,7 +580,14 @@ function ScanReportContent() {
       const r = await getReport(id);
       if (r && r.report_data) {
         const blob = r.report_data as Partial<FormData>;
-        setState((prev) => ({ ...prev, ...blob, currentStep: 3 }));
+        setShowingExample(false);
+        setState((prev) => ({
+          ...prev,
+          ...blob,
+          doctorName: cleanPracticeField(blob.doctorName, identityRef.current.doctorName),
+          practiceName: cleanPracticeField(blob.practiceName, identityRef.current.practiceName),
+          currentStep: 3,
+        }));
         setHistoryOpen(false);
       }
     } catch { /* ignore */ }
@@ -514,24 +644,24 @@ function ScanReportContent() {
       <div className="lg:col-span-2 space-y-6">
         {/* Patient Info */}
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2 mb-4">
             <FileText className="w-4 h-4 text-neuro-orange" /> Patient Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Patient First Name *</label>
+              <label className="text-sm font-bold text-gray-500">Patient First Name *<ExampleMark /></label>
               <input type="text" value={state.patientFirstName} onChange={(e) => set("patientFirstName", e.target.value)} placeholder="e.g. Sarah" className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Patient Age</label>
-              <input type="number" value={state.patientAge} onChange={(e) => set("patientAge", Number(e.target.value) || 0)} min={0} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+              <label className="text-sm font-bold text-gray-500">Patient Age<ExampleMark /></label>
+              <input type="number" value={state.patientAge ?? ""} onChange={(e) => set("patientAge", optionalNumber(e.target.value))} min={0} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Scan Date</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Scan Date</label>
               <input type="date" value={state.scanDate} onChange={(e) => set("scanDate", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Scan Type</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Scan Type</label>
               <select value={state.scanType} onChange={(e) => set("scanType", e.target.value as FormData["scanType"])} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
                 <option>Initial Scan</option>
                 <option>Progress Scan</option>
@@ -540,11 +670,11 @@ function ScanReportContent() {
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Doctor Name</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Doctor Name</label>
               <input type="text" value={state.doctorName} onChange={(e) => set("doctorName", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Practice Name</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Practice Name</label>
               <input type="text" value={state.practiceName} onChange={(e) => set("practiceName", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
           </div>
@@ -552,12 +682,12 @@ function ScanReportContent() {
 
         {/* sEMG */}
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <Activity className="w-4 h-4 text-neuro-orange" /> sEMG
+          <h3 className="text-sm font-bold text-neuro-navy flex items-center gap-2 mb-4">
+            <Activity className="w-4 h-4 text-neuro-orange" /> sEMG <TermInfo term="sEMG" /><ExampleMark />
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Overall Pattern</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-2 block">Overall Pattern</label>
               <div className="flex flex-wrap gap-2">
                 {(["Symmetric/Normal", "Mild Asymmetry", "Moderate Asymmetry", "Severe Asymmetry"] as const).map((opt) => (
                   <button key={opt} onClick={() => set("semgPattern", opt)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.semgPattern === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
@@ -567,13 +697,14 @@ function ScanReportContent() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Primary Region</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Primary Region</label>
               <select value={state.semgRegion} onChange={(e) => set("semgRegion", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                <option value="">Select a region</option>
                 {REGIONS.map((r) => <option key={r}>{r}</option>)}
               </select>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Energy Level</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-2 block">Energy Level</label>
               <div className="flex flex-wrap gap-2">
                 {(["Normal", "Moderate Exhaustion", "Significant Exhaustion"] as const).map((opt) => (
                   <button key={opt} onClick={() => set("semgEnergy", opt)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.semgEnergy === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
@@ -583,7 +714,7 @@ function ScanReportContent() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Notes (optional)</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Notes (optional)</label>
               <textarea value={state.semgNotes} onChange={(e) => set("semgNotes", e.target.value)} rows={2} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors resize-y" />
             </div>
           </div>
@@ -591,12 +722,12 @@ function ScanReportContent() {
 
         {/* Thermography */}
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <Thermometer className="w-4 h-4 text-neuro-orange" /> Thermography
+          <h3 className="text-sm font-bold text-neuro-navy flex items-center gap-2 mb-4">
+            <Thermometer className="w-4 h-4 text-neuro-orange" /> Thermography <TermInfo term="Thermography" /><ExampleMark />
           </h3>
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Overall Pattern</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide mb-2 block">Overall Pattern</label>
               <div className="flex flex-wrap gap-2">
                 {(["Balanced", "Mild Imbalance", "Moderate Imbalance", "Significant Imbalance"] as const).map((opt) => (
                   <button key={opt} onClick={() => set("thermoPattern", opt)} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${state.thermoPattern === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
@@ -606,18 +737,19 @@ function ScanReportContent() {
               </div>
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Primary Region</label>
+              <label className="text-xs font-bold text-gray-500 tracking-wide">Primary Region</label>
               <select value={state.thermoRegion} onChange={(e) => set("thermoRegion", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                <option value="">Select a region</option>
                 {REGIONS.map((r) => <option key={r}>{r}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Max Temp Differential</label>
-                <input type="number" step={0.1} value={state.thermoMaxDiff} onChange={(e) => set("thermoMaxDiff", parseFloat(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                <label className="text-sm font-bold text-gray-500">Max Temp Differential<ExampleMark /></label>
+                <input type="number" step={0.1} value={state.thermoMaxDiff ?? ""} onChange={(e) => set("thermoMaxDiff", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 block">Pattern Consistency</label>
+                <label className="text-xs font-bold text-gray-500 tracking-wide mb-2 block">Pattern Consistency</label>
                 <div className="flex flex-wrap gap-1">
                   {(["First scan", "Improving", "Stable", "Worsening"] as const).map((opt) => (
                     <button key={opt} onClick={() => set("thermoConsistency", opt)} className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${state.thermoConsistency === opt ? "bg-[#1a2744] text-white" : "bg-white border border-gray-300 text-gray-600 hover:border-gray-400"}`}>
@@ -632,29 +764,29 @@ function ScanReportContent() {
 
         {/* HRV */}
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2 mb-4">
-            <Heart className="w-4 h-4 text-neuro-orange" /> HRV
+          <h3 className="text-sm font-bold text-neuro-navy flex items-center gap-2 mb-4">
+            <Heart className="w-4 h-4 text-neuro-orange" /> HRV <TermInfo term="HRV" /><ExampleMark />
           </h3>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">SDNN (ms)</label>
-              <input type="number" value={state.hrvSDNN} onChange={(e) => set("hrvSDNN", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+              <label className="text-sm font-bold text-gray-500 inline-flex items-center">SDNN (ms) <TermInfo term="SDNN" /><ExampleMark /></label>
+              <input type="number" value={state.hrvSDNN ?? ""} onChange={(e) => set("hrvSDNN", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">LF/HF Ratio</label>
-              <input type="number" step={0.1} value={state.hrvLFHF} onChange={(e) => set("hrvLFHF", parseFloat(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+              <label className="text-sm font-bold text-gray-500 inline-flex items-center">LF/HF Ratio <TermInfo term="LF/HF" /><ExampleMark /></label>
+              <input type="number" step={0.1} value={state.hrvLFHF ?? ""} onChange={(e) => set("hrvLFHF", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">RMSSD (ms)</label>
-              <input type="number" value={state.hrvRMSSD} onChange={(e) => set("hrvRMSSD", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+              <label className="text-sm font-bold text-gray-500 inline-flex items-center">RMSSD (ms) <TermInfo term="RMSSD" /><ExampleMark /></label>
+              <input type="number" value={state.hrvRMSSD ?? ""} onChange={(e) => set("hrvRMSSD", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Total Power (ms2)</label>
-              <input type="number" value={state.hrvTotalPower} onChange={(e) => set("hrvTotalPower", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+              <label className="text-sm font-bold text-gray-500 inline-flex items-center">Total Power (ms2) <TermInfo term="Total Power" /><ExampleMark /></label>
+              <input type="number" value={state.hrvTotalPower ?? ""} onChange={(e) => set("hrvTotalPower", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
             </div>
           </div>
           <div className="mt-2">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">SDNN Zones</p>
+            <p className="text-xs font-bold text-gray-500 tracking-wide mb-2">SDNN Zones</p>
             {SDNNBar({ value: state.hrvSDNN })}
           </div>
         </section>
@@ -663,7 +795,7 @@ function ScanReportContent() {
         {isProgressType && (
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <button onClick={() => setProgressOpen(!progressOpen)} className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors">
-              <span className="text-sm font-black text-neuro-navy uppercase tracking-wide flex items-center gap-2">
+              <span className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2">
                 <Clock className="w-4 h-4 text-neuro-orange" /> Progress Comparison
               </span>
               {progressOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
@@ -671,12 +803,13 @@ function ScanReportContent() {
             {progressOpen && (
               <div className="px-5 pb-5 grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Previous SDNN (ms)</label>
-                  <input type="number" value={state.prevSDNN} onChange={(e) => set("prevSDNN", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                  <label className="text-sm font-bold text-gray-500">Previous SDNN (ms)<ExampleMark /></label>
+                  <input type="number" value={state.prevSDNN ?? ""} onChange={(e) => set("prevSDNN", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Previous sEMG Pattern</label>
+                  <label className="text-sm font-bold text-gray-500">Previous sEMG Pattern<ExampleMark /></label>
                   <select value={state.prevSemgPattern} onChange={(e) => set("prevSemgPattern", e.target.value)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors">
+                    <option value="">Select a pattern</option>
                     <option>Symmetric/Normal</option>
                     <option>Mild Asymmetry</option>
                     <option>Moderate Asymmetry</option>
@@ -684,16 +817,16 @@ function ScanReportContent() {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Previous Thermo Differential</label>
-                  <input type="number" step={0.1} value={state.prevThermoDiff} onChange={(e) => set("prevThermoDiff", parseFloat(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                  <label className="text-sm font-bold text-gray-500">Previous Thermo Differential<ExampleMark /></label>
+                  <input type="number" step={0.1} value={state.prevThermoDiff ?? ""} onChange={(e) => set("prevThermoDiff", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Visits Completed</label>
-                  <input type="number" value={state.visitsCompleted} onChange={(e) => set("visitsCompleted", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                  <label className="text-sm font-bold text-gray-500">Visits Completed<ExampleMark /></label>
+                  <input type="number" value={state.visitsCompleted ?? ""} onChange={(e) => set("visitsCompleted", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Weeks in Care</label>
-                  <input type="number" value={state.weeksInCare} onChange={(e) => set("weeksInCare", Number(e.target.value) || 0)} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
+                  <label className="text-sm font-bold text-gray-500">Weeks in Care<ExampleMark /></label>
+                  <input type="number" value={state.weeksInCare ?? ""} onChange={(e) => set("weeksInCare", optionalNumber(e.target.value))} className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors" />
                 </div>
               </div>
             )}
@@ -704,13 +837,17 @@ function ScanReportContent() {
       {/* Right Column — Live Score Preview */}
       <div className="space-y-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-4">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-wide mb-4">Live Score Preview</h3>
+          <h3 className="text-sm font-bold text-gray-400 mb-4">Live Score Preview<ExampleMark /></h3>
+          {scores ? (
           <div className="flex justify-center">
             {ScoreGauge({ score: scores.total, size: 180, label: scores.label, color: scores.color })}
           </div>
+          ) : (
+            <p className="text-sm text-portal-ink-2 text-center">Enter the sEMG pattern, thermography pattern, max temperature difference, and SDNN to see a score.</p>
+          )}
 
           {/* Mini progress bars */}
-          <div className="space-y-3 mt-4">
+          {scores ? <div className="space-y-3 mt-4">
             <div>
               <div className="flex justify-between text-xs mb-1">
                 <span className="font-bold text-gray-600">sEMG</span>
@@ -738,11 +875,11 @@ function ScanReportContent() {
                 <div className="h-full rounded-full transition-all" style={{ width: `${(scores.hrvScore / 30) * 100}%`, backgroundColor: scores.hrvScore >= 25 ? "#22c55e" : scores.hrvScore >= 18 ? "#facc15" : "#ef4444" }} />
               </div>
             </div>
-          </div>
+          </div> : null}
 
           {/* Patient + Date */}
           <div className="mt-4 pt-4 border-t border-gray-100 text-center">
-            <p className="text-sm font-bold text-neuro-navy">{state.patientFirstName || "Patient Name"}</p>
+            <p className="text-sm font-bold text-neuro-navy">{state.patientFirstName || "Patient Name"}<ExampleMark /></p>
             <p className="text-xs text-gray-400">{state.scanDate}</p>
           </div>
         </div>
@@ -755,20 +892,22 @@ function ScanReportContent() {
      ═══════════════════════════════════════════════════════ */
 
   const ReportContent = () => {
-    const lfhfInterp = state.hrvLFHF < 0.8 ? "Parasympathetic Dominant (Recovery Mode)" : state.hrvLFHF <= 2.0 ? "Balanced" : "Sympathetic Dominant (Stress Mode)";
-    const hasProgress = isProgressType && prevScoreVal !== null;
-    const scoreDelta = hasProgress ? scores.total - (prevScoreVal ?? 0) : 0;
+    const lfhfInterp = state.hrvLFHF == null ? "" : state.hrvLFHF < 0.8 ? "Parasympathetic Dominant (Recovery Mode)" : state.hrvLFHF <= 2.0 ? "Balanced" : "Sympathetic Dominant (Stress Mode)";
+    const hasProgress = Boolean(scores) && isProgressType && prevScoreVal !== null;
+    const scoreDelta = hasProgress && scores ? scores.total - (prevScoreVal ?? 0) : 0;
+    const thermoDiff = state.thermoMaxDiff ?? 0;
+    const sdnn = state.hrvSDNN;
 
     return (
       <div className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Header */}
         <div className="p-8" style={{ backgroundColor: "#1a2744" }}>
-          <p className="text-white/50 text-xs font-bold uppercase tracking-[0.2em]">{state.practiceName}</p>
-          <h1 className="font-heading text-2xl font-black text-white mt-1">Nervous System Assessment</h1>
+          <p className="text-white/50 text-xs font-bold tracking-[0.2em]">{state.practiceName}</p>
+          <h2 className="font-heading text-2xl font-bold text-white mt-1">Nervous System Assessment</h2>
           <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-white/60">
-            <span className="text-white font-bold">{state.patientFirstName || "Patient"}</span>
+            <span className="text-white font-bold">{state.patientFirstName || "Patient"}{showingExample ? " (Example)" : ""}</span>
             <span>&middot;</span>
-            <span>Age {state.patientAge}</span>
+            <span>{state.patientAge == null ? "Age" : `Age ${state.patientAge}`}{showingExample ? " (Example)" : ""}</span>
             <span>&middot;</span>
             <span>{state.scanDate}</span>
             <span>&middot;</span>
@@ -781,7 +920,9 @@ function ScanReportContent() {
         <div className="p-6 sm:p-8 space-y-8">
           {/* Section 1: Your Nervous System Score */}
           <section>
-            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Your Nervous System Score</h2>
+            <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Your Nervous System Score{showingExample ? " (Example)" : ""}</h2>
+            {scores ? (
+            <>
             <div className="flex justify-center mb-4">
               {ScoreGauge({ score: scores.total, size: 220, label: scores.label, color: scores.color })}
             </div>
@@ -789,28 +930,32 @@ function ScanReportContent() {
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <p className="text-xs text-gray-500 font-bold uppercase">sEMG</p>
-                <p className="text-xl font-black text-neuro-navy mt-1">{scores.semgScore}<span className="text-sm text-gray-400">/35</span></p>
+                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.semgScore}<span className="text-sm text-gray-400">/35</span></p>
                 <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(scores.semgScore / 35) * 100}%`, backgroundColor: scores.semgScore >= 25 ? "#22c55e" : scores.semgScore >= 15 ? "#facc15" : "#ef4444" }} />
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <p className="text-xs text-gray-500 font-bold uppercase">Thermal</p>
-                <p className="text-xl font-black text-neuro-navy mt-1">{scores.thermoScore}<span className="text-sm text-gray-400">/35</span></p>
+                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.thermoScore}<span className="text-sm text-gray-400">/35</span></p>
                 <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(scores.thermoScore / 35) * 100}%`, backgroundColor: scores.thermoScore >= 25 ? "#22c55e" : scores.thermoScore >= 15 ? "#facc15" : "#ef4444" }} />
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <p className="text-xs text-gray-500 font-bold uppercase">HRV</p>
-                <p className="text-xl font-black text-neuro-navy mt-1">{scores.hrvScore}<span className="text-sm text-gray-400">/30</span></p>
+                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.hrvScore}<span className="text-sm text-gray-400">/30</span></p>
                 <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(scores.hrvScore / 30) * 100}%`, backgroundColor: scores.hrvScore >= 25 ? "#22c55e" : scores.hrvScore >= 18 ? "#facc15" : "#ef4444" }} />
                 </div>
               </div>
             </div>
             {/* Summary text */}
-            <p className="text-gray-700 text-sm leading-relaxed">{summary}</p>
+            {summary ? <p className="text-gray-700 text-sm leading-relaxed">{summary}</p> : null}
+            </>
+            ) : (
+              <p className="text-sm text-portal-ink-2">Enter the sEMG pattern, thermography pattern, max temperature difference, and SDNN to see a score.</p>
+            )}
           </section>
 
           {/* Section 2: Scan Findings */}
@@ -819,13 +964,13 @@ function ScanReportContent() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* sEMG Card */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="text-xs font-black text-neuro-navy uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-neuro-navy tracking-wide mb-3 flex items-center gap-1.5">
                   <Activity className="w-3.5 h-3.5 text-neuro-orange" /> Muscle & Nerve Activity
                 </h4>
                 <div className="flex justify-center mb-3">
                   {SpineDiagram({ region: state.semgRegion, severity: state.semgPattern })}
                 </div>
-                <p className="text-sm font-bold text-neuro-navy">{state.semgPattern}</p>
+                <p className="text-sm font-bold text-neuro-navy">{state.semgPattern || "—"}{showingExample ? " · Example" : ""}</p>
                 <p className="text-xs text-gray-500 mt-1">Region: {state.semgRegion}</p>
                 <div className="mt-2">
                   <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${state.semgEnergy === "Normal" ? "bg-green-100 text-green-700" : state.semgEnergy === "Moderate Exhaustion" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
@@ -836,7 +981,7 @@ function ScanReportContent() {
 
               {/* Thermo Card */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="text-xs font-black text-neuro-navy uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-neuro-navy tracking-wide mb-3 flex items-center gap-1.5">
                   <Thermometer className="w-3.5 h-3.5 text-neuro-orange" /> Temperature Regulation
                 </h4>
                 {/* Symmetric bar visualization */}
@@ -844,16 +989,16 @@ function ScanReportContent() {
                   <svg viewBox="0 0 120 60" width={120} height={60}>
                     <line x1="60" y1="5" x2="60" y2="55" stroke="#d1d5db" strokeWidth={1} />
                     {/* Left bar */}
-                    <rect x={60 - Math.min(50, state.thermoMaxDiff * 25)} y="20" width={Math.min(50, state.thermoMaxDiff * 25)} height="20" rx="3"
+                    <rect x={60 - Math.min(50, thermoDiff * 25)} y="20" width={Math.min(50, thermoDiff * 25)} height="20" rx="3"
                       fill={state.thermoPattern === "Balanced" ? "#22c55e" : state.thermoPattern === "Mild Imbalance" ? "#facc15" : state.thermoPattern === "Moderate Imbalance" ? "#f97316" : "#ef4444"} opacity={0.7} />
                     {/* Right bar */}
-                    <rect x="60" y="20" width={Math.min(50, state.thermoMaxDiff * 20)} height="20" rx="3"
+                    <rect x="60" y="20" width={Math.min(50, thermoDiff * 20)} height="20" rx="3"
                       fill={state.thermoPattern === "Balanced" ? "#22c55e" : state.thermoPattern === "Mild Imbalance" ? "#facc15" : state.thermoPattern === "Moderate Imbalance" ? "#f97316" : "#ef4444"} opacity={0.5} />
-                    <text x="60" y="52" textAnchor="middle" fontSize="7" fill="#6b7280">{state.thermoMaxDiff.toFixed(1)} C diff</text>
+                    <text x="60" y="52" textAnchor="middle" fontSize="7" fill="#6b7280">{state.thermoMaxDiff == null ? "—" : `${state.thermoMaxDiff.toFixed(1)} C diff`}</text>
                   </svg>
                 </div>
-                <p className="text-sm font-bold text-neuro-navy">{state.thermoPattern}</p>
-                <p className="text-xs text-gray-500 mt-1">Max differential: {state.thermoMaxDiff.toFixed(1)} C</p>
+                <p className="text-sm font-bold text-neuro-navy">{state.thermoPattern || "—"}{showingExample ? " · Example" : ""}</p>
+                <p className="text-sm text-gray-500 mt-1">Max differential: {state.thermoMaxDiff == null ? "—" : `${state.thermoMaxDiff.toFixed(1)} C`}</p>
                 <div className="mt-2">
                   <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded-full ${state.thermoConsistency === "Improving" ? "bg-green-100 text-green-700" : state.thermoConsistency === "Worsening" ? "bg-red-100 text-red-700" : "bg-gray-100 text-gray-700"}`}>
                     {state.thermoConsistency}
@@ -863,17 +1008,17 @@ function ScanReportContent() {
 
               {/* HRV Card */}
               <div className="bg-gray-50 rounded-xl p-4">
-                <h4 className="text-xs font-black text-neuro-navy uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                <h4 className="text-xs font-bold text-neuro-navy tracking-wide mb-3 flex items-center gap-1.5">
                   <Heart className="w-3.5 h-3.5 text-neuro-orange" /> Stress Adaptability
                 </h4>
                 <div className="my-3">
                   {SDNNBar({ value: state.hrvSDNN })}
                 </div>
-                <p className="text-2xl font-black text-neuro-navy text-center">{state.hrvSDNN} <span className="text-sm text-gray-400 font-normal">ms</span></p>
-                <p className="text-xs text-gray-500 mt-2">LF/HF: {state.hrvLFHF} - <span className="font-bold">{lfhfInterp}</span></p>
-                <p className="text-xs text-gray-500 mt-1">
-                  {state.hrvSDNN >= 80 ? "Excellent nervous system adaptability" : state.hrvSDNN >= 60 ? "Good adaptability" : state.hrvSDNN >= 40 ? "Below average adaptability" : state.hrvSDNN >= 20 ? "Low adaptability" : "Critical - very low adaptability"}
-                </p>
+                <p className="text-2xl font-bold text-neuro-navy text-center">{sdnn == null ? "—" : sdnn}{showingExample ? " Example" : ""} <span className="text-sm text-gray-400 font-normal">ms</span></p>
+                {state.hrvLFHF == null ? null : <p className="text-sm text-gray-500 mt-2">LF/HF: {state.hrvLFHF} - <span className="font-bold">{lfhfInterp}</span></p>}
+                {sdnn == null ? null : <p className="text-sm text-gray-500 mt-1">
+                  {sdnn >= 80 ? "Excellent nervous system adaptability" : sdnn >= 60 ? "Good adaptability" : sdnn >= 40 ? "Below average adaptability" : sdnn >= 20 ? "Low adaptability" : "Critical - very low adaptability"}
+                </p>}
               </div>
             </div>
           </section>
@@ -890,17 +1035,17 @@ function ScanReportContent() {
               <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Progress</h2>
               <div className="flex items-center justify-center gap-8 mb-4">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider">Previous</p>
-                  <p className="text-3xl font-heading font-black text-gray-400">{prevScoreVal}</p>
+                  <p className="text-xs text-gray-400 tracking-wider">Previous</p>
+                  <p className="text-3xl font-heading font-bold text-gray-400">{prevScoreVal}</p>
                 </div>
                 <div className="text-center">
-                  <span className={`text-2xl font-black ${scoreDelta > 0 ? "text-green-500" : scoreDelta < 0 ? "text-red-500" : "text-gray-400"}`}>
+                  <span className={`text-2xl font-bold ${scoreDelta > 0 ? "text-green-500" : scoreDelta < 0 ? "text-red-500" : "text-gray-400"}`}>
                     {scoreDelta > 0 ? "+" : ""}{scoreDelta}
                   </span>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider">Current</p>
-                  <p className="text-3xl font-heading font-black" style={{ color: scores.color }}>{scores.total}</p>
+                  <p className="text-xs text-gray-400 tracking-wider">Current</p>
+                  <p className="text-3xl font-heading font-bold" style={{ color: scores?.color }}>{scores?.total}</p>
                 </div>
               </div>
               {/* Metric comparisons */}
@@ -921,9 +1066,9 @@ function ScanReportContent() {
                   <p className="font-bold text-neuro-navy text-xs">{state.hrvSDNN} ms</p>
                 </div>
               </div>
-              {state.weeksInCare > 0 && (
+              {(state.weeksInCare ?? 0) > 0 && (
                 <p className="text-gray-600 text-sm text-center mt-4">
-                  Since starting care {state.weeksInCare} weeks ago ({state.visitsCompleted} visits), your score has {scoreDelta >= 0 ? "improved" : "changed"} from {prevScoreVal} to {scores.total}.
+                  Since starting care {state.weeksInCare} weeks ago ({state.visitsCompleted} visits), your score has {scoreDelta >= 0 ? "improved" : "changed"} from {prevScoreVal} to {scores?.total}.
                 </p>
               )}
             </section>
@@ -959,18 +1104,18 @@ function ScanReportContent() {
       {/* Edit controls below report */}
       <div className="no-print mt-6 space-y-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide mb-3">Edit Summary</h3>
+          <h3 className="text-sm font-bold text-neuro-navy tracking-wide mb-3">Edit Summary</h3>
           <textarea
             value={state.editSummary}
             onChange={(e) => set("editSummary", e.target.value)}
             rows={4}
-            placeholder={generateSummary(state, scores)}
+            placeholder={scores ? generateSummary(state, scores) : "Summary appears after the required scan fields are filled."}
             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors resize-y"
           />
           <p className="text-xs text-gray-400 mt-1">Leave blank to use auto-generated summary.</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide mb-3">Add Notes</h3>
+          <h3 className="text-sm font-bold text-neuro-navy tracking-wide mb-3">Add Notes</h3>
           <textarea
             value={state.doctorNotes}
             onChange={(e) => set("doctorNotes", e.target.value)}
@@ -1038,7 +1183,7 @@ function ScanReportContent() {
       {historyOpen && (
         <div className="no-print mb-6 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
-            <h3 className="text-sm font-black text-neuro-navy uppercase tracking-wide">Report History</h3>
+            <h3 className="text-sm font-bold text-neuro-navy tracking-wide">Report History</h3>
             <button onClick={() => setHistoryOpen(false)} className="text-gray-400 hover:text-gray-600">
               <X className="w-4 h-4" />
             </button>
@@ -1052,7 +1197,7 @@ function ScanReportContent() {
               <div className="space-y-2">
                 {history.map((h) => {
                   const lbl = h.score >= 80 ? "Thriving" : h.score >= 60 ? "Adapting Well" : h.score >= 40 ? "Stressed" : h.score >= 20 ? "Struggling" : "In Crisis";
-                  const badgeColor = h.score >= 80 ? "bg-green-100 text-green-700" : h.score >= 60 ? "bg-blue-100 text-blue-700" : h.score >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700";
+                  const badgeColor = h.score >= 80 ? "bg-green-100 text-green-700" : h.score >= 60 ? "bg-portal-info-bg text-blue-700" : h.score >= 40 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700";
                   return (
                     <button key={h.id} onClick={() => loadReport(h.id)} className="w-full text-left flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors">
                       <div>
@@ -1093,19 +1238,15 @@ function ScanReportContent() {
         }
       `}</style>
 
-      {/* Page Header */}
-      <div className="no-print flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
-            <ClipboardList className="w-7 h-7 text-neuro-orange" /> Scan Report Generator
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Input scan data, preview, and print a patient-friendly report.
-          </p>
+      <div className="no-print">
+        <PageHeader title="Scan report" description="Enter scan data, preview it, and print a patient-friendly report." />
+        <div className="flex flex-wrap gap-2 -mt-2 mb-4">
+          <button type="button" onClick={loadExample} className="min-h-11 px-4 rounded-lg bg-white border border-portal-border text-sm font-bold text-portal-ink">Load example patient</button>
+          <button type="button" onClick={resetAll} className="min-h-11 px-4 rounded-lg bg-white border border-portal-border text-sm font-bold text-portal-ink inline-flex items-center gap-1.5">
+            <RotateCcw className="w-4 h-4" /> Reset
+          </button>
         </div>
-        <button onClick={resetAll} className="px-3 py-2 text-gray-400 hover:text-neuro-navy text-xs font-bold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5">
-          <RotateCcw className="w-3.5 h-3.5" /> Reset
-        </button>
+        {showingExample ? <div className="mb-4"><ExampleBanner onClear={clearExample} /></div> : null}
       </div>
 
       {StepTabs()}

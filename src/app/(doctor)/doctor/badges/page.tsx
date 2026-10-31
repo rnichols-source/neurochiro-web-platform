@@ -8,7 +8,7 @@ import { BADGE_DEFINITIONS } from "@/lib/badges";
 const ICON_MAP: Record<string, any> = { User, Eye, Users, Calendar, Briefcase, Award, Shuffle, Trophy, Star, Gift };
 
 const COLOR_MAP: Record<string, { bg: string; border: string; icon: string; locked: string }> = {
-  blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: 'text-blue-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
+  blue: { bg: 'bg-portal-info-bg', border: 'border-blue-500/20', icon: 'text-blue-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
   emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: 'text-emerald-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
   violet: { bg: 'bg-violet-500/10', border: 'border-violet-500/20', icon: 'text-violet-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
   orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/20', icon: 'text-orange-400', locked: 'bg-white/[0.03] border-white/[0.06]' },
@@ -76,9 +76,9 @@ export default function BadgesPage() {
                 )}
               </div>
               <p className={`text-sm font-bold mb-1 ${isEarned ? 'text-white' : 'text-white/30'}`}>{badge.name}</p>
-              <p className={`text-[10px] ${isEarned ? 'text-white/50' : 'text-white/15'}`}>{badge.description}</p>
+              <p className={`text-xs ${isEarned ? 'text-white/50' : 'text-white/15'}`}>{badge.description}</p>
               {isEarned && earnedData && (
-                <p className="text-[9px] text-neuro-orange font-bold mt-2">
+                <p className="text-xs text-neuro-orange font-bold mt-2">
                   Earned {new Date(earnedData.earned_at).toLocaleDateString()}
                 </p>
               )}

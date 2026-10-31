@@ -251,7 +251,7 @@ function WorkshopsContent() {
 
         {/* Kit header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-heading font-black text-neuro-navy">
+          <h1 className="text-2xl font-heading font-bold text-neuro-navy">
             {selectedKit.title}
           </h1>
           <p className="text-gray-500 text-sm mt-1">{selectedKit.subtitle}</p>
@@ -271,19 +271,19 @@ function WorkshopsContent() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
             <div>
               <span className="text-green-600 font-bold block">Attendees</span>
-              <span className="text-green-900 font-black text-lg">{selectedKit.expectedResults.attendees}</span>
+              <span className="text-green-900 font-bold text-lg">{selectedKit.expectedResults.attendees}</span>
             </div>
             <div>
               <span className="text-green-600 font-bold block">Sign-Up Rate</span>
-              <span className="text-green-900 font-black text-lg">{selectedKit.expectedResults.signUpRate}</span>
+              <span className="text-green-900 font-bold text-lg">{selectedKit.expectedResults.signUpRate}</span>
             </div>
             <div>
               <span className="text-green-600 font-bold block">Show Rate</span>
-              <span className="text-green-900 font-black text-lg">{selectedKit.expectedResults.showRate}</span>
+              <span className="text-green-900 font-bold text-lg">{selectedKit.expectedResults.showRate}</span>
             </div>
             <div>
               <span className="text-green-600 font-bold block">Case Acceptance</span>
-              <span className="text-green-900 font-black text-lg">{selectedKit.expectedResults.caseAcceptance}</span>
+              <span className="text-green-900 font-bold text-lg">{selectedKit.expectedResults.caseAcceptance}</span>
             </div>
           </div>
           <p className="text-green-700 text-xs mt-3 leading-relaxed">{selectedKit.expectedResults.exampleCalc}</p>
@@ -302,7 +302,7 @@ function WorkshopsContent() {
                 if (result.url) window.location.href = result.url;
                 else alert(result.error);
               }}
-              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex items-center gap-2"
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex items-center gap-2"
             >
               <Lock className="w-4 h-4" /> Unlock Kit — ${selectedKit.price}
             </button>
@@ -350,7 +350,7 @@ function WorkshopsContent() {
                                   <h4 className="font-bold text-sm text-neuro-navy">
                                     {item.title}
                                   </h4>
-                                  <span className="text-[10px] font-bold text-gray-400 bg-white px-2 py-0.5 rounded">
+                                  <span className="text-xs font-bold text-gray-400 bg-white px-2 py-0.5 rounded">
                                     {item.type}
                                   </span>
                                 </div>
@@ -404,7 +404,7 @@ function WorkshopsContent() {
                                           onClick={() =>
                                             handleCopy(itemKey, item.content)
                                           }
-                                          className="px-3 py-1.5 bg-neuro-navy text-white rounded-lg font-bold text-[10px] hover:bg-neuro-navy/90 transition-colors flex items-center gap-1"
+                                          className="px-3 py-1.5 bg-neuro-navy text-white rounded-lg font-bold text-xs hover:bg-neuro-navy/90 transition-colors flex items-center gap-1"
                                         >
                                           {copiedKey === itemKey ? (
                                             <>
@@ -421,7 +421,7 @@ function WorkshopsContent() {
                                           onClick={() =>
                                             handleEdit(itemKey, item.content)
                                           }
-                                          className="px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-bold text-[10px] hover:bg-white transition-colors flex items-center gap-1"
+                                          className="px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-bold text-xs hover:bg-white transition-colors flex items-center gap-1"
                                         >
                                           <Edit3 className="w-3 h-3" />{" "}
                                           Customize
@@ -567,7 +567,7 @@ function WorkshopsContent() {
     <div className="p-4 md:p-8 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy flex items-center gap-3">
+        <h1 className="text-2xl font-heading font-bold text-neuro-navy flex items-center gap-3">
           <Presentation className="w-7 h-7 text-neuro-orange" /> Workshop-in-a-Box
         </h1>
         <p className="text-gray-500 text-sm mt-1">
@@ -586,7 +586,7 @@ function WorkshopsContent() {
               <label className="text-xs font-bold text-gray-500">
                 Average Case Value
               </label>
-              <span className="text-sm font-black text-neuro-navy">
+              <span className="text-sm font-bold text-neuro-navy">
                 ${caseValue.toLocaleString()}
               </span>
             </div>
@@ -599,7 +599,7 @@ function WorkshopsContent() {
               onChange={(e) => setCaseValue(Number(e.target.value))}
               className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-neuro-orange"
             />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1">
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
               <span>$1,000</span>
               <span>$5,000</span>
             </div>
@@ -608,10 +608,10 @@ function WorkshopsContent() {
             <p className="text-xs text-green-600 font-bold mb-1">
               One workshop could generate
             </p>
-            <p className="text-2xl font-black text-green-800">
+            <p className="text-2xl font-bold text-green-800">
               ${roiLow.toLocaleString()} &mdash; ${roiHigh.toLocaleString()}
             </p>
-            <p className="text-[10px] text-green-500 mt-1">in new patient revenue</p>
+            <p className="text-xs text-green-500 mt-1">in new patient revenue</p>
           </div>
         </div>
       </div>
@@ -623,22 +623,22 @@ function WorkshopsContent() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Zap className="w-5 h-5 text-neuro-orange" />
-                <span className="text-xs font-black uppercase tracking-widest text-neuro-orange">
+                <span className="text-xs font-bold tracking-widest text-neuro-orange">
                   Best Value
                 </span>
               </div>
-              <h2 className="text-xl font-black text-white mb-1">
+              <h2 className="text-xl font-bold text-white mb-1">
                 Workshop Mastery System &mdash; All 5 Kits
               </h2>
               <p className="text-gray-400 text-sm">
                 Every workshop kit, every script, every follow-up template. Use forever.
               </p>
               <div className="flex items-center gap-3 mt-3">
-                <span className="text-3xl font-black text-white">$149</span>
+                <span className="text-3xl font-bold text-white">$149</span>
                 <span className="text-gray-400 line-through">
                   ${totalIndividual}
                 </span>
-                <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-black px-2 py-0.5 rounded-full">
+                <span className="bg-neuro-orange/20 text-neuro-orange text-xs font-bold px-2 py-0.5 rounded-full">
                   Save ${totalIndividual - 149}
                 </span>
               </div>
@@ -649,7 +649,7 @@ function WorkshopsContent() {
                 if (result.url) window.location.href = result.url;
                 else alert(result.error);
               }}
-              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-black text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
+              className="px-6 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap"
             >
               Get All 5 Kits &mdash; $149
             </button>
@@ -685,7 +685,7 @@ function WorkshopsContent() {
                       <h3 className="font-bold text-neuro-navy text-sm leading-tight">
                         {kit.title}
                       </h3>
-                      <p className="text-[10px] font-bold text-neuro-orange mt-0.5">
+                      <p className="text-xs font-bold text-neuro-orange mt-0.5">
                         {kit.subtitle}
                       </p>
                     </div>
@@ -703,7 +703,7 @@ function WorkshopsContent() {
                   </div>
 
                   <div className="bg-gray-50 rounded-lg p-3 space-y-1">
-                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                    <p className="text-xs font-bold text-gray-500 tracking-wider mb-1.5">
                       What&apos;s Included
                     </p>
                     <p className="text-xs text-gray-600">
@@ -766,7 +766,7 @@ function WorkshopsContent() {
 
       {/* Bottom note */}
       <div className="mt-6 text-center">
-        <p className="text-[10px] text-gray-300 max-w-lg mx-auto leading-relaxed">
+        <p className="text-xs text-gray-300 max-w-lg mx-auto leading-relaxed">
           All templates include [BRACKETED PLACEHOLDERS] highlighted in orange for easy customization. Replace all placeholders with your specific information before use.
         </p>
       </div>

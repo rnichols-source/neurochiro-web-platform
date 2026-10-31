@@ -19,7 +19,7 @@ export default function RevenueWidget(props: Props) {
       </div>
 
       <div className="flex items-end gap-3 mb-4">
-        <span className="text-3xl font-black text-white">${props.estimatedMonthlyRevenue.toLocaleString()}</span>
+        <span className="text-3xl font-bold text-white">${props.estimatedMonthlyRevenue.toLocaleString()}</span>
         <span className="text-sm text-white/20 pb-1">estimated this month</span>
       </div>
 
@@ -37,7 +37,7 @@ export default function RevenueWidget(props: Props) {
             <p className="text-xs text-white/40">Estimated ROI</p>
             <div className="flex items-center gap-1">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span className="text-lg font-black text-emerald-400">{props.roi}x</span>
+              <span className="text-lg font-bold text-emerald-400">{props.roi}x</span>
             </div>
           </div>
         </div>

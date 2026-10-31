@@ -1,0 +1,104 @@
+import 'server-only';
+import { createAdminClient } from '@/lib/supabase-admin';
+import type { AttentionItem, SetupFields } from './home-types';
+
+export type { AttentionItem, SetupFields };
+
+export async function getSetupFields(doctorId: string): Promise<SetupFields> {
+  const admin = createAdminClient() as any;
+  const { data, error } = await admin
+    .from('doctors')
+    .select('photo_url, bio, short_intro, phone, city, address, specialties, first_visit_price, payment_model, slug')
+    .eq('id', doctorId)
+    .maybeSingle();
+  if (error || !data) return { photo: false, bio: false, address: false, services: false, slug: null };
+  return {
+    photo: Boolean(data.photo_url),
+    bio: Boolean((data.bio && data.bio.length >= 20) || (data.short_intro && data.short_intro.length >= 20)),
+    address: Boolean(data.phone && (data.city || data.address)),
+    services: Boolean((data.specialties && data.specialties.length) || data.first_visit_price || data.payment_model),
+    slug: data.slug || null,
+  };
+}
+
+export async function getAttention(doctorId: string, userId: string): Promise<AttentionItem[]> {
+  const admin = createAdminClient() as any;
+  const items: AttentionItem[] = [];
+  const contacts = await admin
+    .from('contact_requests')
+    .select('id, name, phone, note, contact_outcome, created_at')
+    .eq('doctor_id', doctorId)
+    .order('created_at', { ascending: false })
+    .limit(6);
+  if (!contacts.error && Array.isArray(contacts.data)) {
+    for (const row of contacts.data) {
+      if (row.contact_outcome === 'patient_contacted_confirmed') continue;
+      items.push({
+        id: row.id,
+        title: row.name || 'Patient',
+        detail: row.note || 'Asked your office to call',
+        phone: row.phone,
+        kind: 'request',
+      });
+    }
+  }
+  const staleBefore = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const leads = await admin
+    .from('leads')
+    .select('id, name, created_at')
+    .eq('doctor_id', doctorId)
+    .eq('stage', 'new')
+    .lt('created_at', staleBefore)
+    .limit(4);
+  if (!leads.error && Array.isArray(leads.data)) {
+    for (const row of leads.data) {
+      items.push({
+        id: row.id,
+        title: row.name || 'Lead',
+        detail: 'Waiting more than 2 days',
+        kind: 'lead',
+        href: '/doctor/leads',
+      });
+    }
+  }
+  const messages = await admin
+    .from('messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('recipient_id', userId)
+    .is('read_at', null);
+  if ((messages.count || 0) > 0) {
+    items.unshift({
+      id: 'messages',
+      title: `${messages.count} unread message${messages.count === 1 ? '' : 's'}`,
+      detail: 'Open messages',
+      kind: 'message',
+      href: '/doctor/messages',
+    });
+  }
+  return items.slice(0, 8);
+}
+
+export async function getViewSeries(doctorId: string): Promise<number[]> {
+  const admin = createAdminClient() as any;
+  const start = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const events = await admin
+    .from('analytics_events')
+    .select('created_at')
+    .eq('doctor_id', doctorId)
+    .eq('event_type', 'profile_view')
+    .gte('created_at', start);
+  if (events.error || !Array.isArray(events.data)) return [];
+  const days = new Set<string>();
+  for (const row of events.data as { created_at?: string }[]) {
+    const key = (row.created_at || '').slice(0, 10);
+    if (key) days.add(key);
+  }
+  if (days.size < 14) return [];
+  const buckets = new Map<string, number>();
+  for (const day of days) buckets.set(day, 0);
+  for (const row of events.data as { created_at?: string }[]) {
+    const key = (row.created_at || '').slice(0, 10);
+    if (buckets.has(key)) buckets.set(key, (buckets.get(key) || 0) + 1);
+  }
+  return [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, count]) => count);
+}

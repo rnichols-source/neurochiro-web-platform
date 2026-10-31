@@ -155,10 +155,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         <Link href="/" className="flex items-center gap-3 group">
           <img src="/logo-white.png" alt="NeuroChiro" className="w-9 h-9 object-contain group-hover:scale-105 transition-transform" />
           <div className="flex flex-col">
-            <span className="text-lg font-heading font-black tracking-tight text-white leading-none">
+            <span className="text-lg font-heading font-bold tracking-tight text-white leading-none">
               NeuroChiro
             </span>
-            <span className="text-neuro-orange text-[9px] font-black uppercase tracking-[0.2em] mt-0.5">
+            <span className="text-neuro-orange text-xs font-bold tracking-[0.2em] mt-0.5">
               Doctor Portal
             </span>
           </div>
@@ -179,13 +179,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           return (
             <div key={section.label} className={si > 0 ? "mt-3" : ""}>
               <div className="px-3 py-2">
-                <span className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${
+                <span className={`text-xs font-bold tracking-[0.2em] transition-colors ${
                   hasActive ? "text-neuro-orange" : "text-gray-500"
                 }`}>
                   {section.label}
                 </span>
                 {(section as any).sublabel && (
-                  <span className="text-[8px] text-gray-600 block mt-0.5">{(section as any).sublabel}</span>
+                  <span className="text-xs text-gray-600 block mt-0.5">{(section as any).sublabel}</span>
                 )}
               </div>
               <AnimatePresence initial={false}>
@@ -222,10 +222,10 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                               <Lock className="w-3 h-3 text-gray-600 ml-auto flex-shrink-0" />
                             )}
                             {item.name === 'Notifications' && unreadNotifs > 0 && (
-                              <span className="ml-auto bg-neuro-orange text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
+                              <span className="ml-auto bg-neuro-orange text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{unreadNotifs > 9 ? '9+' : unreadNotifs}</span>
                             )}
                             {item.name === 'Messages' && unreadMessages > 0 && (
-                              <span className="ml-auto bg-blue-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
+                              <span className="ml-auto bg-portal-info-bg text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{unreadMessages > 9 ? '9+' : unreadMessages}</span>
                             )}
                             {active && (
                               <motion.div
@@ -248,12 +248,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* User Section */}
       <div className="p-4 border-t border-white/5">
         <div className="flex items-center gap-3 px-3 py-3">
-          <div className="w-10 h-10 rounded-xl bg-neuro-orange/20 border border-neuro-orange/30 flex items-center justify-center text-neuro-orange font-black text-sm">
+          <div className="w-10 h-10 rounded-xl bg-neuro-orange/20 border border-neuro-orange/30 flex items-center justify-center text-neuro-orange font-bold text-sm">
             {initials}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white truncate">{userName || "Loading..."}</p>
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest flex items-center gap-1">
+            <p className="text-xs text-gray-500 font-bold tracking-widest flex items-center gap-1">
               <ShieldCheck className="w-2.5 h-2.5 text-blue-400" /> Doctor
             </p>
           </div>

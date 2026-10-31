@@ -293,14 +293,14 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
   // ============================================
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-black text-[#1E2D3B] mb-2">The Care Plan Closer</h1>
+      <h1 className="text-2xl font-bold text-[#1E2D3B] mb-2">The Care Plan Closer</h1>
       <p className="text-sm text-gray-500 mb-6">Build professional care plans with insurance billing intelligence.</p>
 
       {/* Step tabs */}
       <div className="flex gap-0 bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
         {STEP_LABELS.map((label, i) => (
           <button key={i} onClick={() => setStep(i)}
-            className={`flex-1 py-3 text-[11px] font-bold text-center transition-all border-r border-gray-200 last:border-r-0 ${
+            className={`flex-1 py-3 text-xs font-bold text-center transition-all border-r border-gray-200 last:border-r-0 ${
               step === i ? "bg-[#1E2D3B] text-white" : i < step ? "bg-green-500 text-white" : "text-gray-400"
             }`}>
             {i < step ? <Check className="w-3 h-3 inline mr-1" /> : null}{label}
@@ -314,22 +314,22 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
           <h2 className="text-lg font-bold text-[#1E2D3B]">Patient Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 md:col-span-1">
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Patient Name *</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Patient Name *</label>
               <input value={state.patient_name} onChange={e => setState(p => ({ ...p, patient_name: e.target.value }))}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Date</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Date</label>
               <input type="date" value={state.date} onChange={e => setState(p => ({ ...p, date: e.target.value }))}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Email</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Email</label>
               <input value={state.patient_email} onChange={e => setState(p => ({ ...p, patient_email: e.target.value }))}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Phone</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Phone</label>
               <input value={state.patient_phone} onChange={e => setState(p => ({ ...p, patient_phone: e.target.value }))}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none" />
             </div>
@@ -337,7 +337,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
           {/* Case Type */}
           <div>
-            <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Case Type</label>
+            <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Case Type</label>
             <div className="flex gap-0 bg-gray-100 rounded-xl overflow-hidden mt-1">
               {(["cash", "insurance", "pi", "hybrid"] as const).map(t => (
                 <button key={t} onClick={() => setState(p => ({ ...p, case_type: t }))}
@@ -351,7 +351,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
           {/* Insurance payer */}
           {(state.case_type === "insurance" || state.case_type === "hybrid") && (
             <div>
-              <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Insurance Payer</label>
+              <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Insurance Payer</label>
               <select value={state.insurance_payer} onChange={e => setState(p => ({ ...p, insurance_payer: e.target.value }))}
                 className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none">
                 <option value="">Select payer...</option>
@@ -369,7 +369,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
           {/* Care Track */}
           <div>
-            <label className="text-xs font-bold text-[#1E2D3B] uppercase tracking-wider">Care Track</label>
+            <label className="text-xs font-bold text-[#1E2D3B] tracking-wider">Care Track</label>
             <div className="flex gap-0 bg-gray-100 rounded-xl overflow-hidden mt-1">
               <button onClick={() => handleCareTrackChange("corrective")}
                 className={`flex-1 py-3 text-xs font-bold text-center transition-all ${state.care_track === "corrective" ? "bg-[#1E2D3B] text-white" : "text-gray-500"}`}>
@@ -415,7 +415,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
               ))}
             </div>
             <div className="mt-4 bg-[#1E2D3B] rounded-xl p-4 text-center text-white">
-              <div className="text-4xl font-black">{dysfunctionScore}<span className="text-lg text-white/40">/{maxScore}</span></div>
+              <div className="text-4xl font-bold">{dysfunctionScore}<span className="text-lg text-white/40">/{maxScore}</span></div>
               <div className="text-xs text-white/50 mt-1">
                 {dysfunctionScore <= 10 ? "Mild Dysfunction" : dysfunctionScore <= 15 ? "Moderate Dysfunction" : dysfunctionScore <= 20 ? "Significant Dysfunction" : "Severe Dysfunction"}
               </div>
@@ -475,17 +475,17 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
               <div className="grid grid-cols-3 gap-4 mb-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Visits/Week</label>
+                  <label className="text-xs font-bold text-gray-500 tracking-wider">Visits/Week</label>
                   <input type="number" min={1} max={7} value={phase.visitsPerWeek} onChange={e => updatePhase(pi, "visitsPerWeek", parseInt(e.target.value) || 1)}
                     className="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-lg text-sm font-bold text-center outline-none focus:border-[#1E2D3B]" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Weeks</label>
+                  <label className="text-xs font-bold text-gray-500 tracking-wider">Weeks</label>
                   <input type="number" min={1} max={52} value={phase.weeks} onChange={e => updatePhase(pi, "weeks", parseInt(e.target.value) || 1)}
                     className="w-full mt-1 px-3 py-2 border-2 border-gray-200 rounded-lg text-sm font-bold text-center outline-none focus:border-[#1E2D3B]" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-gray-500 tracking-wider">
                     {state.case_type === "cash" || state.case_type === "pi" ? "Fee/Visit" : "Est. Reimb/Visit"}
                   </label>
                   {state.case_type === "cash" || state.case_type === "pi" ? (
@@ -504,11 +504,11 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
               {/* CPT Code Selection */}
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 block">CPT Codes for This Phase</label>
+                <label className="text-xs font-bold text-gray-500 tracking-wider mb-2 block">CPT Codes for This Phase</label>
                 <div className="flex flex-wrap gap-1.5">
                   {getCptsByCategory("cmt").concat(getCptsByCategory("therapy")).concat(getCptsByCategory("modality")).map(cpt => (
                     <button key={cpt.code} onClick={() => togglePhaseCpt(pi, cpt.code)}
-                      className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                         phase.cptCodes.includes(cpt.code) ? "bg-[#1E2D3B] text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                       }`}>
                       {cpt.code}
@@ -536,10 +536,10 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
           <div className="bg-[#1E2D3B] rounded-2xl p-6 text-white">
             <div className="flex justify-between items-center">
               <div>
-                <div className="text-xs text-white/40 uppercase tracking-wider">Total Plan</div>
+                <div className="text-xs text-white/40 tracking-wider">Total Plan</div>
                 <div className="text-sm text-white/70 mt-1">{totalVisits} visits over {totalWeeks} weeks ({state.phases.length} phases)</div>
               </div>
-              <div className="text-3xl font-black">{formatCents(totalPlanValue)}</div>
+              <div className="text-3xl font-bold">{formatCents(totalPlanValue)}</div>
             </div>
           </div>
         </div>
@@ -617,16 +617,16 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
                 <img src={practiceConfig.practice_logo_url} alt="Logo" className="h-8 mb-3" />
               )}
               <div className="text-sm font-bold opacity-60">{practiceConfig?.practice_name || "Care Plan"}</div>
-              <div className="text-2xl font-black mt-1">{state.patient_name || "Patient Name"}</div>
+              <div className="text-2xl font-bold mt-1">{state.patient_name || "Patient Name"}</div>
               <div className="text-sm opacity-50 mt-1">{state.date} | {state.care_track === "corrective" ? "Corrective Care" : "Relief Care"} | {state.case_type.toUpperCase()}</div>
             </div>
 
             <div className="p-8 space-y-6">
               {/* Dysfunction Score */}
               <div>
-                <div className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Dysfunction Score</div>
+                <div className="text-xs font-bold text-[#D66829] tracking-wider mb-2">Dysfunction Score</div>
                 <div className="flex items-center gap-4">
-                  <div className="text-4xl font-black text-[#1E2D3B]">{dysfunctionScore}<span className="text-lg text-gray-400">/{maxScore}</span></div>
+                  <div className="text-4xl font-bold text-[#1E2D3B]">{dysfunctionScore}<span className="text-lg text-gray-400">/{maxScore}</span></div>
                   <div className="text-xs text-gray-500">
                     {dysfunctionScore <= 10 ? "Mild" : dysfunctionScore <= 15 ? "Moderate" : dysfunctionScore <= 20 ? "Significant" : "Severe"} Dysfunction
                   </div>
@@ -636,7 +636,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
               {/* Complaints & Goals */}
               {state.complaints.length > 0 && (
                 <div>
-                  <div className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Areas of Concern</div>
+                  <div className="text-xs font-bold text-[#D66829] tracking-wider mb-2">Areas of Concern</div>
                   <div className="flex flex-wrap gap-1.5">
                     {state.complaints.map(c => (
                       <span key={c} className="px-2.5 py-1 bg-red-50 text-red-700 rounded-lg text-xs font-semibold">{c}</span>
@@ -647,7 +647,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
               {state.goals.length > 0 && (
                 <div>
-                  <div className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Your Goals</div>
+                  <div className="text-xs font-bold text-[#D66829] tracking-wider mb-2">Your Goals</div>
                   <ul className="space-y-1">
                     {state.goals.map(g => (
                       <li key={g} className="text-sm text-gray-700 flex items-start gap-2">
@@ -660,14 +660,14 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
               {/* Phase Timeline */}
               <div>
-                <div className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Care Plan Timeline</div>
+                <div className="text-xs font-bold text-[#D66829] tracking-wider mb-2">Care Plan Timeline</div>
                 <div className="flex gap-0 rounded-xl overflow-hidden h-12 mb-3">
                   {state.phases.map((p, i) => {
                     const colors = ["#1E2D3B", "#D66829", "#22c55e", "#3b82f6"];
                     const width = (p.weeks / totalWeeks) * 100;
                     return (
                       <div key={i} style={{ width: `${width}%`, background: colors[i % colors.length] }}
-                        className="flex items-center justify-center text-white text-[11px] font-bold px-2 text-center">
+                        className="flex items-center justify-center text-white text-xs font-bold px-2 text-center">
                         {p.name}
                       </div>
                     );
@@ -684,7 +684,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
               {/* Financial Summary */}
               <div className="bg-[#1E2D3B] rounded-xl p-5 text-white">
-                <div className="text-xs text-white/40 uppercase tracking-wider mb-3">Financial Summary</div>
+                <div className="text-xs text-white/40 tracking-wider mb-3">Financial Summary</div>
                 <div className="flex justify-between py-2 border-b border-white/10 text-sm">
                   <span className="text-white/70">Total Visits</span>
                   <span className="font-bold">{totalVisits}</span>
@@ -705,7 +705,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
                 )}
                 <div className="flex justify-between pt-3 text-lg">
                   <span className="text-white/70">Total Investment</span>
-                  <span className="font-black text-[#D66829]">
+                  <span className="font-bold text-[#D66829]">
                     {formatCents(totalPlanValue + totalSupplementsMonthly * Math.ceil(totalWeeks / 4))}
                   </span>
                 </div>
@@ -726,7 +726,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
               {/* Lifestyle */}
               {state.lifestyle_recs.length > 0 && (
                 <div>
-                  <div className="text-xs font-bold text-[#D66829] uppercase tracking-wider mb-2">Lifestyle Recommendations</div>
+                  <div className="text-xs font-bold text-[#D66829] tracking-wider mb-2">Lifestyle Recommendations</div>
                   <ul className="space-y-1">
                     {state.lifestyle_recs.map(l => (
                       <li key={l} className="text-sm text-gray-700 flex items-start gap-2">
@@ -739,7 +739,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
 
               {/* Notes */}
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Additional Notes</label>
+                <label className="text-xs font-bold text-gray-500 tracking-wider">Additional Notes</label>
                 <textarea value={state.notes} onChange={e => setState(p => ({ ...p, notes: e.target.value }))}
                   className="w-full mt-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:border-[#1E2D3B] outline-none resize-none"
                   rows={3} placeholder="Any additional notes for this care plan..." />
@@ -747,7 +747,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
             </div>
 
             {/* Footer */}
-            <div className="px-8 py-3 border-t border-gray-100 flex justify-between text-[10px] text-gray-400">
+            <div className="px-8 py-3 border-t border-gray-100 flex justify-between text-xs text-gray-400">
               <span>{practiceConfig?.practice_name} | {practiceConfig?.phone}</span>
               <span>Generated by NeurOS</span>
             </div>
@@ -760,7 +760,7 @@ export default function CarePlanCloser({ editId }: CarePlanCloserProps) {
               <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Draft"}
             </button>
             <button onClick={() => handleSave("presented")} disabled={saving}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50">
+              className="flex items-center gap-2 px-6 py-3 bg-portal-info-bg rounded-xl text-sm font-bold text-white hover:bg-portal-info-bg disabled:opacity-50">
               <Check className="w-4 h-4" /> Mark as Presented
             </button>
             <button onClick={() => handleSave("accepted")} disabled={saving}

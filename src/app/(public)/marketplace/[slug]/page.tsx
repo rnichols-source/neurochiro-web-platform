@@ -16,6 +16,7 @@ import VendorProducts from "./vendor-products";
 import VendorContact from "./vendor-contact";
 import VendorPageClient from "./vendor-page-client";
 import NetworkStats from "@/components/common/NetworkStats";
+import { createServerSupabase } from "@/lib/supabase-server";
 
 async function getVendorBySlug(slug: string) {
   const supabase = createAdminClient();
@@ -41,8 +42,9 @@ async function getRelatedVendors(categories: string[], currentId: string) {
   return data || [];
 }
 
-export default async function VendorProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function VendorProfilePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ from?: string }> }) {
   const { slug } = await params;
+  const { from } = await searchParams;
   const vendor = await getVendorBySlug(slug);
 
   if (!vendor) notFound();
@@ -75,8 +77,21 @@ export default async function VendorProfilePage({ params }: { params: Promise<{ 
   const founded = v.founded as string | null;
   const location = v.location as string | null;
 
+  let showPortalBar = false;
+  if (from === 'portal') {
+    const supabase = createServerSupabase();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+      showPortalBar = profile?.role === 'doctor' || profile?.role === 'founder' || profile?.role === 'super_admin';
+    }
+  }
+
   return (
     <div className="min-h-dvh bg-neuro-cream">
+      {showPortalBar ? (
+        <a href="/doctor/marketplace" className="block bg-neuro-navy text-white px-4 py-3 text-sm font-bold">Back to portal</a>
+      ) : null}
       {/* Hero */}
       <section className={`text-white pt-28 pb-14 px-6 relative overflow-hidden ${bannerUrl ? '' : 'bg-neuro-navy'}`}>
         {bannerUrl && (

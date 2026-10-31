@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import PageHeader from "@/components/portal/PageHeader";
+import HiringTabs from "./HiringTabs";
 import {
-  Plus,
   X,
   Briefcase,
   Loader2,
@@ -27,6 +28,7 @@ import {
   ChevronUp,
   BarChart3,
 } from "lucide-react";
+import EmptyState from "@/components/portal/EmptyState";
 import {
   getJobPostings,
   createJobPosting,
@@ -69,6 +71,8 @@ function StarRating({
           key={s}
           type="button"
           onClick={() => onChange?.(s === rating ? 0 : s)}
+          aria-label={`Rate ${s} of 5`}
+          title={`Rate ${s} of 5`}
           className={`${onChange ? "cursor-pointer hover:scale-110" : "cursor-default"} transition-transform`}
         >
           <Star
@@ -83,7 +87,7 @@ function StarRating({
 function Badge({ children, color = "gray" }: { children: React.ReactNode; color?: string }) {
   const colors: Record<string, string> = {
     gray: "bg-gray-100 text-gray-600",
-    blue: "bg-blue-100 text-blue-700",
+    blue: "bg-portal-info-bg text-blue-700",
     green: "bg-green-100 text-green-700",
     orange: "bg-orange-100 text-orange-700",
     purple: "bg-purple-100 text-purple-700",
@@ -132,13 +136,13 @@ export default function JobsPage() {
 
 function JobsPageInner() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const justPosted = searchParams.get('posted') === 'success'
   const [showPostedBanner, setShowPostedBanner] = useState(justPosted)
 
   const [jobs, setJobs] = useState<any[]>([]);
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showPostModal, setShowPostModal] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -178,6 +182,12 @@ function JobsPageInner() {
     loadData();
   }, [loadData]);
 
+  const showPostModal = searchParams.get("post") === "1";
+
+  function closePostModal() {
+    if (showPostModal) router.replace("/doctor/jobs");
+  }
+
   const [applyMethod, setApplyMethod] = useState("neurochiro");
   const [selectedTemplate, setSelectedTemplate] = useState("");
 
@@ -198,7 +208,7 @@ function JobsPageInner() {
       apply_method: fd.get("apply_method") as string,
       apply_url: (fd.get("apply_url") as string) || null,
     });
-    setShowPostModal(false);
+    closePostModal();
     setApplyMethod("neurochiro");
     setSelectedTemplate("");
     setSubmitting(false);
@@ -333,7 +343,13 @@ function JobsPageInner() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-6">
+      <PageHeader
+        title="Hiring"
+        description="Jobs, students, and ChiroMatch."
+        primary={{ label: "Post a job", href: "/doctor/jobs?post=1" }}
+      />
+      <HiringTabs />
       {/* Success banner after Stripe checkout */}
       {showPostedBanner && (
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center justify-between">
@@ -344,7 +360,7 @@ function JobsPageInner() {
               <p className="text-xs text-green-600">Your listing is now live for 30 days. Applications will arrive in your dashboard and by email.</p>
             </div>
           </div>
-          <button onClick={() => setShowPostedBanner(false)} className="text-green-400 hover:text-green-600"><X className="w-4 h-4" /></button>
+          <button type="button" onClick={() => setShowPostedBanner(false)} className="text-green-400 hover:text-green-600" aria-label="Dismiss" title="Dismiss"><X className="w-4 h-4" /></button>
         </div>
       )}
 
@@ -381,7 +397,7 @@ function JobsPageInner() {
               if (count === 0) return null;
               const pct = (count / totalApplicants) * 100;
               const barColors: Record<string, string> = {
-                New: "bg-blue-400",
+                New: "bg-portal-info-bg",
                 Reviewing: "bg-purple-400",
                 "Phone Screen": "bg-indigo-400",
                 Interview: "bg-neuro-orange",
@@ -402,23 +418,9 @@ function JobsPageInner() {
         )}
       </div>
 
-      {/* ── Header ───────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-black text-neuro-navy">Jobs</h1>
-        <button
-          onClick={() => setShowPostModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-neuro-orange text-white rounded-lg hover:bg-neuro-orange/90 transition-colors text-sm font-bold"
-        >
-          <Plus className="w-4 h-4" /> Post New Job
-        </button>
-      </div>
-
       {/* ── Job List ─────────────────────────────────────────────────── */}
       {jobs.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
-          <Briefcase className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-          <p>No job postings yet.</p>
-        </div>
+        <EmptyState icon={Briefcase} title="No job postings yet" sentence="Post a role when you are ready to hire." />
       ) : (
         <div className="space-y-4">
           {jobs.map((job) => {
@@ -460,7 +462,9 @@ function JobsPageInner() {
                   </button>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
+                      type="button"
                       onClick={() => handleToggleStatus(job.id, job.status)}
+                      aria-label={isOpen ? "Close posting" : "Reopen posting"}
                       title={isOpen ? "Close posting" : "Reopen posting"}
                       className="p-1.5 rounded hover:bg-gray-100 text-gray-400 hover:text-gray-600"
                     >
@@ -471,7 +475,10 @@ function JobsPageInner() {
                       )}
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(job.id)}
+                      aria-label="Delete job"
+                      title="Delete job"
                       className="p-1.5 rounded hover:bg-red-50 text-gray-400 hover:text-red-600"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -544,6 +551,7 @@ function JobsPageInner() {
                                     onClick={() => advanceStage(app.id, stage, -1)}
                                     disabled={stage === "New"}
                                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed text-gray-500"
+                                    aria-label="Move back"
                                     title="Move back"
                                   >
                                     <ChevronLeft className="w-4 h-4" />
@@ -552,6 +560,7 @@ function JobsPageInner() {
                                     onClick={() => advanceStage(app.id, stage, 1)}
                                     disabled={stage === "Hired"}
                                     className="p-1 rounded hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed text-neuro-orange"
+                                    aria-label="Advance"
                                     title="Advance"
                                   >
                                     <ChevronRight className="w-4 h-4" />
@@ -627,7 +636,7 @@ function JobsPageInner() {
                               {app.skills.slice(0, 4).map((skill: string, i: number) => (
                                 <span
                                   key={i}
-                                  className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded"
+                                  className="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded"
                                 >
                                   {skill}
                                 </span>
@@ -772,7 +781,7 @@ function JobsPageInner() {
       {/* ── Post Job Modal (with templates) ──────────────────────────── */}
       {showPostModal && (
         <PostJobModal
-          onClose={() => setShowPostModal(false)}
+          onClose={closePostModal}
         />
       )}
     </div>
@@ -823,7 +832,7 @@ function ApplicantDetailPanel({
               {appDetail.jobTitle} - <Badge color={STAGE_COLORS[appDetail.stage] || "gray"}>{appDetail.stage}</Badge>
             </p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button type="button" onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg" aria-label="Close" title="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -943,7 +952,7 @@ function ApplicantDetailPanel({
             </button>
             <button
               onClick={() => onShowEmail(appDetail.stage)}
-              className="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-bold rounded-lg border border-gray-200 hover:bg-blue-50 text-blue-700 transition-colors"
+              className="flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-bold rounded-lg border border-gray-200 hover:bg-portal-info-bg text-blue-700 transition-colors"
             >
               <Mail className="w-4 h-4" />
               Send Email
@@ -986,7 +995,7 @@ function InterviewModal({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-bold text-neuro-navy">Interview Question Bank</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1074,7 +1083,7 @@ function ReferenceModal({
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-bold text-neuro-navy">Reference Check</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1092,7 +1101,7 @@ function ReferenceModal({
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Intro Script */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="bg-portal-info-bg border border-blue-200 rounded-lg p-3">
             <p className="text-xs font-bold text-blue-700 mb-1">Intro Script</p>
             <p className="text-sm text-blue-900 whitespace-pre-wrap">
               {fillPlaceholders(template.introScript, appDetail)}
@@ -1159,7 +1168,7 @@ function OfferModal({
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-bold text-neuro-navy">Offer Letter Generator</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1225,7 +1234,7 @@ function EmailModal({
       <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-bold text-neuro-navy">Email Template</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -1325,7 +1334,7 @@ function PostJobModal({
       <div className="bg-white rounded-xl w-full max-w-lg max-h-[90vh] shadow-xl flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-gray-100">
           <h2 className="text-lg font-semibold">{step === 'form' ? 'Post a Job' : 'Review & Pay'}</h2>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} className="p-1 hover:bg-gray-100 rounded" aria-label="Close" title="Close"><X className="w-5 h-5" /></button>
         </div>
 
         {step === 'form' ? (
@@ -1352,7 +1361,7 @@ function PostJobModal({
             </div>
 
             {/* Compensation — required with explanation */}
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <div className="bg-portal-info-bg border border-blue-100 rounded-xl p-4">
               <label className="block text-sm font-bold text-gray-700 mb-1">Compensation Range *</label>
               <p className="text-xs text-gray-500 mb-3">Students filter jobs by pay first. A post without a range gets skipped. Be honest and you'll attract the right candidates.</p>
               <div className="flex items-center gap-2 mb-2">
@@ -1414,7 +1423,7 @@ function PostJobModal({
           <div className="flex-1 overflow-y-auto p-5 space-y-4">
             {/* Preview */}
             <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-              <p className="text-xs text-gray-400 uppercase tracking-wider font-bold mb-2">How students will see your listing</p>
+              <p className="text-xs text-gray-400 tracking-wider font-bold mb-2">How students will see your listing</p>
               <h3 className="text-lg font-bold text-neuro-navy mb-1">{form.title}</h3>
               <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
                 {form.city && <span>{form.city}{form.state ? `, ${form.state}` : ''}</span>}
@@ -1432,7 +1441,7 @@ function PostJobModal({
 
             {/* Pricing */}
             <div className="bg-neuro-orange/5 border border-neuro-orange/20 rounded-xl p-4 text-center">
-              <p className="text-2xl font-black text-neuro-navy">$99</p>
+              <p className="text-2xl font-bold text-neuro-navy">$99</p>
               <p className="text-sm text-gray-500">for 30 days on the NeuroChiro Job Board</p>
               <p className="text-xs text-gray-400 mt-2">Your listing will be visible to all verified chiropractic students. Applications go to your dashboard and email. You can edit the listing while it's active.</p>
             </div>

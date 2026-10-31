@@ -1,500 +1,113 @@
-"use client";
+import Link from 'next/link';
+import { Suspense } from 'react';
+import PageHeader from '@/components/portal/PageHeader';
+import StatList from '@/components/portal/StatList';
+import LineChart from '@/components/portal/LineChart';
+import { getPortalContext } from '@/lib/portal/context';
+import { greeting, firstName } from '@/lib/portal/greeting';
+import { getDoctorTimezone } from '@/lib/doctor-timezone';
+import { getDoctorPortalStats } from '@/lib/portal/stats-load';
+import { getFeature } from '@/lib/portal/features';
+import { redirect } from 'next/navigation';
+import SetupChecklist from './setup-checklist';
+import AttentionList from './attention-list';
+import InviteColleague from './invite-colleague';
+import { getAttention, getSetupFields, getViewSeries } from './home-data';
 
-import { Loader2, Eye, Users, DollarSign, MapPin, Briefcase, Calendar, Bell, Mail, ArrowRight, Copy, CheckCircle2, Gift, Zap, X, Lock, TrendingUp, Video, Image as ImageIcon, Star, BarChart3, Search, Send, Phone } from "lucide-react";
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { motion } from "framer-motion";
-import { isProfileGated } from "@/lib/profile-gating";
-import {
-  getDoctorDashboardStats,
-  getDoctorActivityFeed,
-  getPracticeHealthScore,
-  getCompetitiveIntelligence,
-  getSmartActionItems,
-  getRevenueIntelligence,
-  getLeadPipelineStages,
-  acknowledgeContactRequest,
-} from "./actions";
-import { formatDistanceToNow } from "date-fns";
-import { getOrCreateReferralCode, getReferralStats } from "@/app/actions/referral-program";
-import { getPortalShellData } from "../portal-actions";
-import WhatsNew from "@/components/common/WhatsNew";
-import PracticeHealthGauge from "./practice-health";
-import ActionItems from "./action-items";
-import LeadPipelineWidget from "./lead-pipeline-widget";
-import CompetitiveIntelWidget from "./competitive-intel-widget";
-import RevenueWidget from "./revenue-widget";
-import WeeklyInsight from "./weekly-insight";
-import ProfileOptimization from "./profile-optimization";
-import RoutingWidget from "./routing-widget";
+function Card({ children }: { children: React.ReactNode }) {
+  return <section className="bg-white border border-portal-border rounded-xl p-4">{children}</section>;
+}
 
-const fadeUp = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] },
-};
-
-function delay(d: number) { return { ...fadeUp, transition: { ...fadeUp.transition, delay: d } }; }
-
-export default function DoctorDashboard() {
-  const searchParams = useSearchParams();
-  const [data, setData] = useState<any>(null);
-  const [health, setHealth] = useState<any>(null);
-  const [intel, setIntel] = useState<any>(null);
-  const [actionItems, setActionItems] = useState<any[]>([]);
-  const [revenue, setRevenue] = useState<any>(null);
-  const [pipeline, setPipeline] = useState<any>(null);
-  const [activity, setActivity] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [views, setViews] = useState(0);
-  const [showUpgradeBanner, setShowUpgradeBanner] = useState(searchParams.get("upgraded") === "true");
-  const [showClaimedBanner, setShowClaimedBanner] = useState(searchParams.get("claimed") === "true");
-
-  // Referral state
-  const [referralCode, setReferralCode] = useState("");
-  const [referralStats, setReferralStats] = useState<any>(null);
-  const [copied, setCopied] = useState(false);
-  const [showIntroductions, setShowIntroductions] = useState(false);
-
-  useEffect(() => {
-    Promise.allSettled([
-      getDoctorDashboardStats(),
-      getPracticeHealthScore(),
-      getCompetitiveIntelligence(),
-      getSmartActionItems(),
-      getRevenueIntelligence(),
-      getLeadPipelineStages(),
-      getDoctorActivityFeed(),
-    ]).then((results) => {
-      const val = (i: number) => results[i].status === 'fulfilled' ? results[i].value : null;
-      if (val(0)) setData(val(0));
-      if (val(1)) setHealth(val(1));
-      if (val(2)) setIntel(val(2));
-      setActionItems((val(3) as any) || []);
-      if (val(4)) setRevenue(val(4));
-      if (val(5)) setPipeline(val(5));
-      setActivity((val(6) as any) || []);
-      setLoading(false);
-    });
-
-    getPortalShellData().then((shell) => {
-      if (shell?.doctor) setViews(shell.doctor.profile_views || 0);
-    });
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-neuro-orange animate-spin" />
-      </div>
-    );
-  }
-
-  const doctorName = (data?.profile?.name || data?.profile?.full_name || "Doctor").split(" ")[0];
-  const clinicName = data?.doctor?.clinic_name || "";
-  const slug = data?.doctor?.slug;
-  const stats = data?.stats || [];
-  const profileViews = views || parseInt(stats[0]?.value || "0");
-  const patientLeads = parseInt(stats[1]?.value || "0");
-
-  const iconMap: Record<string, any> = { job: Briefcase, seminar: Calendar, referral: Users, message: Mail, system: Bell };
+async function DashboardBody() {
+  const ctx = await getPortalContext();
+  if (!ctx?.doctor) redirect('/login');
+  const doctor = ctx.doctor;
+  const timeZone = getDoctorTimezone(doctor.state, doctor.country, 'America/New_York') || 'America/New_York';
+  const hello = `${greeting(new Date(), timeZone)}, Dr. ${firstName(ctx.fullName)}`;
+  const profilePath = doctor.slug ? `/directory/${doctor.slug}` : '/doctor/profile';
+  const [stats, fields, attention, points] = await Promise.all([
+    getDoctorPortalStats({
+      doctorId: doctor.id,
+      userId: ctx.userId,
+      range: 'month',
+      city: doctor.city,
+      profileViews: doctor.profile_views,
+    }),
+    getSetupFields(doctor.id),
+    getAttention(doctor.id, ctx.userId),
+    getViewSeries(doctor.id),
+  ]);
+  const lives = getFeature('lives');
+  const showLives = lives && lives.state !== 'hidden' && lives.state !== 'coming_soon';
+  const plan = ctx.membership.isFounder
+    ? 'Founding member'
+    : ctx.membership.priceLabel || (ctx.membership.source === 'comped' ? 'Included' : 'Free');
 
   return (
-    <div className="p-4 md:p-8 lg:p-10 max-w-6xl mx-auto space-y-6">
-      {/* Upgrade Success Banner */}
-      {showUpgradeBanner && (
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-green-500/10 border border-green-500/30 rounded-2xl p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <Zap className="w-5 h-5 text-green-500" />
-            </div>
-            <div>
-              <p className="font-black text-green-700 text-sm">Upgrade complete — all features are now unlocked!</p>
-              <p className="text-green-600/70 text-xs mt-0.5">Your new tools are ready to use in the sidebar.</p>
-            </div>
-          </div>
-          <button onClick={() => setShowUpgradeBanner(false)} className="p-1.5 text-green-500 hover:bg-green-500/10 rounded-lg"><X className="w-4 h-4" /></button>
-        </motion.div>
-      )}
-
-      {/* Profile Claimed Banner */}
-      {showClaimedBanner && (
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-neuro-orange/10 border border-neuro-orange/30 rounded-2xl p-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-neuro-orange/20 rounded-xl flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-neuro-orange" />
-            </div>
-            <div>
-              <p className="font-black text-neuro-navy text-sm">Profile claimed! Add your photo and details to stand out.</p>
-              <p className="text-gray-500 text-xs mt-0.5">Upgrade anytime to unlock patient leads, analytics, and more.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Link href="/doctor/profile" className="px-4 py-2 bg-neuro-orange text-white rounded-xl text-xs font-bold hover:bg-neuro-orange/90 whitespace-nowrap">Edit Profile</Link>
-            <button onClick={() => setShowClaimedBanner(false)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"><X className="w-4 h-4" /></button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Welcome Checklist — shows until profile is 100% complete */}
-      {data?.marketPerformance?.completeness < 100 && data?.marketPerformance?.missingItems?.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-black text-neuro-navy text-base">Complete Your Profile</h3>
-              <p className="text-gray-400 text-xs mt-0.5">Complete profiles get 5x more patient inquiries.</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-black text-neuro-orange">{data.marketPerformance.completeness}%</span>
-              <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-neuro-orange rounded-full transition-all" style={{ width: `${data.marketPerformance.completeness}%` }} />
-              </div>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {data.marketPerformance.missingItems.map((label: string, i: number) => (
-              <Link
-                key={i}
-                href="/doctor/profile"
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
-              >
-                <div className="w-6 h-6 rounded-full border-2 border-gray-200 group-hover:border-neuro-orange transition-colors flex-shrink-0" />
-                <span className="text-sm text-gray-600 group-hover:text-neuro-navy transition-colors">{label}</span>
-                <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-neuro-orange ml-auto transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Feature Adoption Checklist — helps Pro members discover tools */}
-      {data?.doctor && !isProfileGated(data.doctor) && (
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] p-6">
-          <div className="mb-4">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Get the Most Out of Pro</p>
-            <p className="text-white/30 text-xs">Complete these to maximize your membership value.</p>
-          </div>
-          <div className="space-y-2">
-            {[
-              { label: "Complete your profile", done: (data?.marketPerformance?.completeness || 0) >= 100, href: "/doctor/profile" },
-              { label: "Check your analytics", done: profileViews > 0, href: "/doctor/analytics" },
-              { label: "Share your profile link", done: !slug, href: `/directory/${slug || ''}` },
-              { label: "Watch a weekly live recap", done: false, href: "/doctor/lives" },
-              { label: "Explore the Care Plan Closer", done: false, href: "/doctor/care-plan-closer" },
-            ].filter(item => !item.done).slice(0, 3).map((item, i) => (
-              <Link
-                key={i}
-                href={item.href}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.04] transition-colors group"
-              >
-                <div className="w-5 h-5 rounded-full border-2 border-white/15 group-hover:border-neuro-orange transition-colors flex-shrink-0" />
-                <span className="text-sm text-white/50 group-hover:text-white transition-colors">{item.label}</span>
-                <ArrowRight className="w-3.5 h-3.5 text-white/15 group-hover:text-neuro-orange ml-auto transition-colors" />
-              </Link>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Upgrade Nudge Banner — shows for gated free profiles */}
-      {data?.doctor && isProfileGated(data.doctor) && profileViews > 0 && (
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-r from-neuro-navy to-neuro-navy/90 rounded-2xl p-6 border border-neuro-orange/20 shadow-lg">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-neuro-orange/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <TrendingUp className="w-6 h-6 text-neuro-orange" />
-              </div>
-              <div>
-                <p className="font-black text-white text-base">
-                  {profileViews} {profileViews === 1 ? 'patient' : 'patients'} found your profile
-                </p>
-                <p className="text-gray-400 text-sm mt-1">
-                  But they can't see your phone number, website, or booking link yet. Upgrade to Pro so patients can actually reach you.
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <Lock className="w-3 h-3 text-neuro-orange" />
-                  <span className="text-neuro-orange text-xs font-semibold">Phone, website, email & socials are hidden on your public profile</span>
-                </div>
-              </div>
-            </div>
-            <Link href="/pricing" className="px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl text-sm hover:bg-neuro-orange/90 transition-colors whitespace-nowrap flex-shrink-0">
-              Unlock for $99/mo
-            </Link>
-          </div>
-        </motion.div>
-      )}
-
-      <WhatsNew />
-
-      {/* Top Banner: Greeting + Practice Health Score */}
-      <motion.div {...delay(0)} className="bg-neuro-navy rounded-2xl shadow-lg p-6 md:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Practice Command Center</p>
-            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-              Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'}, Dr. {doctorName}
-            </h1>
-            {clinicName && <p className="text-gray-400 text-sm mt-1">{clinicName}</p>}
-            {slug && (
-              <Link href={`/directory/${slug}`} target="_blank" className="text-xs text-neuro-orange hover:underline mt-2 inline-flex items-center gap-1">
-                View Public Profile <ArrowRight className="w-3 h-3" />
-              </Link>
-            )}
-          </div>
-          {health && <PracticeHealthGauge data={health} />}
+    <div className="space-y-6" data-patient-requests={stats.patientRequests.total}>
+      <PageHeader
+        title={hello}
+        description="Here's what needs you today."
+        primary={{ label: 'Refer a patient', href: '/doctor/referral-network' }}
+      />
+      <p className="text-sm text-portal-ink-2 -mt-4">
+        {doctor.clinic_name || 'Your practice'}
+        {doctor.slug ? (
+          <>
+            {' · '}
+            <Link href={profilePath} target="_blank" className="text-portal-accent font-bold">View my public profile</Link>
+          </>
+        ) : null}
+      </p>
+      <SetupChecklist fields={fields} profileUrl={doctor.slug ? `https://neurochiro.co/directory/${doctor.slug}` : 'https://neurochiro.co'} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
+          <AttentionList items={attention} />
+          <Card>
+            <h2 className="text-lg font-bold text-portal-ink">Profile views</h2>
+            <p className="text-sm text-portal-muted mb-2">All time: {stats.profileViews.toLocaleString()}</p>
+            <LineChart points={points} />
+          </Card>
         </div>
-      </motion.div>
-
-      {/* Key Metrics */}
-      <motion.div {...delay(0.05)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 grid grid-cols-2 sm:grid-cols-5 divide-x divide-white/[0.06]">
-        {[
-          { icon: Eye, value: profileViews, label: "Profile Views", color: "text-blue-400", clickable: false },
-          { icon: Users, value: patientLeads, label: "Appointment Requests", color: "text-emerald-400", clickable: false },
-          { icon: Phone, value: data?.contactRequests?.count || 0, label: "Contact Requests", color: "text-purple-400", clickable: false },
-          { icon: Send, value: data?.referrals?.count || 0, label: "Pointed Your Way", color: "text-cyan-400", clickable: true },
-          { icon: MapPin, value: intel ? `#${intel.cityRank}` : '—', label: intel ? `in ${intel.city}` : 'Network Rank', color: "text-neuro-orange", clickable: false },
-        ].map((stat, i) => (
-          <div key={i}
-            className={`px-3 sm:px-5 py-4 sm:py-6 text-center ${stat.clickable ? 'cursor-pointer hover:bg-white/[0.03] transition-colors' : ''}`}
-            onClick={stat.clickable ? () => setShowIntroductions(!showIntroductions) : undefined}
-          >
-            <stat.icon className={`w-4 h-4 ${stat.color} mx-auto mb-2`} />
-            <p className="text-2xl sm:text-3xl font-bold text-white tabular-nums">{stat.value}</p>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.15em] text-white/25 mt-1">{stat.label}</p>
-          </div>
-        ))}
-      </motion.div>
-
-      {/* Introductions detail */}
-      {showIntroductions && data?.referrals?.cities && (
-        <motion.div {...delay(0)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-cyan-400 font-semibold mb-1">Introductions</p>
-              <h3 className="text-sm font-bold text-white">Patients we pointed toward you</h3>
-            </div>
-            <button onClick={() => setShowIntroductions(false)} className="text-white/30 hover:text-white/60">
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          {data.referrals.cities.length > 0 ? (
-            <div className="space-y-2">
-              {data.referrals.cities.map((city: string, i: number) => (
-                <div key={i} className="flex items-center gap-3 py-2 px-3 bg-white/[0.03] rounded-xl">
-                  <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
-                  <span className="text-sm text-white/70">{city}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-white/30">No introductions yet. When we point a patient toward you, it'll show here.</p>
-          )}
-          <p className="text-[10px] text-white/20 mt-4">These are people we introduced to your practice. Whether they booked is between you and them.</p>
-        </motion.div>
-      )}
-
-      {/* Contact Requests */}
-      {data?.contactRequests?.items?.length > 0 && (
-        <motion.div {...delay(0.07)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-          <div className="mb-4">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-purple-400 font-semibold mb-1">Patient Requests</p>
-            <h3 className="text-sm font-bold text-white">People who asked your office to call them</h3>
-          </div>
-          <div className="space-y-3">
-            {data.contactRequests.items.map((req: any) => (
-              <div key={req.id} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-white text-sm">{req.name}</p>
-                    <a href={`tel:${req.phone}`} className="text-neuro-orange font-bold text-sm">{req.phone}</a>
-                    {req.note && <p className="text-xs text-white/40 mt-1">"{req.note}"</p>}
-                    <p className="text-[10px] text-white/20 mt-1">{req.source} · {req.date}</p>
-                  </div>
-                  <div className="shrink-0">
-                    {req.contact_outcome === 'patient_contacted_confirmed' ? (
-                      <span className="text-[10px] px-2 py-1 bg-green-500/20 text-green-400 rounded-full font-bold">Called</span>
-                    ) : req.contact_outcome === 'will_call_today' ? (
-                      <div className="flex flex-col gap-1">
-                        <span className="text-[10px] px-2 py-1 bg-amber-500/20 text-amber-400 rounded-full font-bold text-center">Pending</span>
-                        <button
-                          onClick={async () => { await acknowledgeContactRequest(req.id, 'called'); const d = await getDoctorDashboardStats(); setData(d); }}
-                          className="text-[10px] px-2 py-1 bg-green-600 text-white rounded-full font-bold hover:bg-green-500 min-h-[28px]"
-                        >
-                          Done
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={async () => { await acknowledgeContactRequest(req.id, 'called'); const d = await getDoctorDashboardStats(); setData(d); }}
-                          className="text-[10px] px-3 py-1.5 bg-green-600 text-white rounded-lg font-bold hover:bg-green-500 min-h-[32px]"
-                        >
-                          I called them
-                        </button>
-                        <button
-                          onClick={async () => { await acknowledgeContactRequest(req.id, 'will_call'); const d = await getDoctorDashboardStats(); setData(d); }}
-                          className="text-[10px] px-3 py-1.5 bg-white/10 text-white/70 rounded-lg font-bold hover:bg-white/20 min-h-[32px]"
-                        >
-                          I'll call today
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* What You Get This Month */}
-      <motion.div {...delay(0.1)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-1">Your Membership</p>
-            <h3 className="text-sm font-bold text-white">What You Get This Month</h3>
-          </div>
-          <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">Pro — $99/mo</span>
+        <div className="space-y-4">
+          <StatList
+            title="This month"
+            rows={[
+              { label: 'Profile views', value: (stats.viewsInRange ?? stats.profileViews).toLocaleString(), hint: 'Profile views: people who opened your public profile. The all-time total is on the chart. This number is views in the current month when that log exists.' },
+              { label: 'New leads', value: String(stats.patientRequests.total), hint: 'Patient requests: people who asked to book with you through NeuroChiro this month.' },
+              { label: 'Referrals sent', value: String(stats.referralsSent), hint: 'Referrals sent: patients you sent to another doctor this month.' },
+              { label: 'Referrals received', value: String(stats.referralsReceived), hint: 'Referrals received: patients other doctors sent you this month.' },
+            ]}
+          />
+          <Card>
+            <h2 className="text-lg font-bold text-portal-ink">Your membership</h2>
+            <p className="text-sm text-portal-ink-2 mt-1">Your plan: {plan}</p>
+            <ul className="mt-3 space-y-2 text-sm text-portal-ink-2">
+              <li>Network profile, so patients can find you on neurochiro.co.</li>
+              <li>{stats.patientRequests.total} new lead{stats.patientRequests.total === 1 ? '' : 's'} this month.</li>
+              {showLives ? <li>The Weekly Adjustment. Thursday at 8 PM ET.</li> : null}
+              <li>Spotlight interview. We will reach out to schedule.</li>
+              <li>Content rotation. We will reach out to schedule.</li>
+            </ul>
+            <Link href="/doctor/billing" className="mt-3 min-h-11 inline-flex items-center text-sm font-bold text-portal-accent">Plan and billing</Link>
+          </Card>
+          <InviteColleague initialCode={null} />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {[
-            { icon: Search, label: "Network profile", detail: "Active — patients can find you via SEO", done: true, link: undefined as string | undefined },
-            { icon: Users, label: "Patient leads", detail: `${patientLeads} lead${patientLeads !== 1 ? 's' : ''} this month`, done: patientLeads > 0, link: "/doctor/leads" },
-            { icon: Video, label: "The Weekly Adjustment", detail: "Live show every Thursday 8 PM — you get featured", done: false, link: "/doctor/lives" },
-            { icon: Star, label: "Spotlight interview", detail: "On YouTube + clips for your social", done: false, link: undefined },
-            { icon: ImageIcon, label: "Content rotation", detail: "Your clips and graphics posted to our audience", done: false, link: undefined },
-            { icon: BarChart3, label: "Monthly growth report", detail: "Views, patient actions, city ranking", done: false, link: "/doctor/analytics" },
-          ].map((item, i) => {
-            const content = (
-              <div className={`flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] ${item.link ? 'hover:bg-white/[0.06] transition-colors cursor-pointer' : ''}`}>
-                <item.icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${item.done ? 'text-green-400' : 'text-white/25'}`} />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white/80">{item.label}</p>
-                  <p className="text-[11px] text-white/30 mt-0.5">{item.detail}</p>
-                </div>
-              </div>
-            );
-            return item.link ? <Link key={i} href={item.link}>{content}</Link> : <div key={i}>{content}</div>;
-          })}
-        </div>
-      </motion.div>
-
-      {/* Smart Action Items */}
-      <motion.div {...delay(0.15)}>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-neuro-orange font-semibold mb-3">Action Items</p>
-        <ActionItems items={actionItems} />
-      </motion.div>
-
-      {/* Patients Sent to You */}
-      <motion.div {...delay(0.12)}>
-        <RoutingWidget />
-      </motion.div>
-
-      {/* Two-Column: Pipeline + Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div {...delay(0.15)}>
-          <LeadPipelineWidget stages={pipeline || { new: 0, contacted: 0, scheduled: 0, converted: 0 }} />
-        </motion.div>
-
-        <motion.div {...delay(0.15)} className="bg-gradient-to-b from-[#1a2e40] to-[#162231] rounded-2xl border border-white/[0.08] shadow-lg shadow-black/20 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-white">Recent Activity</h3>
-            <Link href="/doctor/notifications" className="text-[10px] font-bold text-neuro-orange hover:underline">View All</Link>
-          </div>
-          {activity.length === 0 ? (
-            <p className="text-xs text-white/30">No recent activity yet.</p>
-          ) : (
-            <div className="space-y-3">
-              {activity.slice(0, 5).map((item: any, i: number) => {
-                const Icon = iconMap[item.type] || Bell;
-                return (
-                  <Link key={i} href={item.link || '#'} className="flex items-start gap-3 group">
-                    <div className="w-8 h-8 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
-                      <Icon className="w-4 h-4 text-white/30" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-white/60 group-hover:text-neuro-orange transition-colors truncate">{item.title}</p>
-                      <p className="text-[10px] text-white/20">{formatDistanceToNow(new Date(item.time), { addSuffix: true })}</p>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </motion.div>
       </div>
-
-      {/* Two-Column: Revenue + Competitive Intel */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {revenue && (
-          <motion.div {...delay(0.2)}>
-            <RevenueWidget {...revenue} />
-          </motion.div>
-        )}
-        {intel && (
-          <motion.div {...delay(0.2)}>
-            <CompetitiveIntelWidget {...intel} />
-          </motion.div>
-        )}
-      </div>
-
-      {/* AI Insights Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div {...delay(0.22)}>
-          <WeeklyInsight />
-        </motion.div>
-        <motion.div {...delay(0.22)}>
-          <ProfileOptimization />
-        </motion.div>
-      </div>
-
-      {/* Quick Actions */}
-      <motion.div {...delay(0.25)}>
-        <p className="text-[10px] uppercase tracking-[0.2em] text-white/20 font-semibold mb-3">Quick Actions</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { label: "Edit Profile", href: "/doctor/profile", icon: "👤" },
-            { label: "Post a Job", href: "/doctor/jobs", icon: "💼" },
-            { label: "Browse Students", href: "/doctor/students", icon: "🎓" },
-            { label: "Marketplace", href: "/marketplace", icon: "🛒" },
-          ].map((action) => (
-            <Link key={action.href} href={action.href} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-center hover:border-[#D66829]/30 hover:bg-[#D66829]/5 transition-all">
-              <span className="text-2xl block mb-2">{action.icon}</span>
-              <p className="text-xs font-bold text-white/50">{action.label}</p>
-            </Link>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Referral Program */}
-      <motion.div {...delay(0.3)} className="bg-neuro-navy rounded-2xl p-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Gift className="w-5 h-5 text-neuro-orange" />
-          <h3 className="text-sm font-bold text-white">Referral Program</h3>
-        </div>
-        <p className="text-xs text-gray-400 mb-4">Invite doctors to NeuroChiro and earn free months on your membership.</p>
-        {referralCode ? (
-          <div className="flex items-center gap-2">
-            <code className="flex-1 px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm font-mono text-neuro-orange">
-              neurochiro.co/join?ref={referralCode}
-            </code>
-            <button
-              onClick={() => { navigator.clipboard.writeText(`https://neurochiro.co/join?ref=${referralCode}`); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-              className="p-2.5 bg-neuro-orange text-white rounded-lg hover:bg-neuro-orange/90"
-            >
-              {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={async () => { const result = await getOrCreateReferralCode(); if (result && typeof result === 'object' && 'code' in result) setReferralCode((result as any).code); else if (typeof result === 'string') setReferralCode(result); }}
-            className="px-4 py-2 bg-neuro-orange text-white text-xs font-bold rounded-lg hover:bg-neuro-orange/90"
-          >
-            Generate Referral Link
-          </button>
-        )}
-      </motion.div>
+      {stats.market ? (
+        <Card>
+          <h2 className="text-lg font-bold text-portal-ink">Your market</h2>
+          <p className="text-sm text-portal-ink-2 mt-1">Rank {stats.market.rank} of {stats.market.total} verified doctors in {doctor.city}. Average profile views: {stats.market.avgViews}.</p>
+        </Card>
+      ) : null}
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="h-40 bg-white border border-portal-border rounded-xl animate-pulse" />}>
+      <DashboardBody />
+    </Suspense>
   );
 }

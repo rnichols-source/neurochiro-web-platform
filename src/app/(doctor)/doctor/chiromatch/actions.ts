@@ -2,18 +2,36 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { deriveCycleStatus } from '@/lib/chiromatch-status'
 import type { MatchCycle, MatchPosition } from '@/types/chiromatch'
+
+function withDerivedStatus(cycle: MatchCycle, now: Date): MatchCycle | null {
+  const derived = deriveCycleStatus(cycle, now);
+  if (derived.finished) return null;
+  const status: MatchCycle['status'] =
+    derived.phase === 'open' ? 'ranking_open'
+    : derived.phase === 'closed' ? 'ranking_closed'
+    : 'upcoming';
+  return { ...cycle, status };
+}
 
 export async function getActiveCycle(): Promise<MatchCycle | null> {
   const sb = createServerSupabase() as any;
   const { data } = await sb
     .from('match_cycles')
     .select('*')
-    .in('status', ['upcoming', 'ranking_open', 'ranking_closed', 'matched'])
-    .order('match_day', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-  return data;
+    .order('ranking_opens_at', { ascending: true });
+  const now = new Date();
+  const cycles = ((data || []) as MatchCycle[])
+    .map((cycle) => withDerivedStatus(cycle, now))
+    .filter((cycle): cycle is MatchCycle => cycle != null);
+  const open = cycles.find((cycle) => cycle.status === 'ranking_open');
+  if (open) return open;
+  const closed = cycles
+    .filter((cycle) => cycle.status === 'ranking_closed')
+    .sort((a, b) => new Date(a.match_day).getTime() - new Date(b.match_day).getTime());
+  if (closed[0]) return closed[0];
+  return cycles.find((cycle) => cycle.status === 'upcoming') || null;
 }
 
 export async function getMyMatchPositions(cycleId?: string): Promise<MatchPosition[]> {
@@ -38,17 +56,10 @@ export async function createMatchPosition(input: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Not authenticated' };
 
-  // Get active cycle
-  const sb = supabase as any;
-  const { data: cycle } = await sb
-    .from('match_cycles')
-    .select('id, status')
-    .in('status', ['upcoming', 'ranking_open'])
-    .order('match_day', { ascending: true })
-    .limit(1)
-    .maybeSingle();
-
-  if (!cycle) return { error: 'No active match cycle accepting positions' };
+  const cycle = await getActiveCycle();
+  if (!cycle || (cycle.status !== 'upcoming' && cycle.status !== 'ranking_open')) {
+    return { error: 'No active match cycle accepting positions' };
+  }
 
   const admin = createAdminClient() as any;
   const { error } = await admin.from('match_positions').insert({
