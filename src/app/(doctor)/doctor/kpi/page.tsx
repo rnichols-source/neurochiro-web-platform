@@ -675,7 +675,7 @@ function KpiTrackerContent() {
       return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-lg font-bold text-neuro-navy mb-3">Today&apos;s Scorecard</h2>
-          <p className="text-sm text-gray-400 text-center py-6">Log today&apos;s numbers to see your scorecard.</p>
+          <p className="text-sm text-portal-muted text-center py-6">Log today&apos;s numbers to see your scorecard.</p>
         </div>
       );
     }
@@ -723,14 +723,14 @@ function KpiTrackerContent() {
             const statusColor = getStatusColor(card.value, card.target, card.invert);
             return (
               <div key={card.label} className="bg-gray-50 rounded-xl p-4">
-                <p className="text-xs font-bold text-gray-400 tracking-wide mb-1">{card.label}</p>
+                <p className="text-xs font-bold text-portal-muted tracking-wide mb-1">{card.label}</p>
                 <p className="text-2xl font-bold text-neuro-navy">{card.format(card.value)}</p>
                 <div className="flex items-center gap-1.5 mt-2">
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: statusColor }} />
                   <span className="text-xs text-gray-500">Target: {card.format(card.target)}</span>
                 </div>
                 {thirtyDayAvg && (
-                  <p className="text-xs text-gray-400 mt-1">30d avg: {card.format(card.avg)}</p>
+                  <p className="text-xs text-portal-muted mt-1">30d avg: {card.format(card.avg)}</p>
                 )}
               </div>
             );
@@ -799,7 +799,7 @@ function KpiTrackerContent() {
           <table className="w-full text-xs min-w-[600px]">
             <thead>
               <tr className="border-b border-gray-100">
-                <th className="text-left py-2 px-2 font-bold text-gray-400 uppercase w-24"></th>
+                <th className="text-left py-2 px-2 font-bold text-portal-muted uppercase w-24"></th>
                 {DAYS_OF_WEEK.map((day, i) => (
                   <th
                     key={day}
@@ -822,7 +822,7 @@ function KpiTrackerContent() {
                     const val = entry ? (entry as any)[row.key] : null;
                     const isToday = i === todayDayIndex;
                     let cellText = "\u2014";
-                    let textColor = "text-gray-400";
+                    let textColor = "text-portal-muted";
 
                     if (val !== null && val !== undefined) {
                       cellText = row.fmt(val);
@@ -890,9 +890,9 @@ function KpiTrackerContent() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-lg font-bold text-neuro-navy mb-4">Trends</h2>
           <div className="text-center py-12">
-            <BarChart3 className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-            <p className="text-sm text-gray-400 font-bold">Log your first day to see trends!</p>
-            <p className="text-xs text-gray-300 mt-1">Charts will appear here once you have data.</p>
+            <BarChart3 className="w-12 h-12 text-portal-muted mx-auto mb-3" />
+            <p className="text-sm text-portal-muted font-bold">Log your first day to see trends!</p>
+            <p className="text-xs text-portal-muted mt-1">Charts will appear here once you have data.</p>
           </div>
         </div>
       );
@@ -1037,22 +1037,22 @@ function KpiTrackerContent() {
           {/* Metric summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-gray-100">
             <div className="text-center">
-              <p className="text-xs text-gray-400 uppercase font-bold">Period Total</p>
+              <p className="text-xs text-portal-muted uppercase font-bold">Period Total</p>
               <p className="text-sm font-bold text-neuro-navy">{fmtDollars(periodTotal)}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-400 uppercase font-bold">Daily Avg</p>
+              <p className="text-xs text-portal-muted uppercase font-bold">Daily Avg</p>
               <p className="text-sm font-bold text-neuro-navy">{fmtDollars(dailyAvg)}</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-400 uppercase font-bold">Best Day</p>
+              <p className="text-xs text-portal-muted uppercase font-bold">Best Day</p>
               <p className="text-sm font-bold text-neuro-navy">
                 {bestDay ? `${fmtDollars(bestDay.collections)} (${bestDay.date.slice(5)})` : "\u2014"}
               </p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-400 uppercase font-bold">Trend</p>
-              <p className={`text-sm font-bold ${trendPct !== null ? (trendPct >= 0 ? "text-green-600" : "text-red-500") : "text-gray-400"}`}>
+              <p className="text-xs text-portal-muted uppercase font-bold">Trend</p>
+              <p className={`text-sm font-bold ${trendPct !== null ? (trendPct >= 0 ? "text-green-600" : "text-red-500") : "text-portal-muted"}`}>
                 {trendPct !== null ? `${trendPct > 0 ? "+" : ""}${trendPct}%` : "\u2014"}
               </p>
             </div>
@@ -1098,7 +1098,7 @@ function KpiTrackerContent() {
               </div>
               <button
                 onClick={() => setDismissedAlerts(prev => new Set([...prev, i]))}
-                className="text-gray-300 hover:text-gray-500"
+                className="text-portal-muted hover:text-gray-500"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1120,7 +1120,7 @@ function KpiTrackerContent() {
         <span className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2">
           <Settings className="w-4 h-4 text-neuro-orange" /> Goals &amp; Settings
         </span>
-        <span className="text-xs text-gray-400">{showGoals ? "\u25B2" : "\u25BC"}</span>
+        <span className="text-xs text-portal-muted">{showGoals ? "\u25B2" : "\u25BC"}</span>
       </button>
 
       {showGoals && (
@@ -1187,7 +1187,7 @@ function KpiTrackerContent() {
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold focus:outline-none focus:border-neuro-orange"
               />
               {monthlyRevenueGoal && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="text-xs text-portal-muted mt-1">
                   = {fmtDollars(Math.round((parseFloat(monthlyRevenueGoal) / 22) * 100))}/day
                 </p>
               )}
@@ -1209,7 +1209,7 @@ function KpiTrackerContent() {
                   className={`px-3 py-2 rounded-lg text-xs font-bold transition-all ${
                     workingDays[i]
                       ? "bg-neuro-navy text-white"
-                      : "bg-gray-100 text-gray-400"
+                      : "bg-gray-100 text-portal-muted"
                   }`}
                 >
                   {day}

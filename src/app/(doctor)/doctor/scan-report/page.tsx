@@ -798,7 +798,7 @@ function ScanReportContent() {
               <span className="text-sm font-bold text-neuro-navy tracking-wide flex items-center gap-2">
                 <Clock className="w-4 h-4 text-neuro-orange" /> Progress Comparison
               </span>
-              {progressOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
+              {progressOpen ? <ChevronDown className="w-5 h-5 text-portal-muted" /> : <ChevronRight className="w-5 h-5 text-portal-muted" />}
             </button>
             {progressOpen && (
               <div className="px-5 pb-5 grid grid-cols-2 gap-4">
@@ -837,7 +837,7 @@ function ScanReportContent() {
       {/* Right Column — Live Score Preview */}
       <div className="space-y-4">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-4">
-          <h3 className="text-sm font-bold text-gray-400 mb-4">Live Score Preview<ExampleMark /></h3>
+          <h3 className="text-sm font-bold text-portal-muted mb-4">Live Score Preview<ExampleMark /></h3>
           {scores ? (
           <div className="flex justify-center">
             {ScoreGauge({ score: scores.total, size: 180, label: scores.label, color: scores.color })}
@@ -880,7 +880,7 @@ function ScanReportContent() {
           {/* Patient + Date */}
           <div className="mt-4 pt-4 border-t border-gray-100 text-center">
             <p className="text-sm font-bold text-neuro-navy">{state.patientFirstName || "Patient Name"}<ExampleMark /></p>
-            <p className="text-xs text-gray-400">{state.scanDate}</p>
+            <p className="text-xs text-portal-muted">{state.scanDate}</p>
           </div>
         </div>
       </div>
@@ -930,21 +930,21 @@ function ScanReportContent() {
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <p className="text-xs text-gray-500 font-bold uppercase">sEMG</p>
-                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.semgScore}<span className="text-sm text-gray-400">/35</span></p>
+                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.semgScore}<span className="text-sm text-portal-muted">/35</span></p>
                 <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(scores.semgScore / 35) * 100}%`, backgroundColor: scores.semgScore >= 25 ? "#22c55e" : scores.semgScore >= 15 ? "#facc15" : "#ef4444" }} />
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <p className="text-xs text-gray-500 font-bold uppercase">Thermal</p>
-                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.thermoScore}<span className="text-sm text-gray-400">/35</span></p>
+                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.thermoScore}<span className="text-sm text-portal-muted">/35</span></p>
                 <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(scores.thermoScore / 35) * 100}%`, backgroundColor: scores.thermoScore >= 25 ? "#22c55e" : scores.thermoScore >= 15 ? "#facc15" : "#ef4444" }} />
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4 text-center">
                 <p className="text-xs text-gray-500 font-bold uppercase">HRV</p>
-                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.hrvScore}<span className="text-sm text-gray-400">/30</span></p>
+                <p className="text-xl font-bold text-neuro-navy mt-1">{scores.hrvScore}<span className="text-sm text-portal-muted">/30</span></p>
                 <div className="h-2 bg-gray-200 rounded-full mt-2 overflow-hidden">
                   <div className="h-full rounded-full" style={{ width: `${(scores.hrvScore / 30) * 100}%`, backgroundColor: scores.hrvScore >= 25 ? "#22c55e" : scores.hrvScore >= 18 ? "#facc15" : "#ef4444" }} />
                 </div>
@@ -1014,7 +1014,7 @@ function ScanReportContent() {
                 <div className="my-3">
                   {SDNNBar({ value: state.hrvSDNN })}
                 </div>
-                <p className="text-2xl font-bold text-neuro-navy text-center">{sdnn == null ? "—" : sdnn}{showingExample ? " Example" : ""} <span className="text-sm text-gray-400 font-normal">ms</span></p>
+                <p className="text-2xl font-bold text-neuro-navy text-center">{sdnn == null ? "—" : sdnn}{showingExample ? " Example" : ""} <span className="text-sm text-portal-muted font-normal">ms</span></p>
                 {state.hrvLFHF == null ? null : <p className="text-sm text-gray-500 mt-2">LF/HF: {state.hrvLFHF} - <span className="font-bold">{lfhfInterp}</span></p>}
                 {sdnn == null ? null : <p className="text-sm text-gray-500 mt-1">
                   {sdnn >= 80 ? "Excellent nervous system adaptability" : sdnn >= 60 ? "Good adaptability" : sdnn >= 40 ? "Below average adaptability" : sdnn >= 20 ? "Low adaptability" : "Critical - very low adaptability"}
@@ -1035,33 +1035,33 @@ function ScanReportContent() {
               <h2 className="text-lg font-heading font-bold text-neuro-navy mb-4">Progress</h2>
               <div className="flex items-center justify-center gap-8 mb-4">
                 <div className="text-center">
-                  <p className="text-xs text-gray-400 tracking-wider">Previous</p>
-                  <p className="text-3xl font-heading font-bold text-gray-400">{prevScoreVal}</p>
+                  <p className="text-xs text-portal-muted tracking-wider">Previous</p>
+                  <p className="text-3xl font-heading font-bold text-portal-muted">{prevScoreVal}</p>
                 </div>
                 <div className="text-center">
-                  <span className={`text-2xl font-bold ${scoreDelta > 0 ? "text-green-500" : scoreDelta < 0 ? "text-red-500" : "text-gray-400"}`}>
+                  <span className={`text-2xl font-bold ${scoreDelta > 0 ? "text-green-500" : scoreDelta < 0 ? "text-red-500" : "text-portal-muted"}`}>
                     {scoreDelta > 0 ? "+" : ""}{scoreDelta}
                   </span>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs text-gray-400 tracking-wider">Current</p>
+                  <p className="text-xs text-portal-muted tracking-wider">Current</p>
                   <p className="text-3xl font-heading font-bold" style={{ color: scores?.color }}>{scores?.total}</p>
                 </div>
               </div>
               {/* Metric comparisons */}
               <div className="grid grid-cols-3 gap-3 text-center text-sm">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-400">sEMG Pattern</p>
+                  <p className="text-xs text-portal-muted">sEMG Pattern</p>
                   <p className="text-gray-500 text-xs">{state.prevSemgPattern}</p>
                   <p className="font-bold text-neuro-navy text-xs">{state.semgPattern}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-400">Thermo Diff</p>
+                  <p className="text-xs text-portal-muted">Thermo Diff</p>
                   <p className="text-gray-500 text-xs">{state.prevThermoDiff} C</p>
                   <p className="font-bold text-neuro-navy text-xs">{state.thermoMaxDiff} C</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-xs text-gray-400">SDNN</p>
+                  <p className="text-xs text-portal-muted">SDNN</p>
                   <p className="text-gray-500 text-xs">{state.prevSDNN} ms</p>
                   <p className="font-bold text-neuro-navy text-xs">{state.hrvSDNN} ms</p>
                 </div>
@@ -1085,8 +1085,8 @@ function ScanReportContent() {
           {/* Footer */}
           <div className="pt-4 border-t border-gray-200 text-center">
             <p className="text-xs text-gray-500 font-bold">{state.practiceName} &middot; {state.doctorName}</p>
-            <p className="text-xs text-gray-400 mt-1 italic">Your nervous system controls every function in your body. These scans help us measure your progress objectively.</p>
-            <p className="text-xs text-gray-300 mt-1">{state.scanDate}</p>
+            <p className="text-xs text-portal-muted mt-1 italic">Your nervous system controls every function in your body. These scans help us measure your progress objectively.</p>
+            <p className="text-xs text-portal-ink-2 mt-1">{state.scanDate}</p>
           </div>
         </div>
       </div>
@@ -1112,7 +1112,7 @@ function ScanReportContent() {
             placeholder={scores ? generateSummary(state, scores) : "Summary appears after the required scan fields are filled."}
             className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors resize-y"
           />
-          <p className="text-xs text-gray-400 mt-1">Leave blank to use auto-generated summary.</p>
+          <p className="text-xs text-portal-muted mt-1">Leave blank to use auto-generated summary.</p>
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <h3 className="text-sm font-bold text-neuro-navy tracking-wide mb-3">Add Notes</h3>
@@ -1157,7 +1157,7 @@ function ScanReportContent() {
         <button onClick={() => goToStep(1)} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 transition-colors">
           <FileText className="w-4 h-4" /> Edit
         </button>
-        <button onClick={resetAll} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-400 rounded-xl hover:bg-gray-50 hover:text-red-500 transition-colors">
+        <button onClick={resetAll} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-portal-muted rounded-xl hover:bg-gray-50 hover:text-red-500 transition-colors">
           <RotateCcw className="w-4 h-4" /> New Report
         </button>
         <button onClick={loadHistory} className="flex items-center gap-2 px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:bg-gray-50 transition-colors">
@@ -1184,15 +1184,15 @@ function ScanReportContent() {
         <div className="no-print mb-6 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between p-4 border-b border-gray-100">
             <h3 className="text-sm font-bold text-neuro-navy tracking-wide">Report History</h3>
-            <button onClick={() => setHistoryOpen(false)} className="text-gray-400 hover:text-gray-600">
+            <button onClick={() => setHistoryOpen(false)} className="text-portal-muted hover:text-gray-600">
               <X className="w-4 h-4" />
             </button>
           </div>
           <div className="p-4 max-h-64 overflow-y-auto">
             {historyLoading ? (
-              <p className="text-sm text-gray-400">Loading...</p>
+              <p className="text-sm text-portal-muted">Loading...</p>
             ) : history.length === 0 ? (
-              <p className="text-sm text-gray-400">No previous reports.</p>
+              <p className="text-sm text-portal-muted">No previous reports.</p>
             ) : (
               <div className="space-y-2">
                 {history.map((h) => {
@@ -1202,8 +1202,8 @@ function ScanReportContent() {
                     <button key={h.id} onClick={() => loadReport(h.id)} className="w-full text-left flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 hover:bg-gray-100 transition-colors">
                       <div>
                         <span className="font-bold text-neuro-navy text-sm">{h.patient_name}</span>
-                        <span className="text-gray-400 text-xs ml-2">{h.scan_date}</span>
-                        <span className="text-gray-400 text-xs ml-2">{h.scan_type}</span>
+                        <span className="text-portal-muted text-xs ml-2">{h.scan_date}</span>
+                        <span className="text-portal-muted text-xs ml-2">{h.scan_type}</span>
                       </div>
                       <span className={`text-xs font-bold px-2 py-1 rounded-full ${badgeColor}`}>{h.score} &middot; {lbl}</span>
                     </button>
