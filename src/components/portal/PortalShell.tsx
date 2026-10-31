@@ -11,6 +11,7 @@ import { ReferButton } from '@/components/portal/ReferralProvider';
 import { createClient } from '@/lib/supabase';
 import type { PortalNavItem } from '@/lib/portal/features';
 
+const MOBILE_NAV_H = 56;
 const GROUPS = ['main', 'grow', 'tools', 'account'] as const;
 const GROUP_LABEL: Record<string, string | null> = {
   main: null,
@@ -36,6 +37,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
   const [locked, setLocked] = useState<PortalNavItem | null>(null);
 
   const referral = ctx.nav.find((item) => item.key === 'referrals');
+  const fullHeight = (pathname || '').startsWith('/doctor/messages');
 
   function signOut() {
     const supabase = createClient();
@@ -142,17 +144,22 @@ export default function PortalShell({ children }: { children: React.ReactNode })
             </Link>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto bg-portal-canvas pb-24 md:pb-0">
+        <main
+          className={fullHeight
+            ? 'flex-1 min-h-0 flex flex-col overflow-hidden bg-portal-canvas md:!pb-0'
+            : 'flex-1 overflow-y-auto bg-portal-canvas pb-24 md:pb-0'}
+          style={fullHeight ? { paddingBottom: `calc(${MOBILE_NAV_H}px + env(safe-area-inset-bottom, 0px))` } : undefined}
+        >
           {ctx.membership.tier === 'free' ? (
-            <div className="bg-portal-accent-50 border-b border-portal-border px-4 py-3 flex items-center justify-between gap-3">
+            <div className="shrink-0 bg-portal-accent-50 border-b border-portal-border px-4 py-3 flex items-center justify-between gap-3">
               <p className="text-sm text-portal-ink">Activate Pro to unlock patient requests and results.</p>
               <Link href="/doctor/billing" className="min-h-11 px-4 inline-flex items-center bg-portal-accent text-white text-sm font-bold rounded-lg">Activate Pro</Link>
             </div>
           ) : null}
-          <div className="p-4 md:p-8 max-w-6xl mx-auto w-full">{children}</div>
+          <div className={fullHeight ? 'flex-1 min-h-0 flex flex-col p-0 md:p-6 max-w-6xl mx-auto w-full' : 'p-4 md:p-8 max-w-6xl mx-auto w-full'}>{children}</div>
         </main>
       </div>
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-[150] bg-portal-sidebar border-t border-white/10 flex" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-[150] bg-portal-sidebar border-t border-white/10 flex" style={{ height: `calc(${MOBILE_NAV_H}px + env(safe-area-inset-bottom, 0px))`, paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         {mobile.map((item) => {
           const active = itemActive(item.href);
           const badge = badgeText(item.badge);

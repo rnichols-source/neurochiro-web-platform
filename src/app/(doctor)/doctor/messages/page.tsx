@@ -1,5 +1,6 @@
 import { createServerSupabase } from "@/lib/supabase-server";
 import MessagingSystem from "@/components/messaging/MessagingSystem";
+import PageHeader from "@/components/portal/PageHeader";
 import { redirect } from "next/navigation";
 
 export const dynamic = 'force-dynamic';
@@ -20,13 +21,18 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
     .single();
 
   return (
-    <div className="p-4 lg:p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-heading font-bold text-white tracking-tight">Direct Messages</h1>
-        <p className="text-gray-400 mt-2">Connect with students, doctors, and the NeuroChiro team securely.</p>
-      </div>
-
-      <MessagingSystem currentUserId={user.id} userRole={(profile as any)?.role || 'doctor'} initialOtherUserId={to} initialConversationId={c} />
-    </div>
+    <MessagingSystem
+      fill
+      currentUserId={user.id}
+      userRole={(profile as { role?: string } | null)?.role || 'doctor'}
+      initialOtherUserId={to}
+      initialConversationId={c}
+      header={
+        <PageHeader
+          title="Messages"
+          description="Conversations with patients, doctors and the NeuroChiro team."
+        />
+      }
+    />
   );
 }

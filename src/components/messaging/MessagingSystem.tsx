@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { messagingV2 } from '@/config/portal-features';
 import { useReferralOptional } from '@/components/portal/ReferralProvider';
@@ -80,12 +80,16 @@ export default function MessagingSystem({
   initialOtherUserId,
   initialConversationId,
   emptyMessage,
+  header,
+  fill = false,
 }: {
   currentUserId: string;
   userRole: string;
   initialOtherUserId?: string;
   initialConversationId?: string;
   emptyMessage?: string;
+  header?: ReactNode;
+  fill?: boolean;
 }) {
   const referral = useReferralOptional();
   const router = useRouter();
@@ -347,10 +351,25 @@ export default function MessagingSystem({
     threadRef.current?.scrollToBottom();
   }, [messages, selected?.id]);
 
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const onResize = () => {
+      if (nearBottom.current) threadRef.current?.scrollToBottom();
+    };
+    viewport.addEventListener('resize', onResize);
+    return () => viewport.removeEventListener('resize', onResize);
+  }, []);
+
   const showList = !selected;
+  const frame = fill
+    ? 'flex flex-1 min-h-0 overflow-hidden bg-white md:rounded-2xl md:border md:border-portal-border'
+    : 'flex h-[calc(100dvh-11rem)] min-h-[420px] overflow-hidden rounded-2xl border border-portal-border bg-white';
   return (
-    <div className="flex h-[calc(100dvh-11rem)] min-h-[420px] overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <div className={selected ? 'hidden md:flex h-full' : 'flex h-full w-full md:w-auto'}>
+    <div className={fill ? 'flex flex-1 min-h-0 flex-col' : undefined}>
+      {header ? <div className={selected ? 'hidden md:block shrink-0 px-4 pt-4 md:px-0 md:pt-0' : 'shrink-0 px-4 pt-4 md:px-0 md:pt-0'}>{header}</div> : null}
+    <div className={frame}>
+      <div className={selected ? 'hidden md:flex md:flex-col min-h-0 h-full' : 'flex flex-col min-h-0 h-full w-full md:w-auto'}>
         <Inbox
           items={items}
           loading={loading}
@@ -367,7 +386,7 @@ export default function MessagingSystem({
           emptyMessage={emptyMessage}
         />
       </div>
-      <div className={showList ? 'hidden md:flex flex-1' : 'flex flex-1 min-w-0'}>
+      <div className={showList ? 'hidden md:flex flex-1 min-h-0 flex-col' : 'flex flex-1 min-w-0 min-h-0 flex-col'}>
         {selected ? (
           <div className="flex flex-1 flex-col min-w-0">
             <Thread
@@ -416,6 +435,7 @@ export default function MessagingSystem({
               showCanned={showCanned}
               onToggleCanned={() => setShowCanned((value) => !value)}
               onPickCanned={(value) => { setDraft(value); setShowCanned(false); }}
+              includeSafeArea={!fill}
             />
           </div>
         ) : (
@@ -481,6 +501,7 @@ export default function MessagingSystem({
           </div>
         </div>
       ) : null}
+    </div>
     </div>
   );
 }
