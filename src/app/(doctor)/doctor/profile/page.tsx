@@ -434,7 +434,6 @@ function ProfileEditor() {
             </div>
           )}
 
-          <StudentOptIn />
           <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
             <h2 className="text-lg font-bold text-portal-ink">Profile photo</h2>
             <div className="mt-4 flex items-center gap-4">
@@ -832,6 +831,8 @@ function ProfileEditor() {
               </button>
             </div>
           </form>
+
+          {tab === "basics" ? <div className="mt-4"><StudentOptIn /></div> : null}
 
           <div className="mt-8">
             <VerifiedBadge
