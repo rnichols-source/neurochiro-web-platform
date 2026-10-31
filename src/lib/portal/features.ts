@@ -42,7 +42,7 @@ export function isVisible(feature: PortalFeature, ctx: PortalNavContext): boolea
 }
 
 export function navFor(ctx: PortalNavContext): PortalNavItem[] {
-  return PORTAL_FEATURES.filter((feature) => feature.key !== 'notifications' && isVisible(feature, ctx) && effectiveState(feature, ctx) !== 'coming_soon').map((feature) => {
+  return PORTAL_FEATURES.filter((feature) => feature.key !== 'notifications' && feature.key !== 'students' && isVisible(feature, ctx) && effectiveState(feature, ctx) !== 'coming_soon').map((feature) => {
     const state = effectiveState(feature, ctx);
     const item: PortalNavItem = {
       ...feature,
