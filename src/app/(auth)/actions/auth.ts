@@ -83,8 +83,11 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   // Free tier — students can access portal without payment
   // Features gated inside via UpgradeGate components
 
-  // Honor redirect param only after subscription is verified
-  if (redirectUrl) return redirect(redirectUrl);
+  // Honor redirect param only after subscription is verified.
+  // Login accepts ?redirect= and ?next=. Only same-site paths are followed.
+  if (redirectUrl && redirectUrl.startsWith("/") && !redirectUrl.startsWith("//") && !redirectUrl.includes("://")) {
+    return redirect(redirectUrl);
+  }
 
   // Standardize the dashboard routes
   const dashboardMap: Record<string, string> = {

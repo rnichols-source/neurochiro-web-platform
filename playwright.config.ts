@@ -36,19 +36,19 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      testIgnore: [/directory-search/, /seminars\.spec/],
+      testIgnore: [/directory-search/, /seminars/],
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
-      testIgnore: [/directory-search/, /seminars\.spec/],
+      testIgnore: [/directory-search/, /seminars/],
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
-      testIgnore: [/directory-search/, /seminars\.spec/],
+      testIgnore: [/directory-search/, /seminars/],
       use: { ...devices['Desktop Safari'] },
     },
 
@@ -73,20 +73,23 @@ export default defineConfig({
 
     {
       name: 'seminars-mobile',
-      testMatch: /seminars\.spec/,
+      testMatch: /seminars/,
       use: {
         ...devices['iPhone 13'],
+        browserName: 'chromium',
         baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+        launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
       },
     },
 
     {
       name: 'seminars-desktop',
-      testMatch: /seminars\.spec/,
+      testMatch: /seminars/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
         baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://127.0.0.1:3000',
+        launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] },
       },
     },
 

@@ -30,6 +30,22 @@ export function registrationConfirmed(input: {
   };
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export function hostApplicationReceived(name: string): { subject: string; html: string } {
+  const safe = escapeHtml(name || "there");
+  return {
+    subject: "We received your seminar host application",
+    html: wrapEmail(`
+      <h1>Application received</h1>
+      <p>Thanks ${safe}. We review every host application and will write back.</p>
+      <p><a href="${SITE}/seminars/host">Host packages</a></p>
+    `),
+  };
+}
+
 export function rsvpConfirmed(input: { title: string; slug: string; when: string; registrationLink?: string | null }): { subject: string; html: string } {
   return {
     subject: `Reminder set: ${input.title}`,

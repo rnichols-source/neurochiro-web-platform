@@ -6,7 +6,7 @@ import { stripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { buildFeaturedCheckoutSession, buildPackageCheckoutSession, buildTicketCheckoutSession } from "@/lib/seminars/checkout-params";
-import { rsvpConfirmed, seminarsFrom } from "@/lib/seminars/emails";
+import { hostApplicationReceived, rsvpConfirmed, seminarsFrom } from "@/lib/seminars/emails";
 import { formatDateRange } from "@/lib/seminars/format";
 import { memberTicketPrice } from "@/lib/seminars/utm";
 import { getSeminarBySlug } from "@/lib/seminars/queries";
@@ -131,10 +131,13 @@ export async function createSeminarCheckout(input: {
   return { url: session.url };
 }
 
-export async function createHostPackageCheckout(packageId: SeminarPackageId): Promise<{ url: string | null } | { error: string }> {
+export async function createHostPackageCheckout(packageId: SeminarPackageId): Promise<{ url: string | null } | { error: string; loginUrl?: string }> {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user?.email) return { error: "Log in to buy a host package." };
+  if (!user?.email) {
+    const next = `/seminars/host?pkg=${packageId}`;
+    return { error: "Log in to buy a host package.", loginUrl: `/login?redirect=${encodeURIComponent(next)}` };
+  }
   const built = buildPackageCheckoutSession({ packageId, email: user.email, userId: user.id });
   if ("error" in built && built.error) return { error: built.error };
   const { subscription_data, ...rest } = built;
@@ -173,14 +176,17 @@ export async function submitHostInterest(formData: FormData) {
     status: "applied",
     application: { email, topics, website },
   });
+  let saved = !host.error;
   if (host.error) {
-    await insertFlexible("leads", {
+    const lead = await insertFlexible("leads", {
       email,
       full_name: name,
       source: "seminar_host_interest",
       metadata: { org, website, topics },
     });
+    saved = !lead.error;
   }
+  if (!saved) return { ok: false as const, error: "Could not submit your application. Try again." };
   const discordUrl = process.env.DISCORD_WEBHOOK_URL;
   if (discordUrl) {
     await fetch(discordUrl, {
@@ -188,6 +194,16 @@ export async function submitHostInterest(formData: FormData) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: `Seminar host interest\n${name} (${org || "no org"})\nStatus: submitted for review` }),
     }).catch(() => {});
+  }
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const { Resend } = await import("resend");
+      const message = hostApplicationReceived(name);
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({ from: seminarsFrom(), to: email, subject: message.subject, html: message.html });
+    } catch {
+      // A missing or rejected sender must not fail a saved application.
+    }
   }
   return { success: true as const };
 }
