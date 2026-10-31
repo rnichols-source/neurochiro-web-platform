@@ -34,6 +34,15 @@ function initialsFrom(fullName: string | null): string {
   return (parts[0]?.[0] || '--').toUpperCase();
 }
 
+/** Null until the first doctors read. False after a missing subscription_status column. */
+let hasSubscriptionStatus: boolean | null = null;
+
+function missingSubscriptionColumn(error: { message?: string; code?: string } | null): boolean {
+  if (!error) return false;
+  if (error.code === '42703') return true;
+  return /subscription_status|does not exist/i.test(error.message || '');
+}
+
 function toDoctor(row: DoctorRow | null): PortalDoctor | null {
   if (!row) return null;
   return {
@@ -59,18 +68,23 @@ function toDoctor(row: DoctorRow | null): PortalDoctor | null {
 /** Profiles and doctors, once. Used by the portal context and by the shell server action. */
 export async function loadShell(user: { id: string }): Promise<LoadedShell> {
   const admin = createAdminClient();
+  const columns = hasSubscriptionStatus === false ? DOCTOR_COLUMNS_FALLBACK : DOCTOR_COLUMNS;
   const [profileRes, doctorFirst] = await Promise.all([
     admin.from('profiles').select('full_name, tier, stripe_customer_id, role').eq('id', user.id).maybeSingle(),
-    (admin.from('doctors') as any).select(DOCTOR_COLUMNS).eq('user_id', user.id).maybeSingle() as Promise<{ data: DoctorRow | null; error: { message?: string } | null }>,
+    (admin.from('doctors') as any).select(columns).eq('user_id', user.id).maybeSingle() as Promise<{ data: DoctorRow | null; error: { message?: string; code?: string } | null }>,
   ]);
   let doctorRow = doctorFirst.data;
-  let subscriptionStatus = doctorRow?.subscription_status ?? null;
+  let subscriptionStatus = hasSubscriptionStatus === false ? null : (doctorRow?.subscription_status ?? null);
   if (doctorFirst.error) {
+    console.warn('[portal-shell] fallback');
+    if (missingSubscriptionColumn(doctorFirst.error)) hasSubscriptionStatus = false;
     const fallback = await (admin.from('doctors') as any).select(DOCTOR_COLUMNS_FALLBACK).eq('user_id', user.id).maybeSingle() as {
       data: DoctorRow | null;
     };
     doctorRow = fallback.data;
     subscriptionStatus = null;
+  } else if (hasSubscriptionStatus !== false) {
+    hasSubscriptionStatus = true;
   }
   const fullName = profileRes.data?.full_name ?? null;
   return {
