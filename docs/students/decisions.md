@@ -11,7 +11,7 @@ Approved by Raymond on Oct 31, 2026. The config in `src/config/students.ts` matc
 5. Member doctors get 2 active job posts. Featured boost is $49 for 30 days.
 6. Outside clinics pay $149 per post for 60 days. Admin approval is required. A rejection refunds the full charge.
 7. Students can browse jobs free. Membership is required to apply, match, message mentors, book shadow days, and join the monthly call.
-8. The name stays ChiroMatch. Matching is always on. Twice-a-year cycles are retired. Doctors appear only if they opt in. Students verify their school before doctors can see them.
+8. The name stays ChiroMatch. Matching is always on. Twice-a-year cycles are retired. Doctors appear only if they opt in. Students verify their school before doctors can see them. v1 weights are in `src/lib/match/score.ts`. See `docs/matching/how-scoring-works.md`. A weight change needs Raymond's approval.
 
 ## Still open
 

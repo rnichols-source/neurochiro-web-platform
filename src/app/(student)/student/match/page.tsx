@@ -1,12 +1,11 @@
-import PageHeader from '@/components/portal/PageHeader';
+import MatchDesk from '@/components/student/MatchDesk';
+import { loadDesk } from '@/lib/match/store';
 
-export default function MatchSoonPage() {
+export default async function StudentMatchPage() {
+  const data = await loadDesk();
   return (
-    <div className="max-w-xl mx-auto px-4 py-8">
-      <PageHeader
-        title="ChiroMatch"
-        description="Always-on matching is next. You and a practice both say yes before a conversation starts. The old ranking rounds are closed."
-      />
+    <div className="mx-auto max-w-3xl px-4 py-8">
+      <MatchDesk initial={data} />
     </div>
   );
 }

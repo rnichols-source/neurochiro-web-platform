@@ -3,7 +3,7 @@
 // beta: shown with a "Beta" chip.
 // coming_soon: listed on /doctor/coming-soon, not in the main nav.
 // hidden: not shown. neuros stays hidden until neuros_tier is set.
-// RAYMOND: approve or flip these states. ChiroMatch becomes live on its own while a cycle is open.
+// RAYMOND: approve or flip these states. ChiroMatch v1 is the Hiring tab. The chiromatch key stays hidden.
 
 export type FeatureState = 'live' | 'beta' | 'coming_soon' | 'hidden';
 
@@ -28,7 +28,8 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'seminars', label: 'Seminars', href: '/doctor/seminars', group: 'grow', subtitle: 'Host or find a seminar', state: 'live', icon: 'Calendar' },
   { key: 'hiring', label: 'Hiring', href: '/doctor/jobs', group: 'grow', subtitle: 'Jobs, students, and ChiroMatch', state: 'live', icon: 'Briefcase' },
   { key: 'students', label: 'Students', href: '/doctor/students', group: 'grow', subtitle: 'Browse students looking for a practice', state: 'beta', requires: 'pro', icon: 'GraduationCap' },
-  { key: 'chiromatch', label: 'ChiroMatch', href: '/doctor/chiromatch', group: 'grow', subtitle: 'Match with graduating students', state: 'coming_soon', requires: 'pro', comingSoonBlurb: 'ChiroMatch opens when a cycle is running. You will be able to rank graduating students from here.', icon: 'Shuffle' },
+  // Hidden so the old cycle pages stay out of the nav. ChiroMatch v1 is the Hiring tab at /doctor/match.
+  { key: 'chiromatch', label: 'ChiroMatch', href: '/doctor/match', group: 'grow', subtitle: 'You and a student both say yes', state: 'hidden', requires: 'pro', comingSoonBlurb: 'Matching is always on. Open it from Hiring.', icon: 'Shuffle' },
   // RAYMOND: confirm the show is running; else coming_soon
   { key: 'lives', label: 'The Weekly Adjustment', href: '/doctor/lives', group: 'grow', subtitle: 'Live show every Thursday 8 PM ET', state: 'beta', icon: 'Video' },
   { key: 'referrals', label: 'Referrals', href: '/doctor/referrals', group: 'grow', subtitle: 'Refer a patient to another doctor', state: 'live', requires: 'pro', icon: 'Users' },

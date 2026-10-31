@@ -15,7 +15,7 @@ export const STUDENT_FEATURES: StudentFeature[] = [
   { key: 'mentorship', label: 'Monthly call', href: '/student/mentorship', group: 'main', state: 'beta', requires: 'member' },
   { key: 'doctors', label: 'Doctors', href: '/student/doctors', group: 'place', state: 'live' },
   { key: 'jobs', label: 'Associateships', href: '/student/jobs', group: 'place', state: 'live' },
-  { key: 'chiromatch', label: 'ChiroMatch', href: '/student/match', group: 'place', state: 'coming_soon', requires: 'member' },
+  { key: 'chiromatch', label: 'ChiroMatch', href: '/student/match', group: 'place', state: 'beta', requires: 'member' },
   { key: 'academy', label: 'Academy', href: '/student/academy', group: 'ready', state: 'live', requires: 'member' },
   { key: 'techniques', label: 'Techniques', href: '/student/techniques', group: 'ready', state: 'live' },
   { key: 'interview_prep', label: 'Interview playbook', href: '/student/interview-prep', group: 'ready', state: 'live', requires: 'member' },
