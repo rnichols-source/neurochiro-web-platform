@@ -23,7 +23,7 @@ type DoctorCard = {
   is_mentoring: boolean | null;
 };
 
-export default async function StudentDoctorsPage({ searchParams }: { searchParams: Promise<{ badge?: string; state?: string; q?: string }> }) {
+export default async function StudentDoctorsPage({ searchParams }: { searchParams: Promise<{ badge?: string; state?: string; q?: string; doctor?: string }> }) {
   const params = await searchParams;
   const portal = await getStudentPortal();
   const member = portal ? hasMemberAccess(portal.membership) : false;
@@ -44,6 +44,7 @@ export default async function StudentDoctorsPage({ searchParams }: { searchParam
   if (params.badge === 'shadow') rows = rows.filter((doctor) => doctor.offers_shadowing || doctor.is_mentoring);
   if (params.badge === 'intern') rows = rows.filter((doctor) => doctor.accepts_interns);
   if (params.badge === 'hiring') rows = rows.filter((doctor) => doctor.is_hiring);
+  if (params.doctor) rows = rows.filter((doctor) => doctor.id === params.doctor);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

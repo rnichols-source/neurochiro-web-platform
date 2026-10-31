@@ -32,7 +32,6 @@ export function requirementMet(feature: PortalFeature, ctx: PortalNavContext): b
 
 export function effectiveState(feature: PortalFeature, ctx: PortalNavContext): FeatureState {
   if (feature.key === 'neuros') return ctx.neurosTier ? 'live' : 'hidden';
-  if (feature.key === 'chiromatch' && ctx.chiroMatchOpen) return 'live';
   if (feature.key === 'purchases' && !ctx.hasPurchase) return 'hidden';
   return feature.state;
 }
@@ -57,5 +56,5 @@ export function navFor(ctx: PortalNavContext): PortalNavItem[] {
 }
 
 export function comingSoonFeatures(): PortalFeature[] {
-  return PORTAL_FEATURES.filter((feature) => feature.state === 'coming_soon' || feature.key === 'chiromatch');
+  return PORTAL_FEATURES.filter((feature) => feature.state === 'coming_soon');
 }
