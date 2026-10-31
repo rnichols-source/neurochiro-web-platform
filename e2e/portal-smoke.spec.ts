@@ -97,4 +97,58 @@ test.describe('doctor portal smoke', () => {
       await expect(page.getByText('% match')).toHaveCount(0);
     });
   }
+
+  for (const viewport of [
+    { width: 375, height: 812 },
+    { width: 390, height: 844 },
+  ]) {
+    test(`composer sits on the nav at ${viewport.width}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto('/doctor/messages');
+      const thread = page.locator('button.border-l-4').first();
+      await expect(thread).toBeVisible();
+      await thread.click();
+      const composer = page.locator('[data-composer]');
+      await expect(composer).toBeVisible();
+      const gap = await page.evaluate(() => {
+        const box = document.querySelector('[data-composer]');
+        const bar = document.querySelector('nav');
+        if (!box || !bar) return null;
+        const composerBox = box.getBoundingClientRect();
+        const navBox = bar.getBoundingClientRect();
+        return navBox.top - (composerBox.top + composerBox.height);
+      });
+      expect(gap).not.toBeNull();
+      expect(Math.abs(gap as number)).toBeLessThanOrEqual(1);
+    });
+  }
+
+  test('care plan has no placeholder doctor name', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/doctor/care-plan');
+    await expect(page.getByText('[DOCTOR NAME]')).toHaveCount(0);
+  });
+
+  test('marketplace chip count matches the cards', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto('/doctor/marketplace');
+    const all = page.getByRole('link', { name: /All · \d+/ });
+    await expect(all).toBeVisible();
+    const label = await all.innerText();
+    const count = Number(label.split('·')[1]?.trim());
+    await expect(page.locator('[data-marketplace-cards] > li')).toHaveCount(count);
+    const chip = page.locator('[data-marketplace-chips] a').nth(1);
+    if (await chip.count()) {
+      const chipLabel = await chip.innerText();
+      const chipCount = Number(chipLabel.split('·')[1]?.trim());
+      await chip.click();
+      await expect(page.locator('[data-marketplace-cards] > li')).toHaveCount(chipCount);
+    }
+  });
+
+  test('notifications page renders', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/doctor/notifications');
+    await expect(page.getByRole('heading', { name: 'Notifications' })).toBeVisible();
+  });
 });

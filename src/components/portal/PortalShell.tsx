@@ -38,6 +38,8 @@ export default function PortalShell({ children }: { children: React.ReactNode })
 
   const referral = ctx.nav.find((item) => item.key === 'referrals');
   const fullHeight = (pathname || '').startsWith('/doctor/messages');
+  // Small viewport on messages so the mobile browser bar does not leave a gap under the composer.
+  const shellHeight = fullHeight ? 'h-svh md:h-dvh' : 'h-dvh';
 
   function signOut() {
     const supabase = createClient();
@@ -124,7 +126,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex flex-col md:flex-row h-dvh bg-portal-canvas overflow-hidden text-portal-ink">
+    <div className={`flex flex-col md:flex-row ${shellHeight} bg-portal-canvas overflow-hidden text-portal-ink`}>
       <aside className="hidden md:flex w-72 shrink-0 h-dvh">{sidebar}</aside>
       {open ? (
         <div className="fixed inset-0 z-[200] md:hidden">
