@@ -12,6 +12,8 @@ const shell: LoadedShell = {
   doctor: {
     id: 'doc-1',
     slug: 'dr-raymond-nichols',
+    first_name: 'Raymond',
+    last_name: 'Nichols',
     clinic_name: 'NeuroChiro',
     membership_tier: 'pro',
     is_founding_member: true,

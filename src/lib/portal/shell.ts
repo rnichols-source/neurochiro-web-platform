@@ -4,13 +4,15 @@ import type { LoadedShell } from '@/lib/portal/context-assemble';
 import type { PortalDoctor } from '@/lib/portal/types';
 
 const DOCTOR_COLUMNS =
-  'id, slug, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views, city, state, country, specialties, subscription_status';
+  'id, slug, first_name, last_name, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views, city, state, country, specialties, subscription_status';
 const DOCTOR_COLUMNS_FALLBACK =
-  'id, slug, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views, city, state, country, specialties';
+  'id, slug, first_name, last_name, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views, city, state, country, specialties';
 
 type DoctorRow = {
   id: string;
   slug: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
   clinic_name: string | null;
   membership_tier: string | null;
   is_founding_member: boolean | null;
@@ -37,6 +39,8 @@ function toDoctor(row: DoctorRow | null): PortalDoctor | null {
   return {
     id: row.id,
     slug: row.slug,
+    first_name: row.first_name ?? null,
+    last_name: row.last_name ?? null,
     clinic_name: row.clinic_name,
     membership_tier: row.membership_tier,
     is_founding_member: Boolean(row.is_founding_member),

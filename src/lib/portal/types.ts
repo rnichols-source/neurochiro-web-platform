@@ -4,6 +4,8 @@ import type { PortalNavItem } from '@/lib/portal/features';
 export type PortalDoctor = {
   id: string;
   slug: string | null;
+  first_name: string | null;
+  last_name: string | null;
   clinic_name: string | null;
   membership_tier: string | null;
   is_founding_member: boolean;

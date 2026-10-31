@@ -2,7 +2,9 @@
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 import { saveToolData, loadToolData } from "../tool-data-actions";
 import ExampleBanner from "@/components/portal/ExampleBanner";
-import { EXAMPLE_CARE_PHASES, isUntouchedCarePlanDefault } from "@/lib/portal/tool-examples";
+import { EXAMPLE_CARE_PHASES, cleanPracticeField, isUntouchedCarePlanDefault } from "@/lib/portal/tool-examples";
+import { publicDoctorName } from "@/lib/portal/greeting";
+import { getPortalShellData } from "../portal-actions";
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
@@ -124,8 +126,8 @@ const today = () => new Date().toISOString().split("T")[0];
 const INITIAL_STATE: CarePlanState = {
   patientName: "",
   date: today(),
-  doctorName: "[DOCTOR NAME]",
-  practiceName: "[PRACTICE NAME]",
+  doctorName: "",
+  practiceName: "",
   useScoring: false,
   scoringCategories: DEFAULT_SCORING,
   perVisitFee: null,
@@ -187,26 +189,47 @@ function CarePlanContent() {
   const [state, setState] = useState<CarePlanState>(INITIAL_STATE);
   const [loaded, setLoaded] = useState(false);
   const [usingExample, setUsingExample] = useState(false);
+  const confirmedRef = useRef(false);
   const printRef = useRef<HTMLDivElement>(null);
 
   // Load from Supabase on mount (localStorage fallback)
   useEffect(() => {
     async function load() {
+      const shell = await getPortalShellData().catch(() => null);
+      const doctorName = publicDoctorName(shell?.doctor, shell?.fullName);
+      const practiceName = shell?.doctor?.clinic_name?.trim() || "";
+      const apply = (parsed: Partial<CarePlanState> & { __example?: unknown; __confirmed?: unknown } | null) => {
+        const example = Boolean(parsed && isUntouchedCarePlanDefault(parsed));
+        confirmedRef.current = parsed?.__confirmed === true;
+        setUsingExample(example);
+        if (parsed && !example) {
+          setState((prev) => ({
+            ...prev,
+            ...parsed,
+            doctorName: cleanPracticeField(parsed.doctorName, doctorName),
+            practiceName: cleanPracticeField(parsed.practiceName, practiceName),
+          }));
+          return;
+        }
+        setState((prev) => ({
+          ...prev,
+          ...(example ? parsed : {}),
+          doctorName: cleanPracticeField(example ? parsed?.doctorName : doctorName, doctorName),
+          practiceName: cleanPracticeField(example ? parsed?.practiceName : practiceName, practiceName),
+        }));
+      };
       try {
         const cloud = await loadToolData('care_plan');
         const saved = !cloud && typeof localStorage !== 'undefined' ? localStorage.getItem(LS_KEY) : null;
-        const parsed = cloud || (saved ? JSON.parse(saved) as Partial<CarePlanState> : null);
-        if (parsed && !isUntouchedCarePlanDefault(parsed)) {
-          setState((prev) => ({ ...prev, ...parsed }));
-        }
+        const parsed = (cloud || (saved ? JSON.parse(saved) : null)) as Partial<CarePlanState> | null;
+        apply(parsed);
       } catch {
         try {
           const saved = localStorage.getItem(LS_KEY);
-          if (saved) {
-            const parsed = JSON.parse(saved) as Partial<CarePlanState>;
-            if (!isUntouchedCarePlanDefault(parsed)) setState((prev) => ({ ...prev, ...parsed }));
-          }
-        } catch {}
+          apply(saved ? JSON.parse(saved) : null);
+        } catch {
+          apply(null);
+        }
       }
       setLoaded(true);
     }
@@ -219,13 +242,16 @@ function CarePlanContent() {
   useEffect(() => {
     if (!loaded) return;
     const timer = setTimeout(() => {
-      const data = stateRef.current;
-      // Save to both Supabase and localStorage (offline fallback)
+      const data = {
+        ...stateRef.current,
+        ...(usingExample ? { __example: true } : {}),
+        ...(confirmedRef.current && !usingExample ? { __confirmed: true } : {}),
+      };
       saveToolData('care_plan', data).catch(() => {});
       try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch {}
     }, 1000);
     return () => clearTimeout(timer);
-  }, [state, loaded]);
+  }, [state, loaded, usingExample]);
 
   const set = useCallback(
     <K extends keyof CarePlanState>(key: K, value: CarePlanState[K]) => {
@@ -290,6 +316,7 @@ function CarePlanContent() {
   };
 
   const startBlank = () => {
+    confirmedRef.current = false;
     setUsingExample(false);
     setState((prev) => ({
       ...prev,
@@ -298,7 +325,13 @@ function CarePlanContent() {
     }));
   };
 
+  const keepPlan = () => {
+    confirmedRef.current = true;
+    setUsingExample(false);
+  };
+
   const loadExamplePlan = () => {
+    confirmedRef.current = false;
     setUsingExample(true);
     setState((prev) => ({
       ...prev,
@@ -311,6 +344,7 @@ function CarePlanContent() {
   const resetAll = () => {
     localStorage.removeItem(LS_KEY);
     saveToolData('care_plan', null).catch(() => {});
+    confirmedRef.current = false;
     setUsingExample(false);
     setState({
       ...INITIAL_STATE,
@@ -557,7 +591,8 @@ function CarePlanContent() {
                 type="text"
                 value={state.doctorName}
                 onChange={(e) => set("doctorName", e.target.value)}
-                className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors"
+                placeholder="Your name as patients see it"
+                className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base focus:outline-none focus:border-neuro-orange transition-colors"
               />
             </div>
             <div>
@@ -566,7 +601,8 @@ function CarePlanContent() {
                 type="text"
                 value={state.practiceName}
                 onChange={(e) => set("practiceName", e.target.value)}
-                className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange transition-colors"
+                placeholder="Practice name"
+                className="mt-1 w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-base focus:outline-none focus:border-neuro-orange transition-colors"
               />
             </div>
           </div>
@@ -651,14 +687,14 @@ function CarePlanContent() {
       {/* Right: Live Preview */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
         <div className="bg-neuro-navy p-6">
-          <p className="text-xs text-white/50 tracking-wide font-bold">Live Preview</p>
+          <p className="text-sm text-white/70 font-bold">Live Preview</p>
           <h2 className="text-xl font-heading font-bold text-white mt-2">
             {state.patientName || "Patient Name"}
           </h2>
-          <p className="text-white/60 text-sm mt-1">
+          <p className="text-white/80 text-sm mt-1">
             {state.date} &middot; {state.doctorName}
           </p>
-          <p className="text-white/40 text-xs mt-1">{state.practiceName}</p>
+          <p className="text-white/70 text-sm mt-1">{state.practiceName}</p>
         </div>
         {state.useScoring && avgScore > 0 && (
           <div className="p-6 border-b border-gray-100">
@@ -744,7 +780,7 @@ function CarePlanContent() {
             )}
           </div>
           <div className="space-y-3">
-            {usingExample ? <ExampleBanner onClear={startBlank} /> : null}
+            {usingExample ? <ExampleBanner onClear={startBlank} onKeep={keepPlan} keepLabel="This is my plan" /> : null}
             {state.phases.map((phase, i) => {
               const phaseVisits = num(phase.visitsPerWeek) * num(phase.weeks);
               const phaseCost = phaseVisits * fee;
@@ -1167,18 +1203,18 @@ function CarePlanContent() {
       <div ref={printRef} className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Report Header */}
         <div className="print-header bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
-          <p className="text-white/50 text-xs font-bold tracking-[0.2em]">
+          <p className="text-white/70 text-sm font-bold">
             {state.practiceName}
           </p>
           <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white mt-2">
             {state.patientName || "Patient"}
           </h2>
           <div className="flex items-center gap-3 mt-2">
-            <span className="text-white/60 text-sm">Personalized Care Plan</span>
-            <span className="text-white/30">|</span>
-            <span className="text-white/40 text-sm">{state.date}</span>
-            <span className="text-white/30">|</span>
-            <span className="text-white/40 text-sm">{state.doctorName}</span>
+            <span className="text-white/80 text-sm">Personalized Care Plan</span>
+            <span className="text-white/70">|</span>
+            <span className="text-white/70 text-sm">{state.date}</span>
+            <span className="text-white/70">|</span>
+            <span className="text-white/70 text-sm">{state.doctorName}</span>
           </div>
         </div>
 
