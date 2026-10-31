@@ -67,7 +67,13 @@ export async function getBillingData() {
       }))
     };
   } catch (error) {
-    console.error("Billing Action Error:", error);
+    console.error("[billing] failed to load");
+    try {
+      const Sentry = await import("@sentry/nextjs");
+      Sentry.captureException(new Error("billing load failed"));
+    } catch {
+      // Sentry is optional in local runs.
+    }
     return { error: "Failed to load billing data." };
   }
 }

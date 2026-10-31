@@ -13,6 +13,7 @@ export type Membership = {
   renewsAt: string | null;
   hasPracticeTools: boolean;
   isFounder: boolean;
+  hasStripeCustomer: boolean;
 };
 
 export type MembershipInput = {
@@ -75,5 +76,6 @@ export function deriveMembership(input: MembershipInput): Membership {
     renewsAt: input.renewsAt || null,
     hasPracticeTools,
     isFounder: founding,
+    hasStripeCustomer: hasStripe,
   };
 }
