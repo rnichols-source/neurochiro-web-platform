@@ -1,4 +1,5 @@
 import type { SeminarRecord } from "./types";
+import { formatSeminarAddress, formatSeminarLocation } from "./format.ts";
 
 function icsEscape(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/,/g, "\\,").replace(/;/g, "\\;");
@@ -17,7 +18,7 @@ export function buildIcs(seminar: Pick<SeminarRecord, "slug" | "title" | "startD
   const zone = seminar.timeZone || "America/New_York";
   const startStamp = icsStamp(start, "09:00");
   const endStamp = icsStamp(end, "17:00");
-  const place = [seminar.venueName, seminar.venueAddress, seminar.city, seminar.location].filter(Boolean).join(", ");
+  const place = formatSeminarAddress(seminar);
   const url = `https://www.neurochiro.co/seminars/${seminar.slug}`;
   const lines = [
     "BEGIN:VCALENDAR",
@@ -40,7 +41,7 @@ export function buildIcs(seminar: Pick<SeminarRecord, "slug" | "title" | "startD
   return lines.join("\r\n") + "\r\n";
 }
 
-export function googleCalendarUrl(seminar: Pick<SeminarRecord, "title" | "startDate" | "endDate" | "timeZone" | "city" | "slug">): string | null {
+export function googleCalendarUrl(seminar: Pick<SeminarRecord, "title" | "startDate" | "endDate" | "timeZone" | "city" | "state" | "country" | "countryCode" | "location" | "slug" | "format">): string | null {
   if (!seminar.startDate) return null;
   const zone = seminar.timeZone || "America/New_York";
   const start = icsStamp(seminar.startDate, "09:00");
@@ -50,7 +51,7 @@ export function googleCalendarUrl(seminar: Pick<SeminarRecord, "title" | "startD
     text: seminar.title,
     dates: `${start}/${end}`,
     ctz: zone,
-    location: seminar.city || "",
+    location: formatSeminarLocation(seminar),
     details: `https://www.neurochiro.co/seminars/${seminar.slug}`,
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;

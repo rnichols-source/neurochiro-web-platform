@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { isUpcoming, parseSeminarDates } from '@/lib/seminars/dates'
+import type { SeminarFilters } from '@/lib/seminars/types'
 
 // Public columns only. admin_notes, payment_status, host_type_at_submission
 // are revoked from anon/authenticated via column-level grants.
@@ -66,24 +67,14 @@ export async function getSeminars(options: SeminarFilterOptions = {}) {
   return rows
 }
 
-export async function getSeminarsForMap() {
-  // Note: latitude/longitude/is_boosted columns don't exist.
-  // Map uses address-based geocoding via Google Maps embed.
-  const supabase = createServerSupabase()
-
-  const { data, error } = await supabase
-    .from('seminars')
-    .select('id, title, city, country, dates, instructor_name, venue_address, listing_tier')
-    .eq('is_approved', true)
-    .eq('is_past', false)
-    .order('created_at', { ascending: true })
-
-  if (error) {
-    console.error("Error fetching map seminars:", error)
-    return []
-  }
-
-  return ((data || []) as Array<{ dates?: string | null }>).filter((row) => isUpcoming(parseSeminarDates(row.dates)?.end || null, false))
+export async function getSeminarsForMap(filters: SeminarFilters = {}) {
+  const { listSeminars } = await import('@/lib/seminars/queries')
+  const { seminarMapPin } = await import('@/lib/seminars/map-pins')
+  const rows = await listSeminars(filters)
+  return rows.flatMap((seminar) => {
+    const pin = seminarMapPin(seminar)
+    return pin ? [pin] : []
+  })
 }
 
 export async function getSeminarBySlugAction(param: string) {
