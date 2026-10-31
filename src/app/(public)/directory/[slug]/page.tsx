@@ -8,6 +8,7 @@ import { addressForSchema } from "@/lib/profile-display";
 import { getApprovedStories } from "@/app/actions/patient-stories";
 import { isDemoSlug } from "@/lib/directory/exclude-demo";
 import { trackProfileView } from "@/lib/portal/track-view";
+import { loadEarnedBadgeIds } from "@/lib/badges/compute";
 
 export const revalidate = 60; // ISR: cache for 60 seconds
 
@@ -99,13 +100,14 @@ export default async function DoctorProfilePage({ params }: Props) {
   await trackProfileView({ id: doctor.id, user_id: doctor.user_id });
 
   // Fetch doctor's seminars, jobs, city data, and nearby doctors in parallel
-  const [seminars, jobs, cityDoctorCount, nearbyDoctors, citySearchVolume, stories] = await Promise.all([
+  const [seminars, jobs, cityDoctorCount, nearbyDoctors, citySearchVolume, stories, badgeIds] = await Promise.all([
     doctor.user_id ? getDoctorSeminars(doctor.user_id) : Promise.resolve([]),
     getDoctorJobs(doctor.id),
     getCityDoctorCount(doctor.city || '', doctor.state || ''),
     getNearbyDoctors(doctor.id, doctor.state || '', 4, doctor.latitude, doctor.longitude),
     getCitySearchVolume(doctor.city || '', doctor.state || ''),
     getApprovedStories(doctor.id),
+    loadEarnedBadgeIds(doctor),
   ]);
 
   const profileUrl = `https://www.neurochiro.co/directory/${doctor.slug || doctor.id}`;
@@ -170,7 +172,7 @@ export default async function DoctorProfilePage({ params }: Props) {
     <>
       <SchemaMarkup data={jsonLd} />
       {faqLd && <SchemaMarkup data={faqLd} />}
-      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} stories={stories} />
+      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} stories={stories} badgeIds={badgeIds} />
     </>
   );
 }
