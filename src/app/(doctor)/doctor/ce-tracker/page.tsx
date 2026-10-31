@@ -1,11 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Award, Loader2, Calendar, MapPin } from "lucide-react";
+import Link from "next/link";
+import { Award, Loader2 } from "lucide-react";
 import { getCEHistory } from "./actions";
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 import PageHeader from "@/components/portal/PageHeader";
 import EmptyState from "@/components/portal/EmptyState";
+import { parseSeminarDates } from "@/lib/seminars/dates";
+
+function issuedBeforeEvent(issuedAt?: string | null, dates?: string | null): boolean {
+  const parsed = parseSeminarDates(dates);
+  if (!parsed?.start || !issuedAt) return false;
+  const issued = new Date(issuedAt);
+  if (Number.isNaN(issued.getTime())) return false;
+  return issued.getTime() < new Date(`${parsed.start}T00:00:00Z`).getTime();
+}
+
+function certificateLine(cert: { seminar_city?: string | null; seminar_dates?: string | null; ce_hours?: number | null }): string {
+  const hours = `${Number(cert.ce_hours) || 0} CE hours`;
+  return [cert.seminar_city, cert.seminar_dates, hours].filter(Boolean).join(" · ");
+}
 
 function dedupeCertificates(certificates: any[]) {
   const seen = new Set<string>();
@@ -86,16 +101,14 @@ function CETrackerContent() {
                   </div>
                   <div>
                     <p className="font-bold text-portal-ink text-sm">{cert.seminar_title}</p>
-                    <div className="flex items-center gap-3 text-sm text-portal-ink-2 mt-0.5">
-                      {cert.seminar_dates && <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{cert.seminar_dates}</span>}
-                      {cert.seminar_city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{cert.seminar_city}</span>}
-                    </div>
+                    <p className="text-sm text-portal-ink-2 mt-0.5">{certificateLine(cert)}</p>
+                    {issuedBeforeEvent(cert.issued_at, cert.seminar_dates) ? (
+                      <Link href="/doctor/help?topic=ce" className="mt-1 inline-flex min-h-11 items-center text-sm font-bold text-portal-warning">
+                        Issued before the event. We&apos;ll correct this.
+                      </Link>
+                    ) : null}
                     <p className="text-sm text-portal-muted mt-1">Certificate: {cert.certificate_number}</p>
                   </div>
-                </div>
-                <div className="text-right shrink-0">
-                  <p className="text-lg font-bold text-portal-ink">{cert.ce_hours} hrs</p>
-                  <p className="text-sm text-portal-muted">{new Date(cert.issued_at).toLocaleDateString()}</p>
                 </div>
               </div>
             ))}
