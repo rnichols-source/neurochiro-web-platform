@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { resolveStateCode } from '@/lib/resolve-state';
 import { EUROPEAN_ISO } from '@/lib/directory-countries';
+import { excludeDemo } from '@/lib/directory/exclude-demo';
 
 export const revalidate = 300; // Cache 5 min
 
@@ -26,11 +27,11 @@ export async function GET(request: NextRequest) {
 
     if (type === 'all' || type === 'location') {
       // Get matching cities with count
-      let cityQuery = supabase
+      let cityQuery = excludeDemo(supabase
         .from('doctors')
         .select('city, state, country')
         .ilike('city', `${q}%`)
-        .eq('verification_status', 'verified');
+        .eq('verification_status', 'verified'));
       if (country === 'EU') cityQuery = cityQuery.in('country', EUROPEAN_ISO);
       else if (country === 'US') cityQuery = cityQuery.or('country.is.null,country.eq.US');
       else if (country && country !== 'ALL') cityQuery = cityQuery.eq('country', country === 'UK' ? 'GB' : country);
@@ -54,11 +55,11 @@ export async function GET(request: NextRequest) {
 
       // Also try state match
       if (results.cities.length === 0) {
-        const { data: stateData } = await supabase
+        const { data: stateData } = await excludeDemo(supabase
           .from('doctors')
           .select('state, country')
           .eq('state', resolveStateCode(q) || q)
-          .eq('verification_status', 'verified')
+          .eq('verification_status', 'verified'))
           .limit(20);
 
         if (stateData) {
@@ -80,11 +81,11 @@ export async function GET(request: NextRequest) {
 
     if (type !== 'location') {
       // Get matching doctor names (skip when searching by location only)
-      let nameQuery = supabase
+      let nameQuery = excludeDemo(supabase
         .from('doctors')
         .select('first_name, last_name, slug, clinic_name, city, state, photo_url')
         .eq('verification_status', 'verified')
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,clinic_name.ilike.%${q}%`);
+        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,clinic_name.ilike.%${q}%`));
       if (country === 'EU') nameQuery = nameQuery.in('country', EUROPEAN_ISO);
       else if (country === 'US') nameQuery = nameQuery.or('country.is.null,country.eq.US');
       else if (country && country !== 'ALL') nameQuery = nameQuery.eq('country', country === 'UK' ? 'GB' : country);

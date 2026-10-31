@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Heart, Stethoscope, GraduationCap, Store, ArrowRight, Sparkles } from "lucide-react";
+import { X, Heart, Stethoscope, GraduationCap, Store, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface GetStartedModalProps {
@@ -24,7 +24,7 @@ export default function GetStartedModal({ isOpen, onClose }: GetStartedModalProp
       title: "I am a Doctor",
       desc: "Join the elite network and scale your clinical impact.",
       icon: Stethoscope,
-      href: "/pricing/doctors",
+      href: "/pro?source=nav",
       color: "text-blue-600",
       bg: "bg-blue-50",
       cta: "Explore Tiers"

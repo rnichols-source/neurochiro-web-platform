@@ -11,6 +11,8 @@ export interface SpotlightEpisode {
   description: string;
   episodeNumber: number;
   publishedAt: string;
+  /** Homepage "Meet the doctors" prefers these episodes. */
+  patientFacing?: boolean;
 }
 
 export function getYouTubeThumbnail(videoUrl: string): string {
@@ -114,6 +116,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     description:
       "Dr. Ryan Maxwell is the owner of Silver Lining Chiropractic in Park Ridge, Illinois, just outside Chicago. A former college baseball player at Monmouth, he discovered chiropractic after an ankle injury that PT couldn't fully resolve. He opened his practice in November 2020 and has built a 3-doctor team with nearly 400 five-star Google reviews and Best Chiropractor of Park Ridge four years running. With 60% of his patients being pediatric and prenatal, Dr. Ryan shares why birth is one of the most stressful events on a baby's nervous system, how INSiGHT scans change the conversation with families, and why he's on a mission to make kids healthier than ever.",
     episodeNumber: 6,
+    patientFacing: true,
     publishedAt: "2026-09-15T12:00:00Z",
   },
   {
@@ -194,6 +197,7 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     description:
       "Dr. Danika Phillips is the founder of Fika Chiropractic in Oakland, California. A former Canadian hockey player, she experienced a complete health breakdown during chiropractic school that forced her to step away for a quarter. That crisis led her to nervous system focused care and changed everything about how she practices. Now specializing in pediatric and prenatal care, she shares the story of her first complex pediatric case, an autistic child who slept through the night after one adjustment, a child who said 'I love you' for the first time in her office, and why Fika means taking a pause from your day to focus on your health.",
     episodeNumber: 11,
+    patientFacing: true,
     publishedAt: "2026-10-07T12:00:00Z",
   },
   {
@@ -210,9 +214,18 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     description:
       "Dr. Devin DiCenzo is the founder of Lighthouse Family Chiropractic in Mount Pleasant, South Carolina, just outside Charleston. A Life University graduate and PX Doc, he specializes in pediatric and family nervous system care with a focus on neurodevelopmental cases including autism, ADHD, seizures, and sensory processing disorders. He shares the story of Declan, a nonverbal autistic child who now communicates and told his mom not to stop chiropractic, a child with grand mal seizures who is 8 months seizure-free, and why adults are just big kids who need the same care.",
     episodeNumber: 12,
+    patientFacing: true,
     publishedAt: "2026-10-08T12:00:00Z",
   },
 ];
+
+/** Patient-facing episodes first. Falls back to the newest episodes. */
+export function patientSpotlightEpisodes(limit = 3): SpotlightEpisode[] {
+  const flagged = spotlightEpisodes.filter((episode) => episode.patientFacing);
+  if (flagged.length >= limit) return flagged.slice(0, limit);
+  const newest = [...spotlightEpisodes].reverse().filter((episode) => !episode.patientFacing);
+  return [...flagged, ...newest].slice(0, limit);
+}
 
 export function getLatestEpisode(): SpotlightEpisode {
   return spotlightEpisodes[spotlightEpisodes.length - 1];

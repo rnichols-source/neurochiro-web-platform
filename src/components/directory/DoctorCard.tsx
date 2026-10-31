@@ -68,11 +68,12 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
         prefetch={false}
         onClick={() => { trackConversion(doc.id, "profile_view"); onNavigate?.(); }}
         className="relative z-10 flex items-start gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neuro-orange"
-        aria-label={`View profile for ${name}`}
       >
         <div className="w-14 h-14 rounded-xl bg-neuro-navy overflow-hidden flex items-center justify-center shrink-0">
           {doc.photo_url && !cardPhotoError ? (
-            <img src={doc.photo_url} alt="" className="w-full h-full object-cover" onError={() => setCardPhotoError(true)} />
+            // Doctor photos are stored on several hosts.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={doc.photo_url} alt={name} width={56} height={56} sizes="56px" className="w-full h-full object-cover" onError={() => setCardPhotoError(true)} />
           ) : (
             <span className="text-white font-bold text-lg">{initials}</span>
           )}
@@ -81,23 +82,23 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
           <div className="flex items-center gap-1.5 flex-wrap">
             <h3 className={cn("font-bold truncate", dark ? "text-white" : "text-neuro-navy")}>{name}</h3>
             {doc.verification_status === "verified" && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold rounded-md bg-blue-500/15 text-blue-300">
+              <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold rounded-md", dark ? "bg-blue-500/15 text-blue-300" : "bg-blue-50 text-blue-800")}>
                 <ShieldCheck className="w-3 h-3" /> Verified
               </span>
             )}
           </div>
           <p className={cn("text-sm truncate", dark ? "text-white/70" : "text-gray-600")}>{doc.clinic_name || "Private practice"}</p>
           <p className={cn("text-sm mt-0.5", dark ? "text-white/70" : "text-gray-600")}>
-            {distanceMiles != null && <span className="text-neuro-orange font-bold">{formatDistance(distanceMiles, distanceUnit)} · </span>}
+            {distanceMiles != null && <span className={cn("font-bold", dark ? "text-neuro-orange" : "text-neuro-orange-ink")}>{formatDistance(distanceMiles, distanceUnit)} · </span>}
             {location && <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" />{location}</span>}
           </p>
           {doc.accepting_new_patients && (
-            <p className="text-sm font-semibold text-green-400 mt-1">Accepting new patients</p>
+            <p className={cn("text-sm font-semibold mt-1", dark ? "text-green-400" : "text-green-700")}>Accepting new patients</p>
           )}
           {specialties.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {specialties.map((specialty) => (
-                <span key={specialty} className="px-2.5 py-1 text-xs font-bold rounded-lg bg-neuro-orange/15 text-neuro-orange">{specialty}</span>
+                <span key={specialty} className={cn("px-2.5 py-1 text-xs font-bold rounded-lg", dark ? "bg-neuro-orange/15 text-neuro-orange" : "bg-neuro-orange/10 text-neuro-orange-ink")}>{specialty}</span>
               ))}
             </div>
           )}
@@ -115,7 +116,7 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
         className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange"
         aria-label={saved ? "Unsave doctor" : "Save doctor"}
       >
-        <Heart className={cn("w-5 h-5", saved ? "text-red-500 fill-red-500" : "text-white/70")} />
+        <Heart className={cn("w-5 h-5", saved ? "text-red-500 fill-red-500" : dark ? "text-white/70" : "text-gray-500")} />
         {showToast && <span className="sr-only">{showToast}</span>}
       </button>
 
@@ -124,7 +125,7 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
           href={`${profileUrl}#appointment-form`}
           prefetch={false}
           onClick={() => { trackConversion(doc.id, "request_click"); onNavigate?.(); }}
-          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-neuro-orange px-4 text-sm font-bold text-white hover:bg-[#B8551F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          className={cn("inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white", dark ? "bg-neuro-orange hover:bg-[#B8551F]" : "bg-neuro-orange-ink hover:bg-neuro-orange")}
         >
           <Calendar className="w-4 h-4" /> Request appointment
         </Link>
@@ -132,7 +133,7 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
           <a
             href={`tel:${doc.phone}`}
             onClick={() => trackConversion(doc.id, "call")}
-            className="inline-flex min-h-12 min-w-12 items-center justify-center gap-1.5 rounded-xl bg-white/10 px-3 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange"
+            className={cn("inline-flex min-h-12 min-w-12 items-center justify-center gap-1.5 rounded-xl px-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange", dark ? "bg-white/10 text-white" : "border border-gray-200 bg-white text-neuro-navy")}
             aria-label={`Call ${name}`}
           >
             <Phone className="w-4 h-4" /> Call
@@ -144,7 +145,7 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => trackConversion(doc.id, "book")}
-            className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white/10 px-4 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange"
+            className={cn("inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange", dark ? "bg-white/10 text-white" : "border border-gray-200 bg-white text-neuro-navy")}
           >
             Book online
           </a>

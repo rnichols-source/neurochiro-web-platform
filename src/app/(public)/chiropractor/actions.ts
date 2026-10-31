@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { haversineDistance } from '@/lib/geo';
 import { cityToSlug, EMPTY_METROS } from '@/lib/city-data';
 import { getThresholds, THRESHOLD_DEFAULTS } from '@/lib/thresholds';
+import { excludeDemo } from '@/lib/directory/exclude-demo';
 const NEAREST_FALLBACK_COUNT = 5;
 
 export interface CityDoctor {
@@ -45,7 +46,7 @@ export async function getDoctorsNearCity(
   const latDelta = radiusMiles / 69;
   const lngDelta = radiusMiles / (69 * Math.cos(lat * Math.PI / 180));
 
-  const { data } = await (supabase as any)
+  const { data } = await excludeDemo((supabase as any)
     .from('doctors')
     .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
     .eq('verification_status', 'verified')
@@ -53,7 +54,7 @@ export async function getDoctorsNearCity(
     .gte('latitude', lat - latDelta)
     .lte('latitude', lat + latDelta)
     .gte('longitude', lng - lngDelta)
-    .lte('longitude', lng + lngDelta);
+    .lte('longitude', lng + lngDelta));
 
   if (!data || data.length === 0) return [];
 
@@ -76,13 +77,13 @@ export async function getNearestDoctors(
 ): Promise<CityDoctor[]> {
   const supabase = createAdminClient();
 
-  const { data } = await (supabase as any)
+  const { data } = await excludeDemo((supabase as any)
     .from('doctors')
     .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
     .eq('verification_status', 'verified')
     .eq('accepting_new_patients', true)
     .or('country.is.null,country.eq.US')
-    .gt('latitude', 0);
+    .gt('latitude', 0));
 
   if (!data || data.length === 0) return [];
 
@@ -108,12 +109,12 @@ export async function getNearbyCityPages(
   const supabase = createAdminClient();
 
   // Get all doctor cities
-  const { data: docs } = await (supabase as any)
+  const { data: docs } = await excludeDemo((supabase as any)
     .from('doctors')
     .select('city, state, latitude, longitude')
     .eq('verification_status', 'verified')
     .or('country.is.null,country.eq.US')
-    .gt('latitude', 0);
+    .gt('latitude', 0));
 
   if (!docs) return [];
 

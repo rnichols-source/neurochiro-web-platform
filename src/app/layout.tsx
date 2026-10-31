@@ -5,21 +5,21 @@ import "./globals.css";
 const lato = Lato({
   variable: "--font-lato",
   subsets: ["latin"],
-  weight: ["100", "300", "400", "700", "900"],
+  weight: ["400", "700", "900"],
   display: 'swap',
 });
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: 'swap',
 });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.neurochiro.co"),
-  title: "NeuroChiro | Nervous-System-First Chiropractic",
-  description: "The global ecosystem for nervous-system-focused chiropractic. Find doctors, educational resources, and career opportunities.",
+  title: "NeuroChiro | Find a Nervous System Chiropractor Near You",
+  description: "Free directory of verified nervous system chiropractors. Search by city or ZIP, compare doctors, and request an appointment online.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -31,16 +31,16 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "NeuroChiro | Nervous-System-First Chiropractic",
-    description: "The global ecosystem for nervous-system-focused chiropractic.",
+    title: "NeuroChiro | Find a Nervous System Chiropractor Near You",
+    description: "Free directory of verified nervous system chiropractors. Search by city or ZIP, compare doctors, and request an appointment online.",
     url: "https://www.neurochiro.co",
     siteName: "NeuroChiro",
     images: [
       {
         url: "/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "NeuroChiro Logo",
+        width: 1000,
+        height: 1000,
+        alt: "NeuroChiro",
       },
     ],
     locale: "en_US",
@@ -48,8 +48,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "NeuroChiro",
-    description: "The global ecosystem for nervous-system-focused chiropractic.",
+    title: "NeuroChiro | Find a Nervous System Chiropractor Near You",
+    description: "Free directory of verified nervous system chiropractors. Search by city or ZIP, compare doctors, and request an appointment online.",
     images: ["/logo.png"],
   },
   appleWebApp: {
@@ -75,21 +75,37 @@ export default function RootLayout({
 }>) {
   const organizationJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "NeuroChiro",
-    "url": "https://neurochiro.co",
-    "logo": "https://neurochiro.co/logo.png",
-    "sameAs": [
-      "https://facebook.com/neurochiro",
-      "https://instagram.com/neurochiro"
-    ],
-    "description": "The global ecosystem for nervous-system-focused chiropractic."
+    "@graph": [
+      {
+        "@type": "Organization",
+        "name": "NeuroChiro",
+        "url": "https://www.neurochiro.co",
+        "logo": "https://www.neurochiro.co/logo.png",
+        "sameAs": [
+          "https://facebook.com/neurochiro",
+          "https://instagram.com/neurochiro",
+          "https://twitter.com/neurochiro",
+          "https://www.linkedin.com/company/neurochiro"
+        ],
+        "description": "Free directory of verified nervous system chiropractors."
+      },
+      {
+        "@type": "WebSite",
+        "name": "NeuroChiro",
+        "url": "https://www.neurochiro.co",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://www.neurochiro.co/directory?location={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
   };
 
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://vpxuzoqsnshvgtukvsqy.supabase.co" />
+        <link rel="preconnect" href="https://gddapefwrmucimpdhjrz.supabase.co" />
         <link rel="preconnect" href="https://api.mapbox.com" />
         <link rel="preconnect" href="https://events.mapbox.com" />
         <script

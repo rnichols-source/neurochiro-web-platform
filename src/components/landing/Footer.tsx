@@ -2,125 +2,169 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Twitter, Instagram, Linkedin, Github } from "lucide-react";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { Instagram, Linkedin } from "lucide-react";
+
+const PATIENT_LINKS = [
+  { name: "Find a doctor", href: "/directory" },
+  { name: "Take the quiz", href: "/quiz" },
+  { name: "Learn", href: "/learn" },
+  { name: "FAQ", href: "/learn/faq" },
+  { name: "Patient list", href: "/list?source=site_footer" },
+];
+
+const CHIRO_LINKS = [
+  { name: "Membership", href: "/pro?source=site_footer" },
+  { name: "Seminars", href: "/seminars" },
+  { name: "Marketplace", href: "/marketplace" },
+  { name: "Careers", href: "/jobs" },
+  { name: "Store", href: "/store" },
+  { name: "Students", href: "/pricing/students" },
+  { name: "Log in", href: "/login" },
+];
+
+const COMPANY_LINKS = [
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
+  { name: "Privacy", href: "/privacy" },
+  { name: "Terms", href: "/terms" },
+];
+
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.727-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function Column({ title, links }: { title: string; links: { name: string; href: string }[] }) {
+  return (
+    <div>
+      <h2 className="text-base font-bold text-gray-200">{title}</h2>
+      <ul className="mt-2">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link href={link.href} className="inline-flex min-h-11 items-center py-2 text-sm text-gray-400 hover:text-white">
+              {link.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
+  const year = new Date().getFullYear();
   return (
-    <footer className="bg-neuro-black text-white py-24 px-6 border-t border-white/10">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
-        
-        {/* Brand */}
-        <div className="space-y-6">
-          <Link href="/" className="text-2xl font-heading font-black tracking-tight flex items-center gap-3 hover:text-neuro-orange transition-colors">
-            <div className="relative w-10 h-10">
-              <Image src="/logo-white.png" alt="NeuroChiro" fill className="object-contain" />
-            </div>
-            <span>NEURO<span className="text-neuro-orange">CHIRO</span></span>
+    <footer className="border-t border-white/10 bg-neuro-black px-4 py-12 text-white sm:px-6">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div>
+          <Link href="/" className="inline-flex min-h-11 items-center gap-3">
+            <Image src="/logo-white.png" alt="" width={40} height={40} className="object-contain" />
+            <span className="font-heading text-xl font-black tracking-tight">
+              NEURO<span className="text-neuro-orange-light">CHIRO</span>
+            </span>
           </Link>
-          <p className="text-gray-400 leading-relaxed max-w-sm">
-            The global nervous-system-first chiropractic ecosystem. Connecting doctors, students, and patients worldwide.
+          <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-gray-400">
+            A free directory of verified nervous system chiropractors.
           </p>
-          <div className="flex gap-4">
-            <Link href="https://twitter.com/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors" aria-label="Follow NeuroChiro on Twitter"><Twitter className="w-5 h-5" aria-hidden="true" /></Link>
-            <Link href="https://instagram.com/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors" aria-label="Follow NeuroChiro on Instagram"><Instagram className="w-5 h-5" aria-hidden="true" /></Link>
-            <Link href="https://linkedin.com/company/neurochiro" className="p-2 bg-white/5 rounded-full hover:bg-white/10 transition-colors" aria-label="Follow NeuroChiro on LinkedIn"><Linkedin className="w-5 h-5" aria-hidden="true" /></Link>
+          <div className="mt-4 flex gap-2">
+            <Link href="https://twitter.com/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label="Follow NeuroChiro on X">
+              <XIcon />
+            </Link>
+            <Link href="https://instagram.com/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label="Follow NeuroChiro on Instagram">
+              <Instagram className="h-5 w-5" aria-hidden />
+            </Link>
+            <Link href="https://linkedin.com/company/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label="Follow NeuroChiro on LinkedIn">
+              <Linkedin className="h-5 w-5" aria-hidden />
+            </Link>
           </div>
         </div>
-
-        {/* Links Column 1 */}
+        <Column title="For patients" links={PATIENT_LINKS} />
+        <Column title="For chiropractors" links={CHIRO_LINKS} />
         <div>
-          <h4 className="font-bold text-lg mb-6 text-gray-200">Product</h4>
-          <ul className="space-y-4">
-            <li><Link href="/directory" className="text-gray-400 hover:text-neuro-orange transition-colors">Global Directory</Link></li>
-            <li><Link href="/get-started" className="text-gray-400 hover:text-neuro-orange transition-colors">For Students</Link></li>
-            <li><Link href="/pro?source=site_footer" className="text-gray-400 hover:text-neuro-orange transition-colors">For Doctors</Link></li>
-            <li><Link href="/seminars" className="text-gray-400 hover:text-neuro-orange transition-colors">Seminars</Link></li>
-            <li><Link href="/why-neurochiro" className="text-gray-400 hover:text-neuro-orange transition-colors">Why NeuroChiro?</Link></li>
-            <li><Link href="/list?source=site_footer" className="text-gray-400 hover:text-neuro-orange transition-colors">Patient List</Link></li>
+          <h2 className="text-base font-bold text-gray-200">Company</h2>
+          <ul className="mt-2">
+            {COMPANY_LINKS.map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="inline-flex min-h-11 items-center py-2 text-sm text-gray-400 hover:text-white">
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+            <li>
+              <a href="mailto:support@neurochirodirectory.com" className="inline-flex min-h-11 items-center py-2 text-sm text-gray-400 hover:text-white">
+                Feedback
+              </a>
+            </li>
           </ul>
-        </div>
-
-        {/* Links Column 2 */}
-        <div>
-          <h4 className="font-bold text-lg mb-6 text-gray-200">Resources</h4>
-          <ul className="space-y-4">
-            <li><Link href="/careers" className="text-gray-400 hover:text-neuro-orange transition-colors">Careers</Link></li>
-            <li><Link href="/about" className="text-gray-400 hover:text-neuro-orange transition-colors">About Us</Link></li>
-            <li><Link href="/contact" className="text-gray-400 hover:text-neuro-orange transition-colors">Contact</Link></li>
-            <li><Link href="/register" className="text-gray-400 hover:text-neuro-orange transition-colors">Join Now</Link></li>
-            <li><a href="mailto:support@neurochiro.com" className="text-gray-400 hover:text-neuro-orange transition-colors">Feedback</a></li>
-          </ul>
-        </div>
-
-        {/* Newsletter */}
-        <div>
-          <h4 className="font-bold text-lg mb-6 text-gray-200">Stay Updated</h4>
-          <p className="text-gray-400 mb-4 text-sm">Join our newsletter for the latest updates and clinical insights.</p>
+          <h2 className="mt-6 text-base font-bold text-gray-200">Stay updated</h2>
+          <p className="mt-2 text-sm leading-relaxed text-gray-400">Get updates when new doctors join near you.</p>
           <NewsletterForm />
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
-        <p>© 2026 NeuroChiro Directory. All rights reserved.</p>
-        <div className="flex gap-8 mt-4 md:mt-0">
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+      <div className="mx-auto mt-10 flex max-w-6xl flex-col gap-3 border-t border-white/10 pt-6 text-sm text-gray-400 sm:flex-row sm:items-center sm:justify-between">
+        <p>© {year} NeuroChiro</p>
+        <div className="flex gap-4">
+          <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-white">Privacy</Link>
+          <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-white">Terms</Link>
         </div>
       </div>
-      <p className="max-w-7xl mx-auto text-center text-[10px] text-gray-600 mt-4">Postal code data from <a href="https://www.geonames.org" className="hover:text-gray-400" target="_blank" rel="noopener noreferrer">GeoNames</a> (geonames.org), CC BY 4.0.</p>
+      <p className="mx-auto mt-2 max-w-6xl text-xs text-gray-300">
+        Postal code data from{" "}
+        <a href="https://www.geonames.org" className="underline hover:text-white" target="_blank" rel="noopener noreferrer">
+          GeoNames
+        </a>{" "}
+        (geonames.org), CC BY 4.0.
+      </p>
     </footer>
   );
 }
 
 function NewsletterForm() {
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
-  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [email, setEmail] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!email) return;
-    setStatus('loading');
+    setStatus("loading");
     try {
-      await fetch('/api/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'footer_newsletter', role: 'subscriber' }),
+      await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "footer_newsletter", role: "subscriber" }),
       });
-    } catch {}
-    setStatus('success');
+    } catch {
+      /* still confirm so a network blip does not trap the form */
+    }
+    setStatus("success");
   };
 
-  if (status === 'success') {
-    return (
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-xl text-emerald-400 text-sm font-bold"
-      >
-        Welcome to the network!
-      </motion.div>
-    );
+  if (status === "success") {
+    return <p className="mt-3 text-sm font-bold text-emerald-300">You&apos;re on the list.</p>;
   }
 
   return (
-    <form className="flex gap-2" onSubmit={handleSubmit}>
+    <form className="mt-3 flex gap-2" onSubmit={handleSubmit}>
+      <label htmlFor="footer-email" className="sr-only">Email</label>
       <input
+        id="footer-email"
         type="email"
         required
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        className="bg-white/5 border border-white/10 rounded-lg px-4 py-3 w-full text-white placeholder-gray-500 focus:outline-none focus:border-neuro-orange transition-colors"
+        onChange={(event) => setEmail(event.target.value)}
+        placeholder="Email address"
+        className="min-h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-base text-white placeholder:text-gray-500 focus:border-neuro-orange-light focus:outline-none"
       />
-      <button 
+      <button
         type="submit"
-        disabled={status === 'loading'}
-        className="bg-neuro-orange hover:bg-neuro-orange-light active:scale-95 disabled:opacity-50 px-4 py-3 rounded-lg font-bold text-white transition-all"
-        aria-label="Join newsletter"
+        disabled={status === "loading"}
+        className="min-h-11 shrink-0 rounded-lg bg-neuro-orange-ink px-4 text-sm font-bold text-white disabled:opacity-50"
       >
-        {status === 'loading' ? '...' : 'Join'}
+        {status === "loading" ? "..." : "Join"}
       </button>
     </form>
   );
