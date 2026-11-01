@@ -1,6 +1,6 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase-admin'
+import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
 import { checkAdminAuth } from '@/lib/admin-auth'
 
 export interface InvisibleDoctor {
@@ -15,7 +15,7 @@ export interface InvisibleDoctor {
   membership_tier: string | null
   latitude: number | null
   longitude: number | null
-  reason: 'no_address' | 'geocode_failed' | 'zero_coords' | 'address_mismatch'
+  reason: 'no_address' | 'geocode_failed' | 'zero_coords' | 'missing_coords' | 'address_mismatch'
   mismatchNote?: string
 }
 
@@ -43,30 +43,52 @@ function extractCityFromAddress(address: string, state: string): string | null {
   return null
 }
 
+function isUnitedStates(country: string | null | undefined): boolean {
+  if (country == null) return true
+  const value = country.trim().toLowerCase().replace(/\./g, '')
+  if (!value) return true
+  return value === 'us' || value === 'usa' || value === 'united states'
+}
+
+type DoctorPinRow = {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  clinic_name: string | null
+  city: string | null
+  state: string | null
+  address: string | null
+  verification_status: string
+  membership_tier: string | null
+  latitude: number | null
+  longitude: number | null
+  country: string | null
+}
+
 export async function getInvisibleDoctors(): Promise<InvisibleDoctor[]> {
   await checkAdminAuth()
   const supabase = createAdminClient()
 
-  // Fetch all verified/pending US doctors
-  const { data, error } = await supabase
-    .from('doctors')
-    .select('id, first_name, last_name, clinic_name, city, state, address, verification_status, membership_tier, latitude, longitude, country')
-    .in('verification_status', ['verified', 'pending'])
-    .or('country.is.null,country.eq.US')
-    .order('verification_status', { ascending: true })
-    .order('last_name')
-
-  if (error || !data) return []
+  const data = await fetchAllRows(
+    supabase,
+    'doctors',
+    'id, first_name, last_name, clinic_name, city, state, address, verification_status, membership_tier, latitude, longitude, country',
+    (query) => query.in('verification_status', ['verified', 'pending']),
+    'last_name',
+    true,
+  ) as DoctorPinRow[]
 
   const invisible: InvisibleDoctor[] = []
 
   for (const d of data) {
     const lat = d.latitude
     const lng = d.longitude
-    const isZero = (lat === 0 && lng === 0) || lat == null || lng == null
+    const missing = lat == null || lng == null
+    const zero = lat === 0 && lng === 0
+    const isZero = missing || zero
 
-    // Check for city/address mismatch (even if coords are valid)
-    if (!isZero && d.address && d.city) {
+    // US address mismatch still applies when the pin itself is usable.
+    if (!isZero && isUnitedStates(d.country) && d.address && d.city) {
       const addrCity = extractCityFromAddress(d.address, d.state || '')
       if (addrCity) {
         const recordCity = d.city.trim().toLowerCase()
@@ -95,13 +117,9 @@ export async function getInvisibleDoctors(): Promise<InvisibleDoctor[]> {
     if (!isZero) continue
 
     let reason: InvisibleDoctor['reason']
-    if (!d.address || !d.address.trim()) {
-      reason = 'no_address'
-    } else if (lat === 0 && lng === 0) {
-      reason = 'geocode_failed'
-    } else {
-      reason = 'zero_coords'
-    }
+    if (missing) reason = 'missing_coords'
+    else if (!d.address || !d.address.trim()) reason = 'no_address'
+    else reason = 'zero_coords'
 
     invisible.push({
       id: d.id,

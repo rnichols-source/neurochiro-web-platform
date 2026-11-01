@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveMembership } from './membership.ts';
+import { accessForStripeStatus, deriveMembership } from './membership.ts';
 
 test('founding member with no Stripe customer', () => {
   const membership = deriveMembership({
@@ -73,4 +73,97 @@ test('neuros', () => {
   });
   assert.equal(membership.tier, 'neuros');
   assert.equal(membership.source, 'comped');
+});
+
+const accessCases = [
+  { status: 'active', paid: true, paymentIssue: false },
+  { status: 'trialing', paid: true, paymentIssue: false },
+  { status: 'past_due', paid: true, paymentIssue: true },
+  { status: 'incomplete', paid: 'unchanged', paymentIssue: false },
+  { status: 'paused', paid: 'unchanged', paymentIssue: true },
+  { status: 'canceled', paid: false, paymentIssue: false },
+  { status: 'unpaid', paid: false, paymentIssue: false },
+  { status: 'incomplete_expired', paid: false, paymentIssue: false },
+] as const;
+
+for (const role of ['doctor', 'student']) {
+  for (const entry of accessCases) {
+    test(`access ${role} ${entry.status}`, () => {
+      assert.deepEqual(accessForStripeStatus(entry.status, role), {
+        paid: entry.paid,
+        paymentIssue: entry.paymentIssue,
+      });
+    });
+  }
+}
+
+test('derive unpaid is free', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'unpaid',
+    membershipTier: 'pro',
+  });
+  assert.equal(membership.tier, 'free');
+  assert.equal(membership.status, 'unpaid');
+});
+
+test('derive incomplete_expired is free', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'incomplete_expired',
+    membershipTier: 'pro',
+  });
+  assert.equal(membership.tier, 'free');
+  assert.equal(membership.status, 'incomplete_expired');
+});
+
+test('derive past_due stays pro', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'past_due',
+    membershipTier: 'pro',
+  });
+  assert.equal(membership.tier, 'pro');
+  assert.equal(membership.status, 'past_due');
+  assert.equal(membership.priceLabel, '$49/mo');
+});
+
+test('derive trialing stays pro', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'trialing',
+    membershipTier: 'pro',
+  });
+  assert.equal(membership.tier, 'pro');
+  assert.equal(membership.status, 'trialing');
+});
+
+test('derive incomplete does not grant access', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'incomplete',
+    membershipTier: 'free',
+  });
+  assert.equal(membership.tier, 'free');
+  assert.equal(membership.status, 'incomplete');
+});
+
+test('derive incomplete does not revoke stored pro', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'incomplete',
+    membershipTier: 'pro',
+  });
+  assert.equal(membership.tier, 'pro');
+  assert.equal(membership.status, 'incomplete');
+});
+
+test('derive paused keeps stored pro', () => {
+  const membership = deriveMembership({
+    hasStripeCustomer: true,
+    stripeStatus: 'paused',
+    membershipTier: 'pro',
+  });
+  assert.equal(membership.tier, 'pro');
+  assert.equal(membership.status, 'paused');
 });
