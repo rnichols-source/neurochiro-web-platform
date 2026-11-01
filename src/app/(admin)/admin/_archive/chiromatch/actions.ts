@@ -35,7 +35,7 @@ export async function createMatchCycle(input: {
     match_day: input.match_day,
   });
   if (error) return { error: error.message };
-  revalidatePath("/admin/chiromatch");
+  revalidatePath("/admin/archive/chiromatch");
   return { success: true };
 }
 
@@ -47,7 +47,7 @@ export async function updateCycleStatus(cycleId: string, status: CycleStatus) {
     .update({ status })
     .eq("id", cycleId);
   if (error) return { error: error.message };
-  revalidatePath("/admin/chiromatch");
+  revalidatePath("/admin/archive/chiromatch");
   return { success: true };
 }
 
@@ -71,6 +71,6 @@ export async function deleteCycle(cycleId: string) {
   const sb = createAdminClient() as any;
   const { error } = await sb.from("match_cycles").delete().eq("id", cycleId);
   if (error) return { error: error.message };
-  revalidatePath("/admin/chiromatch");
+  revalidatePath("/admin/archive/chiromatch");
   return { success: true };
 }

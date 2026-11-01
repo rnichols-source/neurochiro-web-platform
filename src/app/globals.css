@@ -126,6 +126,65 @@ html[data-cookie-bar="1"] .nc-seminar-cta {
   bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
+/* Legacy admin pages were written for a near-black shell. The cream canvas
+   remaps those utilities so the words stay readable. New pages use navy text directly. */
+.admin-canvas {
+  background: var(--color-neuro-cream);
+  color: var(--color-neuro-navy);
+}
+.admin-canvas .text-white,
+.admin-canvas .text-white\/90,
+.admin-canvas .text-white\/80,
+.admin-canvas .text-white\/70,
+.admin-canvas .text-white\/60,
+.admin-canvas .text-white\/50,
+.admin-canvas .text-white\/40 {
+  color: var(--color-neuro-navy);
+}
+.admin-canvas .text-gray-300,
+.admin-canvas .text-gray-400,
+.admin-canvas .text-gray-500 {
+  color: #4b5563;
+}
+.admin-canvas .bg-\[\#020617\],
+.admin-canvas .bg-\[\#0F172A\],
+.admin-canvas .bg-\[\#0f172a\],
+.admin-canvas .bg-\[\#1E293B\],
+.admin-canvas .bg-\[\#1e293b\] {
+  background-color: #fff;
+}
+.admin-canvas .bg-neuro-orange,
+.admin-canvas .bg-neuro-orange.text-white,
+.admin-canvas .bg-neuro-orange .text-white,
+.admin-canvas .bg-neuro-navy,
+.admin-canvas .bg-neuro-navy.text-white,
+.admin-canvas .bg-neuro-navy .text-white,
+.admin-canvas .bg-red-500,
+.admin-canvas .bg-red-500.text-white,
+.admin-canvas .bg-red-500 .text-white,
+.admin-canvas .bg-red-600,
+.admin-canvas .bg-red-600.text-white,
+.admin-canvas .bg-red-600 .text-white,
+.admin-canvas .bg-emerald-500,
+.admin-canvas .bg-emerald-500.text-white,
+.admin-canvas .bg-emerald-600,
+.admin-canvas .bg-emerald-600.text-white,
+.admin-canvas .bg-green-500,
+.admin-canvas .bg-green-500.text-white,
+.admin-canvas .bg-green-600,
+.admin-canvas .bg-green-600.text-white,
+.admin-canvas .bg-blue-500,
+.admin-canvas .bg-blue-500.text-white,
+.admin-canvas .bg-blue-600,
+.admin-canvas .bg-blue-600.text-white,
+.admin-canvas .bg-blue-600 .text-white,
+.admin-canvas .bg-amber-500,
+.admin-canvas .bg-amber-500.text-white,
+.admin-canvas .bg-amber-600,
+.admin-canvas .bg-amber-600.text-white {
+  color: #fff;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

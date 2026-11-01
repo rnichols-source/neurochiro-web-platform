@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
 import { checkAdminAuth } from '@/lib/admin-auth';
+import { randomToken } from '@/lib/admin/random-token';
 
 export async function getAllDoctors(search?: string) {
   noStore();
@@ -167,7 +168,7 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
         first_name: firstName,
         last_name: lastName,
         email: row.email,
-        slug: `${slug}-${Math.random().toString(36).substring(2, 6)}`,
+        slug: `${slug}-${randomToken(4)}`,
         clinic_name: `${firstName} ${lastName} Chiropractic`,
         city: '',
         state: '',
@@ -192,7 +193,7 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
 
       // Also create a Supabase auth account + profile
       // Note: uses admin client to create users
-      const tempPassword = `NC-${Math.random().toString(36).substring(2, 10)}!`;
+      const tempPassword = `NC-${randomToken(8)}!`;
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: row.email,
         password: tempPassword,
@@ -265,7 +266,7 @@ export async function registerAllUnlinkedDoctors() {
       // Check if auth account already exists for this email
       const { data: existingUsers } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
       // Use a direct approach - try to create, if fails it already exists
-      const tempPassword = `NC-${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 4)}!A`;
+      const tempPassword = `NC-${randomToken(8)}${randomToken(2)}!A`;
 
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: doctor.email,

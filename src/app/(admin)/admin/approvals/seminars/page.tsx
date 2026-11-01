@@ -15,6 +15,7 @@ import {
   Loader2
 } from "lucide-react";
 import { getPendingSeminars, approveSeminarAction, rejectSeminarAction } from "./actions";
+import { SeminarSectionTabs } from "@/components/admin/SeminarSectionTabs";
 
 export default function SeminarApprovalsPage() {
   const [seminars, setSeminars] = useState<any[]>([]);
@@ -61,6 +62,7 @@ export default function SeminarApprovalsPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <SeminarSectionTabs active="approvals" />
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-heading font-black text-neuro-navy">Seminar Approval Queue</h1>

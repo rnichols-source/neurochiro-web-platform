@@ -99,6 +99,8 @@ const NEW_DOCTORS = [
   },
 ];
 
+// Archived. Removed from the admin nav. The route stays so a cron caller with
+// the bearer secret can still post. This comment does not delete any rows.
 export async function POST(req: Request) {
   const authHeader = req.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

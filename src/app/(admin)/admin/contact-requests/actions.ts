@@ -10,6 +10,7 @@ import { getDoctorRecipients } from '@/lib/leads/recipients'
 import { isMissingColumn, isMissingTable, updateContactRequest } from '@/lib/leads/schema'
 import { parseLegacyNote } from '@/lib/leads/validate'
 import { logPortalEvent } from '@/lib/leads/send'
+import { countAttention } from '@/lib/leads/attention-count'
 
 const REQUEST_COLUMNS = `
   id, name, phone, email, preferred_time, message, note, status, source, created_at,
@@ -120,8 +121,7 @@ export async function getContactRequests() {
 
 export async function getLeadAttentionCount(): Promise<number> {
   await checkAdminAuth()
-  const rows = await getContactRequests()
-  return rows.filter((row: any) => row.needsAttention).length
+  return countAttention()
 }
 
 async function loadOne(db: any, requestId: string) {

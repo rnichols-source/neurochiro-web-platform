@@ -5,6 +5,7 @@ import { checkAdminAuth } from '@/lib/admin-auth'
 import { haversineDistance } from '@/lib/geo'
 import { revalidatePath } from 'next/cache'
 import { getThresholds } from '@/lib/thresholds'
+import { randomToken } from '@/lib/admin/random-token'
 
 // ── Types ──
 
@@ -1115,7 +1116,7 @@ export async function logReply(
   const supabase = createAdminClient()
 
   // Generate short unique redirect code when a doctor is associated
-  const redirectCode = doctorId ? Math.random().toString(36).slice(2, 8) : undefined
+  const redirectCode = doctorId ? randomToken(6) : undefined
 
   const { data } = await (supabase as any).from('reply_logs').insert({
     template_id: templateId,

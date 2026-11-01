@@ -2,6 +2,7 @@
 
 import { stripe } from "@/lib/stripe";
 import { checkAdminAuth } from '@/lib/admin-auth';
+import { mrr } from '@/lib/admin/metrics';
 
 /**
  * Fetches all records from a Stripe list API using async iteration.
@@ -113,6 +114,8 @@ export async function getRevenueData(timeRange: string) {
     };
 
     const currentMrr = getMrrAt(Math.floor(now.getTime() / 1000));
+    const sharedMrr = await mrr();
+    const headlineMrr = sharedMrr.usd;
     const previousMrr = getMrrAt(prevEndTs);
     const mrrTrend = previousMrr === 0 ? (currentMrr > 0 ? 100 : 0) : ((currentMrr - previousMrr) / previousMrr) * 100;
 
@@ -173,7 +176,8 @@ export async function getRevenueData(timeRange: string) {
       data: {
         totalRevenue: currentRevenue,
         revenueTrend,
-        mrr: currentMrr,
+        mrr: headlineMrr,
+        mrrOther: sharedMrr.other,
         mrrTrend,
         activeSubscriptions: currentActiveCount,
         activeSubscriptionsTrend,
@@ -188,7 +192,7 @@ export async function getRevenueData(timeRange: string) {
           type: c.description || "Subscription update"
         })),
         breakdown,
-        projectedGrowth: currentMrr * 12
+        projectedGrowth: headlineMrr == null ? null : headlineMrr * 12
       }
     };
   } catch (error) {
