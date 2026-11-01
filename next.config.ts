@@ -52,6 +52,12 @@ const nextConfig: NextConfig = {
       },
       { source: '/student/career-pipeline', destination: '/student/dashboard', permanent: false },
       { source: '/student/mentors', destination: '/student/doctors', permanent: false },
+      { source: '/admin/dashboard', destination: '/admin', permanent: false },
+      { source: '/admin/contact-requests', destination: '/admin/leads?tab=requests', permanent: false },
+      { source: '/admin/list', destination: '/admin/leads?tab=waitlist', permanent: false },
+      { source: '/admin/referrals', destination: '/admin/leads?tab=introductions', permanent: false },
+      { source: '/admin/stats/recommendations', destination: '/admin/leads?tab=introductions&view=stats', permanent: false },
+      { source: '/admin/match', destination: '/admin/leads?tab=matching', permanent: false },
       ...JOB_REDIRECTS,
       ...LEGACY_STORE_PRODUCT_IDS.map((id) => ({
         source: `/store/${id}`,

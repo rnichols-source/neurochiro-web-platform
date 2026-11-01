@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Calendar, Trash2, CheckCircle2, XCircle, Search, MapPin, Globe } from "lucide-react";
 import { getAdminSeminars, toggleSeminarApproval, deleteSeminar } from "./actions";
 import { cn } from "@/lib/utils";
+import { SeminarSectionTabs } from "@/components/admin/SeminarSectionTabs";
 import { formatDistanceToNow } from "date-fns";
 
 export default function AdminSeminarsPage() {
@@ -51,14 +52,18 @@ export default function AdminSeminarsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center min-h-[60vh]">
-        <div className="w-10 h-10 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+      <div className="p-8">
+        <SeminarSectionTabs active="listings" />
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="w-10 h-10 border-4 border-neuro-orange border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8">
+      <SeminarSectionTabs active="listings" />
       <header>
         <h1 className="text-3xl font-heading font-black text-neuro-navy uppercase tracking-tight">Seminars</h1>
         <p className="text-gray-500 mt-1">{counts.all} total &middot; {counts.pending} pending approval &middot; {counts.approved} approved</p>

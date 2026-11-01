@@ -115,7 +115,7 @@ export async function executeMatching(cycleId: string) {
     // 10. Update cycle status to matched
     await sb.from("match_cycles").update({ status: "matched" }).eq("id", cycleId);
 
-    revalidatePath("/admin/chiromatch");
+    revalidatePath("/admin/archive/chiromatch");
     return {
       success: true,
       matched: result.matches.length,

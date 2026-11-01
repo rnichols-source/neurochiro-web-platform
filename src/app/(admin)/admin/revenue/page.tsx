@@ -43,9 +43,10 @@ export default function AdminRevenue() {
 
   const stats = [
     { label: "Total Revenue", value: data ? fmt(data.totalRevenue) : "$0" },
-    { label: "MRR", value: data ? fmt(data.mrr) : "$0" },
+    { label: "MRR", value: data?.mrr == null ? "Unavailable" : fmt(data.mrr) },
     { label: "Failed Payments", value: data ? String(data.failedPayments) : "0" },
   ];
+  const otherMrr = Array.isArray(data?.mrrOther) ? data.mrrOther as { currency: string; amount: number }[] : [];
 
   return (
     <div className="p-6 max-w-6xl mx-auto text-white space-y-6">
@@ -68,6 +69,10 @@ export default function AdminRevenue() {
       </div>
 
       {error && <p className="bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-red-400 text-sm">{error}</p>}
+
+      {otherMrr.length > 0 && (
+        <p className="text-sm">Other currencies: {otherMrr.map((row) => `${row.currency} ${row.amount}`).join(" · ")}</p>
+      )}
 
       <div className="grid grid-cols-3 gap-4">
         {stats.map((s) => (
