@@ -1,6 +1,9 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { categoryKeyFromAlias } from '@/lib/synapse/categories'
+import { isSynapseCountry } from '@/lib/synapse/config'
+import { asLooseDb, type PostgrestError } from '@/lib/synapse/loose-db'
 
 export async function applyAsFoundingVendor(data: {
   companyName: string;
@@ -8,8 +11,10 @@ export async function applyAsFoundingVendor(data: {
   email: string;
   website: string;
   category: string;
+  country?: string;
   description: string;
   phone?: string;
+  pledged?: boolean;
 }) {
   const supabase = createAdminClient();
 
@@ -28,22 +33,52 @@ export async function applyAsFoundingVendor(data: {
   }
 
   // Create vendor record — inactive until approved
-  const { error } = await (supabase as any).from('vendors').insert({
+  const categoryKey = categoryKeyFromAlias(data.category)
+  if (!categoryKey) return { error: 'Pick a category from the list. An admin assigns anything marked Other.' }
+  const country = data.country || 'US'
+  if (!isSynapseCountry(country)) return { error: 'Pick a country.' }
+  if (!data.pledged) return { error: 'The best-member-price pledge is required.' }
+
+  const row = {
     id: crypto.randomUUID(),
     name: data.companyName,
     slug,
     website_url: data.website || null,
     short_description: data.description,
-    categories: data.category ? [data.category] : [],
-    tier: 'starter',
+    categories: [categoryKey],
+    country,
+    tier: 'anchor',
     is_active: false,
     is_founding_vendor: true,
+    vetting_status: 'applied',
+    contact_email: data.email,
+    contact_name: data.contactName,
+    best_price_pledged_at: new Date().toISOString(),
     email: data.email,
     phone: data.phone || null,
-  });
+  }
+  const db = asLooseDb(supabase)
+  let error: PostgrestError | null = (await db.from('vendors').insert(row)).error
+  if (error && (error.code === '42703' || error.code === 'PGRST204')) {
+    error = (await db.from('vendors').insert({
+      id: row.id,
+      name: row.name,
+      slug: row.slug,
+      website_url: row.website_url,
+      short_description: row.short_description,
+      categories: row.categories,
+      tier: 'starter',
+      is_active: false,
+      is_founding_vendor: true,
+      email: row.email,
+      phone: row.phone,
+    })).error
+  }
 
   if (error) {
-    console.error('Founding vendor insert error:', error);
+    if (error.code === '23503') {
+      return { error: 'Create a NeuroChiro account, then apply again so we can attach the company to you.' }
+    }
     return { error: 'Something went wrong. Please try again.' };
   }
 

@@ -116,7 +116,7 @@ export default function VendorOnboarding({ onClose }: VendorOnboardingProps) {
                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Company Name</label>
                   <input 
                     type="text" 
-                    placeholder="e.g. NeuralPulse Tech"
+                    placeholder="e.g. Northstar Tables"
                     className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-2 focus:ring-neuro-orange/20 outline-none font-bold"
                     value={formData.companyName}
                     onChange={(e) => setFormData({...formData, companyName: e.target.value})}

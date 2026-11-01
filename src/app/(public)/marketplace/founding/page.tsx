@@ -3,31 +3,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Award, CheckCircle2, Users, Eye, ShoppingBag, Star, Zap,
+  Award, CheckCircle2, Users, Eye, ShoppingBag, Star,
   ArrowRight, Loader2, Globe, BarChart3, MessageSquare, Shield,
 } from "lucide-react";
+import { useEffect } from "react";
 import { applyAsFoundingVendor } from "./actions";
+import { listHeldAnchors } from "../actions";
 import Footer from "@/components/landing/Footer";
-import NetworkStats from "@/components/common/NetworkStats";
+import { SYNAPSE_CATEGORIES } from "@/lib/synapse/categories";
+import { COUNTRY_LABELS, SYNAPSE_COUNTRIES, formatDollars, ANCHOR_TERMS } from "@/lib/synapse/config";
 
-const CATEGORIES = [
-  "Supplements & Nutrition",
-  "Scanning Technology",
-  "Practice Management Software",
-  "Chiropractic Tables & Equipment",
-  "Orthotics & Supports",
-  "Education & Training",
-  "Marketing & Branding",
-  "Office Supplies & Décor",
-  "Billing & Insurance",
-  "Patient Engagement",
-  "Apparel & Merchandise",
-  "Other",
-];
+const CATEGORIES = SYNAPSE_CATEGORIES;
 
 const BENEFITS = [
   { icon: Award, title: "Founding Vendor Badge", desc: "Permanent gold badge on your listing — forever." },
-  { icon: ShoppingBag, title: "3 Months Free", desc: "Full marketplace listing. No credit card. No commitment." },
+  { icon: ShoppingBag, title: "Year 1 at the floor", desc: `Founding Anchors pay the category floor in year one (${formatDollars(ANCHOR_TERMS.core.floorCents)} core, ${formatDollars(ANCHOR_TERMS.standard.floorCents)} standard).` },
   { icon: Users, title: "140+ Doctor Network", desc: "Direct access to verified nervous system chiropractors." },
   { icon: Eye, title: "Profile Analytics", desc: "See who views your page, clicks your site, and uses your code." },
   { icon: Globe, title: "Full Vendor Page", desc: "Logo, description, products, team, video, reviews, FAQ — the works." },
@@ -43,16 +33,19 @@ export default function FoundingVendorPage() {
     email: "",
     website: "",
     category: "",
+    country: "US",
     description: "",
     phone: "",
+    pledged: false,
   });
+  const [held, setHeld] = useState<{ categoryKey: string; country: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.companyName || !form.contactName || !form.email || !form.category) {
+    if (!form.companyName || !form.contactName || !form.email || !form.category || !form.country) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -64,7 +57,13 @@ export default function FoundingVendorPage() {
     setLoading(false);
   };
 
-  const updateForm = (key: string, value: string) => setForm({ ...form, [key]: value });
+  const updateForm = (key: string, value: string | boolean) => setForm({ ...form, [key]: value });
+
+  useEffect(() => {
+    listHeldAnchors().then(setHeld).catch(() => setHeld([]));
+  }, []);
+
+  const seatTaken = held.some((seat) => seat.categoryKey === form.category && seat.country === form.country);
 
   if (success) {
     return (
@@ -103,7 +102,7 @@ export default function FoundingVendorPage() {
             Become a Founding Vendor
           </h1>
           <p className="text-xl text-gray-300 mb-4 max-w-xl mx-auto">
-            3 months free. Permanent Founding Vendor badge. Direct access to <NetworkStats format="doctors" /> nervous system chiropractors.
+            Year 1 at the floor. Renewal increases are capped at 25%. Founding Anchor badge.
           </p>
           <p className="text-gray-500">
             We&apos;re handpicking 20 vendors to launch the NeuroChiro Marketplace. No credit card required.
@@ -118,7 +117,7 @@ export default function FoundingVendorPage() {
             { value: "140+", label: "Verified Doctors" },
             { value: "30+", label: "States" },
             { value: "20", label: "Founding Spots" },
-            { value: "$0", label: "For 3 Months" },
+            { value: "Floor", label: "Year 1 price" },
           ].map((s) => (
             <div key={s.label} className="flex-1 text-center py-5">
               <div className="text-2xl font-black text-neuro-orange">{s.value}</div>
@@ -132,7 +131,7 @@ export default function FoundingVendorPage() {
       <section className="max-w-5xl mx-auto px-6 py-16">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-heading font-black text-neuro-navy mb-3">What Founding Vendors Get</h2>
-          <p className="text-gray-500">Everything below is included free for 3 months. After that, plans start at $99/mo.</p>
+          <p className="text-gray-500">Year 1 is the category floor. A renewal cannot rise more than 25%.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {BENEFITS.map((b, i) => (
@@ -148,22 +147,18 @@ export default function FoundingVendorPage() {
       {/* After 3 Months */}
       <section className="max-w-3xl mx-auto px-6 pb-12">
         <div className="bg-neuro-navy rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-heading font-black text-white mb-4">After 3 Months</h2>
-          <p className="text-gray-400 mb-6">Founding Vendors keep their permanent badge and get preferred pricing:</p>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { name: "Starter", price: "$99", desc: "Listing + discount code" },
-              { name: "Growth", price: "$249", desc: "Featured placement + analytics", popular: true },
-              { name: "Partner", price: "$499", desc: "Priority placement + content hub" },
-            ].map((t) => (
-              <div key={t.name} className={`rounded-xl p-5 ${t.popular ? 'bg-neuro-orange/10 border-2 border-neuro-orange/30' : 'bg-white/5 border border-white/10'}`}>
-                <p className="text-xs font-bold text-neuro-orange uppercase tracking-wider mb-2">{t.name}</p>
-                <p className="text-2xl font-black text-white">{t.price}<span className="text-sm text-gray-500">/mo</span></p>
-                <p className="text-xs text-gray-400 mt-1">{t.desc}</p>
-              </div>
-            ))}
+          <h2 className="text-2xl font-heading font-black text-white mb-4">After year 1</h2>
+          <p className="text-gray-400 mb-6">The Founding Anchor badge stays. The renewal is the normal formula, and the increase is capped at 25%.</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-neuro-orange">Core floor</p>
+              <p className="text-2xl font-black text-white">{formatDollars(ANCHOR_TERMS.core.floorCents)}<span className="text-sm text-gray-500">/yr</span></p>
+            </div>
+            <div className="rounded-xl border border-neuro-orange/30 bg-neuro-orange/10 p-5">
+              <p className="text-xs font-bold uppercase tracking-wider text-neuro-orange">Standard floor</p>
+              <p className="text-2xl font-black text-white">{formatDollars(ANCHOR_TERMS.standard.floorCents)}<span className="text-sm text-gray-500">/yr</span></p>
+            </div>
           </div>
-          <p className="text-xs text-gray-600 mt-4">Cancel anytime. No long-term contracts.</p>
         </div>
       </section>
 
@@ -193,8 +188,17 @@ export default function FoundingVendorPage() {
           <select required value={form.category} onChange={e => updateForm('category', e.target.value)}
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange text-gray-500">
             <option value="">Select category *</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {CATEGORIES.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
           </select>
+          <select required value={form.country} onChange={e => updateForm('country', e.target.value)}
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange">
+            {SYNAPSE_COUNTRIES.map(country => <option key={country} value={country}>{COUNTRY_LABELS[country]}</option>)}
+          </select>
+          {seatTaken ? <p className="text-sm font-bold text-red-600">That Anchor seat is taken for this category and country.</p> : null}
+          <label className="flex items-start gap-2 text-sm text-neuro-navy">
+            <input type="checkbox" checked={form.pledged} onChange={e => updateForm('pledged', e.target.checked)} />
+            We pledge a best member price.
+          </label>
           <textarea required value={form.description} onChange={e => updateForm('description', e.target.value)}
             placeholder="Tell us about your product — what do you sell, who is it for, and why chiropractors love it. *"
             rows={4}
@@ -202,7 +206,7 @@ export default function FoundingVendorPage() {
 
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
 
-          <button type="submit" disabled={loading}
+          <button type="submit" disabled={loading || seatTaken}
             className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50 text-lg">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Award className="w-5 h-5" />}
             {loading ? "Submitting..." : "Apply as Founding Vendor"}
@@ -210,7 +214,7 @@ export default function FoundingVendorPage() {
 
           <div className="flex items-center justify-center gap-4 text-xs text-gray-400 pt-2">
             <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> No credit card</span>
-            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> 3 months free</span>
+            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Year 1 at the floor</span>
             <span className="flex items-center gap-1"><Award className="w-3 h-3" /> Founding badge</span>
           </div>
         </form>
