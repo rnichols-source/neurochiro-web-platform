@@ -76,6 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes = [
     '',
     '/directory',
+    '/quiz',
     '/seminars',
     '/marketplace',
     '/nervous-system',

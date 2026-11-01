@@ -24,7 +24,7 @@ const CHIPS = [
   { label: "Pregnancy", href: "/directory?specialties=Prenatal" },
   { label: "Migraines & headaches", href: "/directory?specialties=Migraines" },
   { label: "Sciatica & back pain", href: "/directory?specialties=Sciatica" },
-  { label: "Not sure? Take the 60-sec quiz", href: "/quiz" },
+  { label: "Not sure? Take the 60-sec quiz", href: "/quiz?source=hero" },
 ];
 
 function eyebrowText(counts: PublicDirectoryCounts, code: RegionCode, label: string) {
