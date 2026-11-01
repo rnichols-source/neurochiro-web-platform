@@ -309,7 +309,7 @@ export default function LeadsPage() {
                           {Object.entries(metadata).map(([key, value]) => (
                             <div key={key} className="flex items-start gap-2">
                               <span className="text-[11px] text-white/30 min-w-[100px] flex-shrink-0">{key.replace(/_/g, " ")}:</span>
-                              <span className="text-[12px] text-white/70 break-all">{String(value)}</span>
+                              <span className="text-[12px] text-white/70 break-all">{key === 'experience' && value === 'nervous_system' ? 'Seen a traditional chiropractor (not nervous system)' : String(value)}</span>
                             </div>
                           ))}
                         </div>

@@ -11,7 +11,8 @@
     "lint": "node scripts/lint-portal-style.mjs && eslint .",
     "test:portal": "node --experimental-strip-types --test src/lib/portal/*.test.ts src/lib/badges/compute.test.ts src/lib/chiromatch-status.test.ts src/lib/referrals/pure.test.ts src/lib/referrals/emails.test.ts",
     "test:e2e": "playwright test",
-    "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts",
+    "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts src/lib/leads/validate.test.ts",
+    "test:quiz": "node --experimental-strip-types --test src/lib/quiz/*.test.ts",
     "test:seminars": "node --experimental-strip-types --test src/lib/seminars/seminars.test.ts src/lib/seminars/checkin-window.test.ts",
     "test:messaging": "node --experimental-strip-types --test src/lib/messaging/access.test.ts src/lib/messaging/validate.test.ts src/lib/messaging/send.test.ts src/lib/messaging/email.test.ts src/lib/messaging/notify.test.ts src/lib/messaging/realtime.test.ts",
     "test:students": "node --experimental-strip-types --test src/lib/auth/role-allowlist.test.ts src/lib/students/membership-pure.test.ts src/lib/students/seminar-price.test.ts src/lib/students/gate.test.ts",
@@ -49,6 +50,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.58.2",
     "@types/node": "^20",
     "@types/react": "^19",

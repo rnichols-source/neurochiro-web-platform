@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase";
 const PATIENT_LINKS = [
   { name: "Find a doctor", href: "/directory" },
   { name: "Learn", href: "/learn" },
-  { name: "Take the quiz", href: "/quiz" },
+  { name: "Take the quiz", href: "/quiz?source=navbar" },
 ];
 
 const CHIRO_LINKS = [
@@ -27,7 +27,7 @@ const CHIRO_LINKS = [
 
 const MOBILE_PATIENT_LINKS = [
   { name: "Find a doctor", href: "/directory" },
-  { name: "Take the 60-second quiz", href: "/quiz" },
+  { name: "Take the 60-second quiz", href: "/quiz?source=navbar" },
   { name: "What is nervous system chiropractic?", href: "/learn/foundations" },
   { name: "FAQ", href: "/learn/faq" },
   { name: "Join the patient list", href: "/list?source=nav" },

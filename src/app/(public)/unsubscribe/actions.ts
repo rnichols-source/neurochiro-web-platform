@@ -26,20 +26,23 @@ export async function unsubscribeByEmail(email: string): Promise<{ success: bool
     found = true // already unsubscribed
   }
 
-  // 2. Check leads table
-  const { data: lead } = await (admin as any)
+  // 2. Update every matching leads row. maybeSingle() throws when the same
+  // email was saved more than once, which blocked those people from unsubscribing.
+  const { data: leads } = await (admin as any)
     .from('leads')
     .select('id, status')
-    .eq('email', normalizedEmail)
-    .maybeSingle()
+    .ilike('email', normalizedEmail)
 
-  if (lead && lead.status !== 'unsubscribed') {
+  const leadRows = Array.isArray(leads) ? leads : []
+  const stillSubscribed = leadRows.filter((lead) => lead.status !== 'unsubscribed')
+  if (stillSubscribed.length > 0) {
     await (admin as any)
       .from('leads')
       .update({ status: 'unsubscribed' })
-      .eq('id', lead.id)
+      .ilike('email', normalizedEmail)
+      .neq('status', 'unsubscribed')
     found = true
-  } else if (lead?.status === 'unsubscribed') {
+  } else if (leadRows.length > 0) {
     found = true
   }
 

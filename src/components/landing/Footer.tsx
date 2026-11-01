@@ -7,7 +7,7 @@ import { Instagram, Linkedin } from "lucide-react";
 
 const PATIENT_LINKS = [
   { name: "Find a doctor", href: "/directory" },
-  { name: "Take the quiz", href: "/quiz" },
+  { name: "Take the quiz", href: "/quiz?source=footer" },
   { name: "Learn", href: "/learn" },
   { name: "FAQ", href: "/learn/faq" },
   { name: "Patient list", href: "/list?source=site_footer" },

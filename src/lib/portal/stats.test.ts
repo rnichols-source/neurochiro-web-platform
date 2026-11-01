@@ -53,6 +53,14 @@ test('request sources add up to patient requests', () => {
   assert.equal(sources.find((row) => row.label === 'Quiz')?.count, 1);
 });
 
+test('a quiz contact request counts as Quiz in how patients found you', () => {
+  const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+  const sources = patientRequestSources([], [
+    { id: 'c-quiz', stage: 'new', created_at: recent, source: 'quiz', email: 'quiz-patient@example.com' },
+  ], start)
+  assert.equal(sources.find((row) => row.label === 'Quiz')?.count, 1)
+})
+
 test('market rank needs at least 3 verified doctors', () => {
   assert.equal(marketRank([{ id: 'a', views: 10 }, { id: 'b', views: 4 }], 'a'), null);
   assert.deepEqual(
