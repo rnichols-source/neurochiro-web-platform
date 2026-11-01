@@ -138,20 +138,53 @@ html[data-cookie-bar="1"] .nc-seminar-cta {
 .admin-canvas .text-white\/70,
 .admin-canvas .text-white\/60,
 .admin-canvas .text-white\/50,
-.admin-canvas .text-white\/40 {
+.admin-canvas .text-white\/40,
+.admin-canvas .text-white\/30,
+.admin-canvas .text-white\/25,
+.admin-canvas .text-white\/20 {
   color: var(--color-neuro-navy);
 }
+.admin-canvas .text-gray-100,
+.admin-canvas .text-gray-200,
 .admin-canvas .text-gray-300,
 .admin-canvas .text-gray-400,
-.admin-canvas .text-gray-500 {
-  color: #4b5563;
+.admin-canvas .text-gray-500,
+.admin-canvas .text-gray-600 {
+  color: #374151;
+}
+.admin-canvas .text-amber-200,
+.admin-canvas .text-amber-300 {
+  color: #92400e;
+}
+.admin-canvas .text-red-300 {
+  color: #b91c1c;
 }
 .admin-canvas .bg-\[\#020617\],
+.admin-canvas .bg-\[\#0B1118\],
+.admin-canvas .bg-\[\#0b1118\],
+.admin-canvas .bg-\[\#0a0a0a\],
+.admin-canvas .bg-\[\#0A0A0A\],
+.admin-canvas .bg-\[\#0d1117\],
+.admin-canvas .bg-\[\#15202B\],
+.admin-canvas .bg-\[\#15202b\],
 .admin-canvas .bg-\[\#0F172A\],
 .admin-canvas .bg-\[\#0f172a\],
 .admin-canvas .bg-\[\#1E293B\],
 .admin-canvas .bg-\[\#1e293b\] {
   background-color: #fff;
+}
+.admin-canvas .bg-white\/5,
+.admin-canvas .bg-white\/10,
+.admin-canvas .bg-white\/\[0\.03\],
+.admin-canvas .bg-white\/\[0\.04\],
+.admin-canvas .bg-white\/\[0\.06\] {
+  background-color: #f3f4f6;
+}
+.admin-canvas .border-white\/5,
+.admin-canvas .border-white\/10,
+.admin-canvas .border-white\/\[0\.08\],
+.admin-canvas .border-white\/\[0\.1\] {
+  border-color: rgba(30, 45, 59, 0.18);
 }
 .admin-canvas .bg-neuro-orange,
 .admin-canvas .bg-neuro-orange.text-white,
@@ -173,6 +206,13 @@ html[data-cookie-bar="1"] .nc-seminar-cta {
 .admin-canvas .bg-green-500.text-white,
 .admin-canvas .bg-green-600,
 .admin-canvas .bg-green-600.text-white,
+.admin-canvas .bg-green-600 .text-white,
+.admin-canvas .bg-green-700,
+.admin-canvas .bg-green-700.text-white,
+.admin-canvas .bg-green-700 .text-white,
+.admin-canvas .bg-red-700,
+.admin-canvas .bg-red-700.text-white,
+.admin-canvas .bg-red-700 .text-white,
 .admin-canvas .bg-blue-500,
 .admin-canvas .bg-blue-500.text-white,
 .admin-canvas .bg-blue-600,
