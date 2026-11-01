@@ -129,8 +129,8 @@ export function ProductInteractive({
   );
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-2">
-      <div>
+    <div className="grid min-w-0 items-start gap-10 lg:grid-cols-2">
+      <div className="min-w-0">
         {product.images.length > 0 ? (
           <div
             ref={scrollerRef}
@@ -154,7 +154,7 @@ export function ProductInteractive({
               const next = Math.round(event.currentTarget.scrollLeft / width);
               setManualIndex((current) => (current === next ? current : next));
             }}
-            className="flex snap-x snap-mandatory overflow-x-auto rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange"
+            className="flex w-full min-w-0 snap-x snap-mandatory overflow-x-auto rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange"
           >
             {product.images.map((image, index) => (
               <div key={`${image.id ?? image.url}-${index}`} className="relative aspect-square w-full shrink-0 snap-center bg-white">
@@ -175,7 +175,7 @@ export function ProductInteractive({
           </div>
         )}
         {product.thumbs.length > 1 ? (
-          <div className="mt-3 flex gap-2 overflow-x-auto">
+          <div className="mt-3 flex min-w-0 gap-2 overflow-x-auto">
             {product.thumbs.map((thumb, index) => (
               <button
                 key={`${thumb.id ?? thumb.url}-${index}`}

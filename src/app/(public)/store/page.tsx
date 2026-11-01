@@ -6,7 +6,15 @@ import { JsonLd } from "@/components/store/JsonLd";
 import { ProductCard } from "@/components/store/ProductCard";
 import { SortSelect } from "@/components/store/SortSelect";
 import { StoreFallback } from "@/components/store/StoreFallback";
-import { categoryFromTitle, parseCategory, parseSort, type MerchSort, type StoreCategoryFilter } from "@/lib/shopify-catalog";
+import {
+  categoryLabel,
+  categoryOf,
+  parseCategory,
+  parseSort,
+  type MerchCategory,
+  type MerchSort,
+  type StoreCategoryFilter,
+} from "@/lib/shopify-catalog";
 import { getCollectionProducts, getCollections, getProducts } from "@/lib/shopify";
 import { publicStoreImage } from "@/lib/store-assets";
 import type { ShopifyProductCard } from "@/lib/shopify-types";
@@ -62,12 +70,16 @@ function chipHref(category: StoreCategoryFilter, sort: MerchSort): string {
 async function productsForCategory(all: ShopifyProductCard[], category: StoreCategoryFilter, sort: MerchSort) {
   if (category === "all") return all;
   const collections = await getCollections();
-  const collectionReady = collections.ok && collections.collections.some((collection) => collection.handle === category && collection.hasProducts);
+  const collectionReady =
+    collections.ok &&
+    collections.collections.some(
+      (collection) => collection.handle !== "frontpage" && collection.handle === category && collection.hasProducts,
+    );
   if (collectionReady) {
     const collection = await getCollectionProducts(category, sort);
     if (collection.ok && !collection.missing) return collection.products;
   }
-  return all.filter((product) => categoryFromTitle(product.title) === category);
+  return all.filter((product) => categoryOf(product) === category);
 }
 
 export default async function StorePage({ searchParams }: StorePageProps) {
@@ -127,8 +139,8 @@ export default async function StorePage({ searchParams }: StorePageProps) {
             >
               Shop the Hats
             </Link>
-            <Link href="/store?category=crewnecks#shop" className="inline-flex min-h-12 items-center text-base font-bold text-neuro-cream underline-offset-4 hover:underline">
-              Shop Crewnecks
+            <Link href="/store?sort=newest#shop" className="inline-flex min-h-12 items-center text-base font-bold text-neuro-cream underline-offset-4 hover:underline">
+              Shop New Drops
             </Link>
           </div>
         </div>
@@ -136,26 +148,28 @@ export default async function StorePage({ searchParams }: StorePageProps) {
 
       <section id="shop" className="scroll-mt-28 mx-auto max-w-7xl px-6 py-12 md:px-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2" role="navigation" aria-label="Product categories">
-            {([
-              ["all", "All"],
-              ["hats", "Hats"],
-              ["crewnecks", "Crewnecks"],
-            ] as const).map(([id, label]) => {
-              const active = category === id;
-              return (
-                <Link
-                  key={id}
-                  href={chipHref(id, sort)}
-                  aria-current={active ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center rounded-full px-5 text-base font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange ${
-                    active ? "bg-neuro-navy text-white" : "bg-white text-neuro-navy"
-                  }`}
-                >
-                  {label}
-                </Link>
-              );
-            })}
+          <div className="min-w-0">
+            <div
+              className="-mx-6 flex gap-2 overflow-x-auto px-6 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+              role="navigation"
+              aria-label="Product categories"
+            >
+              {storeChips(catalog.products).map((id) => {
+                const active = category === id;
+                return (
+                  <Link
+                    key={id}
+                    href={chipHref(id, sort)}
+                    aria-current={active ? "page" : undefined}
+                    className={`inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-5 text-base font-bold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange ${
+                      active ? "bg-neuro-navy text-white" : "bg-white text-neuro-navy"
+                    }`}
+                  >
+                    {id === "all" ? "All" : categoryLabel(id)}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
           <SortSelect category={category} sort={sort} />
         </div>
@@ -208,6 +222,23 @@ export default async function StorePage({ searchParams }: StorePageProps) {
       <Footer />
     </div>
   );
+}
+
+const CHIP_ORDER = ["all", "hats", "crewnecks", "hoodies", "tees", "sweatpants"] as const;
+
+function storeChips(products: ShopifyProductCard[]): StoreCategoryFilter[] {
+  const counts: Record<Exclude<MerchCategory, "other">, number> = {
+    hats: 0,
+    crewnecks: 0,
+    hoodies: 0,
+    tees: 0,
+    sweatpants: 0,
+  };
+  for (const product of products) {
+    const category = categoryOf(product);
+    if (category !== "other") counts[category] += 1;
+  }
+  return CHIP_ORDER.filter((id) => id === "all" || counts[id] > 0);
 }
 
 function PromoBand({

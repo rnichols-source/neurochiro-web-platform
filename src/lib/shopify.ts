@@ -418,6 +418,7 @@ function fetchProductPage(input: {
   sortKey: string;
   reverse: boolean;
   query: string | null;
+  cache?: "no-store";
 }): Promise<{ ok: true; data: ProductsQuery } | ShopifyFailure> {
   return shopifyFetch<ProductsQuery>({
     query: PRODUCTS_QUERY,
@@ -428,10 +429,16 @@ function fetchProductPage(input: {
       reverse: input.reverse,
       query: input.query,
     },
+    cache: input.cache,
   });
 }
 
-export async function getProducts(options?: { first?: number; sort?: MerchSort; query?: string }): Promise<
+export async function getProducts(options?: {
+  first?: number;
+  sort?: MerchSort;
+  query?: string;
+  cache?: "no-store";
+}): Promise<
   | { ok: true; products: ShopifyProductCard[] }
   | ShopifyFailure
 > {
@@ -447,6 +454,7 @@ export async function getProducts(options?: { first?: number; sort?: MerchSort; 
       sortKey: sort.sortKey,
       reverse: sort.reverse,
       query: options?.query ?? null,
+      cache: options?.cache,
     });
 
     if (!result.ok) {

@@ -52,6 +52,9 @@ const nextConfig: NextConfig = {
       },
       { source: '/student/career-pipeline', destination: '/student/dashboard', permanent: false },
       { source: '/student/mentors', destination: '/student/doctors', permanent: false },
+      { source: '/shop', destination: '/store', permanent: true },
+      { source: '/shop/:handle', destination: '/store/:handle', permanent: true },
+      { source: '/merch', destination: '/store', permanent: true },
       ...JOB_REDIRECTS,
       ...LEGACY_STORE_PRODUCT_IDS.map((id) => ({
         source: `/store/${id}`,

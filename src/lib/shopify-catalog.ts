@@ -8,9 +8,22 @@ const SIZE_ALIASES: Record<string, string> = {
   XXXL: "3XL",
 };
 
-export type MerchCategory = "hats" | "crewnecks" | "other";
+export type MerchCategory = "hats" | "crewnecks" | "hoodies" | "tees" | "sweatpants" | "other";
 export type MerchSort = "featured" | "price-asc" | "price-desc" | "newest";
-export type StoreCategoryFilter = "all" | "hats" | "crewnecks";
+export type StoreCategoryFilter = "all" | "hats" | "crewnecks" | "hoodies" | "tees" | "sweatpants";
+
+const CATEGORY_LABELS: Record<MerchCategory, string> = {
+  hats: "Hats",
+  crewnecks: "Crewnecks",
+  hoodies: "Hoodies",
+  tees: "Tees",
+  sweatpants: "Sweatpants",
+  other: "Other",
+};
+
+export function categoryLabel(category: MerchCategory): string {
+  return CATEGORY_LABELS[category];
+}
 
 const COLOR_SWATCHES: Record<string, string> = {
   navy: "#1E2D3B",
@@ -58,14 +71,57 @@ export function isSingleVariant(options: ShopifyOption[], fetchedVariantCount: n
   return fetchedVariantCount <= 1;
 }
 
+function normalizedType(productType: string): string {
+  return productType.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function categoryFromType(productType: string): MerchCategory | null {
+  const type = normalizedType(productType);
+  if (type === "hoodie" || type === "zip hoodie") return "hoodies";
+  if (type === "sweatpants") return "sweatpants";
+  if (type === "crewneck") return "crewnecks";
+  if (type === "hat" || type === "cap" || type === "beanie" || type === "snapback") return "hats";
+  return null;
+}
+
+function genericTeeType(productType: string): boolean {
+  const type = normalizedType(productType);
+  return type === "t-shirt" || type === "tee" || type === "crop tee";
+}
+
+function categoryFromTitleWords(title: string): MerchCategory | null {
+  const value = title.toLowerCase();
+  if (/\bsweatpants?\b|\bjoggers?\b/.test(value)) return "sweatpants";
+  if (/hoodie/.test(value)) return "hoodies";
+  const apparel = !/crewneck|sweatshirt/.test(value);
+  if (apparel && /\btees?\b|\bt-?shirts?\b|\bshirts?\b/.test(value)) return "tees";
+  if (/crewneck|\bcrews?\b|sweatshirt/.test(value)) return "crewnecks";
+  if (/\b(?:hat|cap|snapback|beanie|visor)s?\b/.test(value)) return "hats";
+  return null;
+}
+
+export function categoryOf(product: { title: string; productType: string }): MerchCategory {
+  // A specific Shopify type wins. T-SHIRT is generic in this catalog (crewnecks,
+  // hoodies, and sweatpants are often typed that way), so the title decides first.
+  return categoryFromType(product.productType)
+    ?? categoryFromTitleWords(product.title)
+    ?? (genericTeeType(product.productType) ? "tees" : "other");
+}
+
 export function categoryFromTitle(title: string): MerchCategory {
-  if (/crewneck|sweatshirt|hoodie|tee|shirt/i.test(title)) return "crewnecks";
-  if (/hat|cap|snapback|beanie/i.test(title)) return "hats";
-  return "other";
+  return categoryOf({ title, productType: "" });
 }
 
 export function parseCategory(value: string | undefined): StoreCategoryFilter {
-  if (value === "hats" || value === "crewnecks") return value;
+  if (
+    value === "hats" ||
+    value === "crewnecks" ||
+    value === "hoodies" ||
+    value === "tees" ||
+    value === "sweatpants"
+  ) {
+    return value;
+  }
   return "all";
 }
 
