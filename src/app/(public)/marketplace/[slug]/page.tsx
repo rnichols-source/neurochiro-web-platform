@@ -4,18 +4,17 @@ import {
   Linkedin, Youtube, Mail, Phone, Shield, Heart, TrendingUp, Package,
   HelpCircle, MessageSquare,
 } from "lucide-react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase-admin";
 import Footer from "@/components/landing/Footer";
-import CopyDiscountCode from "./copy-discount-code";
 import VendorReviews from "./vendor-reviews";
+import PartnerDisclosure from "@/components/synapse/PartnerDisclosure";
+import Link from "next/link";
 import VendorUsedBy from "./vendor-used-by";
 import VendorContent from "./vendor-content";
 import VendorProducts from "./vendor-products";
 import VendorContact from "./vendor-contact";
 import VendorPageClient from "./vendor-page-client";
-import NetworkStats from "@/components/common/NetworkStats";
 import { createServerSupabase } from "@/lib/supabase-server";
 
 async function getVendorBySlug(slug: string) {
@@ -48,6 +47,7 @@ export default async function VendorProfilePage({ params, searchParams }: { para
   const vendor = await getVendorBySlug(slug);
 
   if (!vendor) notFound();
+  delete (vendor as { discount_code?: string }).discount_code;
 
   const related = await getRelatedVendors(vendor.categories || [], vendor.id);
   const v = vendor as any;
@@ -242,16 +242,14 @@ export default async function VendorProfilePage({ params, searchParams }: { para
           {/* Main */}
           <div className="lg:col-span-2 space-y-6">
             {/* Exclusive Offer */}
-            {vendor.discount_code && (
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-3">
-                  <ShoppingBag className="w-5 h-5 text-green-600" />
-                  <h2 className="text-lg font-black text-green-800">Exclusive NeuroChiro Offer</h2>
-                </div>
-                <p className="text-green-700 mb-4">{vendor.discount_description || 'Special pricing for NeuroChiro members only.'}</p>
-                <CopyDiscountCode code={vendor.discount_code} />
+            <div className="rounded-2xl border border-gray-100 bg-white p-6">
+              <h2 className="text-lg font-black text-neuro-navy">Member perk</h2>
+              <p className="mt-2 text-gray-600">Members unlock this perk in the portal.</p>
+              <Link href="/doctor/marketplace" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange">Open Synapse</Link>
+              <div className="mt-3">
+                <PartnerDisclosure kind={v.tier === 'ally' ? 'ally' : 'anchor'} />
               </div>
-            )}
+            </div>
 
             {/* About */}
             {vendor.full_description && (
@@ -388,16 +386,10 @@ export default async function VendorProfilePage({ params, searchParams }: { para
               </div>
 
               {/* Discount with Copy */}
-              {vendor.discount_code && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ShoppingBag className="w-4 h-4 text-green-600" />
-                    <p className="text-sm font-bold text-green-700">Member Discount</p>
-                  </div>
-                  <p className="text-xs text-green-600 mb-3">{vendor.discount_description || 'Exclusive for NeuroChiro members'}</p>
-                  <CopyDiscountCode code={vendor.discount_code} />
-                </div>
-              )}
+              <div className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                <p className="text-sm font-bold text-neuro-navy">Members unlock this perk in the portal.</p>
+                <Link href="/doctor/marketplace" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange">Open Synapse</Link>
+              </div>
 
               {/* CTAs */}
               {vendor.website_url && (
@@ -454,9 +446,7 @@ export default async function VendorProfilePage({ params, searchParams }: { para
           <div className="mt-10 bg-neuro-navy rounded-2xl p-10 text-center">
             <h2 className="text-2xl font-heading font-black text-white mb-3">Ready to Get Started with {vendor.name}?</h2>
             <p className="text-gray-400 mb-6 max-w-lg mx-auto">
-              {vendor.discount_code
-                ? `Use code ${vendor.discount_code} for your exclusive NeuroChiro member discount.`
-                : <><NetworkStats format="full-sentence" /> who trust NeuroChiro marketplace vendors.</>}
+              Members unlock this perk in the portal.
             </p>
             <a href={vendor.website_url} target="_blank" rel="noopener noreferrer"
               className="px-10 py-4 bg-neuro-orange text-white font-bold rounded-xl text-lg inline-flex items-center gap-2 hover:bg-neuro-orange/90 transition-colors shadow-lg shadow-neuro-orange/20">
@@ -504,10 +494,7 @@ export default async function VendorProfilePage({ params, searchParams }: { para
       {vendor.website_url && (
         <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-white/95 backdrop-blur border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
           <div>
-            {vendor.discount_code && (
-              <p className="text-sm font-black text-green-700">{vendor.discount_code}</p>
-            )}
-            <p className="text-[10px] text-gray-400 font-bold uppercase">Member discount</p>
+            <p className="text-[10px] text-gray-400 font-bold uppercase">Member perk</p>
           </div>
           <a href={vendor.website_url} target="_blank" rel="noopener noreferrer"
             className="flex-1 max-w-[200px] py-3.5 bg-neuro-orange text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">

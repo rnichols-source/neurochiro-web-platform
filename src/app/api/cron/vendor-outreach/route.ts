@@ -22,6 +22,9 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * Processes up to 10 vendors per day.
  */
 export async function GET(req: Request) {
+  if (process.env.VENDOR_OUTREACH_ENABLED !== 'true') {
+    return NextResponse.json({ disabled: true });
+  }
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -50,7 +53,13 @@ export async function GET(req: Request) {
     let emailsSent = 0;
     let skipped = 0;
 
-    for (const p of prospects as any[]) {
+    for (const p of prospects as {
+      id: string
+      email: string | null
+      website: string | null
+      clinic_name: string | null
+      name: string | null
+    }[]) {
       // Step 1: Find email from website if missing
       let email = p.email;
       if (!email && p.website) {
@@ -135,9 +144,10 @@ export async function GET(req: Request) {
       sent: emailsSent,
       skipped,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[VENDOR OUTREACH ERROR]', err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : 'Vendor outreach failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 

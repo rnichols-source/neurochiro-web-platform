@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { submitRFP } from "./actions";
-import { VENDOR_CATEGORIES } from "@/types/vendor";
+import { VENDOR_CATEGORY_OPTIONS } from "@/types/vendor";
 
 const budgetOptions = ["Under $5K", "$5K–$15K", "$15K–$50K", "$50K+", "Not sure"];
 const timelineOptions = ["ASAP", "1–3 months", "3–6 months", "Flexible"];
@@ -67,7 +67,7 @@ export default function RequestQuotePage() {
             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">What category?</label>
             <select name="category" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange">
               <option value="">Select a category</option>
-              {VENDOR_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {VENDOR_CATEGORY_OPTIONS.map(c => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
           </div>
 

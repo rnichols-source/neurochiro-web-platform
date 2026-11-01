@@ -19,6 +19,7 @@
     "test:jobs": "node --experimental-strip-types --test src/lib/jobs/posting-pure.test.ts src/lib/jobs/redirects.test.ts",
     "test:match": "node --experimental-strip-types --test src/lib/match/score.test.ts",
     "test:security": "node --experimental-strip-types --test src/lib/security/role-transition.test.ts src/lib/security/public-columns.test.ts src/lib/security/public-names.test.ts src/lib/security/verification-token.test.ts",
+    "test:synapse": "node --experimental-strip-types --test src/lib/synapse/synapse.test.ts",
     "test:anon-exposure": "node scripts/security/check-anon-exposure.mjs",
     "lint-security": "node scripts/security/lint-security.mjs"
   },

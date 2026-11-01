@@ -8,8 +8,8 @@ async function requireAdmin() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Unauthorized');
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  const role = (profile as any)?.role;
-  if (!['admin', 'super_admin', 'founder'].includes(role)) throw new Error('Unauthorized');
+  const role = (profile as { role?: string } | null)?.role;
+  if (!role || !['admin', 'super_admin', 'founder'].includes(role)) throw new Error('Unauthorized');
   return user;
 }
 
@@ -33,11 +33,35 @@ const AGENT_EVENT_MAP: Record<string, string> = {
   'profile-reminders': 'Profile Reminder',
 };
 
+type AgentSnapshot = {
+  lastRun: string;
+  lastResult: {
+    status?: string | null;
+    event?: string | null;
+    metadata?: { sent?: number; archived?: number; recipients?: number } | null;
+  };
+};
+
+function snapshotFromLog(log: {
+  created_at: string;
+  status?: string | null;
+  event?: string | null;
+  metadata?: unknown;
+}): AgentSnapshot {
+  const metadata = log.metadata && typeof log.metadata === 'object' && !Array.isArray(log.metadata)
+    ? log.metadata as { sent?: number; archived?: number; recipients?: number }
+    : null;
+  return {
+    lastRun: log.created_at,
+    lastResult: { status: log.status ?? null, event: log.event ?? null, metadata },
+  };
+}
+
 export async function getAgentStatus() {
   await requireAdmin();
   const supabase = createAdminClient();
 
-  const results: Record<string, any> = {};
+  const results: Record<string, AgentSnapshot> = {};
 
   // Check audit_logs for last run of each agent
   for (const [agentId, eventName] of Object.entries(AGENT_EVENT_MAP)) {
@@ -50,10 +74,7 @@ export async function getAgentStatus() {
       .maybeSingle();
 
     if (lastLog) {
-      results[agentId] = {
-        lastRun: lastLog.created_at,
-        lastResult: lastLog,
-      };
+      results[agentId] = snapshotFromLog(lastLog);
     }
 
     // Also check automation_queue for nudger and onboarding
@@ -66,15 +87,14 @@ export async function getAgentStatus() {
         .limit(1)
         .maybeSingle();
 
-      if (lastQueue && (!results[agentId] || new Date(lastQueue.created_at) > new Date(results[agentId].lastRun))) {
-        results[agentId] = {
-          lastRun: lastQueue.created_at,
-          lastResult: {
-            status: lastQueue.status,
-            event: `Last ${eventName}: ${lastQueue.status}`,
-            metadata: lastQueue.payload,
-          },
-        };
+      const current = results[agentId];
+      if (lastQueue && (!current || new Date(lastQueue.created_at) > new Date(current.lastRun))) {
+        results[agentId] = snapshotFromLog({
+          created_at: lastQueue.created_at,
+          status: lastQueue.status,
+          event: `Last ${eventName}: ${lastQueue.status}`,
+          metadata: lastQueue.payload,
+        });
       }
     }
   }
@@ -101,12 +121,17 @@ export async function triggerAgent(agentId: string): Promise<{ success: boolean;
 
     const data = await res.json();
 
+    if (data.disabled) {
+      return { success: true, message: 'Vendor outreach is disabled. Nothing was sent.' };
+    }
+
     if (data.success) {
       return { success: true, message: data.message || `${agentId} ran successfully` };
     } else {
       return { success: false, error: data.error || 'Unknown error' };
     }
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Failed to trigger agent' };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to trigger agent';
+    return { success: false, error: message };
   }
 }

@@ -25,7 +25,7 @@ export default async function DoctorMarketplacePage() {
         </ul>
       ) : null}
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {vendors.map((vendor: { id: string; name?: string; slug?: string; short_description?: string; categories?: string[] }) => (
+        {vendors.map((vendor) => (
           <li key={vendor.id} className="bg-white border border-portal-border rounded-xl p-4">
             <h2 className="font-bold">{vendor.name}</h2>
             <p className="text-sm text-portal-ink-2 mt-1">{vendor.short_description}</p>

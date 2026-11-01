@@ -6,6 +6,7 @@ import { Resend } from "resend";
 import { checkoutFromStripeSession, fulfillSeminarSession, isSeminarCheckout, refundSeminarCharge, releaseSeminarHold } from "@/lib/seminars/fulfill";
 import { sendStudentWelcome } from "@/lib/students/welcome-email";
 import { fulfillJobCheckout } from "@/lib/jobs/fulfill";
+import { fulfillSynapseCheckout, lapseSynapseSubscription } from "@/lib/synapse/fulfill";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 
 export async function POST(req: Request) {
@@ -50,6 +51,10 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as any;
+        if (session.metadata?.type === "synapse_seat" || session.metadata?.type === "synapse_addon") {
+          await fulfillSynapseCheckout(supabase, session);
+          break;
+        }
         if (isSeminarCheckout(session.metadata?.type || "")) {
           if (session.payment_status === "paid") {
             await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
@@ -234,6 +239,7 @@ export async function POST(req: Request) {
             }
           }
 
+          // Legacy monthly vendor checkout. New Synapse seats use type synapse_seat.
           if (metaType === 'vendor') {
             const vendorName = session.metadata?.companyName || session.metadata?.company_name || 'Unnamed Vendor';
             const vendorSlug = vendorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
@@ -919,6 +925,12 @@ export async function POST(req: Request) {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object as any;
+        const subscriptionRef = invoice.subscription;
+        const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id ?? null;
+        const lapsedSynapse = await lapseSynapseSubscription(supabase, subscriptionId);
+        if (lapsedSynapse) {
+          break;
+        }
         const customer = invoice.customer as string;
 
         const { data: profile } = await supabase
@@ -993,6 +1005,10 @@ export async function POST(req: Request) {
 
       case "customer.subscription.deleted": {
         const subscription = event.data.object as any;
+        const lapsedSynapse = await lapseSynapseSubscription(supabase, subscription.id);
+        if (lapsedSynapse || subscription.metadata?.type === "synapse_seat") {
+          break;
+        }
         if (subscription.metadata?.type === "seminar_package") {
           await supabaseSeminarStore().expirePackage(subscription.id);
           break;
