@@ -41,6 +41,7 @@ export function sourceLabel(source: string | null | undefined): string {
   if (source === 'dm_outreach') return 'from a NeuroChiro Instagram introduction'
   if (source === 'appointment' || source === 'profile') return 'from your NeuroChiro profile'
   if (source === 'doctor_joined') return 'from a NeuroChiro introduction'
+  if (source === 'quiz') return 'from the NeuroChiro match quiz'
   return 'from NeuroChiro'
 }
 
