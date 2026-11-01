@@ -2,6 +2,10 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { toPublicNames } from '@/lib/security/public-names'
+import { signStudentResume } from '@/lib/security/signed-resume'
+
+const MATCH_CYCLE_COLUMNS = 'id, name, season, year, status, ranking_opens_at, ranking_closes_at, match_day, created_at'
 import { deriveCycleStatus } from '@/lib/chiromatch-status'
 import type { MatchCycle, MatchPosition } from '@/types/chiromatch'
 
@@ -16,10 +20,10 @@ function withDerivedStatus(cycle: MatchCycle, now: Date): MatchCycle | null {
 }
 
 export async function getActiveCycle(): Promise<MatchCycle | null> {
-  const sb = createServerSupabase() as any;
+  const sb = createAdminClient() as any;
   const { data } = await sb
     .from('match_cycles')
-    .select('*')
+    .select(MATCH_CYCLE_COLUMNS)
     .order('ranking_opens_at', { ascending: true });
   const now = new Date();
   const cycles = ((data || []) as MatchCycle[])
@@ -124,7 +128,12 @@ export async function getMyMatchResults(cycleId: string) {
 }
 
 export async function getCandidatesForPosition(positionId: string) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
   const admin = createAdminClient() as any;
+  const owned = await admin.from('match_positions').select('id, doctor_id').eq('id', positionId).maybeSingle();
+  if (!owned.data || owned.data.doctor_id !== user.id) return [];
 
   // Get students who ranked this position
   const { data: rankings } = await admin
@@ -151,21 +160,22 @@ export async function getCandidatesForPosition(positionId: string) {
 
   const drMap: Map<string, any> = new Map((doctorRankings || []).map((r: any) => [r.student_id, r]));
 
-  return rankings.map((r: any) => {
+  return Promise.all(rankings.map(async (r: any) => {
     const student = studentMap.get(r.student_id) || {};
     const dr = drMap.get(r.student_id);
+    const [name] = toPublicNames([{ id: String(r.student_id), full_name: student.full_name || null }]);
     return {
       student_id: r.student_id,
-      full_name: student.full_name || 'Unknown',
+      full_name: name?.full_name || 'Unknown',
       school: student.school,
       graduation_year: student.graduation_year,
       skills: student.skills || [],
-      resume_url: student.resume_url,
+      resume_url: await signStudentResume(student.resume_url),
       student_rank: r.rank,
       doctor_rank: dr?.rank || null,
       notes: dr?.notes || null,
     };
-  });
+  }));
 }
 
 export async function saveDoctorRankings(positionId: string, rankings: { student_id: string; rank: number; notes?: string }[]) {

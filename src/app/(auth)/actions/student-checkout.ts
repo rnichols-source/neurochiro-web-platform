@@ -3,6 +3,7 @@
 import { STUDENT_CONFIG } from '@/config/students'
 import { priceMatches } from '@/lib/students/price-guard'
 import { stripe } from '@/lib/stripe'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 
 type Plan = 'monthly' | 'annual'
@@ -51,7 +52,8 @@ export async function createStudentCheckout(plan: Plan = 'monthly') {
         metadata: { userId: user.id, role: 'student' },
       })
       customerId = customer.id
-      await supabase.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
+      const admin = createAdminClient()
+      await admin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id)
     }
 
     const activeSubs = await stripe.subscriptions.list({

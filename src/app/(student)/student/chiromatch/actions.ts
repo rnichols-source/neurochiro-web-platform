@@ -5,10 +5,10 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import type { MatchCycle, MatchPositionWithDoctor } from '@/types/chiromatch'
 
 export async function getActiveCycleForStudent(): Promise<MatchCycle | null> {
-  const sb = createServerSupabase() as any;
+  const sb = createAdminClient() as any;
   const { data } = await sb
     .from('match_cycles')
-    .select('*')
+    .select('id, name, season, year, status, ranking_opens_at, ranking_closes_at, match_day, created_at')
     .in('status', ['upcoming', 'ranking_open', 'ranking_closed', 'matched'])
     .order('match_day', { ascending: true })
     .limit(1)

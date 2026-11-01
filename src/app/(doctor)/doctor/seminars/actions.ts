@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { stripe } from '@/lib/stripe'
 import { STUDENT_CONFIG } from '@/config/students'
+import { toPublicNames } from '@/lib/security/public-names'
 import { loadDoctorSeminars, loadEnhancedSeminarAnalytics, loadRecommendedSeminars } from './load'
 
 
@@ -264,23 +265,50 @@ export async function getSeminarAttendees(seminarId: string) {
 
   if (!seminar) throw new Error("Unauthorized")
 
-  const { data, error } = await supabase
+  const admin = createAdminClient()
+  const detailed = await admin
     .from('seminar_registrations')
-    .select(`
-      id,
-      amount_paid,
-      created_at,
-      profile:profiles(full_name, email, role)
-    `)
+    .select('id, amount_paid, created_at, profile_id, attendee_name, attendee_email')
     .eq('seminar_id', seminarId)
     .order('created_at', { ascending: false })
 
-  if (error) {
-    console.error("Error fetching attendees:", error)
+  const missingColumn = detailed.error && /attendee_name|attendee_email|42703|PGRST204|schema cache/i.test(detailed.error.message || '')
+  const rows = missingColumn
+    ? await admin
+      .from('seminar_registrations')
+      .select('id, amount_paid, created_at, profile_id')
+      .eq('seminar_id', seminarId)
+      .order('created_at', { ascending: false })
+    : detailed
+
+  if (rows.error || !rows.data) {
+    console.error("Error fetching attendees:", rows.error)
     return []
   }
 
-  return data
+  const profileIds = [...new Set(rows.data.map((row) => (row as unknown as { profile_id?: string | null }).profile_id).filter(Boolean))] as string[]
+  const profileRows = profileIds.length
+    ? (await admin.from('profiles').select('id, full_name, avatar_url, email, role').in('id', profileIds)).data
+    : []
+  const names = new Map(toPublicNames((profileRows || []) as unknown as Record<string, unknown>[]).map((name) => [name.id, name]))
+  const people = new Map(((profileRows || []) as unknown as { id: string; email?: string | null; role?: string | null }[]).map((person) => [person.id, person]))
+
+  return rows.data.map((row) => {
+    const record = row as unknown as { id: string; amount_paid: number | null; created_at: string; profile_id?: string | null; attendee_name?: string | null; attendee_email?: string | null }
+    const name = record.profile_id ? names.get(record.profile_id) : undefined
+    const person = record.profile_id ? people.get(record.profile_id) : undefined
+    return {
+      id: record.id,
+      amount_paid: record.amount_paid,
+      created_at: record.created_at,
+      profile: {
+        full_name: record.attendee_name || name?.full_name || null,
+        avatar_url: name?.avatar_url || null,
+        email: record.attendee_email || person?.email || null,
+        role: person?.role || null,
+      },
+    }
+  })
 }
 
 export async function deleteSeminarAction(seminarId: string) {

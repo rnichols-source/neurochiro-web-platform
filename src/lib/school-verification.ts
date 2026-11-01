@@ -12,6 +12,19 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import crypto from 'crypto'
+import {
+  hashVerificationToken,
+  isVerificationExpired,
+  verificationExpiryIso,
+  verificationTokensMatch,
+  EXPIRED_LINK_MESSAGE,
+} from '@/lib/security/verification-token'
+
+function missingExpiryColumn(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false
+  const message = error.message || ''
+  return error.code === '42703' || error.code === 'PGRST204' || /verification_token_expires_at|schema cache/i.test(message)
+}
 
 export interface SchoolMatch {
   recognized: boolean
@@ -61,18 +74,26 @@ export async function checkSchoolEmail(email: string): Promise<SchoolMatch> {
 /**
  * Generate a verification token and store it on the student record.
  */
-export async function createVerificationToken(userId: string, schoolEmail: string, schoolName: string): Promise<string> {
+export async function createVerificationToken(userId: string, schoolEmail: string, schoolName: string): Promise<string | null> {
   const supabase = createAdminClient()
   const token = crypto.randomBytes(32).toString('hex')
-
-  await (supabase as any).from('students').upsert({
+  const digest = hashVerificationToken(token)
+  const withExpiry = {
     id: userId,
     school_email: schoolEmail,
     school_name: schoolName,
-    verification_token: token,
+    verification_token: digest,
+    verification_token_expires_at: verificationExpiryIso(),
     school_verified: false,
-  }, { onConflict: 'id' })
-
+  }
+  const first = await (supabase as any).from('students').upsert(withExpiry, { onConflict: 'id' })
+  if (missingExpiryColumn(first.error)) {
+    const { verification_token_expires_at: _ignored, ...withoutExpiry } = withExpiry
+    const second = await (supabase as any).from('students').upsert(withoutExpiry, { onConflict: 'id' })
+    if (second.error) return null
+    return token
+  }
+  if (first.error) return null
   return token
 }
 
@@ -81,24 +102,36 @@ export async function createVerificationToken(userId: string, schoolEmail: strin
  * Grace path: once verified, stays verified permanently.
  */
 export async function verifySchoolToken(token: string): Promise<{ success: boolean; schoolName?: string; error?: string }> {
-  if (!token) return { success: false, error: 'Missing token' }
+  if (!token) return { success: false, error: EXPIRED_LINK_MESSAGE }
 
   const supabase = createAdminClient()
-
-  const { data: student } = await (supabase as any)
+  const digest = hashVerificationToken(token)
+  const withExpiry = await (supabase as any)
     .from('students')
-    .select('id, school_name, verification_token, school_verified')
-    .eq('verification_token', token)
+    .select('id, school_name, verification_token, school_verified, verification_token_expires_at')
+    .eq('verification_token', digest)
     .maybeSingle()
 
-  if (!student) return { success: false, error: 'Invalid or expired verification link' }
-  if (student.school_verified) return { success: true, schoolName: student.school_name }
+  const lookedUp = missingExpiryColumn(withExpiry.error)
+    ? await (supabase as any)
+      .from('students')
+      .select('id, school_name, verification_token, school_verified')
+      .eq('verification_token', digest)
+      .maybeSingle()
+    : withExpiry
 
-  // Mark as verified
+  const student = lookedUp.data
+  if (!student || !verificationTokensMatch(student.verification_token, token)) {
+    return { success: false, error: EXPIRED_LINK_MESSAGE }
+  }
+  if (isVerificationExpired(student.verification_token_expires_at)) {
+    return { success: false, error: EXPIRED_LINK_MESSAGE }
+  }
+
   await (supabase as any).from('students').update({
     school_verified: true,
     verified_at: new Date().toISOString(),
-    verification_token: null, // consume the token
+    verification_token: null,
   }).eq('id', student.id)
 
   // Also update profiles for display to doctors

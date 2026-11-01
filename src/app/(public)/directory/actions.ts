@@ -214,34 +214,12 @@ export async function getDoctorJobs(doctorId: string) {
   } catch { return []; }
 }
 
-export async function getStudentsForMap(options: {
+export async function getStudentsForMap(_options: {
   bounds?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
   limit?: number;
 } = {}) {
-  const { bounds, limit = 100 } = options;
-  const supabase = createServerSupabase();
-  try {
-    // Only fetch minimal public student data for the map
-    let query = supabase
-      .from('students')
-      .select('id, full_name, school, graduation_year, location_city, latitude, longitude')
-      .not('latitude', 'is', null)
-      .not('longitude', 'is', null)
-      .limit(limit);
-
-    if (bounds) {
-      query = query
-        .gte('longitude', bounds[0])
-        .gte('latitude', bounds[1])
-        .lte('longitude', bounds[2])
-        .lte('latitude', bounds[3]);
-    }
-    const { data, error } = await query
-    if (error) return [];
-    return (data || []) as any[];
-  } catch (e) {
-    return [];
-  }
+  // Students are never shown to anonymous visitors. A signed-in student map belongs in a later change.
+  return [];
 }
 
 // ── Get count of doctors in same city ──

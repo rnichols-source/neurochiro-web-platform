@@ -12,7 +12,7 @@ export async function submitLeadAction(formData: FormData) {
   const source = formData.get('source') as string || 'directory'
   const doctorId = formData.get('doctor_id') as string
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('leads')
     .insert({
       email,
@@ -27,8 +27,6 @@ export async function submitLeadAction(formData: FormData) {
         userAgent: 'browser'
       }
     })
-    .select()
-    .single()
 
   if (error) {
     console.error("Lead submission error:", error)

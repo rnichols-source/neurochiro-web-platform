@@ -25,13 +25,15 @@ const COPY: Record<string, string> = {
 };
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
+  const path = (await headers()).get('x-pathname') || '';
+  if (path === '/student/verify') return children;
+
   const portal = await getStudentPortal();
   if (!portal) redirect('/login?redirect=/student/dashboard');
   if (portal.role === 'doctor') redirect('/doctor/dashboard');
   if (portal.role === 'patient') redirect('/portal');
   if (portal.role !== 'student' && !isStaffRole(portal.role)) redirect('/');
 
-  const path = (await headers()).get('x-pathname') || '';
   const needsWelcome = portal.role === 'student' && !portal.school && !portal.graduationYear;
   if (path && needsWelcome && !WELCOME_EXEMPT.some((item) => path === item || path.startsWith(`${item}/`))) {
     redirect('/student/welcome');

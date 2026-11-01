@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { canPostFree, insertMemberPost } from '@/lib/jobs/posting';
 import { LIMIT_MESSAGE, stageLabel, toApplicationStage } from '@/lib/jobs/posting-pure';
 import { ensureContextConversation } from '@/lib/messaging/db';
+import { signStudentResume } from '@/lib/security/signed-resume';
 import { missingSchema } from '@/lib/students/schema';
 
 /** Verify the current user owns the job that an application belongs to */
@@ -212,8 +213,9 @@ export async function getApplications(jobId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
+  const admin = createAdminClient();
   // 1. Get registered student applications (from applications table)
-  let studentQuery = supabase
+  let studentQuery = admin
     .from('applications')
     .select(`
       *,
@@ -226,34 +228,32 @@ export async function getApplications(jobId?: string) {
         skills,
         resume_url
       )
-    `);
+    `)
+    .eq('job_postings.doctor_id', user.id);
 
   if (jobId) {
     studentQuery = studentQuery.eq('job_id', jobId);
-  } else {
-    studentQuery = studentQuery.eq('job_postings.doctor_id', user.id);
   }
 
   const { data: studentApps } = await studentQuery.order('created_at', { ascending: false });
 
   // 2. Get public/guest applications (from job_applications table)
-  let publicQuery = (supabase as any)
+  let publicQuery = (admin as any)
     .from('job_applications')
     .select(`
       *,
       job:job_postings!inner(title, doctor_id)
-    `);
+    `)
+    .eq('job_postings.doctor_id', user.id);
 
   if (jobId) {
     publicQuery = publicQuery.eq('job_id', jobId);
-  } else {
-    publicQuery = publicQuery.eq('job_postings.doctor_id', user.id);
   }
 
   const { data: publicApps } = await publicQuery.order('created_at', { ascending: false });
 
   // 3. Transform student applications
-  const studentResults = (studentApps || []).map((app: any) => ({
+  const studentResults = await Promise.all((studentApps || []).map(async (app: any) => ({
     id: app.id,
     jobId: app.job_id,
     jobTitle: app.job.title,
@@ -269,10 +269,10 @@ export async function getApplications(jobId?: string) {
     doctorNotes: app.doctor_notes ?? '',
     stageHistory: app.stage_history ?? [],
     skills: app.candidate.skills || [],
-    resumeUrl: app.candidate.resume_url,
+    resumeUrl: await signResume(app.candidate.resume_url),
     appliedAt: app.created_at,
     source: 'student' as const,
-  }));
+  })));
 
   // 4. Transform public applications
   const publicResults = await Promise.all((publicApps || []).map(async (app: any) => ({
@@ -309,12 +309,7 @@ export async function getApplications(jobId?: string) {
 }
 
 async function signResume(url: string | null | undefined): Promise<string | null> {
-  if (!url) return null;
-  if (!url.startsWith('student-resumes/')) return url;
-  const path = url.slice('student-resumes/'.length);
-  const admin = createAdminClient();
-  const signed = await admin.storage.from('student-resumes').createSignedUrl(path, 60 * 10);
-  return signed.data?.signedUrl || null;
+  return signStudentResume(url);
 }
 
 export async function openJobApplicationThread(applicationId: string) {
@@ -637,7 +632,8 @@ export async function getApplicationWithHistory(applicationId: string) {
   await verifyApplicationOwnership(supabase, user.id, applicationId);
 
   try {
-    const { data: rawData, error } = await (supabase as any)
+    const admin = createAdminClient();
+    const { data: rawData, error } = await (admin as any)
       .from('applications')
       .select(`
         *,
@@ -665,7 +661,7 @@ export async function getApplicationWithHistory(applicationId: string) {
     let email = '';
     let phone = '';
     try {
-      const { data: profile } = await (supabase as any)
+      const { data: profile } = await (admin as any)
         .from('profiles')
         .select('email, phone')
         .eq('id', data.candidate_id)
@@ -692,7 +688,7 @@ export async function getApplicationWithHistory(applicationId: string) {
       school: data.candidate?.school || '',
       gradYear: data.candidate?.graduation_year || '',
       skills: data.candidate?.skills || [],
-      resumeUrl: data.candidate?.resume_url || '',
+      resumeUrl: await signResume(data.candidate?.resume_url),
       stage: data.stage,
       rating: data.rating ?? 0,
       doctorNotes: data.doctor_notes ?? '',

@@ -6,6 +6,7 @@ import { Automations } from '@/lib/automations'
 import { cookies } from 'next/headers'
 import { isFounderEmail } from '@/lib/founder'
 import { assertSelfServeRole } from '@/lib/auth/roles'
+import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
 
 /**
  * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
@@ -56,18 +57,21 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     .eq('id', data.user.id)
     .single()
 
-  let role = (profile as any)?.role || 'doctor'
+  const storedRole = ((profile as { role?: string | null } | null)?.role ?? '') as string
+  let role = storedRole || 'doctor'
 
-  // 🛡️ ROLE AUTO-CORRECT: if user has a doctors record, they're a doctor
-  if (role === 'patient' || !role) {
-    const { data: doctorRecord } = await supabase
+  // Patient or a blank role becomes doctor only when this user already has a doctors row.
+  if (storedRole === 'patient' || storedRole === '') {
+    const { createAdminClient } = await import('@/lib/supabase-admin')
+    const admin = createAdminClient()
+    const { data: doctorRecord } = await admin
       .from('doctors')
       .select('id')
       .eq('user_id', data.user.id)
       .maybeSingle()
-    if (doctorRecord) {
+    if (canAutoCorrectToDoctor(storedRole, !!doctorRecord)) {
       role = 'doctor'
-      await supabase.from('profiles').update({ role: 'doctor' } as any).eq('id', data.user.id)
+      await admin.from('profiles').update({ role: 'doctor' }).eq('id', data.user.id)
     }
   }
 
@@ -142,7 +146,6 @@ export async function signInWithProvider(provider: 'google') {
  */
 export async function createAccountAction(formData: FormData, role: string, _tier: string, billingCycle: string) {
   assertSelfServeRole(role);
-  const tier = 'free';
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const name = formData.get('name') as string
@@ -160,7 +163,6 @@ export async function createAccountAction(formData: FormData, role: string, _tie
       data: {
         full_name: name,
         role: role,
-        tier: tier,
         billing_cycle: billingCycle,
         phone: phone,
         license_number: licenseNumber,
@@ -251,111 +253,26 @@ export async function createAccountAction(formData: FormData, role: string, _tie
 }
 
 /**
- * Saves profile information after account creation but before payment.
- */
-export async function updateProfileAction(userId: string, profileData: any) {
-  const supabase = createServerSupabase();
-
-  const { role, tier, clinicName, companyName, gradYear, school, city, website } = profileData;
-
-  // 1. Update main profile (ULTRA-STRICT: only verified core columns)
-  // Note: We avoid updating city, tier, or website here as they belong in role-specific tables
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update({ 
-      role: role 
-    })
-    .eq('id', userId);
-
-  if (profileError) {
-    console.error("Profiles update error:", profileError);
-    if ((profileError as any).code === '23505') {
-      return { error: 'This email is already registered. Please log in or use a different address.' };
-    }
-    return { error: profileError.message };
-  }
-
-  // 2. Role specific updates
-  if (role === 'doctor') {
-    try {
-      // First, try the standard user_id link
-      const { error: doctorError } = await supabase
-        .from('doctors')
-        .update({
-          clinic_name: clinicName,
-          city: city,
-          website_url: website,
-          membership_tier: tier
-        })
-        .eq('user_id', userId);        
-      if (doctorError) {
-        if ((doctorError as any).code === '23505') {
-          return { error: 'This email is already registered. Please log in or use a different address.' };
-        }
-        // If user_id column is missing, fallback to updating by ID
-        console.warn("Retrying update by ID...");
-        const { error: fallbackError } = await supabase
-          .from('doctors')
-          .update({ 
-            clinic_name: clinicName, 
-            city: city, 
-            website_url: website, 
-            membership_tier: tier 
-          })
-          .eq('id', userId);
-          
-        if (fallbackError) {
-          if ((fallbackError as any).code === '23505') {
-            return { error: 'This email is already registered. Please log in or use a different address.' };
-          }
-          throw fallbackError;
-        }
-      }
-    } catch (err: any) {
-      console.error("Failed to update doctor profile:", err);
-      if (err.code === '23505' || (err.message && err.message.includes('23505'))) {
-        return { error: 'This email is already registered. Please log in or use a different address.' };
-      }
-      return { error: err.message || "Database connection error" };
-    }
-  } else if (role === 'student') {
-    // Upsert student-specific data (creates row if trigger didn't fire)
-    const { error: studentError } = await supabase
-      .from('students')
-      .upsert({
-        id: userId,
-        school: school,
-        graduation_year: gradYear ? parseInt(gradYear, 10) : null,
-        location_city: city
-      }, { onConflict: 'id' });
-      
-    if (studentError) {
-      console.error("Failed to update student profile:", studentError);
-      if ((studentError as any).code === '23505') {
-        return { error: 'This email is already registered. Please log in or use a different address.' };
-      }
-      return { error: studentError.message };
-    }
-  }
-
-  return { success: true };
-}
-
-/**
  * Claims an unclaimed doctor profile by linking it to the authenticated user.
  * Called after registration when a claim_id is present.
  */
 export async function claimDoctorProfileAction(userId: string, claimId: string) {
+  const sessionClient = createServerSupabase();
+  const { data: { user } } = await sessionClient.auth.getUser();
+  if (!user || user.id !== userId) {
+    return { error: 'Unauthorized' };
+  }
+
   // Use admin client to bypass RLS for claiming
   const { createAdminClient } = await import('@/lib/supabase-admin');
-  const supabase = createAdminClient();
+  const admin = createAdminClient();
 
   // Auto-confirm the user's email so they get a session immediately
   // Without this, email verification would block them from accessing their dashboard
-  await (supabase.auth.admin as any).updateUserById(userId, { email_confirm: true });
+  await (admin.auth.admin as any).updateUserById(userId, { email_confirm: true });
 
   // Verify the doctor record exists and is unclaimed
-  const { data: doctor, error: fetchError } = await supabase
+  const { data: doctor, error: fetchError } = await admin
     .from('doctors')
     .select('id, user_id, first_name, last_name')
     .eq('id', claimId)
@@ -370,7 +287,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   }
 
   // Link the doctor record to the new user (pending approval)
-  const { error: updateError } = await supabase
+  const { error: updateError } = await admin
     .from('doctors')
     .update({ user_id: userId, is_approved: false } as any)
     .eq('id', claimId);
@@ -378,7 +295,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   if (updateError) {
     console.error("Failed to claim doctor profile:", updateError);
     // Retry without RLS constraints
-    const { error: retryError } = await supabase
+    const { error: retryError } = await admin
       .from('doctors')
       .update({ user_id: userId, is_approved: false } as any)
       .eq('id', claimId);
@@ -390,17 +307,14 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
 
   // Update the user's profile role to doctor and set their name
   const doctorName = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
-  await supabase
+  await admin
     .from('profiles')
-    .update({
-      role: 'doctor',
-      full_name: doctorName || undefined,
-    })
-    .eq('id', userId);
+    .update({ role: 'doctor', full_name: doctorName || undefined })
+    .eq('id', user.id);
 
   // Send welcome notification
   try {
-    await supabase.from('notifications').insert({
+    await admin.from('notifications').insert({
       user_id: userId,
       title: 'Profile Claimed — Welcome to NeuroChiro!',
       body: 'Welcome to NeuroChiro! Book your onboarding call with Dr. Ray to activate your account and get the most out of your membership ($99/mo).',

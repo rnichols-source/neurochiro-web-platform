@@ -6,6 +6,7 @@ import { patientLabel, statusLabel } from '@/lib/referrals/pure';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { hiddenTestUserIds } from '@/lib/profiles/test-users';
+import { toPublicNames } from '@/lib/security/public-names';
 import { decideAccess, type AccessParty } from './access';
 import { assertUuid, isUuid, UuidError } from './ids';
 import { sendUserMessage as deliverCore, type ConversationRow, type SendDeps, type SendInput, type SendResult, type StoredMessage } from './send-core';
@@ -263,9 +264,11 @@ export type InboxRow = {
   referralChip: { label: string; href: string } | null;
 };
 
-function personOrFormer(profile: { id: string; full_name: string | null; role: string | null } | undefined, id: string): InboxPerson {
-  if (!profile?.full_name) return { id, full_name: 'Former member', role: profile?.role || '' };
-  return { id: profile.id, full_name: profile.full_name, role: profile.role || '' };
+function personOrFormer(profile: { id: string; full_name: string | null; role: string | null; avatar_url?: string | null } | undefined, id: string): InboxPerson {
+  const [name] = toPublicNames(profile ? [profile] : []);
+  const role = profile?.role || '';
+  if (!name?.full_name) return { id, full_name: 'Former member', role };
+  return { id: name.id, full_name: name.full_name, role };
 }
 
 async function inboxFallback(userId: string, limit: number, before: string | null): Promise<InboxRow[]> {
@@ -284,7 +287,7 @@ async function inboxFallback(userId: string, limit: number, before: string | nul
   const otherIds = rows.map((row) => (row.participant_one_id === userId ? row.participant_two_id : row.participant_one_id)).filter(Boolean);
   const [messages, profiles] = await Promise.all([
     db.from('messages').select('conversation_id, body, created_at, recipient_id, read_at, deleted_at').in('conversation_id', ids).order('created_at', { ascending: false }).limit(Math.min(ids.length * 30, 500)),
-    db.from('profiles').select('id, full_name, role').in('id', otherIds),
+    db.from('profiles').select('id, full_name, avatar_url, role').in('id', otherIds),
   ]);
   const profileMap = new Map<string, { id: string; full_name: string | null; role: string | null }>((profiles.data || []).map((row: any) => [row.id, row]));
   const preview = new Map<string, string>();
@@ -381,7 +384,7 @@ export async function getThreadMessages(userId: string, conversationId: string, 
     deleted_at: row.deleted_at ?? null,
     client_message_id: row.client_message_id ?? null,
   }));
-  const { data: profile } = await db.from('profiles').select('id, full_name, role').eq('id', otherId).maybeSingle();
+  const { data: profile } = await db.from('profiles').select('id, full_name, avatar_url, role').eq('id', otherId).maybeSingle();
   return {
     conversationId: id,
     otherUser: personOrFormer(profile, otherId),
@@ -442,7 +445,9 @@ export async function searchDirectoryUsers(actorId: string, query: string) {
     if (!recipient) continue;
     const access = decideAccess(sender, recipient, { blocked: false, existingThread: false });
     if (!access.allowed) continue;
-    kept.push({ id: profile.id, full_name: profile.full_name, role: profile.role });
+    const [name] = toPublicNames([profile]);
+    if (!name) continue;
+    kept.push({ id: name.id, full_name: name.full_name, role: profile.role });
     if (kept.length >= 8) break;
   }
   return kept;
@@ -465,8 +470,8 @@ export async function listBlocked(userId: string) {
   const { data } = await admin().from('user_blocks').select('blocked_id').eq('blocker_id', userId).limit(100);
   const ids = (data || []).map((row: any) => row.blocked_id).filter(Boolean);
   if (!ids.length) return [];
-  const profiles = await admin().from('profiles').select('id, full_name').in('id', ids);
-  const names = new Map<string, string>((profiles.data || []).map((row: any) => [row.id, row.full_name || 'Former member']));
+  const profiles = await admin().from('profiles').select('id, full_name, avatar_url').in('id', ids);
+  const names = new Map<string, string>(toPublicNames(profiles.data || []).map((row) => [row.id, row.full_name || 'Former member']));
   return ids.map((id: string) => ({ id, full_name: names.get(id) || 'Former member' }));
 }
 
@@ -565,7 +570,7 @@ export async function personForNewMessage(actorId: string, otherId: string): Pro
   if (!sender || !recipient) return null;
   const access = decideAccess(sender, recipient, { blocked, existingThread: false });
   if (!access.allowed) return null;
-  const { data } = await admin().from('profiles').select('id, full_name, role').eq('id', otherId).maybeSingle();
+  const { data } = await admin().from('profiles').select('id, full_name, avatar_url, role').eq('id', otherId).maybeSingle();
   return personOrFormer(data, otherId);
 }
 

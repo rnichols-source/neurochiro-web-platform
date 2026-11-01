@@ -1,8 +1,10 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
 import { revalidatePath } from 'next/cache'
 import { Automations } from '@/lib/automations'
+import { canTransitionToVendor } from '@/lib/security/role-transition'
 
 export async function submitVendorApplication(formData: any) {
   const supabase = createServerSupabase()
@@ -11,8 +13,17 @@ export async function submitVendorApplication(formData: any) {
   if (!user) throw new Error("Unauthorized")
 
   try {
-    // 1. Update Profile Role
-    const { error: profileError } = await supabase
+    const { data: currentProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (!canTransitionToVendor((currentProfile as { role?: string } | null)?.role)) {
+      return { error: 'This account cannot become a vendor.' }
+    }
+
+    const admin = createAdminClient()
+    const { error: profileError } = await admin
       .from('profiles')
       .update({ role: 'vendor' })
       .eq('id', user.id)
