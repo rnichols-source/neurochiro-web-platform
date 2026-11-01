@@ -28,11 +28,13 @@ export async function middleware(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session && (
-    req.nextUrl.pathname.startsWith('/portal') ||
-    req.nextUrl.pathname.startsWith('/doctor') ||
-    req.nextUrl.pathname.startsWith('/student') ||
-    req.nextUrl.pathname.startsWith('/admin')
+  const path = req.nextUrl.pathname
+  const schoolVerify = path === '/student/verify'
+  if (!session && !schoolVerify && (
+    path.startsWith('/portal') ||
+    path.startsWith('/doctor') ||
+    path.startsWith('/student') ||
+    path.startsWith('/admin')
   )) {
     return NextResponse.redirect(new URL('/login', req.url));
   }

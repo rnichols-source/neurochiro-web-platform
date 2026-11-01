@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('token')
 
   if (!token) {
-    return NextResponse.redirect(new URL('/student/dashboard?verify=missing', request.url))
+    return NextResponse.redirect(new URL('/student/verify', request.url))
   }
 
   const result = await verifySchoolToken(token)
@@ -20,7 +20,5 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  return NextResponse.redirect(
-    new URL(`/student/dashboard?verify=error&reason=${encodeURIComponent(result.error || 'unknown')}`, request.url)
-  )
+  return NextResponse.redirect(new URL('/student/verify', request.url))
 }

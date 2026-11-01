@@ -29,6 +29,7 @@ export async function sendSchoolVerification(schoolEmail: string) {
 
   // Generate token and store
   const token = await createVerificationToken(user.id, schoolEmail, match.schoolName!)
+  if (!token) return { error: 'Failed to send verification email. Please try again.' }
 
   // Send verification email
   try {
@@ -48,7 +49,7 @@ export async function sendSchoolVerification(schoolEmail: string) {
           <p style="margin: 24px 0;">
             <a href="${verifyUrl}" style="display: inline-block; padding: 14px 28px; background: #D66829; color: white; text-decoration: none; border-radius: 10px; font-weight: 700; font-size: 15px;">Verify My School Email</a>
           </p>
-          <p style="color: #999; font-size: 12px;">This link expires in 7 days. If you didn't request this, ignore this email.</p>
+          <p style="color: #999; font-size: 12px;">This link expires in 48 hours. If you didn't request this, ignore this email.</p>
           <p style="margin-top: 32px; color: #666; font-size: 13px;">NeuroChiro<br/>neurochiro.co</p>
         </div>
       `,
