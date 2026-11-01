@@ -1,6 +1,8 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { canTransitionStudentToDoctor } from '@/lib/security/role-transition'
 
 export async function getStudentDashboardData() {
   const supabase = createServerSupabase()
@@ -281,20 +283,19 @@ export async function transitionToDoctorAction() {
       .eq('id', user.id)
       .single()
 
-    if (!currentProfile || (currentProfile.role !== 'student' && currentProfile.role !== 'student_paid')) {
+    if (!currentProfile || !canTransitionStudentToDoctor(currentProfile.role)) {
       return { error: "Only student accounts can transition to doctor." }
     }
 
-    // 1. Update Profile Role
-    const { error: profileError } = await supabase
+    const admin = createAdminClient()
+    const { error: profileError } = await admin
       .from('profiles')
       .update({ role: 'doctor' })
       .eq('id', user.id)
 
     if (profileError) throw profileError
 
-    // 2. Fetch full name for the doctor record
-    const { data: profile } = await supabase
+    const { data: profile } = await admin
         .from('profiles')
         .select('full_name')
         .eq('id', user.id)
@@ -309,7 +310,7 @@ export async function transitionToDoctorAction() {
     const baseSlug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9]/g, '-')
     const slug = `${baseSlug}-${Math.floor(Math.random() * 10000)}`
 
-    const { error: doctorError } = await supabase
+    const { error: doctorError } = await admin
       .from('doctors')
       .upsert({
         user_id: user.id,
