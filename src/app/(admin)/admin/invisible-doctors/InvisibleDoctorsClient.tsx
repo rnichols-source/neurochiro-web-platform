@@ -8,6 +8,7 @@ const REASON_LABELS: Record<string, { label: string; color: string; bg: string }
   no_address: { label: "No Address", color: "text-red-400", bg: "bg-red-500/10 border-red-500/20" },
   geocode_failed: { label: "Geocode Failed", color: "text-amber-400", bg: "bg-amber-500/10 border-amber-500/20" },
   zero_coords: { label: "Zero Coordinates", color: "text-orange-400", bg: "bg-orange-500/10 border-orange-500/20" },
+  missing_coords: { label: "Missing Coordinates", color: "text-orange-300", bg: "bg-orange-500/10 border-orange-500/20" },
   address_mismatch: { label: "Address Mismatch", color: "text-purple-400", bg: "bg-purple-500/10 border-purple-500/20" },
 }
 
@@ -20,6 +21,8 @@ export default function InvisibleDoctorsClient({ doctors }: { doctors: Invisible
   const pending = items.filter(d => d.verification_status === "pending")
   const noAddress = items.filter(d => d.reason === "no_address")
   const geocodeFailed = items.filter(d => d.reason === "geocode_failed")
+  const missingCoords = items.filter(d => d.reason === "missing_coords")
+  const zeroCoords = items.filter(d => d.reason === "zero_coords")
 
   async function handleGeocode(doctorId: string) {
     setGeocoding(doctorId)
@@ -44,8 +47,8 @@ export default function InvisibleDoctorsClient({ doctors }: { doctors: Invisible
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard label="Total Invisible" value={items.length} color="text-red-400" />
         <SummaryCard label="Verified (Paying)" value={verified.length} color="text-amber-400" />
-        <SummaryCard label="No Address" value={noAddress.length} color="text-red-400" />
-        <SummaryCard label="Geocode Failed" value={geocodeFailed.length} color="text-amber-400" />
+        <SummaryCard label="Missing coordinates" value={missingCoords.length} color="text-orange-300" />
+        <SummaryCard label="Zero coordinates" value={zeroCoords.length + noAddress.length + geocodeFailed.length} color="text-amber-400" />
       </div>
 
       {/* Verified doctors first — they're paying and invisible */}

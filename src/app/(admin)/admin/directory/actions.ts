@@ -8,6 +8,7 @@ import { checkAdminAuth } from '@/lib/admin-auth';
 import { looseFrom } from '@/lib/admin/loose-query';
 import { pickDoctorPatch } from '@/lib/admin/member-search';
 import { randomToken } from '@/lib/admin/random-token';
+import { normalizeCoords } from '@/lib/geo';
 import type { Json } from '@/types/supabase';
 
 function thrownMessage(err: unknown): string {
@@ -184,7 +185,8 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
       // Create slug
       const slug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
 
-      // Create doctor record
+      // Create doctor record. The CSV has no address, so the pin stays null.
+      const importedCoords = normalizeCoords(null, null);
       const { error: insertError } = await supabase.from('doctors').insert({
         first_name: firstName,
         last_name: lastName,
@@ -195,8 +197,8 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
         state: '',
         country: 'US',
         address: '',
-        latitude: 0,
-        longitude: 0,
+        latitude: importedCoords.latitude,
+        longitude: importedCoords.longitude,
         bio: '',
         specialties: [],
         verification_status: 'verified',
