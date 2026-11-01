@@ -3,7 +3,7 @@ import test from 'node:test'
 import { categoryKeyFromAlias, SYNAPSE_CATEGORIES } from './categories.ts'
 import { anchorCheckoutPlan, anchorFeeCents } from './fees.ts'
 import { priceMismatch } from './price-check.ts'
-import { proofScore, seatHoldsCategory } from './seats.ts'
+import { canReplyToRequest, proofScore, seatHoldsCategory } from './seats.ts'
 import { suppressSmallBuckets } from './anonymity.ts'
 import { disclosureText, socialDisclosure } from './disclosure.ts'
 import { paybackProgress, savedThisYearCents } from './savings.ts'
@@ -80,6 +80,15 @@ test('proof score thresholds never revoke', () => {
   const review = proofScore([...older, ...newer], now)
   assert.equal(review.flag, 'review')
   assert.notEqual(review.flag, 'revoked')
+})
+
+test('only the anchor can reply during first look', () => {
+  const now = new Date('2026-11-01T00:00:00Z')
+  const until = '2026-11-02T00:00:00Z'
+  assert.equal(canReplyToRequest({ now, firstLookUntil: until, vendorTier: 'anchor' }), true)
+  assert.equal(canReplyToRequest({ now, firstLookUntil: until, vendorTier: 'ally' }), false)
+  assert.equal(canReplyToRequest({ now, firstLookUntil: '2026-10-30T00:00:00Z', vendorTier: 'ally' }), true)
+  assert.equal(canReplyToRequest({ now, firstLookUntil: null, vendorTier: 'none' }), false)
 })
 
 test('a stripe price that does not match the config is refused', () => {

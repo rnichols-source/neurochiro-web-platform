@@ -1,11 +1,20 @@
 import Link from "next/link";
 import { LayoutDashboard, Store, LogOut, ChevronRight } from "lucide-react";
+import { createServerSupabase } from "@/lib/supabase-server";
 
-export default function VendorLayout({
+export default async function VendorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  let profileHref = "/marketplace";
+  if (user) {
+    const { data: vendor } = await supabase.from("vendors").select("slug").eq("id", user.id).maybeSingle();
+    if (vendor?.slug) profileHref = `/marketplace/${vendor.slug}`;
+  }
+
   return (
     <div className="flex h-dvh bg-neuro-cream overflow-hidden">
       {/* Sidebar */}
@@ -23,7 +32,7 @@ export default function VendorLayout({
             <span className="font-medium text-sm">Dashboard</span>
             <ChevronRight className="w-4 h-4 ml-auto" />
           </Link>
-          <Link href="/marketplace" className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
+          <Link href={profileHref} className="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
             <Store className="w-5 h-5" />
             <span className="font-medium text-sm">Public Profile</span>
           </Link>

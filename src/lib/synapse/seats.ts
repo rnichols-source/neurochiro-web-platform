@@ -56,3 +56,15 @@ export function proofScore(rows: RatingRow[], now: Date): ProofResult {
   if (score < AT_RISK_BELOW) return { score, count: recent.length, flag: 'at_risk' }
   return { score, count: recent.length, flag: 'ok' }
 }
+
+/** During the Anchor's 48-hour first look, only that Anchor may reply. */
+export function canReplyToRequest(input: {
+  now: Date
+  firstLookUntil: string | null
+  vendorTier: 'anchor' | 'ally' | 'none'
+}): boolean {
+  if (input.vendorTier === 'none') return false
+  if (!input.firstLookUntil) return true
+  if (new Date(input.firstLookUntil).getTime() <= input.now.getTime()) return true
+  return input.vendorTier === 'anchor'
+}

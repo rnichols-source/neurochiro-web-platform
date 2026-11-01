@@ -97,28 +97,6 @@ export async function updateVendorProfile(profileData: any) {
   }
 }
 
-export async function updateVendorOffer(offerData: any) {
-  const supabase = createServerSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
-
-  try {
-    // Update the offer fields in the vendors table
-    const { error } = await supabase
-      .from('vendors')
-      .update({
-        discount_code: offerData.couponCode,
-        discount_description: offerData.title + " - " + offerData.description
-      })
-      .eq('id', user.id)
-
-    if (error) throw error
-
-    revalidatePath('/vendor/dashboard')
-    revalidatePath('/marketplace')
-    return { success: true }
-  } catch (err) {
-    console.error("Failed to update offer:", err)
-    return { error: "Failed to update offer" }
-  }
+export async function updateVendorOffer() {
+  return { error: "Save member perks from the Synapse section of the vendor dashboard." }
 }

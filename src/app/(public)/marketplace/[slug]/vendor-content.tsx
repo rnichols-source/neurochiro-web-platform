@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { FileText, Loader2 } from "lucide-react";
+import PartnerDisclosure from "@/components/synapse/PartnerDisclosure";
 
 interface Article {
   id: string;
   title: string;
   body: string;
   published_at: string;
+  is_sponsored?: boolean;
 }
 
 export default function VendorContent({ vendorId }: { vendorId: string }) {
@@ -51,6 +53,7 @@ export default function VendorContent({ vendorId }: { vendorId: string }) {
               <p className="text-[10px] text-gray-400 mt-1">
                 {new Date(article.published_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </p>
+              {article.is_sponsored ? <PartnerDisclosure kind="sponsored" /> : null}
             </button>
             {expandedId === article.id && (
               <div className="mt-3 text-sm text-gray-600 leading-relaxed whitespace-pre-line">

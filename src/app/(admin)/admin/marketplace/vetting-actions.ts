@@ -232,6 +232,19 @@ export async function setSeatStatus(seatId: string, status: SeatStatus) {
   return { success: true }
 }
 
+export async function scheduleAddon(orderId: string, scheduledFor: string, notes: string) {
+  await checkAdminAuth()
+  const admin = asLooseDb(createAdminClient())
+  const when = scheduledFor ? new Date(scheduledFor).toISOString() : null
+  const { error } = await admin.from('synapse_addon_orders').update({
+    scheduled_for: when,
+    notes: notes.trim() || null,
+  }).eq('id', orderId)
+  if (error) return { error: 'Could not schedule the add-on.' }
+  revalidatePath('/admin/marketplace')
+  return { success: true }
+}
+
 export async function seatProof(vendorId: string) {
   await checkAdminAuth()
   const admin = asLooseDb(createAdminClient())
