@@ -10,7 +10,7 @@ export async function getMatchCycles(): Promise<MatchCycle[]> {
   const sb = createAdminClient() as any;
   const { data } = await sb
     .from("match_cycles")
-    .select("*")
+    .select("id, name, season, year, status, ranking_opens_at, ranking_closes_at, match_day, created_at")
     .order("match_day", { ascending: false });
   return data || [];
 }
