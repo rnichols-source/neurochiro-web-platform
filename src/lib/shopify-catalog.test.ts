@@ -4,6 +4,7 @@ import { STORE_PRODUCTS } from "../app/(public)/store/store-data.ts";
 import { LEGACY_STORE_PRODUCT_IDS } from "./legacy-store-ids.ts";
 import {
   categoryFromTitle,
+  categoryOf,
   clampQuantity,
   findVariant,
   formatPriceRange,
@@ -39,6 +40,24 @@ test("title categories cover hats and crewnecks", () => {
   assert.equal(categoryFromTitle("Wired Different 3D Puff Snapback"), "hats");
   assert.equal(categoryFromTitle("NeuroChiro Corduroy Logo Cap - Camel"), "hats");
   assert.equal(categoryFromTitle("Clinic Poster"), "other");
+});
+
+test("product type picks the category, then the title", () => {
+  assert.equal(categoryOf({ title: "Regulated-ish Cuffed Beanie", productType: "" }), "hats");
+  assert.equal(categoryOf({ title: "Low Cortisol High Standards Dad Hat", productType: "EMBROIDERY" }), "hats");
+  assert.equal(categoryOf({ title: "Low Cortisol High Standards Crop Tee", productType: "" }), "tees");
+  assert.equal(categoryOf({ title: "Wired Different Oversized Crew", productType: "" }), "crewnecks");
+  assert.equal(categoryOf({ title: "Regulated-ish Sweatpants", productType: "Sweatpants" }), "sweatpants");
+  assert.equal(categoryOf({ title: "Natural Raw Zip Hoodie", productType: "Zip Hoodie" }), "hoodies");
+  assert.equal(categoryOf({ title: "Atlas Social Club Crewneck", productType: "Crewneck" }), "crewnecks");
+  assert.equal(categoryOf({ title: "Vintage Corduroy Cap", productType: "Hat" }), "hats");
+  assert.equal(categoryOf({ title: "Spine Check Tee", productType: "T-SHIRT" }), "tees");
+  assert.equal(categoryOf({ title: "Embroidered Crew", productType: "EMBROIDERY" }), "crewnecks");
+  assert.equal(categoryOf({ title: "Clinic Poster", productType: "Poster" }), "other");
+  assert.equal(categoryOf({ title: "Atlas Social Club Crewneck", productType: "T-SHIRT" }), "crewnecks");
+  assert.equal(categoryOf({ title: "Low Cortisol High Standards Hoodie", productType: "T-SHIRT" }), "hoodies");
+  assert.equal(categoryOf({ title: "Regulated-ish Sweatpants", productType: "T-SHIRT" }), "sweatpants");
+  assert.equal(categoryOf({ title: "Mystery Drop", productType: "T-SHIRT" }), "tees");
 });
 
 test("price range uses From when variant prices differ", () => {

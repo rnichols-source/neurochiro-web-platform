@@ -5,8 +5,7 @@ import Footer from "@/components/landing/Footer";
 import { JsonLd } from "@/components/store/JsonLd";
 import { ProductCard } from "@/components/store/ProductCard";
 import { ProductInteractive } from "@/components/store/ProductInteractive";
-import { StoreFallback } from "@/components/store/StoreFallback";
-import { categoryFromTitle, plainText, truncate } from "@/lib/shopify-catalog";
+import { categoryLabel, categoryOf, plainText, truncate } from "@/lib/shopify-catalog";
 import { isLegacyStoreProductId } from "@/lib/legacy-store-ids";
 import { getProductByHandle, getProductRecommendations, getProducts } from "@/lib/shopify";
 import { publicStoreImage } from "@/lib/store-assets";
@@ -34,7 +33,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { handle } = await params;
   const result = await getProductByHandle(handle);
-  if (!result.ok || !result.product) {
+  if (!result.ok) throw new Error("shopify_fetch_failed");
+  if (!result.product) {
     return { title: "NeuroChiro Merch Store" };
   }
   const product = result.product;
@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 }
 
 function productJsonLd(product: ShopifyProduct) {
-  const category = categoryFromTitle(product.title);
+  const category = categoryOf(product);
   const description = plainText(product.description || product.title);
   const offers = product.variants.map((variant) => ({
     "@type": "Offer",
@@ -107,7 +107,7 @@ function productJsonLd(product: ShopifyProduct) {
           : [{
               "@type": "ListItem",
               position: 2,
-              name: category === "hats" ? "Hats" : "Crewnecks",
+              name: categoryLabel(category),
               item: `${SITE}/store?category=${category}`,
             }]),
         {
@@ -145,14 +145,17 @@ async function relatedProducts(product: ShopifyProduct): Promise<ShopifyProductC
 export default async function ProductPage({ params }: ProductPageProps) {
   const { handle } = await params;
   const result = await getProductByHandle(handle);
-  if (!result.ok) return <StoreFallback />;
+  if (!result.ok) {
+    // A thrown error during ISR keeps the last good page instead of caching a failure for 60s.
+    throw new Error("shopify_fetch_failed");
+  }
   if (!result.product) {
     if (isLegacyStoreProductId(handle)) permanentRedirect("/store");
     notFound();
   }
 
   const product = result.product;
-  const category = categoryFromTitle(product.title);
+  const category = categoryOf(product);
   const related = await relatedProducts(product);
   return (
     <div className="bg-neuro-cream pb-28 text-neuro-black md:pb-0">
@@ -169,7 +172,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <li className="flex items-center gap-2">
                 <span aria-hidden="true">/</span>
                 <Link href={`/store?category=${category}#shop`} className="hover:text-neuro-orange">
-                  {category === "hats" ? "Hats" : "Crewnecks"}
+                  {categoryLabel(category)}
                 </Link>
               </li>
             ) : null}

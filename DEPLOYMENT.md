@@ -33,6 +33,14 @@ Before the application goes live, the database schema and RLS policies must be a
    - `customer.subscription.deleted`
 4. Copy the **Signing Secret** (the signing secret) and add it to your Vercel environment variables as `STRIPE_WEBHOOK_SECRET`.
 
+### Store cache and webhooks
+The merch store reads Shopify with `SHOPIFY_STOREFRONT_TOKEN` on project `master-neurochiro-mdnr`. Product data also refreshes every 60 seconds.
+
+1. In Vercel, set `STORE_REVALIDATE_SECRET` (a long random string) and `SHOPIFY_WEBHOOK_SECRET` for Production and Preview. Leave them empty and the store still works. The webhook and the manual refresh link return 401 until the secrets are set.
+2. In Shopify Admin, open Settings → Notifications → Webhooks. Create JSON webhooks for API version 2025-01 pointing at `https://www.neurochiro.co/api/webhooks/shopify` for product create, product update, product delete, collection update, and inventory level update.
+3. Copy the webhook signing secret into `SHOPIFY_WEBHOOK_SECRET` and redeploy.
+4. To refresh the store by hand, open `https://www.neurochiro.co/api/store/revalidate?secret=<STORE_REVALIDATE_SECRET>`.
+
 ## 5. Deployment Steps (Vercel)
 
 The project is optimized for deployment on Vercel.
