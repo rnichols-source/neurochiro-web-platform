@@ -1,6 +1,7 @@
 'use server'
 
 import { checkAdminAuth } from '@/lib/admin-auth'
+import { looseFrom } from '@/lib/admin/loose-query'
 import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
 
 export interface DoctorRoutingRow {
@@ -50,7 +51,7 @@ export async function getDoctorRoutingStats(): Promise<DoctorRoutingData> {
     admin,
     'doctors',
     'id, first_name, last_name, clinic_name, city, state, country, membership_tier, verification_status',
-    (q: any) => q.eq('verification_status', 'verified').eq('membership_tier', 'pro'),
+    (q) => q.eq('verification_status', 'verified').eq('membership_tier', 'pro'),
   )
 
   // 2. Get ALL reply_logs (paginated via fetchAllRows)
@@ -107,7 +108,7 @@ export async function getDoctorRoutingStats(): Promise<DoctorRoutingData> {
   }
 
   // 5. Merge: every doctor gets a row, even with 0
-  const rows: DoctorRoutingRow[] = doctors.map((d: any) => {
+  const rows: DoctorRoutingRow[] = doctors.map((d) => {
     const s = stats[d.id] || { total: 0, last7: 0, last30: 0, lastDate: null }
     const daysSince = s.lastDate
       ? Math.floor((now.getTime() - new Date(s.lastDate).getTime()) / (1000 * 60 * 60 * 24))
@@ -164,5 +165,80 @@ export async function getDoctorRoutingStats(): Promise<DoctorRoutingData> {
       overall_action_rate,
       tracking_since: earliestClick,
     },
+  }
+}
+
+const ACTION_DESTINATIONS = new Set(['booking', 'phone', 'email', 'website'])
+
+async function rowsForDoctor(admin: unknown, table: string, columns: string, doctorId: string, orderBy: string) {
+  const out: Record<string, unknown>[] = []
+  const size = 1000
+  for (let from = 0; from < 20000; from += size) {
+    const page = await looseFrom(admin, table).select(columns).eq('doctor_id', doctorId).order(orderBy, { ascending: true }).range(from, from + size - 1)
+    if (page.error) {
+      console.error('admin routing', page.error.code || 'error')
+      break
+    }
+    const batch = page.data || []
+    out.push(...batch)
+    if (batch.length < size) break
+  }
+  return out
+}
+
+export async function getDoctorRoutingStatsForOne(doctorId: string): Promise<DoctorRoutingRow | null> {
+  await checkAdminAuth()
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('doctors')
+    .select('id, first_name, last_name, clinic_name, city, state, country, membership_tier, verification_status')
+    .eq('id', doctorId)
+    .maybeSingle()
+  if (error || !data) return null
+
+  const logs = await rowsForDoctor(admin, 'reply_logs', 'doctor_id, created_at', doctorId, 'created_at')
+  const clicks = await rowsForDoctor(admin, 'link_clicks', 'doctor_id, destination, clicked_at', doctorId, 'clicked_at')
+  const now = new Date()
+  const sevenAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000
+  const thirtyAgo = now.getTime() - 30 * 24 * 60 * 60 * 1000
+  let total = 0
+  let last7 = 0
+  let last30 = 0
+  let lastDate: string | null = null
+  for (const log of logs) {
+    const createdAt = typeof log.created_at === 'string' ? log.created_at : null
+    if (!createdAt) continue
+    total += 1
+    const created = Date.parse(createdAt)
+    if (created > sevenAgo) last7 += 1
+    if (created > thirtyAgo) last30 += 1
+    if (!lastDate || createdAt > lastDate) lastDate = createdAt
+  }
+  let profile = 0
+  let action = 0
+  for (const click of clicks) {
+    const destination = typeof click.destination === 'string' ? click.destination : ''
+    if (destination === 'profile') profile += 1
+    else if (ACTION_DESTINATIONS.has(destination)) action += 1
+  }
+  const daysSince = lastDate ? Math.floor((now.getTime() - new Date(lastDate).getTime()) / (1000 * 60 * 60 * 24)) : null
+  return {
+    id: data.id,
+    name: `Dr. ${data.first_name} ${data.last_name}`,
+    clinic: data.clinic_name || '',
+    city: data.city || '',
+    state: data.state || '',
+    country: data.country || 'US',
+    total,
+    last7,
+    last30,
+    lastDate,
+    daysSince,
+    tier: data.membership_tier,
+    status: data.verification_status,
+    profile_clicks: profile,
+    action_clicks: action,
+    click_rate: total > 0 ? Math.round((profile / total) * 1000) / 10 : 0,
+    action_rate: profile > 0 ? Math.round((action / profile) * 1000) / 10 : 0,
   }
 }

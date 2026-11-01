@@ -5,8 +5,32 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
 import { checkAdminAuth } from '@/lib/admin-auth';
+import { looseFrom } from '@/lib/admin/loose-query';
+import { pickDoctorPatch } from '@/lib/admin/member-search';
 import { randomToken } from '@/lib/admin/random-token';
 import { normalizeCoords } from '@/lib/geo';
+import type { Json } from '@/types/supabase';
+
+function thrownMessage(err: unknown): string {
+  return err instanceof Error && err.message ? err.message : 'Unknown error';
+}
+
+function looseUpdate(
+  client: unknown,
+  table: string,
+  values: Record<string, string | number | boolean | null>,
+  idColumn: string,
+  id: string,
+) {
+  const from = (client as {
+    from: (name: string) => {
+      update: (row: Record<string, string | number | boolean | null>) => {
+        eq: (column: string, value: string) => Promise<{ error: { message: string } | null }>
+      }
+    }
+  }).from;
+  return from.call(client, table).update(values).eq(idColumn, id);
+}
 
 export async function getAllDoctors(search?: string) {
   noStore();
@@ -24,12 +48,12 @@ export async function getAllDoctors(search?: string) {
   return data;
 }
 
-export async function updateDoctorManually(doctorId: string, updates: any) {
+export async function updateDoctorManually(doctorId: string, updates: Record<string, unknown>) {
   await checkAdminAuth();
+  const patch = pickDoctorPatch(updates);
 
-  // Validate clinic_name if being updated
-  if (updates.clinic_name) {
-    const cn = updates.clinic_name;
+  if (typeof patch.clinic_name === 'string' && patch.clinic_name) {
+    const cn = patch.clinic_name;
     if (/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(cn)) {
       return { success: false, error: 'Clinic name cannot contain an email address.' };
     }
@@ -41,45 +65,42 @@ export async function updateDoctorManually(doctorId: string, updates: any) {
     }
   }
 
-  // Use Admin Client for manual directory updates
-  const supabase = createAdminClient();
-  const { data: { user } } = await (supabase.auth as any).getUser(); // Auth might not work with admin client if token is not passed, but we don't strictly need user for update
+  if (Object.keys(patch).length === 0) return { success: true };
 
-  const { error } = await supabase
-    .from('doctors')
-    .update(updates)
-    .eq('id', doctorId);
+  const supabase = createAdminClient();
+  const { error } = await looseUpdate(supabase, 'doctors', patch, 'id', doctorId);
 
   if (error) {
-    console.error("Manual Update Error:", error);
+    console.error('Manual Update Error');
     return { success: false, error: error.message };
   }
 
-  // Refresh search index for high-performance GIN/RPC search
   try {
     await supabase.rpc('refresh_search_index');
-  } catch (refreshErr) {
-    console.warn("Search Index Refresh (non-critical):", refreshErr);
+  } catch {
+    console.warn('Search Index Refresh (non-critical)');
   }
 
-  // Log the action (using server client for audit log to get user if possible)
   try {
     const serverSupabase = createServerSupabase();
     const { data: { user: serverUser } } = await serverSupabase.auth.getUser();
-    
+    const metadata: { [key: string]: Json | undefined } = {};
+    for (const [key, value] of Object.entries(patch)) metadata[key] = value;
+
     await supabase.from('audit_logs').insert({
       category: 'DIRECTORY',
       event: `Manual Update: Doctor ${doctorId}`,
-      user_name: serverUser?.email || "Founder",
-      target: "Clinical Directory",
+      user_name: serverUser?.email || 'Founder',
+      target: 'Clinical Directory',
       status: 'Success',
       severity: 'Medium',
-      metadata: updates
+      metadata,
     });
   } catch (logError) {
-    console.error("Audit Log Error (Non-blocking):", logError);
+    console.error('Audit Log Error (Non-blocking)', logError instanceof Error ? logError.name : 'error');
   }
 
+  revalidatePath('/admin/members');
   revalidatePath('/admin/directory');
   revalidatePath('/directory');
   return { success: true };
@@ -122,8 +143,8 @@ export async function bulkDeleteDoctors(doctorIds: string[]) {
     revalidatePath('/');
 
     return { success: true, deleted, failed };
-  } catch (err: any) {
-    return { success: false, error: err.message, deleted: 0, failed: doctorIds.length };
+  } catch (err: unknown) {
+    return { success: false, error: thrownMessage(err), deleted: 0, failed: doctorIds.length };
   }
 }
 
@@ -228,8 +249,8 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
       } else if (authError) {
         console.warn(`Auth creation for ${row.email}:`, authError.message);
       }
-    } catch (err: any) {
-      errors.push(`${row.email}: ${err.message}`);
+    } catch (err: unknown) {
+      errors.push(`${row.email}: ${thrownMessage(err)}`);
     }
   }
 
@@ -266,7 +287,7 @@ export async function registerAllUnlinkedDoctors() {
 
     try {
       // Check if auth account already exists for this email
-      const { data: existingUsers } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
+      await supabase.auth.admin.listUsers({ page: 1, perPage: 1 });
       // Use a direct approach - try to create, if fails it already exists
       const tempPassword = `NC-${randomToken(8)}${randomToken(2)}!A`;
 
@@ -321,8 +342,8 @@ export async function registerAllUnlinkedDoctors() {
 
         registered++;
       }
-    } catch (err: any) {
-      errors.push(`${doctor.email}: ${err.message}`);
+    } catch (err: unknown) {
+      errors.push(`${doctor.email}: ${thrownMessage(err)}`);
       failed++;
     }
   }
@@ -477,9 +498,9 @@ export async function sendMigrationEmails(doctorIds: string[]) {
       });
 
       sent++;
-    } catch (err: any) {
+    } catch (err: unknown) {
       failed++;
-      errors.push(`${id}: ${err.message}`);
+      errors.push(`${id}: ${thrownMessage(err)}`);
     }
   }
 
@@ -524,7 +545,7 @@ export async function deleteDoctorManually(doctorId: string) {
     // 2. Try to clean up leads
     try {
       await supabase.from('leads').delete().eq('doctor_id', doctorId);
-    } catch (e) {
+    } catch {
       console.warn("[DELETE] Leads cleanup skipped");
     }
 
@@ -583,9 +604,9 @@ export async function deleteDoctorManually(doctorId: string) {
     revalidatePath('/');
     
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("[DELETE] Critical Exception:", err);
-    return { success: false, error: `Critical Exception: ${err.message || "Unknown error"}` };
+    return { success: false, error: `Critical Exception: ${thrownMessage(err) || "Unknown error"}` };
   }
 }
 
@@ -598,15 +619,14 @@ export async function activateAfterOnboardingCall(doctorId: string) {
   if (!doctor) return { success: false, error: 'Doctor not found' };
 
   // Activate the doctor
-  await supabase.from('doctors').update({
+  await looseUpdate(supabase, 'doctors', {
     onboarding_call_status: 'completed',
     is_approved: true,
     verification_status: 'verified',
-  } as any).eq('id', doctorId);
+  }, 'id', doctorId);
 
-  // Also update profile if needed
   if (doctor.user_id) {
-    await supabase.from('profiles').update({ is_approved: true } as any).eq('id', doctor.user_id);
+    await looseUpdate(supabase, 'profiles', { is_approved: true }, 'id', doctor.user_id);
   }
 
   // Discord notification
@@ -622,6 +642,7 @@ export async function activateAfterOnboardingCall(doctorId: string) {
   }
 
   revalidatePath('/admin/directory');
+  revalidatePath('/admin/members');
   return { success: true };
 }
 
@@ -629,13 +650,14 @@ export async function activateStudentAfterOnboardingCall(studentId: string) {
   await checkAdminAuth();
   const supabase = createAdminClient();
 
-  await (supabase as any).from('students').update({
+  await looseUpdate(supabase, 'students', {
     onboarding_call_status: 'completed',
-  }).eq('id', studentId);
+  }, 'id', studentId);
 
-  await supabase.from('profiles').update({ is_approved: true } as any).eq('id', studentId);
+  await looseUpdate(supabase, 'profiles', { is_approved: true }, 'id', studentId);
 
   revalidatePath('/admin/directory');
+  revalidatePath('/admin/members');
   return { success: true };
 }
 
@@ -643,18 +665,21 @@ export async function getDoctorIntroductions(doctorId: string): Promise<{ city: 
   await checkAdminAuth();
   const supabase = createAdminClient();
 
-  const { data } = await (supabase as any)
-    .from('reply_logs')
+  const { data } = await looseFrom(supabase, 'reply_logs')
     .select('searched_city, searched_state, created_at, template_id')
     .eq('doctor_id', doctorId)
     .in('template_id', ['doctor_comment', 'doctor_dm', 'sent_to_patient'])
     .order('created_at', { ascending: false });
 
-  return (data || []).map((r: any) => ({
-    city: r.searched_city || '',
-    state: r.searched_state || '',
-    date: r.created_at?.slice(0, 10) || '',
-    type: r.template_id === 'doctor_comment' ? 'Comment' : r.template_id === 'doctor_dm' ? 'DM' : 'Sent',
-  }));
+  return (data || []).map((row) => {
+    const template = typeof row.template_id === 'string' ? row.template_id : '';
+    const created = typeof row.created_at === 'string' ? row.created_at : '';
+    return {
+      city: typeof row.searched_city === 'string' ? row.searched_city : '',
+      state: typeof row.searched_state === 'string' ? row.searched_state : '',
+      date: created.slice(0, 10),
+      type: template === 'doctor_comment' ? 'Comment' : template === 'doctor_dm' ? 'DM' : 'Sent',
+    };
+  });
 }
 

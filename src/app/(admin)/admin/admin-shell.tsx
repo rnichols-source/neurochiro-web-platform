@@ -7,6 +7,7 @@ import { LogOut, Menu, Search, X } from 'lucide-react'
 import PerspectiveBanner from '@/components/admin/PerspectiveBanner'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { AuthProvider } from '@/context/AuthContext'
+import { MemberPalette } from './member-palette'
 import Sidebar from './Sidebar'
 import { logoutAdmin } from './SidebarActions'
 import { moreNav, navIsActive, primaryNav } from './nav'
@@ -55,12 +56,13 @@ export function AdminShell({
                 >
                   <Menu className="h-5 w-5" />
                 </button>
+                <MemberPalette />
                 <form
                   className="hidden min-w-0 flex-1 items-center gap-2 rounded-xl border border-black/10 bg-neuro-cream px-3 md:flex md:max-w-md"
                   onSubmit={(event) => {
                     event.preventDefault()
                     const q = query.trim()
-                    if (q) router.push(`/admin/search?q=${encodeURIComponent(q)}`)
+                    if (q) router.push(`/admin/members?q=${encodeURIComponent(q)}`)
                   }}
                 >
                   <Search className="h-4 w-4 shrink-0 text-neuro-gray" />
@@ -68,9 +70,10 @@ export function AdminShell({
                     id="admin-search"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search"
+                    placeholder="Search members"
                     className="min-h-11 w-full bg-transparent text-sm text-neuro-navy outline-none"
                   />
+                  <span className="hidden text-xs text-neuro-gray lg:inline">⌘K</span>
                 </form>
               </div>
               <div className="flex items-center gap-2">
@@ -143,7 +146,7 @@ export function AdminShell({
                   const q = query.trim()
                   if (!q) return
                   setMenuOpen(false)
-                  router.push(`/admin/search?q=${encodeURIComponent(q)}`)
+                  router.push(`/admin/members?q=${encodeURIComponent(q)}`)
                 }}
               >
                 <Search className="h-4 w-4" />
