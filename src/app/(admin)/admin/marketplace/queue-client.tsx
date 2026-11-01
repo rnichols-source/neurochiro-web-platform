@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SYNAPSE_CATEGORIES } from "@/lib/synapse/categories";
 import { COUNTRY_LABELS, SYNAPSE_COUNTRIES, VETTING_CHECKS, formatDollars } from "@/lib/synapse/config";
-import { getVettingQueue, saveVetting, approveSeat, setSeatStatus, createSeatCheckout, seatProof, type AddonOrderRow, type VettingSeat, type VettingVendor } from "./vetting-actions";
+import { getVettingQueue, saveVetting, approveSeat, setSeatStatus, createSeatCheckout, seatProof, scheduleAddon, type AddonOrderRow, type VettingSeat, type VettingVendor } from "./vetting-actions";
 
 const TABS = ["applied", "in_review", "approved", "seats", "addons"] as const;
 
@@ -59,6 +59,7 @@ export default function AdminQueue({ initial }: { initial: Queue }) {
               <p className="font-bold">{order.addon_key}</p>
               <p>{order.status} · {order.amount_cents ? formatDollars(order.amount_cents) : ""}</p>
               <p className="text-gray-500">{order.scheduled_for ? `Scheduled ${order.scheduled_for}` : "Not scheduled"}</p>
+              <ScheduleOrder orderId={order.id} onDone={async (message) => { setNote(message); await load(); }} />
             </li>
           ))}
           {queue.orders.length === 0 ? <p className="text-sm text-gray-500">No add-on orders yet.</p> : null}
@@ -133,6 +134,22 @@ function VendorCard({ vendor, onDone }: { vendor: VettingVendor; onDone: (messag
         }
       }}>Approve and copy checkout link</button>
     </li>
+  );
+}
+
+function ScheduleOrder({ orderId, onDone }: { orderId: string; onDone: (message: string) => void }) {
+  const [when, setWhen] = useState("");
+  const [notes, setNotes] = useState("");
+  return (
+    <form className="mt-2 flex flex-col gap-2 sm:flex-row" onSubmit={async (event) => {
+      event.preventDefault();
+      const result = await scheduleAddon(orderId, when, notes);
+      onDone(result.error || "Add-on scheduled.");
+    }}>
+      <input type="datetime-local" value={when} onChange={(event) => setWhen(event.target.value)} className="min-h-11 rounded-xl border px-3 text-sm" />
+      <input value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Notes" className="min-h-11 flex-1 rounded-xl border px-3 text-sm" />
+      <button type="submit" className="min-h-11 rounded-xl bg-[#1E2D3B] px-3 text-sm font-bold text-white">Schedule</button>
+    </form>
   );
 }
 

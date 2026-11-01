@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { asLooseDb, asRow } from '@/lib/synapse/loose-db'
 
 export async function getVendorDashboardData() {
   const supabase = createServerSupabase()
@@ -15,43 +16,56 @@ export async function getVendorDashboardData() {
       .eq('id', user.id)
       .single()
 
-    const { data: vendor } = await supabase
+    const loose = asLooseDb(supabase)
+    const extended = await loose
       .from('vendors')
-      .select('*')
+      .select('name, website_url, short_description, categories, slug, profile_views, website_clicks, discount_clicks')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
+    const vendor = extended.error
+      ? (await supabase.from('vendors').select('name, website_url, short_description, categories, slug').eq('id', user.id).maybeSingle()).data
+      : asRow<{
+          name?: string | null
+          website_url?: string | null
+          short_description?: string | null
+          categories?: string[] | null
+          slug?: string | null
+          profile_views?: number | null
+          website_clicks?: number | null
+          discount_clicks?: number | null
+        }>(extended.data)
 
-    // Get network reach stats
     const { count: doctorCount } = await supabase
       .from('doctors')
       .select('id', { count: 'exact', head: true })
       .eq('verification_status', 'verified')
 
+    const row: {
+      name?: string | null
+      website_url?: string | null
+      short_description?: string | null
+      categories?: string[] | null
+      slug?: string | null
+      profile_views?: number | null
+      website_clicks?: number | null
+      discount_clicks?: number | null
+    } | null = vendor
+
     return {
       profile: {
-        name: (vendor as any)?.name || (profile as any)?.full_name || user.email?.split('@')[0],
-        role: (profile as any)?.role,
-        website_url: (vendor as any)?.website_url || "",
-        short_description: (vendor as any)?.short_description || "",
-        categories: (vendor as any)?.categories || [],
-        slug: (vendor as any)?.slug || null,
+        name: row?.name || profile?.full_name || user.email?.split('@')[0] || 'Vendor',
+        role: profile?.role || null,
+        website_url: row?.website_url || "",
+        short_description: row?.short_description || "",
+        categories: row?.categories || [],
+        slug: row?.slug || null,
       },
       stats: {
-        views: (vendor as any)?.profile_views || 0,
-        clicks: (vendor as any)?.website_clicks || 0,
-        engagement: (vendor as any)?.discount_clicks || 0,
+        views: row?.profile_views || 0,
+        clicks: row?.website_clicks || 0,
+        engagement: row?.discount_clicks || 0,
         networkDoctors: doctorCount || 0,
       },
-      offer: {
-        title: (vendor as any)?.discount_description?.split(' - ')[0] || "NeuroChiro Partner Discount",
-        description: (vendor as any)?.discount_description?.split(' - ').slice(1).join(' - ') || "",
-        discountType: "Percentage",
-        discountValue: "15%",
-        redemptionInstructions: "Enter code at checkout",
-        couponCode: (vendor as any)?.discount_code || "",
-        expirationDate: "2026-12-31", // In a real app, store this in DB
-        active: (vendor as any)?.is_active || false
-      }
     }
   } catch (e) {
     console.error("Vendor Dashboard Error:", e)
