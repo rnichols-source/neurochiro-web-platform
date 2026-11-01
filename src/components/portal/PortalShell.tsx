@@ -69,19 +69,16 @@ export default function PortalShell({ children }: { children: React.ReactNode })
           const items = ctx.nav.filter((item) => item.group === group);
           if (!items.length) return null;
           return (
-            <div key={group} className="mb-3">
-              {GROUP_LABEL[group] ? <p className="px-3 pt-2 pb-1 text-xs text-white/60">{GROUP_LABEL[group]}</p> : null}
+            <div key={group} className="mb-2">
+              {GROUP_LABEL[group] ? <p className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-widest text-white/40">{GROUP_LABEL[group]}</p> : null}
               {items.map((item) => {
                 const active = itemActive(item.href, item.match);
                 const badge = badgeText(item.badge);
-                const className = `w-full min-h-11 px-3 py-2 rounded-lg flex items-center gap-3 text-left ${active ? 'bg-portal-sidebar-active text-white' : 'text-white/80 hover:bg-portal-sidebar-active'}`;
+                const className = `w-full min-h-11 px-3 rounded-lg flex items-center gap-3 text-left ${active ? 'bg-portal-sidebar-active text-white' : 'text-white/80 hover:bg-portal-sidebar-active'}`;
                 const body = (
                   <>
                     <NavIcon name={item.icon} />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-bold leading-5">{item.label}</span>
-                      {item.subtitle ? <span className="block text-xs text-white/60 leading-4">{item.subtitle}</span> : null}
-                    </span>
+                    <span className={`min-w-0 flex-1 truncate text-sm ${active ? 'font-bold' : 'font-medium'}`}>{item.label}</span>
                     {item.locked ? <span className="text-xs text-white/80 inline-flex items-center gap-1"><Lock className="w-3 h-3" aria-hidden /> Pro</span> : null}
                     {badge ? <span className="min-w-5 h-5 px-1 rounded-full bg-portal-accent text-white text-xs font-bold inline-flex items-center justify-center" {...(item.key === 'messages' ? { 'data-messages-badge': item.badge || 0 } : {})}>{badge}</span> : null}
                   </>
@@ -102,9 +99,11 @@ export default function PortalShell({ children }: { children: React.ReactNode })
             </div>
           );
         })}
-        <Link href="/doctor/coming-soon" className="min-h-11 px-3 rounded-lg flex items-center text-sm text-white/80 hover:bg-portal-sidebar-active" onClick={() => setOpen(false)}>
-          Coming soon ({ctx.comingSoonCount})
-        </Link>
+        {ctx.comingSoonCount > 0 ? (
+          <Link href="/doctor/coming-soon" className="min-h-11 px-3 rounded-lg flex items-center text-sm text-white/70 hover:bg-portal-sidebar-active" onClick={() => setOpen(false)}>
+            Coming soon
+          </Link>
+        ) : null}
       </nav>
       <div className="p-3 border-t border-white/10 flex items-center gap-2">
         <div className="w-11 h-11 rounded-lg bg-portal-sidebar-active inline-flex items-center justify-center text-sm font-bold">{ctx.initials}</div>
@@ -125,11 +124,11 @@ export default function PortalShell({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex flex-col md:flex-row h-dvh bg-portal-canvas overflow-hidden text-portal-ink">
-      <aside className="hidden md:flex w-72 shrink-0 h-dvh">{sidebar}</aside>
+      <aside className="hidden md:flex w-60 shrink-0 h-dvh">{sidebar}</aside>
       {open ? (
         <div className="fixed inset-0 z-[200] md:hidden">
           <button type="button" className="absolute inset-0 bg-black/40" aria-label="Close menu" title="Close menu" onClick={() => setOpen(false)} />
-          <div className="relative w-72 h-full shadow-lg">{sidebar}</div>
+          <div className="relative w-60 h-full shadow-lg">{sidebar}</div>
         </div>
       ) : null}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
