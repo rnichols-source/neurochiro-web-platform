@@ -146,6 +146,7 @@ async function lookupPostalCode(supabase: any, code: string, country: string): P
   return data || null
 }
 
+// Phone stays so DoctorCard can render a tel: link. Section E of the lockdown migration is the ask-first revoke. PUBLIC_DOCTOR_COLUMNS excludes phone.
 const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
 /** Country-aware doctors query. `US` includes legacy null country. `EU` is the European set. `ALL` is worldwide. */

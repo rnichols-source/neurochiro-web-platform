@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, MapPin, Briefcase, Clock, CheckCircle2, Star, Filter, ArrowRight, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { getPublicJobs } from "@/app/(public)/careers/actions";
+import { getMyJobApplicationStages } from "@/app/(student)/student/jobs/actions";
 import { createClient } from "@/lib/supabase";
 
 interface StudentProfile {
@@ -124,15 +125,7 @@ export default function JobsPage() {
           is_looking_for_mentorship: (student as any).is_looking_for_mentorship || false,
         });
       }
-      // Fetch applied jobs
-      const primary = await supabase
-        .from("job_applications")
-        .select("job_id, stage")
-        .or(`applicant_id.eq.${user.id},student_user_id.eq.${user.id}`);
-      const fallback = primary.error
-        ? await supabase.from("job_applications").select("job_id").eq("applicant_id", user.id)
-        : primary;
-      const appliedRows = (fallback.data || []) as { job_id: string; stage?: string | null }[];
+      const appliedRows = await getMyJobApplicationStages();
       if (appliedRows.length) {
         setAppliedJobIds(new Set(appliedRows.map((a) => a.job_id)));
         setAppliedStages((prev) => {

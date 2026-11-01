@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Megaphone, Users, Send, Calendar, Clock, Eye, AlertTriangle, Zap, Info, Loader2, CheckCircle2 } from "lucide-react";
+import { Megaphone, Users, Send, AlertTriangle, Zap, Info, Loader2, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase";
-import { motion, AnimatePresence } from "framer-motion";
+import { queueAnnouncementBroadcast } from "@/components/admin/announcement-actions";
+import { motion } from "framer-motion";
 
 export default function AnnouncementBuilder() {
   const [loading, setLoading] = useState(false);
@@ -42,12 +43,7 @@ export default function AnnouncementBuilder() {
     if (dbError) {
       setError(dbError.message);
     } else {
-      // Queue broadcast notification
-      await supabase.from('automation_queue').insert({
-        event_type: 'broadcast_announcement',
-        payload: { title: form.title, audience_type: form.audience_type || 'all' },
-        status: 'pending',
-      });
+      await queueAnnouncementBroadcast(form.title, form.audience_type || 'all');
       setSuccess(true);
       setForm({
         title: "",
