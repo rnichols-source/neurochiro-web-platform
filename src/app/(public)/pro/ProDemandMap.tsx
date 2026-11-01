@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import "maplibre-gl/dist/maplibre-gl.css";
 import type { MapDoctor, MapDemandCity } from "./actions";
 
 // Default views per country — used when no data or single pin
@@ -77,20 +78,13 @@ export default function ProDemandMap({
     if (!mapRef.current || loadedRef.current) return;
     loadedRef.current = true;
 
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js";
-    script.onload = () => {
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css";
-      document.head.appendChild(link);
-
-      const maplibregl = (window as any).maplibregl;
+    let removed = false;
+    void import("maplibre-gl").then((maplibregl) => {
+      if (removed || !mapRef.current) return;
       maplibreRef.current = maplibregl;
-
       const view = COUNTRY_VIEWS[country] || COUNTRY_VIEWS.US;
       const map = new maplibregl.Map({
-        container: mapRef.current!,
+        container: mapRef.current,
         style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
         center: view.center,
         zoom: view.zoom,
@@ -99,15 +93,14 @@ export default function ProDemandMap({
       });
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
       map.scrollZoom.disable();
-
       map.on("load", () => {
+        if (removed) return;
         mapInstanceRef.current = map;
         updateMapData(map, maplibregl, doctors, demandCities, country);
       });
-    };
-
-    document.head.appendChild(script);
+    });
     return () => {
+      removed = true;
       mapInstanceRef.current?.remove();
       mapInstanceRef.current = null;
       loadedRef.current = false;

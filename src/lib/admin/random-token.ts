@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 
-/** Short [a-z0-9] token. Replaces Math.random() so admin code does not use it. */
+/** Short [a-z0-9] token from cryptographic bytes. */
 export function randomToken(length: number): string {
   const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'
   const bytes = randomBytes(length)
