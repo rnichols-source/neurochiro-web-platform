@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors, activateAfterOnboardingCall, getDoctorIntroductions } from "./actions";
 import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus, Phone, Send } from "lucide-react";
+import { normalizeCoords } from "@/lib/geo";
 
 export default function DirectoryManager() {
   const [doctors, setDoctors] = useState<any[]>([]);
@@ -47,6 +48,7 @@ export default function DirectoryManager() {
     e.preventDefault();
     if (!selectedDoctor) return;
     setIsUpdating(true);
+    const coords = normalizeCoords(selectedDoctor.latitude, selectedDoctor.longitude);
     const updates = {
       first_name: selectedDoctor.first_name,
       last_name: selectedDoctor.last_name,
@@ -57,8 +59,8 @@ export default function DirectoryManager() {
       city: selectedDoctor.city,
       state: selectedDoctor.state,
       country: selectedDoctor.country,
-      latitude: parseFloat(selectedDoctor.latitude) || 0,
-      longitude: parseFloat(selectedDoctor.longitude) || 0,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
       bio: selectedDoctor.bio,
       website_url: selectedDoctor.website_url,
       instagram_url: selectedDoctor.instagram_url,

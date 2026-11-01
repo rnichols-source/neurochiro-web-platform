@@ -8,6 +8,186 @@ import { sendStudentWelcome } from "@/lib/students/welcome-email";
 import { fulfillJobCheckout } from "@/lib/jobs/fulfill";
 import { fulfillSynapseCheckout, lapseSynapseSubscription } from "@/lib/synapse/fulfill";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
+import { accessForStripeStatus } from "@/lib/portal/membership";
+import {
+  isUndefinedPaymentIssueColumn,
+  planSubscriptionChange,
+  resolveStripeStatus,
+  type ProfileBillingUpdate,
+} from "@/lib/billing/plan-subscription-change";
+import type { Database } from "@/types/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+type AdminClient = SupabaseClient<Database>;
+
+const NON_MEMBERSHIP_TYPES = new Set(["synapse_seat", "seminar_package"]);
+
+function isNonMembershipType(metadata: { type?: string | null } | null | undefined): boolean {
+  return NON_MEMBERSHIP_TYPES.has(metadata?.type || "");
+}
+
+function readId(value: unknown): string | null {
+  if (typeof value === "string" && value.length > 0) return value;
+  if (value && typeof value === "object" && "id" in value) {
+    const id = (value as { id?: unknown }).id;
+    return typeof id === "string" && id.length > 0 ? id : null;
+  }
+  return null;
+}
+
+type BillingProfile = {
+  id: string;
+  role: string;
+  payment_issue_since: string | null;
+  student_past_due_since: string | null;
+};
+
+async function loadBillingProfile(admin: AdminClient, customerId: string): Promise<BillingProfile | null> {
+  const full = await admin
+    .from("profiles")
+    .select("id, role, payment_issue_since, student_past_due_since")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+  if (full.error && isUndefinedPaymentIssueColumn(full.error)) {
+    console.error("payment_issue_since");
+    const bare = await admin
+      .from("profiles")
+      .select("id, role, student_past_due_since")
+      .eq("stripe_customer_id", customerId)
+      .maybeSingle();
+    if (bare.error || !bare.data) return null;
+    return {
+      id: bare.data.id,
+      role: bare.data.role,
+      payment_issue_since: null,
+      student_past_due_since: bare.data.student_past_due_since,
+    };
+  }
+  if (full.error || !full.data) return null;
+  return full.data;
+}
+
+async function writeProfileBilling(admin: AdminClient, profileId: string, patch: ProfileBillingUpdate): Promise<void> {
+  const payload: Database["public"]["Tables"]["profiles"]["Update"] = {};
+  if (patch.tier !== undefined) payload.tier = patch.tier;
+  if (patch.subscription_status !== undefined) payload.subscription_status = patch.subscription_status;
+  if (patch.payment_issue_since !== undefined) payload.payment_issue_since = patch.payment_issue_since;
+  if (patch.student_past_due_since !== undefined) payload.student_past_due_since = patch.student_past_due_since;
+  if (Object.keys(payload).length === 0) return;
+
+  const first = await admin.from("profiles").update(payload).eq("id", profileId);
+  if (first.error && isUndefinedPaymentIssueColumn(first.error)) {
+    console.error("payment_issue_since");
+    const retryPayload: Database["public"]["Tables"]["profiles"]["Update"] = { ...payload };
+    delete retryPayload.payment_issue_since;
+    if (Object.keys(retryPayload).length === 0) return;
+    const retry = await admin.from("profiles").update(retryPayload).eq("id", profileId);
+    if (retry.error) console.error("[WEBHOOK] profile update failed", retry.error.code);
+    return;
+  }
+  if (first.error) console.error("[WEBHOOK] profile update failed", first.error.code);
+}
+
+async function retrievedSubscriptionStatus(subscriptionId: string, fallback: string): Promise<string> {
+  try {
+    const fresh = await stripe.subscriptions.retrieve(subscriptionId);
+    return resolveStripeStatus(fallback, fresh.status);
+  } catch {
+    console.error("[WEBHOOK] subscription retrieve failed");
+    return fallback;
+  }
+}
+
+async function customerHasOtherLiveMembership(customerId: string, currentId: string): Promise<boolean> {
+  const statuses = ["active", "trialing", "past_due"] as const;
+  for (const status of statuses) {
+    let startingAfter: string | undefined;
+    for (let page = 0; page < 20; page += 1) {
+      const listed = await stripe.subscriptions.list({
+        customer: customerId,
+        status,
+        limit: 100,
+        ...(startingAfter ? { starting_after: startingAfter } : {}),
+      });
+      for (const sub of listed.data) {
+        if (sub.id === currentId) continue;
+        if (isNonMembershipType(sub.metadata)) continue;
+        return true;
+      }
+      if (!listed.has_more) break;
+      const last = listed.data[listed.data.length - 1];
+      if (!last) break;
+      startingAfter = last.id;
+    }
+  }
+  return false;
+}
+
+async function subscriptionIsSynapseSeat(admin: AdminClient, subscriptionId: string): Promise<boolean> {
+  const db = admin as unknown as {
+    from: (table: string) => {
+      select: (columns: string) => {
+        eq: (column: string, value: string) => {
+          limit: (count: number) => Promise<{ data: { id: string }[] | null; error: { message?: string } | null }>;
+        };
+      };
+    };
+  };
+  try {
+    const { data, error } = await db.from("synapse_seats").select("id").eq("stripe_subscription_id", subscriptionId).limit(1);
+    if (error) return false;
+    return Array.isArray(data) && data.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+async function applyMembershipFromSubscription(
+  admin: AdminClient,
+  subscription: {
+    id: string;
+    status?: string | null;
+    customer?: unknown;
+    metadata?: { type?: string | null; role?: string | null } | null;
+  },
+): Promise<void> {
+  const customerId = readId(subscription.customer);
+  if (!customerId) return;
+  const profile = await loadBillingProfile(admin, customerId);
+  if (!profile) return;
+
+  const metadataRole = subscription.metadata?.role || "";
+  const role = profile.role === "student" || profile.role === "student_paid" || metadataRole === "student"
+    ? "student"
+    : profile.role || "doctor";
+  const status = await retrievedSubscriptionStatus(subscription.id, subscription.status || "");
+  const preview = accessForStripeStatus(status, role);
+  let hasOtherLiveMembership = false;
+  if (preview.paid === false) {
+    try {
+      hasOtherLiveMembership = await customerHasOtherLiveMembership(customerId, subscription.id);
+    } catch {
+      console.error("[WEBHOOK] live membership lookup failed");
+    }
+  }
+
+  const plan = planSubscriptionChange({
+    role,
+    stripeStatus: status,
+    hasOtherLiveMembership,
+    paymentIssueSince: profile.payment_issue_since,
+    studentPastDueSince: profile.student_past_due_since,
+    now: new Date().toISOString(),
+  });
+  await writeProfileBilling(admin, profile.id, plan.profiles);
+  if (profile.role === "doctor" && plan.doctors) {
+    const updated = await admin
+      .from("doctors")
+      .update({ membership_tier: plan.doctors.membership_tier })
+      .eq("user_id", profile.id);
+    if (updated.error) console.error("[WEBHOOK] doctor tier update failed", updated.error.code);
+  }
+}
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -924,26 +1104,28 @@ export async function POST(req: Request) {
       }
 
       case "invoice.payment_failed": {
-        const invoice = event.data.object as any;
-        const subscriptionRef = invoice.subscription;
-        const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id ?? null;
+        const invoice = event.data.object;
+        const subscriptionId = readId("subscription" in invoice ? invoice.subscription : null);
         const lapsedSynapse = await lapseSynapseSubscription(supabase, subscriptionId);
         if (lapsedSynapse) {
           break;
         }
-        const customer = invoice.customer as string;
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id, role')
-          .eq('stripe_customer_id', customer)
-          .single();
-
-        if (profile && profile.role !== 'student') {
-          await supabase
-            .from('profiles')
-            .update({ tier: 'free' } as any)
-            .eq('id', profile.id);
+        const customerId = readId(invoice.customer);
+        if (customerId) {
+          const profile = await loadBillingProfile(supabase, customerId);
+          if (profile) {
+            const role = profile.role === "student" || profile.role === "student_paid" ? "student" : profile.role || "doctor";
+            const plan = planSubscriptionChange({
+              role,
+              stripeStatus: "past_due",
+              hasOtherLiveMembership: false,
+              paymentIssueSince: profile.payment_issue_since,
+              studentPastDueSince: profile.student_past_due_since,
+              now: new Date().toISOString(),
+              intent: "payment_failed",
+            });
+            await writeProfileBilling(supabase, profile.id, plan.profiles);
+          }
         }
 
         Automations.onPaymentFailed(invoice);
@@ -951,52 +1133,10 @@ export async function POST(req: Request) {
       }
 
       case "customer.subscription.updated": {
-        const subscription = event.data.object as any;
-        const customer = subscription.customer as string;
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id, role')
-          .eq('stripe_customer_id', customer)
-          .single();
-
-        if (profile) {
-          // Determine tier from the subscription's price
-          const priceId = subscription.items?.data?.[0]?.price?.id || '';
-          const amount = (subscription.items?.data?.[0]?.price?.unit_amount || 0) / 100;
-          const metaTier = subscription.metadata?.tier || '';
-
-          let newTier: string | null = null;
-          if (profile.role === 'student' || subscription.metadata?.role === 'student') {
-            if (subscription.status === 'active' || subscription.status === 'trialing') newTier = 'student_paid';
-            else if (subscription.status === 'past_due') newTier = 'student_paid';
-            else newTier = 'free';
-          } else {
-            // All paid doctors → pro, cancelled → free
-            newTier = subscription.status === 'active' ? 'pro' : 'free';
-          }
-
-          if (newTier) {
-            await supabase
-              .from('profiles')
-              .update({ tier: newTier } as any)
-              .eq('id', profile.id);
-
-            if (profile.role === 'student' || subscription.metadata?.role === 'student') {
-              if (subscription.status === 'past_due') {
-                await supabase.from('profiles').update({ student_past_due_since: new Date().toISOString() } as any).eq('id', profile.id).is('student_past_due_since', null);
-              } else if (subscription.status === 'active' || subscription.status === 'trialing') {
-                await supabase.from('profiles').update({ student_past_due_since: null } as any).eq('id', profile.id);
-              }
-            }
-
-            if (profile.role === 'doctor') {
-              await supabase
-                .from('doctors')
-                .update({ membership_tier: newTier as any })
-                .eq('user_id', profile.id);
-            }
-          }
+        const subscription = event.data.object;
+        const skipMembership = isNonMembershipType(subscription.metadata) || await subscriptionIsSynapseSeat(supabase, subscription.id);
+        if (!skipMembership) {
+          await applyMembershipFromSubscription(supabase, subscription);
         }
 
         Automations.onSubscriptionUpdated(subscription);
@@ -1004,7 +1144,7 @@ export async function POST(req: Request) {
       }
 
       case "customer.subscription.deleted": {
-        const subscription = event.data.object as any;
+        const subscription = event.data.object;
         const lapsedSynapse = await lapseSynapseSubscription(supabase, subscription.id);
         if (lapsedSynapse || subscription.metadata?.type === "synapse_seat") {
           break;
@@ -1013,40 +1153,7 @@ export async function POST(req: Request) {
           await supabaseSeminarStore().expirePackage(subscription.id);
           break;
         }
-        const customer = subscription.customer as string;
-
-        // Check if customer still has other active subscriptions before downgrading
-        let hasOtherActiveSub = false;
-        try {
-          const activeSubs = await stripe.subscriptions.list({
-            customer,
-            status: 'active',
-            limit: 1,
-          });
-          hasOtherActiveSub = activeSubs.data.length > 0;
-        } catch (err) {
-          console.error('[WEBHOOK] Error checking remaining subs:', err);
-        }
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('stripe_customer_id', customer)
-          .single();
-
-        if (profile && !hasOtherActiveSub) {
-          await supabase
-            .from('profiles')
-            .update({ tier: 'free' } as any)
-            .eq('id', profile.id);
-          // Also update doctors table
-          await supabase
-            .from('doctors')
-            .update({ membership_tier: 'free' as any })
-            .eq('user_id', profile.id);
-        } else if (profile && hasOtherActiveSub) {
-          console.log(`[WEBHOOK] Subscription deleted but customer ${customer} still has active subs — not downgrading`);
-        }
+        await applyMembershipFromSubscription(supabase, subscription);
 
         Automations.onSubscriptionCanceled(subscription);
         break;

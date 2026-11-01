@@ -48,6 +48,39 @@ export function formatDistance(miles: number, unit: "mi" | "km" = "mi"): string 
   return `${Math.round(value)} ${suffix}`;
 }
 
+export type NormalizedCoords = {
+  latitude: number | null;
+  longitude: number | null;
+};
+
+const NULL_COORDS: NormalizedCoords = { latitude: null, longitude: null };
+
+function parseCoord(value: unknown): number | 'empty' | 'invalid' {
+  if (value == null) return 'empty';
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '') return 'empty';
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : 'invalid';
+  }
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 'invalid';
+  return 'invalid';
+}
+
+/**
+ * Keep a real lat/lng pair. Blank, NaN, out of range, a half-filled pair, and 0,0 become nulls.
+ * A single 0 is allowed (equator or prime meridian) when the other value is a real coordinate.
+ */
+export function normalizeCoords(lat: unknown, lng: unknown): NormalizedCoords {
+  const latitude = parseCoord(lat);
+  const longitude = parseCoord(lng);
+  if (latitude === 'invalid' || longitude === 'invalid') return NULL_COORDS;
+  if (latitude === 'empty' || longitude === 'empty') return NULL_COORDS;
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return NULL_COORDS;
+  if (latitude === 0 && longitude === 0) return NULL_COORDS;
+  return { latitude, longitude };
+}
+
 /**
  * Check if coordinates are valid (not 0,0 or null/undefined)
  */
