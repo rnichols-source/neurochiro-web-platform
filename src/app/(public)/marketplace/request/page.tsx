@@ -5,6 +5,7 @@ import { Send, CheckCircle2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { submitRFP } from "./actions";
 import { VENDOR_CATEGORY_OPTIONS } from "@/types/vendor";
+import { COUNTRY_LABELS, SYNAPSE_COUNTRIES } from "@/lib/synapse/config";
 
 const budgetOptions = ["Under $5K", "$5K–$15K", "$15K–$50K", "$50K+", "Not sure"];
 const timelineOptions = ["ASAP", "1–3 months", "3–6 months", "Flexible"];
@@ -24,6 +25,7 @@ export default function RequestQuotePage() {
       description: fd.get("description") as string,
       budget: fd.get("budget") as string,
       timeline: fd.get("timeline") as string,
+      country: fd.get("country") as string,
     });
     if (result.error) {
       setError(result.error);
@@ -72,6 +74,13 @@ export default function RequestQuotePage() {
           </div>
 
           <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Country</label>
+            <select name="country" required defaultValue="US" className="min-h-11 w-full rounded-xl border border-gray-200 bg-gray-50 p-3">
+              {SYNAPSE_COUNTRIES.map((code) => <option key={code} value={code}>{COUNTRY_LABELS[code]}</option>)}
+            </select>
+          </div>
+
+          <div className="space-y-1">
             <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">What do you need?</label>
             <textarea
               name="description"
@@ -82,7 +91,7 @@ export default function RequestQuotePage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Budget Range</label>
               <select name="budget" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-neuro-orange">

@@ -47,7 +47,7 @@ const coreNavSections = [
       { name: "Students", href: "/doctor/students", icon: GraduationCap, tier: "pro" as const },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
       { name: "Community", href: "/doctor/community", icon: Users },
-      { name: "Marketplace", href: "/marketplace", icon: ShoppingBag },
+      { name: "Synapse", href: "/doctor/marketplace", icon: ShoppingBag },
     ],
   },
   {

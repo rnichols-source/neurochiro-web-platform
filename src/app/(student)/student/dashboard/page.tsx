@@ -1,4 +1,5 @@
 import DashboardHome from "./DashboardHome";
+import StudentPerks from "./student-perks";
 import { getCareerReadinessData, getStudentDashboardData, getMatchedJobsCount } from "./actions";
 import { getVerificationStatus } from "../actions/verify-school";
 import { nextRoadmapSteps } from "@/config/student-roadmap";
@@ -14,12 +15,15 @@ export default async function StudentDashboardPage() {
   ]);
 
   return (
-    <DashboardHome
-      readiness={readiness}
-      profileData={profileData}
-      verification={verification}
-      jobCount={jobCount}
-      steps={nextRoadmapSteps([])}
-    />
+    <>
+      <StudentPerks />
+      <DashboardHome
+        readiness={readiness}
+        profileData={profileData}
+        verification={verification}
+        jobCount={jobCount}
+        steps={nextRoadmapSteps([])}
+      />
+    </>
   );
 }
