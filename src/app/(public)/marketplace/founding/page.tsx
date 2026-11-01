@@ -11,17 +11,17 @@ import { applyAsFoundingVendor } from "./actions";
 import { listHeldAnchors } from "../actions";
 import Footer from "@/components/landing/Footer";
 import { SYNAPSE_CATEGORIES } from "@/lib/synapse/categories";
-import { COUNTRY_LABELS, SYNAPSE_COUNTRIES, formatDollars, ANCHOR_TERMS } from "@/lib/synapse/config";
+import { COUNTRY_LABELS, SYNAPSE_COUNTRIES, formatDollars, ANCHOR_TERMS, ALLY_ANNUAL_CENTS } from "@/lib/synapse/config";
 
 const CATEGORIES = SYNAPSE_CATEGORIES;
 
 const BENEFITS = [
   { icon: Award, title: "Founding Vendor Badge", desc: "Permanent gold badge on your listing — forever." },
   { icon: ShoppingBag, title: "Year 1 at the floor", desc: `Founding Anchors pay the category floor in year one (${formatDollars(ANCHOR_TERMS.core.floorCents)} core, ${formatDollars(ANCHOR_TERMS.standard.floorCents)} standard).` },
-  { icon: Users, title: "140+ Doctor Network", desc: "Direct access to verified nervous system chiropractors." },
-  { icon: Eye, title: "Profile Analytics", desc: "See who views your page, clicks your site, and uses your code." },
-  { icon: Globe, title: "Full Vendor Page", desc: "Logo, description, products, team, video, reviews, FAQ — the works." },
-  { icon: Star, title: "Discount Code Feature", desc: "Exclusive promo code for NeuroChiro members. We promote it for you." },
+  { icon: Users, title: "Member network", desc: "Your perk is offered to paying NeuroChiro doctors in Synapse." },
+  { icon: Eye, title: "Profile analytics", desc: "See profile views and site clicks on your public page." },
+  { icon: Globe, title: "Full vendor page", desc: "Logo, description, products, team, video, reviews, and FAQ." },
+  { icon: Star, title: "Member perk", desc: "Doctors reveal your code inside Synapse. The public page does not show it." },
   { icon: BarChart3, title: "Lead Generation", desc: "Doctors can request demos and quotes directly through your page." },
   { icon: MessageSquare, title: "Content Hub", desc: "Publish blog posts, case studies, and webinars on your vendor page." },
 ];
@@ -74,10 +74,9 @@ export default function FoundingVendorPage() {
               <Award className="w-8 h-8 text-yellow-600" />
             </div>
             <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">You&apos;re In!</h1>
-            <p className="text-gray-500 mb-6">Welcome to the NeuroChiro Founding Vendor program. We&apos;ll review your application and have your page live within 24 hours.</p>
-            <p className="text-sm text-gray-400 mb-6">Check your email for next steps.</p>
-            <Link href="/marketplace" className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors">
-              Browse the Marketplace <ArrowRight className="w-4 h-4" />
+            <p className="text-gray-500 mb-6">An admin reviews the application. A checkout link is created only after approval. Nothing is emailed from this form.</p>
+            <Link href="/marketplace" className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-neuro-orange py-4 font-bold text-white transition-colors hover:bg-neuro-orange/90">
+              Back to Synapse <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
@@ -96,32 +95,32 @@ export default function FoundingVendorPage() {
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/15 border border-yellow-500/30 rounded-full mb-6">
             <Award className="w-4 h-4 text-yellow-400" />
-            <span className="text-xs font-black text-yellow-300 uppercase tracking-wider">Limited to 20 Vendors</span>
+            <span className="text-xs font-black uppercase tracking-wider text-yellow-300">Founding Anchor</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-black text-white mb-6 leading-tight">
+          <h1 className="mb-6 font-heading text-4xl font-black leading-tight text-white md:text-5xl">
             Become a Founding Vendor
           </h1>
-          <p className="text-xl text-gray-300 mb-4 max-w-xl mx-auto">
+          <p className="mx-auto mb-4 max-w-xl text-xl text-gray-300">
             Year 1 at the floor. Renewal increases are capped at 25%. Founding Anchor badge.
           </p>
           <p className="text-gray-500">
-            We&apos;re handpicking 20 vendors to launch the NeuroChiro Marketplace. No credit card required.
+            Founding Anchors launch NeuroChiro Synapse. No credit card is taken on this form.
           </p>
         </div>
       </section>
 
       {/* Stats */}
       <div className="bg-neuro-navy border-t border-white/5">
-        <div className="max-w-3xl mx-auto flex justify-center divide-x divide-white/10">
+        <div className="mx-auto grid max-w-3xl grid-cols-2 sm:grid-cols-4">
           {[
-            { value: "140+", label: "Verified Doctors" },
-            { value: "30+", label: "States" },
-            { value: "20", label: "Founding Spots" },
-            { value: "Floor", label: "Year 1 price" },
+            { value: formatDollars(ANCHOR_TERMS.core.floorCents), label: "Core floor" },
+            { value: formatDollars(ANCHOR_TERMS.standard.floorCents), label: "Standard floor" },
+            { value: formatDollars(ALLY_ANNUAL_CENTS), label: "Ally per year" },
+            { value: "25%", label: "Renewal cap" },
           ].map((s) => (
-            <div key={s.label} className="flex-1 text-center py-5">
+            <div key={s.label} className="px-2 py-5 text-center">
               <div className="text-2xl font-black text-neuro-orange">{s.value}</div>
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{s.label}</div>
+              <div className="text-[10px] font-bold uppercase tracking-wider text-gray-500">{s.label}</div>
             </div>
           ))}
         </div>
@@ -144,7 +143,7 @@ export default function FoundingVendorPage() {
         </div>
       </section>
 
-      {/* After 3 Months */}
+      {/* After year 1 */}
       <section className="max-w-3xl mx-auto px-6 pb-12">
         <div className="bg-neuro-navy rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-heading font-black text-white mb-4">After year 1</h2>
