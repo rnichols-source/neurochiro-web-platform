@@ -1,31 +1,41 @@
-import { getCoverageDoctors, getDemandData, getCoverageStats, getMentionsData, getReplyTemplates, getDemandScatterData, getOutreachLinks } from './actions'
-import CoverageMapClient from './CoverageMapClient'
-import { getThresholds } from '@/lib/thresholds'
+import { Suspense } from 'react'
+import { redirect } from 'next/navigation'
+import { checkAdminAuth } from '@/lib/admin-auth'
+import { getCoverageMapData, getMissingCountryDoctors } from '@/lib/admin/coverage-data'
+import { getInvisibleDoctors } from '../invisible-doctors/actions'
+import CoverageExperience from './CoverageExperience'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CoveragePage() {
-  const pageStart = Date.now()
+export default async function CoveragePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
+  try {
+    await checkAdminAuth()
+  } catch {
+    redirect('/login?next=/admin')
+  }
 
-  // Phase 1: fetch data that other functions depend on
-  const p1Start = Date.now()
-  const [doctors, demand, mentions, templates, demandDots, outreachLinks, thresholds] = await Promise.all([
-    getCoverageDoctors().then(r => { console.log(`[PERF] getCoverageDoctors: ${Date.now() - p1Start}ms (${r.length} rows)`); return r }),
-    getDemandData().then(r => { console.log(`[PERF] getDemandData: ${Date.now() - p1Start}ms (${r.length} rows)`); return r }),
-    getMentionsData().then(r => { console.log(`[PERF] getMentionsData: ${Date.now() - p1Start}ms (${r.length} rows)`); return r }),
-    getReplyTemplates().then(r => { console.log(`[PERF] getReplyTemplates: ${Date.now() - p1Start}ms (${r.length} rows)`); return r }),
-    getDemandScatterData().then(r => { console.log(`[PERF] getDemandScatterData: ${Date.now() - p1Start}ms (${r.length} rows)`); return r }),
-    getOutreachLinks().then(r => { console.log(`[PERF] getOutreachLinks: ${Date.now() - p1Start}ms`); return r }),
-    getThresholds(),
-  ])
-  console.log(`[PERF] Phase 1 (parallel): ${Date.now() - p1Start}ms`)
+  const params = await searchParams
+  const tab = params.tab === 'pins' ? 'pins' : 'map'
+  if (tab === 'pins') {
+    const [invisible, missingCountry] = await Promise.all([
+      getInvisibleDoctors(),
+      getMissingCountryDoctors(),
+    ])
+    return (
+      <Suspense fallback={<div className="p-4 text-sm text-neuro-navy">Loading coverage…</div>}>
+        <CoverageExperience tab="pins" data={null} invisible={invisible} missingCountry={missingCountry} />
+      </Suspense>
+    )
+  }
 
-  // Phase 2: pass already-fetched data into stats (avoids triple-fetch)
-  const p2Start = Date.now()
-  const stats = await getCoverageStats(mentions, demand)
-  console.log(`[PERF] getCoverageStats: ${Date.now() - p2Start}ms`)
-
-  console.log(`[PERF] TOTAL SERVER: ${Date.now() - pageStart}ms`)
-
-  return <CoverageMapClient doctors={doctors} demand={demand} stats={stats} mentions={mentions} templates={templates} demandDots={demandDots} outreachLinks={outreachLinks} gapRadius={thresholds.gap_radius} lookupMax={thresholds.lookup_max} />
+  const data = await getCoverageMapData()
+  return (
+    <Suspense fallback={<div className="p-4 text-sm text-neuro-navy">Loading coverage…</div>}>
+      <CoverageExperience tab="map" data={data} invisible={[]} missingCountry={[]} />
+    </Suspense>
+  )
 }

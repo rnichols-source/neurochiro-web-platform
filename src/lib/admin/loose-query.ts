@@ -24,5 +24,5 @@ type LooseFilter = {
 /** Query tables or columns the generated Database type does not list yet. */
 export function looseFrom(client: unknown, table: string): LooseFilter {
   const from = (client as { from: (name: string) => LooseFilter }).from
-  return from(table)
+  return from.call(client, table)
 }

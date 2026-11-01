@@ -1170,7 +1170,7 @@ export interface OutreachScenario {
   dmKey: string | null
 }
 
-// Scenarios defined in CoverageMapClient.tsx (static data, not a server action)
+// Scenarios defined in ReplyStation.tsx (static data, not a server action)
 
 export async function checkHandleAgainstMembers(handle: string): Promise<{
   isMember: boolean

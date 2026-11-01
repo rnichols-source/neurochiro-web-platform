@@ -37,7 +37,7 @@ export const primaryNav: AdminNavItem[] = [
 
 export const moreNav: AdminNavItem[] = [
   { name: 'Outreach', href: '/admin/outreach', icon: Mail },
-  { name: 'Reply station', href: '/admin/coverage/work', icon: MessageSquare },
+  { name: 'Reply station', href: '/admin/coverage/reply', icon: MessageSquare },
   { name: 'Mentions', href: '/admin/coverage/mentions', icon: MessageSquare },
   { name: 'Templates', href: '/admin/coverage/templates', icon: FileText },
   { name: 'Jobs', href: '/admin/jobs', icon: Briefcase },
@@ -51,7 +51,7 @@ export const moreNav: AdminNavItem[] = [
 
 const contentPrefixes = ['/admin/content', '/admin/clips', '/admin/spotlight', '/admin/announcements', '/admin/content-tracker']
 const leadPrefixes = ['/admin/leads', '/admin/contact-requests', '/admin/list', '/admin/referrals', '/admin/match', '/admin/stats/recommendations']
-const replyPrefixes = ['/admin/coverage/work', '/admin/coverage/mentions', '/admin/coverage/templates']
+const replyPrefixes = ['/admin/coverage/work', '/admin/coverage/reply', '/admin/coverage/mentions', '/admin/coverage/templates']
 
 export function navIsActive(pathname: string, href: string): boolean {
   if (href === '/admin') return pathname === '/admin'
