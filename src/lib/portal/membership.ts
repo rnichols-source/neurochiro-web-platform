@@ -3,7 +3,39 @@ export const PRO_PRICE_LABEL = '$49/mo';
 
 export type MembershipTier = 'free' | 'pro' | 'neuros';
 export type MembershipSource = 'stripe' | 'founding' | 'comped' | 'none';
-export type MembershipStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'none';
+export type MembershipStatus =
+  | 'active'
+  | 'trialing'
+  | 'past_due'
+  | 'canceled'
+  | 'unpaid'
+  | 'incomplete'
+  | 'incomplete_expired'
+  | 'paused'
+  | 'none';
+
+export type StripeAccess = {
+  paid: boolean | 'unchanged';
+  paymentIssue: boolean;
+};
+
+const PAID_ACCESS = new Set(['active', 'trialing']);
+const FREE_ACCESS = new Set(['canceled', 'unpaid', 'incomplete_expired']);
+
+/**
+ * Doctors and students share this table. `role` does not change the result.
+ * `paused` keeps the current tier and raises the payment-issue flag until Raymond decides otherwise.
+ */
+export function accessForStripeStatus(status: string, role: string): StripeAccess {
+  if (typeof role !== 'string') return { paid: 'unchanged', paymentIssue: false };
+  const normalized = status.trim().toLowerCase();
+  if (PAID_ACCESS.has(normalized)) return { paid: true, paymentIssue: false };
+  if (normalized === 'past_due') return { paid: true, paymentIssue: true };
+  if (normalized === 'incomplete') return { paid: 'unchanged', paymentIssue: false };
+  if (normalized === 'paused') return { paid: 'unchanged', paymentIssue: true };
+  if (FREE_ACCESS.has(normalized)) return { paid: false, paymentIssue: false };
+  return { paid: 'unchanged', paymentIssue: false };
+}
 
 export type Membership = {
   tier: MembershipTier;
@@ -56,7 +88,13 @@ export function deriveMembership(input: MembershipInput): Membership {
   } else if (hasStripe) {
     source = 'stripe';
     status = stripeStatus || 'active';
-    tier = status === 'canceled' ? 'free' : 'pro';
+    if (status === 'canceled' || status === 'unpaid' || status === 'incomplete_expired') {
+      tier = 'free';
+    } else if (status === 'incomplete' || status === 'paused') {
+      tier = stored === 'neuros' ? 'neuros' : PAID.has(stored) ? 'pro' : 'free';
+    } else {
+      tier = 'pro';
+    }
     priceLabel = tier === 'pro' ? PRO_PRICE_LABEL : null;
   } else if (PAID.has(stored) || stored === 'comped') {
     tier = stored === 'neuros' ? 'neuros' : 'pro';

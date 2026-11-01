@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { revalidatePath } from 'next/cache';
 import { unstable_noStore as noStore } from 'next/cache';
 import { checkAdminAuth } from '@/lib/admin-auth';
+import { normalizeCoords } from '@/lib/geo';
 
 export async function getAllDoctors(search?: string) {
   noStore();
@@ -162,7 +163,8 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
       // Create slug
       const slug = `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
 
-      // Create doctor record
+      // Create doctor record. The CSV has no address, so the pin stays null.
+      const importedCoords = normalizeCoords(null, null);
       const { error: insertError } = await supabase.from('doctors').insert({
         first_name: firstName,
         last_name: lastName,
@@ -173,8 +175,8 @@ export async function migrateDoctorsFromCSV(rows: { name: string; email: string;
         state: '',
         country: 'US',
         address: '',
-        latitude: 0,
-        longitude: 0,
+        latitude: importedCoords.latitude,
+        longitude: importedCoords.longitude,
         bio: '',
         specialties: [],
         verification_status: 'verified',

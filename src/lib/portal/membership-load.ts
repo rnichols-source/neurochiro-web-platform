@@ -3,13 +3,23 @@ import { cache } from 'react';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { deriveMembership, type Membership, type MembershipStatus } from '@/lib/portal/membership';
 
-const STATUSES = new Set(['active', 'trialing', 'past_due', 'canceled', 'none']);
+const STATUSES = new Set([
+  'active',
+  'trialing',
+  'past_due',
+  'canceled',
+  'unpaid',
+  'incomplete',
+  'incomplete_expired',
+  'paused',
+  'none',
+]);
 
 export const getMembership = cache(async (userId: string): Promise<Membership> => {
   const admin = createAdminClient();
   const { data: profile } = await admin
     .from('profiles')
-    .select('tier, stripe_customer_id')
+    .select('tier, stripe_customer_id, subscription_status')
     .eq('id', userId)
     .maybeSingle();
 
@@ -31,7 +41,9 @@ export const getMembership = cache(async (userId: string): Promise<Membership> =
     subscription_status?: string | null;
   } | null;
 
-  const rawStatus = doctor?.subscription_status || null;
+  const doctorStatus = typeof doctor?.subscription_status === 'string' ? doctor.subscription_status.trim() : '';
+  const profileStatus = typeof profile?.subscription_status === 'string' ? profile.subscription_status.trim() : '';
+  const rawStatus = doctorStatus || profileStatus || null;
   const stripeStatus = rawStatus && STATUSES.has(rawStatus) ? rawStatus as MembershipStatus : null;
 
   return deriveMembership({

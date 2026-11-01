@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { normalizeCoords } from '@/lib/geo'
 
 export async function lookupStripeSession(sessionId: string): Promise<{ name: string; email: string } | null> {
   if (!sessionId) return null
@@ -37,6 +38,7 @@ export async function submitUKProfile(data: {
   const slug = 'dr-' + data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36)
   const instagram = data.instagram.replace(/^@/, '').trim().toLowerCase()
 
+  const importedCoords = normalizeCoords(null, null)
   const { error } = await (supabase as any).from('doctors').insert({
     first_name: firstName,
     last_name: lastName,
@@ -60,8 +62,8 @@ export async function submitUKProfile(data: {
     onboarding_call_status: 'not_scheduled',
     source: data.source || 'uca_birmingham_2026',
     stripe_session_id: data.stripe_session_id || null,
-    latitude: 0,
-    longitude: 0,
+    latitude: importedCoords.latitude,
+    longitude: importedCoords.longitude,
   })
 
   if (error) {

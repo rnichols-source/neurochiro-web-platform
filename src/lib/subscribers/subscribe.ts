@@ -126,7 +126,7 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
         .maybeSingle()
 
       if (zipCoord) {
-        const { haversineDistance } = await import('@/lib/geo')
+        const { haversineDistance, isValidCoord } = await import('@/lib/geo')
         const t = await getThresholds()
         const lat = Number(zipCoord.lat)
         const lng = Number(zipCoord.lng)
@@ -137,6 +137,7 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
           .eq('verification_status', 'verified')
           .not('latitude', 'eq', 0)
           .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
         if (detectedCountry === 'US') {
           docQuery = docQuery.or('country.is.null,country.eq.US')
         } else {
@@ -145,6 +146,7 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
         const { data: nearbyDocs } = await docQuery
 
         const nearby = ((nearbyDocs || []) as unknown as CoverageDoctor[])
+          .filter((doctor) => isValidCoord(doctor.latitude, doctor.longitude))
           .map((doctor) => ({
             ...doctor,
             distance: haversineDistance(lat, lng, Number(doctor.latitude), Number(doctor.longitude)),

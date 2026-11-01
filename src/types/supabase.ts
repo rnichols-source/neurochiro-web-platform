@@ -23,6 +23,8 @@ export interface Database {
           region_code: string | null
           stripe_customer_id: string | null
           notification_preferences: Json | null
+          payment_issue_since: string | null
+          student_past_due_since: string | null
         }
         Insert: {
           id: string
@@ -37,6 +39,8 @@ export interface Database {
           region_code?: string | null
           stripe_customer_id?: string | null
           notification_preferences?: Json | null
+          payment_issue_since?: string | null
+          student_past_due_since?: string | null
         }
         Update: {
           id?: string
@@ -51,6 +55,8 @@ export interface Database {
           region_code?: string | null
           stripe_customer_id?: string | null
           notification_preferences?: Json | null
+          payment_issue_since?: string | null
+          student_past_due_since?: string | null
         }
         Relationships: []
       }
@@ -107,8 +113,8 @@ export interface Database {
           country?: string
           zip_code?: string | null
           address?: string
-          latitude?: number
-          longitude?: number
+          latitude?: number | null
+          longitude?: number | null
           instagram_url?: string | null
           facebook_url?: string | null
           website_url?: string | null
@@ -147,8 +153,8 @@ export interface Database {
           country?: string
           zip_code?: string | null
           address?: string
-          latitude?: number
-          longitude?: number
+          latitude?: number | null
+          longitude?: number | null
           instagram_url?: string | null
           facebook_url?: string | null
           website_url?: string | null
