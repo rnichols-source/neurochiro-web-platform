@@ -6,12 +6,15 @@ export type LooseList = {
   count: number | null
 }
 
-type LooseFilter = {
+export type LooseFilter = {
   select: (columns: string, options?: { count?: 'exact'; head?: boolean }) => LooseFilter
   order: (column: string, options?: { ascending?: boolean }) => LooseFilter
   limit: (count: number) => LooseFilter
   range: (from: number, to: number) => LooseFilter
-  eq: (column: string, value: string) => LooseFilter
+  eq: (column: string, value: unknown) => LooseFilter
+  neq: (column: string, value: unknown) => LooseFilter
+  ilike: (column: string, pattern: string) => LooseFilter
+  or: (filters: string) => LooseFilter
   gte: (column: string, value: string) => LooseFilter
   lt: (column: string, value: string) => LooseFilter
   in: (column: string, values: readonly string[]) => LooseFilter
@@ -24,5 +27,5 @@ type LooseFilter = {
 /** Query tables or columns the generated Database type does not list yet. */
 export function looseFrom(client: unknown, table: string): LooseFilter {
   const from = (client as { from: (name: string) => LooseFilter }).from
-  return from(table)
+  return from.call(client, table)
 }
