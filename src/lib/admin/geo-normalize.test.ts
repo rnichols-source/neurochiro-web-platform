@@ -11,7 +11,10 @@ test('US country aliases collapse and empty stays empty', () => {
   assert.equal(normalizeCountry(''), '')
   assert.equal(normalizeCountry(null), '')
   assert.equal(normalizeCountry('   '), '')
-  assert.equal(normalizeCountry('Canada'), 'CANADA')
+  assert.equal(normalizeCountry('Canada'), 'CA')
+  assert.equal(normalizeCountry('UK'), 'GB')
+  assert.equal(normalizeCountry('Australia'), 'AU')
+  assert.equal(normalizeCountry('Narnia'), 'NARNIA')
 })
 
 test('Texas and tx become TX', () => {
@@ -20,5 +23,10 @@ test('Texas and tx become TX', () => {
   assert.equal(normalizeState('TX'), 'TX')
   assert.equal(normalizeState(''), '')
   assert.equal(normalizeState(null), '')
-  assert.equal(normalizeState('Ontario'), 'ONTARIO')
+  assert.equal(normalizeState('Ontario'), 'ON')
+  assert.equal(normalizeState('British Columbia'), 'BC')
+  assert.equal(normalizeState('Québec'), 'QC')
+  assert.equal(normalizeState('NSW'), 'NSW')
+  assert.equal(normalizeState('England'), 'ENG')
+  assert.equal(normalizeState('Nottinghamshire'), 'NOTTINGHAMSHIRE')
 })

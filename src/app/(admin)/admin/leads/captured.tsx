@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { parseLocationQuery, requestTextMatches } from "@/lib/admin/location-query";
 import { getLeads, updateLeadStatus, deleteLeadAction, getDemoRegistrants } from "./actions";
 import {
   Mail,
@@ -92,13 +93,17 @@ export default function LeadsPage() {
 
   const filtered = leads.filter((l) => {
     const q = search.toLowerCase();
+    const parsed = parseLocationQuery(search);
+    const structured = Boolean(parsed.postal || parsed.city || parsed.states.length || parsed.countries.length);
     const matchSearch =
       !q ||
-      l.first_name?.toLowerCase().includes(q) ||
-      l.email?.toLowerCase().includes(q) ||
-      l.location?.toLowerCase().includes(q) ||
-      l.source?.toLowerCase().includes(q) ||
-      JSON.stringify(l.metadata || {}).toLowerCase().includes(q);
+      (structured
+        ? requestTextMatches({ name: l.first_name, email: l.email, location: l.location }, search)
+        : l.first_name?.toLowerCase().includes(q) ||
+          l.email?.toLowerCase().includes(q) ||
+          l.location?.toLowerCase().includes(q) ||
+          l.source?.toLowerCase().includes(q) ||
+          JSON.stringify(l.metadata || {}).toLowerCase().includes(q));
     const matchSource = filterSource === "all" || l.source === filterSource;
     const matchStatus = filterStatus === "all" || (l.status || "new") === filterStatus;
     return matchSearch && matchSource && matchStatus;

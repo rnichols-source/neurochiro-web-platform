@@ -11,6 +11,7 @@ import { isMissingColumn, isMissingTable, updateContactRequest } from '@/lib/lea
 import { parseLegacyNote } from '@/lib/leads/validate'
 import { logPortalEvent } from '@/lib/leads/send'
 import { countAttention } from '@/lib/leads/attention-count'
+import { zipFromText } from '@/lib/admin/location-query'
 
 const REQUEST_COLUMNS = `
   id, name, phone, email, preferred_time, message, note, status, source, created_at,
@@ -38,10 +39,15 @@ async function decorate(db: any, rows: any[]) {
   const doctorIds = [...new Set(rows.map((row) => row.doctor_id).filter(Boolean))]
   let doctors: any[] = []
   if (doctorIds.length) {
-    const full = await db.from('doctors').select('id, first_name, last_name, clinic_name, email, phone, city, state, user_id, lead_notification_emails').in('id', doctorIds)
+    const full = await db.from('doctors').select('id, first_name, last_name, clinic_name, email, phone, city, state, user_id, lead_notification_emails, address').in('id', doctorIds)
     if (full.error && isMissingColumn(full.error)) {
-      const basic = await db.from('doctors').select('id, first_name, last_name, clinic_name, email, phone, city, state, user_id').in('id', doctorIds)
-      doctors = basic.data || []
+      const withAddress = await db.from('doctors').select('id, first_name, last_name, clinic_name, email, phone, city, state, user_id, address').in('id', doctorIds)
+      if (withAddress.error && isMissingColumn(withAddress.error)) {
+        const basic = await db.from('doctors').select('id, first_name, last_name, clinic_name, email, phone, city, state, user_id').in('id', doctorIds)
+        doctors = basic.data || []
+      } else {
+        doctors = withAddress.data || []
+      }
     } else {
       doctors = full.data || []
     }
@@ -104,6 +110,8 @@ async function decorate(db: any, rows: any[]) {
       doctor_phone: doctor?.phone || '',
       doctor_city: doctor?.city || '',
       doctor_state: doctor?.state || '',
+      doctor_address: doctor?.address || '',
+      doctor_zip: zipFromText(typeof doctor?.address === 'string' ? doctor.address : null) || '',
       doctor_recipients: uniqueRecipients,
       hours_elapsed: ageHours,
       needsAttention,

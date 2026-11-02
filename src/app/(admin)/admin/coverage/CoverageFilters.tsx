@@ -1,6 +1,9 @@
 'use client'
 
+import { getCountryByIso2 } from '@/config/countries'
 import type { StatusFilter } from '@/lib/admin/coverage-types'
+import { matchCountry } from '@/lib/geo/country-alias'
+import { matchRegion, regionLabel } from '@/lib/geo/region-alias'
 
 export type LayerFlags = {
   doctors: boolean
@@ -40,8 +43,10 @@ export function defaultLayers(): LayerFlags {
 }
 
 export function readFilters(params: { get: (key: string) => string | null }): FilterState {
-  const country = (params.get('country') || 'US').trim().toUpperCase() || 'US'
-  const state = (params.get('state') || '').trim().toUpperCase()
+  const rawCountry = (params.get('country') || 'US').trim()
+  const country = matchCountry(rawCountry)?.iso2 || rawCountry.toUpperCase() || 'US'
+  const rawState = (params.get('state') || '').trim()
+  const state = rawState ? (matchRegion(rawState, country)?.code || rawState.toUpperCase()) : ''
   const statusRaw = params.get('status') || ''
   const status = STATUSES.some((item) => item.value === statusRaw && item.value !== '')
     ? (statusRaw as StatusFilter)
@@ -78,6 +83,24 @@ export function filtersToQuery(filters: FilterState, base: URLSearchParams): str
   return params.toString()
 }
 
+function countryOptionLabel(iso: string): string {
+  const known = getCountryByIso2(iso)
+  return known ? `${known.flag} ${known.name}` : iso
+}
+
+function stateChoices(states: string[], current: string, country: string): { value: string; label: string }[] {
+  const byCode = new Map<string, string>()
+  for (const state of states) {
+    const region = matchRegion(state, country)
+    const code = region?.code || state
+    if (!byCode.has(code)) byCode.set(code, region?.name || regionLabel(state, country) || state)
+  }
+  if (current && !byCode.has(current)) byCode.set(current, regionLabel(current, country) || current)
+  return [...byCode.entries()]
+    .map(([value, label]) => ({ value, label }))
+    .sort((a, b) => a.label.localeCompare(b.label))
+}
+
 function serializeLayers(layers: LayerFlags): string {
   const picked = LAYER_ORDER.filter((item) => layers[item.key]).map((item) => item.key)
   if (picked.length === 2 && picked[0] === 'doctors' && picked[1] === 'demand') return ''
@@ -102,7 +125,7 @@ export default function CoverageFilters({
   stripeOk: boolean
   onChange: (next: FilterState) => void
 }) {
-  const stateOptions = value.state && !states.includes(value.state) ? [value.state, ...states] : states
+  const stateOptions = stateChoices(states, value.state, value.country)
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-2">
@@ -114,7 +137,7 @@ export default function CoverageFilters({
             onChange={(event) => onChange({ ...value, country: event.target.value, state: '' })}
           >
             {countries.map((country) => (
-              <option key={country} value={country}>{country}</option>
+              <option key={country} value={country}>{countryOptionLabel(country)}</option>
             ))}
           </select>
         </label>
@@ -127,7 +150,7 @@ export default function CoverageFilters({
           >
             <option value="">All</option>
             {stateOptions.map((state) => (
-              <option key={state} value={state}>{state}</option>
+              <option key={state.value} value={state.value}>{state.label}</option>
             ))}
           </select>
         </label>

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { searchMembers } from '@/app/(admin)/admin/members/actions'
+import { isNearbyPlace, parseLocationQuery } from '@/lib/admin/location-query'
 import type { MemberListRow } from '@/lib/admin/member-search'
 
 export function MemberPalette() {
@@ -70,9 +71,17 @@ export function MemberPalette() {
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
       setActive((current) => Math.max(0, current - 1))
-    } else if (event.key === 'Enter' && hits[active]) {
+    } else if (event.key === 'Enter') {
+      const typed = text.trim()
+      if (typed && isNearbyPlace(parseLocationQuery(typed))) {
+        event.preventDefault()
+        router.push(`/admin/members?q=${encodeURIComponent(typed)}&near=100`)
+        setOpen(false)
+        return
+      }
+      if (!hits[active]) return
       event.preventDefault()
-      router.push(`/admin/members?q=${encodeURIComponent(text.trim())}&member=${encodeURIComponent(hits[active].id)}`)
+      router.push(`/admin/members?q=${encodeURIComponent(typed)}&member=${encodeURIComponent(hits[active].id)}`)
       setOpen(false)
     } else if (event.key === 'Escape') {
       setOpen(false)

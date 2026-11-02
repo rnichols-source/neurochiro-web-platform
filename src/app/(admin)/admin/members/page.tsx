@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { parseMemberSearchParams, type MemberDetail, type MemberSearchResult } from '@/lib/admin/member-search'
-import { loadMemberDetail, searchMembers } from './actions'
+import { loadMemberDetail, memberLocationOptions, searchMembers, type MemberLocationOptions } from './actions'
 import { MembersClient } from './members-client'
 
 export const dynamic = 'force-dynamic'
@@ -19,9 +19,16 @@ export default async function MembersPage({
 
   const query = parseMemberSearchParams(await searchParams)
   let result: MemberSearchResult = { rows: [], total: 0, billingOk: true, note: null }
+  let locations: MemberLocationOptions = { countries: [], states: [] }
   let loadError = false
   try {
-    result = await searchMembers(query)
+    ;[result, locations] = await Promise.all([
+      searchMembers(query),
+      memberLocationOptions().catch((err) => {
+        console.error('admin member locations', err instanceof Error ? err.name : 'error')
+        return locations
+      }),
+    ])
   } catch (err) {
     console.error('admin members', err instanceof Error ? err.name : 'error')
     loadError = true
@@ -40,9 +47,10 @@ export default async function MembersPage({
 
   return (
     <MembersClient
-      key={`${query.role}|${query.status}|${query.tier}|${query.state}|${query.country}|${query.page}|${query.sort}`}
+      key={`${query.role}|${query.status}|${query.tier}|${query.state}|${query.country}|${query.page}|${query.sort}|${query.near ?? ''}`}
       query={query}
       result={result}
+      locations={locations}
       loadError={loadError}
       detail={detail}
       detailError={detailError}

@@ -6,7 +6,11 @@ import { AdminRefresh } from '@/components/admin/ui/AdminRefresh'
 import { EmptyState } from '@/components/admin/ui/EmptyState'
 import { PageHeader } from '@/components/admin/ui/PageHeader'
 import { SlideOver } from '@/components/admin/ui/SlideOver'
+import { describeEmpty, isNearbyPlace, parseLocationQuery } from '@/lib/admin/location-query'
 import { memberHref, type MemberDetail, type MemberListRow, type MemberQuery, type MemberSearchResult, type MemberStatusFilter, type MemberTierFilter } from '@/lib/admin/member-search'
+import type { MemberLocationOptions } from './actions'
+import { matchCountry } from '@/lib/geo/country-alias'
+import { regionCountry } from '@/lib/geo/region-alias'
 import { loadMemberDetail } from './actions'
 import { MemberPanel, MemberPanelSkeleton } from './member-panel'
 
@@ -38,8 +42,26 @@ function when(value: string | null) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' }).format(date)
 }
 
-function place(row: MemberListRow) {
-  return [row.city, row.state].filter(Boolean).join(', ') || '—'
+function PlaceLine({ row, query }: { row: MemberListRow; query: MemberQuery }) {
+  const parsed = parseLocationQuery(query.q, { country: query.country || undefined })
+  const cityHit = Boolean(parsed.city && row.city && row.city.toLowerCase().includes(parsed.city.toLowerCase()))
+  const stateHit = Boolean(parsed.states[0] && row.state && (row.state.toUpperCase() === parsed.states[0] || row.state.toLowerCase() === parsed.states[0].toLowerCase()))
+  const zipHit = Boolean(parsed.postal && row.zipCode && row.zipCode.replace(/\s+/g, '').toUpperCase().includes(parsed.postal.code))
+  const country = matchCountry(row.country || '')
+  const flag = country?.flag || ''
+  const miles = typeof row.distanceMiles === 'number' ? `${row.distanceMiles.toFixed(1)} mi` : ''
+  const zip = row.zipCode || ''
+  if (!row.city && !row.state && !zip && !flag && !miles) return <>—</>
+  return (
+    <>
+      <span className={cityHit ? 'font-bold' : undefined}>{row.city}</span>
+      {row.city && row.state ? ', ' : ''}
+      <span className={stateHit ? 'font-bold' : undefined}>{row.state}</span>
+      {zip ? <> · <span className={zipHit ? 'font-bold' : undefined}>{zip}</span></> : null}
+      {flag ? ` · ${flag}` : ''}
+      {miles ? ` · ${miles}` : ''}
+    </>
+  )
 }
 
 export function MembersClient({
@@ -49,6 +71,7 @@ export function MembersClient({
   detail,
   detailError,
   updatedAt,
+  locations,
 }: {
   query: MemberQuery
   result: MemberSearchResult
@@ -56,6 +79,7 @@ export function MembersClient({
   detail: MemberDetail | null
   detailError: boolean
   updatedAt: string
+  locations: MemberLocationOptions
 }) {
   const router = useRouter()
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -141,7 +165,17 @@ export function MembersClient({
       } else if (event.key === 'ArrowUp') {
         event.preventDefault()
         setActive((current) => Math.max(0, current - 1))
-      } else if (event.key === 'Enter' && rows.length > 0 && target instanceof HTMLElement && target.id === 'member-search') {
+      } else if (event.key === 'Enter' && target instanceof HTMLElement && target.id === 'member-search') {
+        const typed = (target as HTMLInputElement).value.trim()
+        const parsed = parseLocationQuery(typed, { country: draft.current.country || undefined })
+        if (isNearbyPlace(parsed)) {
+          event.preventDefault()
+          if (timer.current) clearTimeout(timer.current)
+          const next = { ...draft.current, q: typed, near: draft.current.near || 100, page: 1 }
+          draft.current = next
+          startTransition(() => router.replace(memberHref(next), { scroll: false }))
+          return
+        }
         const row = rows[Math.min(activeRef.current, rows.length - 1)]
         if (!row) return
         event.preventDefault()
@@ -182,17 +216,28 @@ export function MembersClient({
         <p className="rounded-xl bg-white px-4 py-3 text-sm text-neuro-navy">Stripe is unavailable right now, so billing labels may be wrong.</p>
       ) : null}
       {result.note ? <p className="text-sm text-neuro-gray">{result.note}</p> : null}
+      {result.banner ? (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm text-neuro-navy">
+          <span>{result.banner.title}</span>
+          {result.banner.tone === 'near' ? [25, 50, 100, 250].map((miles) => (
+            <FilterButton key={miles} active={query.near === miles} onClick={() => visit({ near: miles, page: 1 })}>
+              {`${miles} mi`}
+            </FilterButton>
+          )) : null}
+        </div>
+      ) : null}
+      <SuggestionChips query={query} onVisit={visit} />
       <div className="space-y-3">
         <input
           id="member-search"
           ref={searchRef}
           value={searchText}
-          placeholder="Name, email, practice, or city"
+          placeholder="Name, email, city, state, ZIP, or country"
           aria-label="Search members"
           onChange={(event) => {
             const value = event.target.value
             setSearchDraft(value)
-            visit({ q: value, page: 1 }, true)
+            visit({ q: value, near: null, page: 1 }, true)
           }}
           className="min-h-11 w-full rounded-xl border border-black/10 bg-white px-3 text-sm text-neuro-navy"
         />
@@ -221,27 +266,42 @@ export function MembersClient({
           ))}
         </div>
         <div className="flex flex-wrap gap-2">
-          <input
-            defaultValue={query.state}
-            aria-label="State"
-            placeholder="State"
-            onChange={(event) => visit({ state: event.target.value, page: 1 }, true)}
-            className="min-h-11 w-28 rounded-xl border border-black/10 bg-white px-3 text-sm"
-          />
-          <input
-            defaultValue={query.country}
-            aria-label="Country"
-            placeholder="Country"
-            onChange={(event) => visit({ country: event.target.value, page: 1 }, true)}
-            className="min-h-11 w-36 rounded-xl border border-black/10 bg-white px-3 text-sm"
-          />
+          <label className="min-h-11">
+            <span className="sr-only">State</span>
+            <select
+              aria-label="State"
+              value={query.state}
+              onChange={(event) => visit({ state: event.target.value, page: 1 })}
+              className="min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm"
+            >
+              <option value="">All states</option>
+              {stateChoices(locations, query).map((state) => (
+                <option key={`${state.country}|${state.code}`} value={state.code}>{state.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="min-h-11">
+            <span className="sr-only">Country</span>
+            <select
+              aria-label="Country"
+              value={query.country}
+              onChange={(event) => visit({ country: event.target.value, state: '', page: 1 })}
+              className="min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm"
+            >
+              <option value="">All countries</option>
+              {locations.countries.map((country) => (
+                <option key={country.code} value={country.code}>{`${country.flag ? `${country.flag} ` : ''}${country.label} (${country.count})`}</option>
+              ))}
+            </select>
+          </label>
           <FilterButton active={query.sort === 'name'} onClick={() => visit({ sort: 'name', page: 1 })}>Name</FilterButton>
           <FilterButton active={query.sort === 'recent'} onClick={() => visit({ sort: 'recent', page: 1 })}>Recent</FilterButton>
           <FilterButton active={query.sort === 'newest'} onClick={() => visit({ sort: 'newest', page: 1 })}>Newest</FilterButton>
         </div>
       </div>
       {loadError ? <EmptyState title="Members could not be loaded." body="Try the search again in a moment." /> : null}
-      {!loadError && result.rows.length === 0 ? <EmptyState title="No members match." body="Try a different name, email, or filter." /> : null}
+      {!loadError && result.banner?.hideStudents ? <p className="text-sm text-neuro-gray">Students and vendors have no location, so they are hidden.</p> : null}
+      {!loadError && result.rows.length === 0 ? <EmptyState title={result.banner?.emptyTitle || describeEmpty(parseLocationQuery(query.q, { country: query.country || undefined })) || 'No members match.'} body="Try a different name, email, or filter." /> : null}
       {result.rows.length > 0 ? (
         <>
           <div className="hidden overflow-hidden rounded-2xl bg-white md:block">
@@ -267,7 +327,7 @@ export function MembersClient({
                       <p className="text-xs text-neuro-gray">{row.role}{row.email ? ` · ${row.email}` : ''}</p>
                     </td>
                     <td className="px-4 py-2">{row.practice || '—'}</td>
-                    <td className="px-4 py-2">{place(row)}</td>
+                    <td className="px-4 py-2"><PlaceLine row={row} query={query} /></td>
                     <td className="px-4 py-2">{row.billingLabel}</td>
                     <td className="px-4 py-2">{row.verificationLabel}</td>
                     <td className="px-4 py-2 tabular-nums">{when(row.lastActivity)}</td>
@@ -282,7 +342,7 @@ export function MembersClient({
                 <button type="button" onClick={() => openMember(row.id)} className={`block min-h-11 w-full rounded-2xl bg-white px-4 py-3 text-left ${index === highlighted ? 'ring-2 ring-neuro-orange' : ''}`}>
                   <p className="font-medium">{row.name}{row.isTest ? <span className="ml-2 rounded-full bg-neuro-cream px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">Test</span> : null}</p>
                   <p className="text-neuro-gray">{row.practice || row.role}{row.email ? ` · ${row.email}` : ''}</p>
-                  <p className="text-neuro-gray">{place(row)} · {row.billingLabel} · {row.verificationLabel}</p>
+                  <p className="text-neuro-gray"><PlaceLine row={row} query={query} /> · {row.billingLabel} · {row.verificationLabel}</p>
                   <p className="tabular-nums text-neuro-gray">{when(row.lastActivity)}</p>
                 </button>
               </li>
@@ -302,6 +362,47 @@ export function MembersClient({
       <SlideOver open={Boolean(panelMember)} title={panelDetail?.name || 'Member'} onClose={() => openMember('')}>
         {panelPending ? <MemberPanelSkeleton /> : <MemberPanel detail={panelDetail} detailError={panelError} />}
       </SlideOver>
+    </div>
+  )
+}
+
+function stateChoices(locations: MemberLocationOptions, query: MemberQuery) {
+  const rows = query.country ? locations.states.filter((state) => state.country === query.country) : locations.states
+  if (query.state && !rows.some((state) => state.code === query.state)) {
+    return [{ code: query.state, label: query.state, country: query.country, count: 0 }, ...rows]
+  }
+  return rows
+}
+
+function SuggestionChips({ query, onVisit }: { query: MemberQuery; onVisit: (patch: Partial<MemberQuery>) => void }) {
+  const parsed = parseLocationQuery(query.q, { country: query.country || undefined })
+  const options = parsed.ambiguous.flatMap((group) => group.options)
+  if (!options.length) return null
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => {
+        const country = option.kind === 'country' ? matchCountry(option.code) : null
+        const label = option.kind === 'country'
+          ? `${country?.flag ? `${country.flag} ` : ''}${option.label} (country)`
+          : `${option.label} (state)`
+        return (
+          <button
+            key={`${option.kind}-${option.code}`}
+            type="button"
+            className="inline-flex min-h-11 items-center rounded-full border border-black/10 bg-white px-3 text-sm text-neuro-navy"
+            onClick={() => {
+              if (option.kind === 'country' && parsed.postal) {
+                onVisit({ country: option.code, near: 100, page: 1 })
+                return
+              }
+              if (option.kind === 'country') onVisit({ q: '', country: option.code, state: '', near: null, page: 1 })
+              else onVisit({ q: parsed.city || '', state: option.code, country: regionCountry(option.code) || query.country || 'US', near: null, page: 1 })
+            }}
+          >
+            {label}
+          </button>
+        )
+      })}
     </div>
   )
 }

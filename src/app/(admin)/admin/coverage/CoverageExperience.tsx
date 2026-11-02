@@ -7,10 +7,13 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { AdminRefresh } from '@/components/admin/ui/AdminRefresh'
 import { getCountryByIso2 } from '@/config/countries'
 import type { CoverageMapData, MapDoctor, MissingCountryDoctor } from '@/lib/admin/coverage-types'
+import type { LocationOption } from '@/lib/admin/location-query'
 import type { InvisibleDoctor } from '../invisible-doctors/actions'
 import InvisibleDoctorsClient from '../invisible-doctors/InvisibleDoctorsClient'
 import CoverageFilters, { filtersToQuery, readFilters, type FilterState } from './CoverageFilters'
+import type { CoverageFrame, CoveragePin } from './CoverageMap'
 import GapPanel from './GapPanel'
+import type { AdminPlace } from './place-actions'
 
 const CoverageMap = dynamic(() => import('./CoverageMap'), {
   ssr: false,
@@ -43,41 +46,79 @@ function tabHref(tab: 'map' | 'pins', params: URLSearchParams): string {
   return query ? `/admin/coverage?${query}` : '/admin/coverage'
 }
 
+const RADII = [25, 50, 100, 250] as const
+
+function appliedFilters(filters: FilterState, place: AdminPlace | null, skipState: boolean): FilterState {
+  if (!place) return filters
+  if (place.kind === 'country') return { ...filters, country: place.iso2, state: '' }
+  if (place.kind === 'state') return { ...filters, country: place.country, state: place.state }
+  if (place.kind === 'place') {
+    return {
+      ...filters,
+      country: place.country || filters.country,
+      state: skipState ? '' : (place.state || filters.state),
+    }
+  }
+  return filters
+}
+
+function frameFor(place: AdminPlace | null): CoverageFrame | null {
+  if (!place) return null
+  if (place.kind === 'place') return { mode: 'fly', lng: place.lng, lat: place.lat, zoom: 10 }
+  if (place.kind === 'country' && place.view) {
+    return { mode: 'ease', lng: place.view.center[0], lat: place.view.center[1], zoom: place.view.zoom }
+  }
+  const box = place.kind === 'country' || place.kind === 'state' ? place.bbox : null
+  if (!box) return null
+  return { mode: 'bounds', west: box.west, south: box.south, east: box.east, north: box.north }
+}
+
+function pinFor(place: AdminPlace | null): CoveragePin | null {
+  if (place?.kind !== 'place') return null
+  return { lng: place.lng, lat: place.lat, label: place.label }
+}
+
 export default function CoverageExperience({
   tab,
   data,
   invisible,
   missingCountry,
   updatedAt,
+  placeResult,
 }: {
   tab: 'map' | 'pins'
   data: CoverageMapData | null
   invisible: InvisibleDoctor[]
   missingCountry: MissingCountryDoctor[]
   updatedAt: string
+  placeResult: AdminPlace | null
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
   const filters = readFilters(params)
+  const placeParam = params.get('place') || ''
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [flyTo, setFlyTo] = useState<{ lng: number; lat: number; token: number } | null>(null)
+  const active = appliedFilters(filters, placeResult, params.get('nostate') === '1')
+  const frame = useMemo(() => frameFor(placeResult), [placeResult])
+  const pin = useMemo(() => pinFor(placeResult), [placeResult])
 
   const view = useMemo(() => {
-    const known = getCountryByIso2(filters.country)
+    const known = getCountryByIso2(active.country)
     if (known?.mapView) return known.mapView
     return { center: [-96, 38] as [number, number], zoom: 3.8 }
-  }, [filters.country])
+  }, [active.country])
 
   const filtered = useMemo(() => {
     if (!data) {
       return { doctors: [], demand: [], mentions: [], gaps: [], countries: ['US'], states: [], specialties: [] }
     }
-    const doctors = data.doctors.filter((doctor) => doctorMatches(doctor, filters))
-    const demand = data.demand.filter((point) => placeMatches(point, filters))
-    const mentions = data.mentions.filter((point) => placeMatches(point, filters))
+    const doctors = data.doctors.filter((doctor) => doctorMatches(doctor, active))
+    const demand = data.demand.filter((point) => placeMatches(point, active))
+    const mentions = data.mentions.filter((point) => placeMatches(point, active))
     const gaps = data.gaps
-      .filter((gap) => placeMatches(gap, filters))
+      .filter((gap) => placeMatches(gap, active))
       .sort((a, b) => {
         if (b.demandCount !== a.demandCount) return b.demandCount - a.demandCount
         const left = a.nearestMiles ?? Number.POSITIVE_INFINITY
@@ -87,24 +128,99 @@ export default function CoverageExperience({
       .slice(0, 50)
     const countries = [...new Set([
       'US',
+      active.country,
       ...data.doctors.map((doctor) => doctor.country).filter(Boolean),
       ...data.demand.map((point) => point.country || 'US'),
       ...data.mentions.map((point) => point.country || 'US'),
-    ])].sort((a, b) => (a === 'US' ? -1 : b === 'US' ? 1 : a.localeCompare(b)))
+    ])].filter(Boolean).sort((a, b) => (a === 'US' ? -1 : b === 'US' ? 1 : a.localeCompare(b)))
     const states = [...new Set(data.doctors
-      .filter((doctor) => doctor.country === filters.country && doctor.state)
+      .filter((doctor) => doctor.country === active.country && doctor.state)
       .map((doctor) => doctor.state))].sort()
     const specialties = [...new Set(data.doctors
-      .filter((doctor) => doctor.country === filters.country)
+      .filter((doctor) => doctor.country === active.country)
       .flatMap((doctor) => doctor.specialties))].sort()
     return { doctors, demand, mentions, gaps, countries, states, specialties }
-  }, [data, filters])
+  }, [data, active])
 
-  function commit(next: FilterState) {
-    const query = filtersToQuery(next, new URLSearchParams(params.toString()))
+  function replaceQuery(next: URLSearchParams) {
+    const query = next.toString()
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
     setFiltersOpen(false)
   }
+
+  function commit(next: FilterState) {
+    const query = new URLSearchParams(filtersToQuery(next, new URLSearchParams(params.toString())))
+    query.delete('place')
+    query.delete('choice')
+    query.delete('code')
+    query.delete('near')
+    query.delete('nostate')
+    replaceQuery(query)
+  }
+
+  function submitPlace(raw: string) {
+    const next = new URLSearchParams(params.toString())
+    const q = raw.trim()
+    next.delete('choice')
+    next.delete('code')
+    next.delete('nostate')
+    next.delete('near')
+    if (q) next.set('place', q)
+    else next.delete('place')
+    replaceQuery(next)
+  }
+
+  function pickOption(option: LocationOption) {
+    const next = new URLSearchParams(params.toString())
+    const compact = (params.get('place') || '').replace(/\s+/g, '')
+    if (option.kind === 'country' && /^\d{4}$/.test(compact)) {
+      next.set('country', option.code)
+      next.delete('state')
+      next.delete('choice')
+      next.delete('code')
+      next.delete('nostate')
+      replaceQuery(next)
+      return
+    }
+    next.set('choice', option.kind)
+    next.set('code', option.code)
+    if (option.kind === 'country') {
+      next.set('country', option.code)
+      next.delete('state')
+    } else {
+      next.set('state', option.code)
+      next.delete('nostate')
+    }
+    replaceQuery(next)
+  }
+
+  function clearCountry() {
+    const next = new URLSearchParams(params.toString())
+    next.delete('country')
+    next.delete('state')
+    next.delete('place')
+    next.delete('choice')
+    next.delete('code')
+    next.delete('near')
+    next.delete('nostate')
+    replaceQuery(next)
+  }
+
+  function clearState() {
+    const next = new URLSearchParams(params.toString())
+    next.delete('state')
+    if (params.get('place')) next.set('nostate', '1')
+    replaceQuery(next)
+  }
+
+  function setRadius(miles: number) {
+    const next = new URLSearchParams(params.toString())
+    next.set('near', String(miles))
+    replaceQuery(next)
+  }
+
+  const countryKnown = getCountryByIso2(active.country)
+  const countryChip = countryKnown ? `${countryKnown.flag} ${countryKnown.name}` : active.country
 
   const queryParams = new URLSearchParams(params.toString())
 
@@ -160,21 +276,49 @@ export default function CoverageExperience({
         </div>
       ) : (
         <>
-          <div className="hidden shrink-0 border-b border-black/10 px-3 py-3 md:block">
-            <CoverageFilters
-              value={filters}
-              countries={filtered.countries}
-              states={filtered.states}
-              specialties={filtered.specialties}
-              counts={{
-                doctors: filtered.doctors.length,
-                demand: filtered.demand.reduce((sum, point) => sum + point.count, 0),
-                mentions: filtered.mentions.reduce((sum, point) => sum + point.count, 0),
-                gaps: filtered.gaps.length,
-              }}
-              stripeOk={data?.stripeOk !== false}
-              onChange={commit}
-            />
+          <div className="shrink-0 border-b border-black/10 px-3 py-3">
+            <PlaceSearchForm key={placeParam} placeParam={placeParam} onSubmit={submitPlace} />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" className="inline-flex min-h-11 items-center rounded-full bg-white px-3 text-sm font-bold" onClick={clearCountry}>
+                {countryChip} ×
+                <span className="sr-only">Remove {countryChip}</span>
+              </button>
+              {active.state ? (
+                <button type="button" className="inline-flex min-h-11 items-center rounded-full bg-white px-3 text-sm font-bold" onClick={clearState}>
+                  {active.state} ×
+                  <span className="sr-only">Remove {active.state}</span>
+                </button>
+              ) : null}
+              {placeResult?.kind === 'ambiguous' ? placeResult.options.map((option) => (
+                <button
+                  key={`${option.kind}-${option.code}`}
+                  type="button"
+                  className="inline-flex min-h-11 items-center rounded-full border border-neuro-orange bg-white px-3 text-sm font-bold text-neuro-orange-ink"
+                  onClick={() => pickOption(option)}
+                >
+                  {option.label} ({option.kind})
+                </button>
+              )) : null}
+            </div>
+            {placeResult?.kind === 'none' && placeResult.message ? (
+              <p className="mt-2 text-sm text-neuro-navy">{placeResult.message}</p>
+            ) : null}
+            <div className="mt-3 hidden md:block">
+              <CoverageFilters
+                value={active}
+                countries={filtered.countries}
+                states={filtered.states}
+                specialties={filtered.specialties}
+                counts={{
+                  doctors: filtered.doctors.length,
+                  demand: filtered.demand.reduce((sum, point) => sum + point.count, 0),
+                  mentions: filtered.mentions.reduce((sum, point) => sum + point.count, 0),
+                  gaps: filtered.gaps.length,
+                }}
+                stripeOk={data?.stripeOk !== false}
+                onChange={commit}
+              />
+            </div>
           </div>
           <div className="relative min-h-0 flex-1">
             <CoverageMap
@@ -182,14 +326,16 @@ export default function CoverageExperience({
               demand={filtered.demand}
               mentions={filtered.mentions}
               gaps={filtered.gaps}
-              showDoctors={filters.layers.doctors}
-              showDemand={filters.layers.demand}
-              showMentions={filters.layers.mentions}
-              showGaps={filters.layers.gaps}
+              showDoctors={active.layers.doctors}
+              showDemand={active.layers.demand}
+              showMentions={active.layers.mentions}
+              showGaps={active.layers.gaps}
               viewKey={`${view.center[0]},${view.center[1]},${view.zoom}`}
               center={view.center}
               zoom={view.zoom}
               flyTo={flyTo}
+              frame={frame}
+              pin={pin}
             />
             <CoverageLegend />
             {data && data.stripeOk === false ? (
@@ -197,7 +343,39 @@ export default function CoverageExperience({
                 Stripe is unavailable right now, so billing labels may be wrong.
               </p>
             ) : null}
-            {filters.layers.gaps ? (
+            {placeResult?.kind === 'place' ? (
+              <aside className="absolute inset-x-2 bottom-16 z-20 max-h-[40vh] overflow-y-auto rounded-2xl bg-white p-3 text-neuro-navy shadow md:inset-x-auto md:bottom-3 md:right-2 md:top-3 md:max-h-none md:w-72">
+                <h2 className="font-heading text-sm font-bold">Doctors near {placeResult.label}</h2>
+                <p className="mt-1 text-xs text-neuro-navy/70">{placeResult.doctors.length} within {placeResult.radius} mi</p>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {RADII.map((miles) => (
+                    <button
+                      key={miles}
+                      type="button"
+                      className={`inline-flex min-h-11 items-center rounded-full px-3 text-xs font-bold ${placeResult.radius === miles ? 'bg-neuro-navy text-white' : 'bg-neuro-cream text-neuro-navy'}`}
+                      onClick={() => setRadius(miles)}
+                    >
+                      {miles} mi
+                    </button>
+                  ))}
+                </div>
+                <ul className="mt-2 divide-y divide-black/10">
+                  {placeResult.doctors.length === 0 ? <li className="py-2 text-sm">No doctors within {placeResult.radius} mi.</li> : null}
+                  {placeResult.doctors.map((doctor) => (
+                    <li key={doctor.id}>
+                      <Link className="flex min-h-11 flex-col justify-center py-1" href={`/admin/members?member=${encodeURIComponent(doctor.id)}`}>
+                        <span className="text-sm font-bold">{doctor.name}</span>
+                        <span className="text-xs text-neuro-navy/70">
+                          {[doctor.city, doctor.state].filter(Boolean).join(', ')}
+                          {doctor.miles != null ? ` · ${doctor.miles} mi` : ''}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </aside>
+            ) : null}
+            {active.layers.gaps ? (
               <GapPanel
                 gaps={filtered.gaps}
                 onSelect={(gap) => setFlyTo({ lng: gap.lng, lat: gap.lat, token: Date.now() })}
@@ -209,7 +387,7 @@ export default function CoverageExperience({
               <button type="button" className="absolute inset-0 bg-neuro-navy/40" aria-label="Close filters" onClick={() => setFiltersOpen(false)} />
               <div className="absolute inset-x-0 bottom-0 max-h-[80vh] overflow-y-auto rounded-t-2xl bg-neuro-cream p-4 pb-24">
                 <CoverageFilters
-                  value={filters}
+                  value={active}
                   countries={filtered.countries}
                   states={filtered.states}
                   specialties={filtered.specialties}
@@ -228,6 +406,36 @@ export default function CoverageExperience({
         </>
       )}
     </div>
+  )
+}
+
+function PlaceSearchForm({ placeParam, onSubmit }: { placeParam: string; onSubmit: (q: string) => void }) {
+  const [draft, setDraft] = useState(placeParam)
+  return (
+    <form
+      className="flex flex-wrap items-center gap-2"
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit(draft)
+      }}
+    >
+      <label className="min-w-[16rem] flex-1 text-xs font-bold text-neuro-navy">
+        Place
+        <input
+          value={draft}
+          onChange={(event) => setDraft(event.target.value)}
+          placeholder="ZIP, postal code, city, state, or country"
+          className="mt-1 min-h-11 w-full rounded-xl border border-black/10 bg-white px-3 text-sm font-normal"
+          aria-label="ZIP, postal code, city, state, or country"
+        />
+      </label>
+      <button type="submit" className="inline-flex min-h-11 items-center rounded-xl bg-neuro-orange px-4 text-sm font-bold text-white">
+        Go
+      </button>
+      <Link href="/admin/coverage/reply" className="inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink">
+        Reply station (copy replies) →
+      </Link>
+    </form>
   )
 }
 
