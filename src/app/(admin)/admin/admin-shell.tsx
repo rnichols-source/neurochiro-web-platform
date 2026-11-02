@@ -7,7 +7,15 @@ import { LogOut, Menu, Search, X } from 'lucide-react'
 import PerspectiveBanner from '@/components/admin/PerspectiveBanner'
 import NotificationBell from '@/components/layout/NotificationBell'
 import { AuthProvider } from '@/context/AuthContext'
+import { isNearbyPlace, parseLocationQuery } from '@/lib/admin/location-query'
 import { MemberPalette } from './member-palette'
+
+function memberSearchPath(q: string): string {
+  const params = new URLSearchParams()
+  params.set('q', q)
+  if (isNearbyPlace(parseLocationQuery(q))) params.set('near', '100')
+  return `/admin/members?${params.toString()}`
+}
 import Sidebar from './Sidebar'
 import { logoutAdmin } from './SidebarActions'
 import { moreNav, navIsActive, primaryNav } from './nav'
@@ -62,7 +70,7 @@ export function AdminShell({
                   onSubmit={(event) => {
                     event.preventDefault()
                     const q = query.trim()
-                    if (q) router.push(`/admin/members?q=${encodeURIComponent(q)}`)
+                    if (q) router.push(memberSearchPath(q))
                   }}
                 >
                   <Search className="h-4 w-4 shrink-0 text-neuro-gray" />
@@ -146,7 +154,7 @@ export function AdminShell({
                   const q = query.trim()
                   if (!q) return
                   setMenuOpen(false)
-                  router.push(`/admin/members?q=${encodeURIComponent(q)}`)
+                  router.push(memberSearchPath(q))
                 }}
               >
                 <Search className="h-4 w-4" />

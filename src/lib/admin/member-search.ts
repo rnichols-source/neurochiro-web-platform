@@ -19,6 +19,7 @@ export type MemberQuery = {
   pageSize: number
   sort: MemberSort
   member: string
+  near: number | null
 }
 
 export type MemberSearchInput = {
@@ -32,6 +33,7 @@ export type MemberSearchInput = {
   pageSize?: number | string
   sort?: string
   member?: string
+  near?: number | string | null
 }
 
 export type MemberListRow = {
@@ -53,6 +55,8 @@ export type MemberListRow = {
   firstName?: string
   createdAt?: string | null
   isTest?: boolean
+  zipCode?: string | null
+  distanceMiles?: number | null
 }
 
 export type MemberSearchResult = {
@@ -60,6 +64,15 @@ export type MemberSearchResult = {
   total: number
   billingOk: boolean
   note: string | null
+  banner?: MemberBanner | null
+}
+
+export type MemberBanner = {
+  tone: 'near' | 'info' | 'missing' | 'unavailable'
+  title: string
+  radius: number | null
+  hideStudents: boolean
+  emptyTitle: string
 }
 
 export type DoctorFormValues = {
@@ -184,11 +197,11 @@ export function searchTokens(q: string): string[] {
   return stripped.split(/[\s,]+/).filter(Boolean).slice(0, 4)
 }
 
-export function doctorOrFilter(value: string): string {
+export function doctorOrFilter(value: string, includeZip = true): string {
   const pattern = postgrestOrIlike(value)
-  return ['first_name', 'last_name', 'clinic_name', 'email', 'city', 'slug']
-    .map((column) => `${column}.ilike.${pattern}`)
-    .join(',')
+  const columns = ['first_name', 'last_name', 'clinic_name', 'email', 'city', 'state', 'zip_code', 'country', 'slug']
+  const used = includeZip ? columns : columns.filter((column) => column !== 'zip_code')
+  return used.map((column) => `${column}.ilike.${pattern}`).join(',')
 }
 
 export function profileOrFilter(value: string): string {
@@ -196,8 +209,8 @@ export function profileOrFilter(value: string): string {
   return ['full_name', 'email'].map((column) => `${column}.ilike.${pattern}`).join(',')
 }
 
-export function doctorTokenFilters(q: string): string[] {
-  return searchTokens(q).map((token) => doctorOrFilter(token))
+export function doctorTokenFilters(q: string, includeZip = true): string[] {
+  return searchTokens(q).map((token) => doctorOrFilter(token, includeZip))
 }
 
 export function profileTokenFilters(q: string): string[] {
@@ -280,6 +293,13 @@ export function normalizePage(value: unknown): number {
   return Math.floor(parsed)
 }
 
+export function normalizeNear(value: unknown): number | null {
+  if (value == null || value === '') return null
+  const parsed = typeof value === 'number' ? value : Number(value)
+  if (parsed === 25 || parsed === 50 || parsed === 100 || parsed === 250) return parsed
+  return null
+}
+
 export function normalizePageSize(value: unknown): number {
   if (value === undefined || value === null || value === '') return 25
   const parsed = typeof value === 'number' ? value : Number(value)
@@ -318,6 +338,7 @@ export function normalizeMemberQuery(input: MemberSearchInput): MemberQuery {
     pageSize: normalizePageSize(input.pageSize),
     sort: input.sort === 'recent' ? 'recent' : input.sort === 'newest' ? 'newest' : 'name',
     member: (input.member || '').trim(),
+    near: normalizeNear(input.near),
   }
 }
 
@@ -336,6 +357,7 @@ export function parseMemberSearchParams(params: Record<string, string | string[]
     page: one('page'),
     sort: one('sort'),
     member: one('member'),
+    near: one('near'),
   })
 }
 
@@ -351,6 +373,7 @@ export function memberHref(query: MemberQuery): string {
   if (query.member) params.set('member', query.member)
   if (query.sort === 'recent') params.set('sort', 'recent')
   if (query.sort === 'newest') params.set('sort', 'newest')
+  if (query.near) params.set('near', String(query.near))
   const search = params.toString()
   return search ? `/admin/members?${search}` : '/admin/members'
 }

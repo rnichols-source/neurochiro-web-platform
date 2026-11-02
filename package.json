@@ -9,6 +9,7 @@
     "postbuild": "next-sitemap",
     "start": "next start",
     "lint": "node scripts/lint-portal-style.mjs && eslint .",
+    "test": "node --experimental-strip-types --test src/lib/admin/location-query.test.ts src/lib/admin/member-search.test.ts src/lib/admin/geo-normalize.test.ts",
     "test:portal": "node --experimental-strip-types --test src/lib/portal/*.test.ts src/lib/badges/compute.test.ts src/lib/chiromatch-status.test.ts src/lib/referrals/pure.test.ts src/lib/referrals/emails.test.ts",
     "test:billing-geo": "node --experimental-strip-types --test src/lib/billing/plan-subscription-change.test.ts src/lib/portal/membership.test.ts src/lib/geo-coords.test.ts",
     "test:e2e": "playwright test",

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { GeoJSONSource, Map, NavigationControl, Popup } from 'maplibre-gl'
+import { GeoJSONSource, Map, Marker, NavigationControl, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import Supercluster from 'supercluster'
 import { billingLabel } from '@/lib/admin/coverage-types'
@@ -27,6 +27,13 @@ type DoctorCluster = { paying: number; other: number }
 type DemandProps = { label: string; zip: string; confirmed: number; pending: number; sum: number }
 type DemandCluster = { sum: number }
 
+export type CoverageFrame =
+  | { mode: 'fly'; lng: number; lat: number; zoom: number }
+  | { mode: 'ease'; lng: number; lat: number; zoom: number }
+  | { mode: 'bounds'; west: number; south: number; east: number; north: number }
+
+export type CoveragePin = { lng: number; lat: number; label: string }
+
 export type CoverageMapProps = {
   doctors: MapDoctor[]
   demand: DemandPoint[]
@@ -40,6 +47,53 @@ export type CoverageMapProps = {
   center: [number, number]
   zoom: number
   flyTo: { lng: number; lat: number; token: number } | null
+  frame: CoverageFrame | null
+  pin: CoveragePin | null
+}
+
+function applyFrame(map: Map, frame: CoverageFrame | null) {
+  if (!frame) return
+  if (frame.mode === 'bounds') {
+    const west = Math.min(frame.west, frame.east)
+    const east = Math.max(frame.west, frame.east)
+    const south = Math.min(frame.south, frame.north)
+    const north = Math.max(frame.south, frame.north)
+    if (![west, south, east, north].every((value) => Number.isFinite(value))) return
+    map.fitBounds([[west, south], [east, north]], { padding: 40, duration: 700, maxZoom: 12 })
+    return
+  }
+  const camera = { center: [frame.lng, frame.lat] as [number, number], zoom: frame.zoom, duration: 700 }
+  if (frame.mode === 'fly') map.flyTo(camera)
+  else map.easeTo(camera)
+}
+
+function placeMarker(map: Map, pin: CoveragePin | null, current: Marker | null): Marker | null {
+  if (current) current.remove()
+  if (!pin) return null
+  const root = document.createElement('div')
+  root.style.display = 'flex'
+  root.style.flexDirection = 'column'
+  root.style.alignItems = 'center'
+  root.style.pointerEvents = 'none'
+  const label = document.createElement('div')
+  label.textContent = pin.label
+  label.style.background = '#1E2D3B'
+  label.style.color = '#F5F3EF'
+  label.style.font = '700 12px system-ui, sans-serif'
+  label.style.padding = '4px 8px'
+  label.style.borderRadius = '999px'
+  label.style.marginBottom = '4px'
+  label.style.maxWidth = '220px'
+  label.style.overflow = 'hidden'
+  label.style.textOverflow = 'ellipsis'
+  const dot = document.createElement('div')
+  dot.style.width = '14px'
+  dot.style.height = '14px'
+  dot.style.borderRadius = '999px'
+  dot.style.background = '#D66829'
+  dot.style.border = '2px solid #ffffff'
+  root.append(label, dot)
+  return new Marker({ element: root, anchor: 'bottom' }).setLngLat([pin.lng, pin.lat]).addTo(map)
 }
 
 function collection(features: GeoJSON.Feature[]): GeoJSON.FeatureCollection {
@@ -154,6 +208,8 @@ export default function CoverageMap({
   center,
   zoom,
   flyTo,
+  frame,
+  pin,
 }: CoverageMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<Map | null>(null)
@@ -163,6 +219,9 @@ export default function CoverageMap({
   const drawRef = useRef<(map: Map) => void>(() => {})
   const centerRef = useRef(center)
   const zoomRef = useRef(zoom)
+  const frameRef = useRef<CoverageFrame | null>(null)
+  const pinValueRef = useRef<CoveragePin | null>(null)
+  const pinRef = useRef<Marker | null>(null)
 
   const doctorIndex = useMemo(() => {
     const index = new Supercluster<DoctorProps, DoctorCluster>({
@@ -250,6 +309,11 @@ export default function CoverageMap({
   useEffect(() => {
     drawRef.current = draw
   }, [draw])
+
+  useEffect(() => {
+    frameRef.current = frame
+    pinValueRef.current = pin
+  }, [frame, pin])
 
   useEffect(() => {
     const container = containerRef.current
@@ -488,6 +552,8 @@ export default function CoverageMap({
         map.on('mouseleave', id, () => { map.getCanvas().style.cursor = '' })
       }
       drawRef.current(map)
+      pinRef.current = placeMarker(map, pinValueRef.current, null)
+      applyFrame(map, frameRef.current)
     })
 
     map.on('moveend', () => {
@@ -496,6 +562,8 @@ export default function CoverageMap({
 
     return () => {
       readyRef.current = false
+      pinRef.current?.remove()
+      pinRef.current = null
       map.remove()
       mapRef.current = null
     }
@@ -510,14 +578,21 @@ export default function CoverageMap({
   useEffect(() => {
     const map = mapRef.current
     if (!map || !readyRef.current) return
-    map.easeTo({ center, zoom, duration: 700 })
-  }, [viewKey, center, zoom])
+    pinRef.current = placeMarker(map, pin, pinRef.current)
+    applyFrame(map, frame)
+  }, [frame, pin])
 
   useEffect(() => {
     const map = mapRef.current
-    if (!map || !readyRef.current || !flyTo) return
+    if (!map || !readyRef.current || frame) return
+    map.easeTo({ center, zoom, duration: 700 })
+  }, [viewKey, center, zoom, frame])
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !readyRef.current || !flyTo || frame) return
     map.easeTo({ center: [flyTo.lng, flyTo.lat], zoom: Math.max(map.getZoom(), 8), duration: 700 })
-  }, [flyTo])
+  }, [flyTo, frame])
 
   return <div ref={containerRef} className="h-full w-full touch-none" role="region" aria-label="Coverage map" />
 }

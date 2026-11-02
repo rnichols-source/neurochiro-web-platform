@@ -53,8 +53,11 @@ test('search tokens drop a leading title and require each word', () => {
   const filters = doctorTokenFilters('John Smith')
   assert.equal(filters.length, 2)
   assert.equal(filters[0].includes('slug.ilike.'), true)
-  assert.equal(filters[0].includes('state.ilike.'), false)
+  assert.equal(filters[0].includes('state.ilike.'), true)
+  assert.equal(filters[0].includes('zip_code.ilike.'), true)
+  assert.equal(filters[0].includes('country.ilike.'), true)
   assert.equal(doctorOrFilter('smith').includes('slug.ilike.'), true)
+  assert.equal(doctorTokenFilters('John Smith', false)[0].includes('zip_code.ilike.'), false)
 })
 
 test('blank coordinates are null and never zero', () => {

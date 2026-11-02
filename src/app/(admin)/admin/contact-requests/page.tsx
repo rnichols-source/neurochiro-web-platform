@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Phone, Mail, Clock, Loader2, AlertTriangle } from "lucide-react"
+import { requestTextMatches } from "@/lib/admin/location-query"
 import {
   clearLeadAttention,
   getContactRequests,
@@ -34,6 +35,7 @@ export default function ContactRequestsPage() {
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState("attention")
+  const [query, setQuery] = useState("")
   const [focus, setFocus] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [notes, setNotes] = useState<Record<string, string>>({})
@@ -71,12 +73,21 @@ export default function ContactRequestsPage() {
     setBusy(null)
   }
 
-  const attention = requests.filter((row) => row.needsAttention)
+  const searched = requests.filter((row) => requestTextMatches({
+    name: row.name,
+    email: row.email,
+    doctorName: row.doctor_name,
+    city: row.doctor_city,
+    state: row.doctor_state,
+    zip: row.doctor_zip,
+    address: row.doctor_address,
+  }, query))
+  const attention = searched.filter((row) => row.needsAttention)
   const filtered = filter === "attention"
     ? attention
     : filter === "all"
-      ? requests
-      : requests.filter((row) => row.status === filter)
+      ? searched
+      : searched.filter((row) => row.status === filter)
 
   if (loading) {
     return <div className="p-8 flex items-center justify-center h-96"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>
@@ -87,11 +98,22 @@ export default function ContactRequestsPage() {
       <div className="max-w-4xl mx-auto">
         <h1 className="text-xl font-black uppercase tracking-tight">Contact Requests</h1>
         <p className="text-sm text-gray-500 mt-1 mb-4">{attention.length} need attention · {requests.length} total</p>
+        <label className="mb-4 block text-xs font-bold text-gray-400">
+          Search
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Patient, doctor, city, state, or ZIP"
+            className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-normal text-white"
+            aria-label="Search contact requests"
+          />
+        </label>
+        <p className="mb-4 text-xs text-gray-500">Searching the latest 300 requests</p>
         {error ? <p className="mb-4 text-sm text-red-300">{error}</p> : null}
 
         <div className="flex gap-2 mb-4 flex-wrap">
           {FILTERS.map((item) => {
-            const count = item.key === "attention" ? attention.length : item.key === "all" ? requests.length : requests.filter((row) => row.status === item.key).length
+            const count = item.key === "attention" ? attention.length : item.key === "all" ? searched.length : searched.filter((row) => row.status === item.key).length
             return (
               <button
                 key={item.key}
