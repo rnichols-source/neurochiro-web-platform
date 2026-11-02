@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { AdminRefresh } from '@/components/admin/ui/AdminRefresh'
 import { EmptyState } from '@/components/admin/ui/EmptyState'
 import { PageHeader } from '@/components/admin/ui/PageHeader'
 import { SlideOver } from '@/components/admin/ui/SlideOver'
 import { memberHref, type MemberDetail, type MemberListRow, type MemberQuery, type MemberSearchResult, type MemberStatusFilter, type MemberTierFilter } from '@/lib/admin/member-search'
-import { MemberPanel } from './member-panel'
+import { loadMemberDetail } from './actions'
+import { MemberPanel, MemberPanelSkeleton } from './member-panel'
 
 const ROLES = [
   { id: 'doctor', label: 'Doctor' },
@@ -34,7 +35,7 @@ function when(value: string | null) {
   if (!value) return 'Unknown'
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'Unknown'
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date)
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' }).format(date)
 }
 
 function place(row: MemberListRow) {
@@ -47,20 +48,39 @@ export function MembersClient({
   loadError,
   detail,
   detailError,
+  updatedAt,
 }: {
   query: MemberQuery
   result: MemberSearchResult
   loadError: boolean
   detail: MemberDetail | null
   detailError: boolean
+  updatedAt: string
 }) {
   const router = useRouter()
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const searchRef = useRef<HTMLInputElement | null>(null)
   const rowsRef = useRef(result.rows)
   const draft = useRef(query)
+  const detailRequest = useRef(0)
   const [active, setActive] = useState(0)
   const activeRef = useRef(active)
+  const [searchDraft, setSearchDraft] = useState<string | null>(null)
+  const [panelMember, setPanelMember] = useState(query.member)
+  const [panelDetail, setPanelDetail] = useState<MemberDetail | null>(detail)
+  const [panelError, setPanelError] = useState(detailError)
+  const [panelPending, setPanelPending] = useState(false)
+  const [trackedPanel, setTrackedPanel] = useState({ member: query.member, detail, error: detailError })
+  if (searchDraft !== null && searchDraft === query.q) setSearchDraft(null)
+  const searchText = searchDraft ?? query.q
+
+  if (query.member !== trackedPanel.member || detail !== trackedPanel.detail || detailError !== trackedPanel.error) {
+    setTrackedPanel({ member: query.member, detail, error: detailError })
+    setPanelMember(query.member)
+    setPanelDetail(detail)
+    setPanelError(detailError)
+    setPanelPending(false)
+  }
 
   useEffect(() => {
     rowsRef.current = result.rows
@@ -71,8 +91,38 @@ export function MembersClient({
   }, [active])
 
   useEffect(() => {
-    draft.current = { ...draft.current, member: query.member }
-  }, [query.member])
+    draft.current = { ...draft.current, ...query }
+  }, [query])
+
+  const openMember = useCallback((id: string) => {
+    const next = { ...draft.current, member: id }
+    draft.current = next
+    window.history.replaceState(null, '', memberHref(next))
+    setPanelMember(id)
+    if (!id) {
+      setPanelDetail(null)
+      setPanelError(false)
+      setPanelPending(false)
+      return
+    }
+    const request = detailRequest.current + 1
+    detailRequest.current = request
+    setPanelPending(true)
+    setPanelDetail(null)
+    setPanelError(false)
+    void loadMemberDetail(id)
+      .then((loaded) => {
+        if (detailRequest.current !== request) return
+        setPanelDetail(loaded)
+        setPanelError(false)
+        setPanelPending(false)
+      })
+      .catch(() => {
+        if (detailRequest.current !== request) return
+        setPanelError(true)
+        setPanelPending(false)
+      })
+  }, [])
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -91,14 +141,11 @@ export function MembersClient({
       } else if (event.key === 'ArrowUp') {
         event.preventDefault()
         setActive((current) => Math.max(0, current - 1))
-      } else if (event.key === 'Enter' && rows.length > 0) {
+      } else if (event.key === 'Enter' && rows.length > 0 && target instanceof HTMLElement && target.id === 'member-search') {
         const row = rows[Math.min(activeRef.current, rows.length - 1)]
         if (!row) return
         event.preventDefault()
-        const next = { ...draft.current, member: row.id }
-        draft.current = next
-        if (timer.current) clearTimeout(timer.current)
-        router.replace(memberHref(next), { scroll: false })
+        openMember(row.id)
       }
     }
     window.addEventListener('keydown', onKey)
@@ -106,18 +153,22 @@ export function MembersClient({
       window.removeEventListener('keydown', onKey)
       if (timer.current) clearTimeout(timer.current)
     }
-  }, [router])
+  }, [openMember, router])
 
   function visit(patch: Partial<MemberQuery>, delay = false) {
     const next = { ...draft.current, ...patch }
     draft.current = next
-    const href = memberHref(next)
+    const go = () => {
+      startTransition(() => {
+        router.replace(memberHref(draft.current), { scroll: false })
+      })
+    }
     if (timer.current) clearTimeout(timer.current)
     if (!delay) {
-      router.replace(href, { scroll: false })
+      go()
       return
     }
-    timer.current = setTimeout(() => router.replace(memberHref(draft.current), { scroll: false }), 300)
+    timer.current = setTimeout(go, 300)
   }
 
   const pages = Math.max(1, Math.ceil(result.total / query.pageSize))
@@ -125,16 +176,24 @@ export function MembersClient({
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 px-4 py-6">
-      <PageHeader title="Members" description="Find a doctor, student, or vendor. The link keeps the search, so back and forward still work." />
+      <PageHeader title="Members" description="Find a doctor, student, or vendor. The link keeps the search, so back and forward still work." action={<AdminRefresh at={updatedAt} />} />
       <p className="text-sm text-neuro-gray"><span className="tabular-nums">{result.total}</span> matches</p>
+      {result.billingOk === false ? (
+        <p className="rounded-xl bg-white px-4 py-3 text-sm text-neuro-navy">Stripe is unavailable right now, so billing labels may be wrong.</p>
+      ) : null}
+      {result.note ? <p className="text-sm text-neuro-gray">{result.note}</p> : null}
       <div className="space-y-3">
         <input
           id="member-search"
           ref={searchRef}
-          defaultValue={query.q}
+          value={searchText}
           placeholder="Name, email, practice, or city"
           aria-label="Search members"
-          onChange={(event) => visit({ q: event.target.value, page: 1 }, true)}
+          onChange={(event) => {
+            const value = event.target.value
+            setSearchDraft(value)
+            visit({ q: value, page: 1 }, true)
+          }}
           className="min-h-11 w-full rounded-xl border border-black/10 bg-white px-3 text-sm text-neuro-navy"
         />
         <div className="flex flex-wrap gap-2">
@@ -178,6 +237,7 @@ export function MembersClient({
           />
           <FilterButton active={query.sort === 'name'} onClick={() => visit({ sort: 'name', page: 1 })}>Name</FilterButton>
           <FilterButton active={query.sort === 'recent'} onClick={() => visit({ sort: 'recent', page: 1 })}>Recent</FilterButton>
+          <FilterButton active={query.sort === 'newest'} onClick={() => visit({ sort: 'newest', page: 1 })}>Newest</FilterButton>
         </div>
       </div>
       {loadError ? <EmptyState title="Members could not be loaded." body="Try the search again in a moment." /> : null}
@@ -200,9 +260,10 @@ export function MembersClient({
                 {result.rows.map((row, index) => (
                   <tr key={row.id} className={index === highlighted ? 'bg-neuro-cream' : undefined}>
                     <td className="px-4 py-2">
-                      <Link href={memberHref({ ...query, member: row.id })} className="inline-flex min-h-11 items-center font-medium text-neuro-navy">
+                      <button type="button" onClick={() => openMember(row.id)} className="inline-flex min-h-11 items-center gap-2 font-medium text-neuro-navy">
                         {row.name}
-                      </Link>
+                        {row.isTest ? <span className="rounded-full bg-neuro-cream px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-neuro-navy">Test</span> : null}
+                      </button>
                       <p className="text-xs text-neuro-gray">{row.role}{row.email ? ` · ${row.email}` : ''}</p>
                     </td>
                     <td className="px-4 py-2">{row.practice || '—'}</td>
@@ -218,12 +279,12 @@ export function MembersClient({
           <ul className="space-y-2 md:hidden">
             {result.rows.map((row, index) => (
               <li key={row.id}>
-                <Link href={memberHref({ ...query, member: row.id })} className={`block min-h-11 rounded-2xl bg-white px-4 py-3 ${index === highlighted ? 'ring-2 ring-neuro-orange' : ''}`}>
-                  <p className="font-medium">{row.name}</p>
+                <button type="button" onClick={() => openMember(row.id)} className={`block min-h-11 w-full rounded-2xl bg-white px-4 py-3 text-left ${index === highlighted ? 'ring-2 ring-neuro-orange' : ''}`}>
+                  <p className="font-medium">{row.name}{row.isTest ? <span className="ml-2 rounded-full bg-neuro-cream px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide">Test</span> : null}</p>
                   <p className="text-neuro-gray">{row.practice || row.role}{row.email ? ` · ${row.email}` : ''}</p>
                   <p className="text-neuro-gray">{place(row)} · {row.billingLabel} · {row.verificationLabel}</p>
                   <p className="tabular-nums text-neuro-gray">{when(row.lastActivity)}</p>
-                </Link>
+                </button>
               </li>
             ))}
           </ul>
@@ -238,8 +299,8 @@ export function MembersClient({
           </div>
         </>
       ) : null}
-      <SlideOver open={Boolean(query.member)} title={detail?.name || 'Member'} onClose={() => visit({ member: '' })}>
-        <MemberPanel detail={detail} detailError={detailError} />
+      <SlideOver open={Boolean(panelMember)} title={panelDetail?.name || 'Member'} onClose={() => openMember('')}>
+        {panelPending ? <MemberPanelSkeleton /> : <MemberPanel detail={panelDetail} detailError={panelError} />}
       </SlideOver>
     </div>
   )

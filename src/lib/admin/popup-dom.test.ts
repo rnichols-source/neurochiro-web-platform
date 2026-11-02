@@ -31,7 +31,7 @@ function walk(node: Stub, visit: (item: Stub) => void) {
 test('clinic markup stays literal text and does not create an image', () => {
   const clinic = '<img src=x onerror=alert(1)>'
   const root = renderDoctorPopup(
-    { name: 'Dr. Ada Lovelace', practice: clinic, city: 'Austin, TX', billing: 'Paying' },
+    { id: 'doc-1', name: 'Dr. Ada Lovelace', practice: clinic, city: 'Austin, TX', billing: 'Paying' },
     createElement,
   ) as Stub
 
@@ -45,4 +45,24 @@ test('clinic markup stays literal text and does not create an image', () => {
   assert.equal(texts.includes(clinic), true)
   assert.equal(tags.includes('img'), false)
   assert.equal(tags.includes('a'), true)
+  const links: Stub[] = []
+  walk(root, (node) => {
+    if (node.tagName.toLowerCase() === 'a') links.push(node)
+  })
+  assert.equal(links[0]?.attrs.href, '/admin/members?member=doc-1')
+})
+
+test('stacked doctors each get their own member link', () => {
+  const root = renderDoctorPopup(
+    [
+      { id: 'a', name: 'Ada', practice: 'One', city: 'Austin', billing: 'Paying' },
+      { id: 'b', name: 'Grace', practice: 'Two', city: 'Austin', billing: 'Free' },
+    ],
+    createElement,
+  ) as Stub
+  const hrefs: string[] = []
+  walk(root, (node) => {
+    if (node.attrs.href) hrefs.push(node.attrs.href)
+  })
+  assert.deepEqual(hrefs, ['/admin/members?member=a', '/admin/members?member=b'])
 })

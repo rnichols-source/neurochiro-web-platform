@@ -15,7 +15,7 @@ import type {
   MissingCountryDoctor,
 } from '@/lib/admin/coverage-types'
 import { isMissingColumn } from '@/lib/leads/schema'
-import { deriveMembership, type MembershipStatus } from '@/lib/portal/membership'
+import { classifyMemberBilling } from '@/lib/admin/billing-class'
 import { boundingBox, haversineDistance } from '@/lib/geo'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
@@ -28,9 +28,9 @@ type Admin = ReturnType<typeof createAdminClient>
 type Row = Record<string, unknown>
 
 const DOCTOR_COLUMNS = [
-  'id, user_id, first_name, last_name, clinic_name, city, state, country, latitude, longitude, verification_status, specialties, membership_tier, is_founding_member, neuros_tier, created_at, is_test',
-  'id, user_id, first_name, last_name, clinic_name, city, state, country, latitude, longitude, verification_status, specialties, membership_tier, created_at, is_test',
-  'id, user_id, first_name, last_name, clinic_name, city, state, country, latitude, longitude, verification_status, specialties, membership_tier, created_at',
+  'id, user_id, first_name, last_name, clinic_name, city, state, country, address, latitude, longitude, verification_status, specialties, membership_tier, is_founding_member, neuros_tier, created_at, is_test',
+  'id, user_id, first_name, last_name, clinic_name, city, state, country, address, latitude, longitude, verification_status, specialties, membership_tier, created_at, is_test',
+  'id, user_id, first_name, last_name, clinic_name, city, state, country, address, latitude, longitude, verification_status, specialties, membership_tier, created_at',
 ]
 
 function record(row: unknown): Row | null {
@@ -119,18 +119,33 @@ async function listCustomerIds(status: Stripe.SubscriptionListParams['status']):
   return ids
 }
 
+class StripeUnavailable extends Error {
+  constructor() {
+    super('stripe-unavailable')
+    this.name = 'StripeUnavailable'
+  }
+}
+
 function classifyBilling(input: {
   stripeOk: boolean
   verificationStatus: string
-  source: string
+  membershipTier: string | null
+  profileTier: string | null
+  isFoundingMember: boolean
+  neurosTier: string | null
   live: 'active' | 'trialing' | 'past_due' | null
 }): Billing {
-  if (!input.stripeOk) return 'unknown'
-  if (input.live === 'active') return 'paying'
-  if (input.source === 'founding' || input.source === 'comped') return 'founding-comped'
-  if (input.live === 'trialing') return 'trialing'
-  if (input.verificationStatus === 'pending') return 'pending'
-  return 'free'
+  const kind = classifyMemberBilling({
+    stripeOk: input.stripeOk,
+    live: input.live,
+    verificationStatus: input.verificationStatus,
+    membershipTier: input.membershipTier,
+    profileTier: input.profileTier,
+    isFoundingMember: input.isFoundingMember,
+    neurosTier: input.neurosTier,
+  })
+  if (kind === 'unknown') return 'unknown'
+  return kind
 }
 
 async function loadDoctors(admin: Admin): Promise<unknown[]> {
@@ -317,7 +332,7 @@ function rankGaps(points: DemandPoint[], doctors: MapDoctor[], gapRadius: number
   return gaps
 }
 
-async function buildCoverageMap(): Promise<CoverageMapData> {
+async function buildCoverageMap(options?: { stripeFailed?: boolean }): Promise<CoverageMapData> {
   const admin = createAdminClient()
   let gapRadius = 50
   try {
@@ -341,6 +356,7 @@ async function buildCoverageMap(): Promise<CoverageMapData> {
   let trialIds = new Set<string>()
   let pastDueIds = new Set<string>()
   let unpaidIds = new Set<string>()
+  if (options?.stripeFailed) stripeOk = false
   if (stripeOk) {
     try {
       ;[activeIds, trialIds, pastDueIds, unpaidIds] = await Promise.all([
@@ -349,8 +365,9 @@ async function buildCoverageMap(): Promise<CoverageMapData> {
         listCustomerIds('past_due'),
         listCustomerIds('unpaid'),
       ])
-    } catch {
-      stripeOk = false
+    } catch (err) {
+      console.error('admin coverage stripe', err instanceof Error ? err.name : 'error')
+      throw new StripeUnavailable()
     }
   }
 
@@ -377,17 +394,11 @@ async function buildCoverageMap(): Promise<CoverageMapData> {
         : customer && (pastDueIds.has(customer) || unpaidIds.has(customer))
           ? 'past_due'
           : null
-    const stripeStatus: MembershipStatus | null = live
-    const membership = deriveMembership({
-      membershipTier: text(row, 'membership_tier') || null,
-      profileTier: profile?.tier || null,
-      isFoundingMember: flag(row.is_founding_member),
-      neurosTier: text(row, 'neuros_tier') || null,
-      createdAt: text(row, 'created_at') || null,
-      hasStripeCustomer: Boolean(customer),
-      stripeStatus,
-    })
-    const country = normalizeCountry(text(row, 'country')) || 'US'
+    const membershipTier = text(row, 'membership_tier') || null
+    const profileTier = profile?.tier || null
+    const isFoundingMember = flag(row.is_founding_member)
+    const neurosTier = text(row, 'neuros_tier') || null
+    const country = normalizeCountry(text(row, 'country'))
     seen.add(id)
     doctors.push({
       id,
@@ -403,7 +414,10 @@ async function buildCoverageMap(): Promise<CoverageMapData> {
       billing: classifyBilling({
         stripeOk,
         verificationStatus: verification,
-        source: membership.source,
+        membershipTier,
+        profileTier,
+        isFoundingMember,
+        neurosTier,
         live,
       }),
     })
@@ -500,14 +514,19 @@ async function buildCoverageMap(): Promise<CoverageMapData> {
   }
 }
 
-const loadCoverageMap = unstable_cache(buildCoverageMap, ['coverage-map-v1'], {
+const loadCoverageMap = unstable_cache(() => buildCoverageMap(), ['coverage-map-v2'], {
   revalidate: 600,
   tags: ['admin-coverage'],
 })
 
 export async function getCoverageMapData(): Promise<CoverageMapData> {
   await checkAdminAuth()
-  return loadCoverageMap()
+  try {
+    return await loadCoverageMap()
+  } catch (err) {
+    if (!(err instanceof Error) || (err.name !== 'StripeUnavailable' && err.message !== 'stripe-unavailable')) throw err
+    return buildCoverageMap({ stripeFailed: true })
+  }
 }
 
 export async function getMissingCountryDoctors(): Promise<MissingCountryDoctor[]> {

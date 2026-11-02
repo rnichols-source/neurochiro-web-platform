@@ -1,7 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { getAllDoctors, updateDoctorManually, deleteDoctorManually, bulkDeleteDoctors, migrateDoctorsFromCSV, sendMigrationEmails, registerAllUnlinkedDoctors, activateAfterOnboardingCall, getDoctorIntroductions } from "./actions";
+import { updateDoctorManually, activateAfterOnboardingCall, getDoctorIntroductions } from "@/app/(admin)/admin/directory/actions";
+
+async function getAllDoctors(_query?: string) {
+  return [];
+}
+async function deleteDoctorManually(_id: string) {
+  return { success: false as const, error: "This directory tool is archived." };
+}
+async function bulkDeleteDoctors(_ids: string[]) {
+  return { success: false as const, error: "This directory tool is archived.", deleted: 0, failed: 0 };
+}
+async function sendMigrationEmails(_ids: string[]) {
+  return { sent: 0, failed: 0, errors: [] as string[] };
+}
+async function migrateDoctorsFromCSV(_rows: { name: string; email: string; stripeCustomerId: string; subscriptionId: string; amount: string }[]) {
+  return { success: false, error: "This directory tool is archived." };
+}
+async function registerAllUnlinkedDoctors() {
+  return { registered: 0, failed: 0, total: 0 };
+}
 import { Trash2, Upload, CheckSquare, Square, AlertTriangle, CheckCircle2, Loader2, X, Mail, UserPlus, Phone, Send } from "lucide-react";
 import { normalizeCoords } from "@/lib/geo";
 

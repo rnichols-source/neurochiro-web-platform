@@ -2,6 +2,7 @@
 
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { postgrestOrIlike } from '@/lib/admin/member-search'
 import { extractInstagramHandle } from '@/lib/instagram'
 
 // ── Types ──
@@ -320,7 +321,10 @@ export async function getClipLibrary(filters?: {
 
   if (filters?.doctorId) query = query.eq('doctor_id', filters.doctorId)
   if (filters?.status) query = query.eq('status', filters.status)
-  if (filters?.search) query = query.or(`transcript.ilike.%${filters.search}%,topic.ilike.%${filters.search}%`)
+  if (filters?.search) {
+    const pattern = postgrestOrIlike(filters.search)
+    query = query.or(`transcript.ilike.${pattern},topic.ilike.${pattern}`)
+  }
 
   const limit = filters?.limit || 50
   const offset = filters?.offset || 0

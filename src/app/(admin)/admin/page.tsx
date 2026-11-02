@@ -32,8 +32,8 @@ export default async function TodayPage() {
     ? today.mrrOther.map((row) => money(row.amount, row.currency)).join(' · ')
     : null
   const needs = [
-    today.pendingApprovals ? { href: '/admin/moderation', label: `${today.pendingApprovals} doctors waiting for approval` } : null,
-    today.invisibleDoctors ? { href: '/admin/invisible-doctors', label: `${today.invisibleDoctors} doctors with no usable pin` } : null,
+    today.pendingApprovals ? { href: '/admin/members?status=pending', label: `${today.pendingApprovals} doctors waiting for approval` } : null,
+    today.invisibleDoctors ? { href: '/admin/coverage?tab=pins', label: `${today.invisibleDoctors} doctors with no usable pin` } : null,
     today.failedSubscriptions ? { href: '/admin/revenue', label: `${today.failedSubscriptions} subscriptions past due or unpaid` } : null,
     today.patientRequestsWaiting ? { href: '/admin/leads?tab=requests', label: `${today.patientRequestsWaiting} patient requests need a look` } : null,
     today.leadsWaitingOnDoctors ? { href: '/admin/leads?tab=requests', label: `${today.leadsWaitingOnDoctors} leads still waiting on a doctor` } : null,
@@ -48,7 +48,7 @@ export default async function TodayPage() {
       />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <KpiTile
-          href="/admin/directory"
+          href="/admin/members?tier=paying"
           label="Paying members"
           value={countText(today.paying)}
           detail={today.membersOk ? `${foundingComped} founding/comped${today.trialing === null ? '' : ` · ${today.trialing} trialing`}` : null}
@@ -62,7 +62,7 @@ export default async function TodayPage() {
           caption="Sum of active Stripe subscriptions. Quantity, billing interval, and a current coupon are included. Other currencies stay in their own total."
         />
         <KpiTile
-          href="/admin/directory"
+          href="/admin/members?sort=newest"
           label="New signups"
           value={countText(today.newDoctors7d)}
           detail={today.waitlistConfirmed === null ? null : `${today.waitlistConfirmed} waitlist confirmed · ${today.waitlistNew7d ?? 0} new this week`}

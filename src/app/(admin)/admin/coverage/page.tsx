@@ -20,6 +20,7 @@ export default async function CoveragePage({
 
   const params = await searchParams
   const tab = params.tab === 'pins' ? 'pins' : 'map'
+  const updatedAt = new Date().toISOString()
   if (tab === 'pins') {
     const [invisible, missingCountry] = await Promise.all([
       getInvisibleDoctors(),
@@ -27,7 +28,7 @@ export default async function CoveragePage({
     ])
     return (
       <Suspense fallback={<div className="p-4 text-sm text-neuro-navy">Loading coverage…</div>}>
-        <CoverageExperience tab="pins" data={null} invisible={invisible} missingCountry={missingCountry} />
+        <CoverageExperience tab="pins" data={null} invisible={invisible} missingCountry={missingCountry} updatedAt={updatedAt} />
       </Suspense>
     )
   }
@@ -35,7 +36,7 @@ export default async function CoveragePage({
   const data = await getCoverageMapData()
   return (
     <Suspense fallback={<div className="p-4 text-sm text-neuro-navy">Loading coverage…</div>}>
-      <CoverageExperience tab="map" data={data} invisible={[]} missingCountry={[]} />
+      <CoverageExperience tab="map" data={data} invisible={[]} missingCountry={[]} updatedAt={updatedAt} />
     </Suspense>
   )
 }

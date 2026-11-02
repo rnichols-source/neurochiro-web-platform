@@ -3,6 +3,7 @@
 import { stripe } from "@/lib/stripe";
 import { checkAdminAuth } from '@/lib/admin-auth';
 import { mrr } from '@/lib/admin/metrics';
+import { formatMoney } from '@/lib/admin/member-search';
 
 /**
  * Fetches all records from a Stripe list API using async iteration.
@@ -65,7 +66,7 @@ export async function getRevenueData(timeRange: string) {
 
     const currentRevenue = calcRevenue(currentCharges);
     const previousRevenue = calcRevenue(previousCharges);
-    const revenueTrend = previousRevenue === 0 ? 100 : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
+    const revenueTrend = previousRevenue === 0 ? null : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
 
     // 4. Real MRR & Active Subscriptions Trend Calculation
     const getMrrAt = (timestamp: number) => {
@@ -113,11 +114,10 @@ export async function getRevenueData(timeRange: string) {
       }).length;
     };
 
-    const currentMrr = getMrrAt(Math.floor(now.getTime() / 1000));
     const sharedMrr = await mrr();
     const headlineMrr = sharedMrr.usd;
     const previousMrr = getMrrAt(prevEndTs);
-    const mrrTrend = previousMrr === 0 ? (currentMrr > 0 ? 100 : 0) : ((currentMrr - previousMrr) / previousMrr) * 100;
+    const mrrTrend = headlineMrr == null || previousMrr === 0 ? null : ((headlineMrr - previousMrr) / previousMrr) * 100;
 
     const currentActiveCount = countActiveAt(Math.floor(now.getTime() / 1000));
     const previousActiveCount = countActiveAt(prevEndTs);
@@ -186,7 +186,7 @@ export async function getRevenueData(timeRange: string) {
         transactions: currentCharges.slice(0, 50).map((c: any) => ({
           id: c.id,
           user: c.billing_details?.name || "Customer",
-          amount: (c.amount / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+          amount: formatMoney(typeof c.amount === 'number' ? c.amount : 0, typeof c.currency === 'string' ? c.currency : 'usd'),
           status: c.status === 'succeeded' ? 'Succeeded' : c.status === 'failed' ? 'Failed' : 'Other',
           date: new Date(c.created * 1000).toLocaleDateString(),
           type: c.description || "Subscription update"

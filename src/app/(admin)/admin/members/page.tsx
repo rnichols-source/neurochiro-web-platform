@@ -18,7 +18,7 @@ export default async function MembersPage({
   }
 
   const query = parseMemberSearchParams(await searchParams)
-  let result: MemberSearchResult = { rows: [], total: 0 }
+  let result: MemberSearchResult = { rows: [], total: 0, billingOk: true, note: null }
   let loadError = false
   try {
     result = await searchMembers(query)
@@ -40,12 +40,13 @@ export default async function MembersPage({
 
   return (
     <MembersClient
-      key={`${query.q}|${query.role}|${query.status}|${query.tier}|${query.state}|${query.country}|${query.page}|${query.sort}`}
+      key={`${query.role}|${query.status}|${query.tier}|${query.state}|${query.country}|${query.page}|${query.sort}`}
       query={query}
       result={result}
       loadError={loadError}
       detail={detail}
       detailError={detailError}
+      updatedAt={new Date().toISOString()}
     />
   )
 }

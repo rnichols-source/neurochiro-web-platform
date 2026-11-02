@@ -69,6 +69,10 @@ const nextConfig: NextConfig = {
       { source: '/admin/referrals', destination: '/admin/leads?tab=introductions', permanent: false },
       { source: '/admin/stats/recommendations', destination: '/admin/leads?tab=introductions&view=stats', permanent: false },
       { source: '/admin/match', destination: '/admin/leads?tab=matching', permanent: false },
+      { source: '/admin/invisible-doctors', destination: '/admin/coverage?tab=pins', permanent: false },
+      { source: '/admin/search', destination: '/admin/members', permanent: false },
+      { source: '/admin/broadcast', destination: '/admin/leads?tab=waitlist', permanent: false },
+      { source: '/admin/approvals/seminars', destination: '/admin/seminars', permanent: false },
       ...JOB_REDIRECTS,
       ...LEGACY_STORE_PRODUCT_IDS.map((id) => ({
         source: `/store/${id}`,
