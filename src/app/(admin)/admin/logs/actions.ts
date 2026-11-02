@@ -3,6 +3,7 @@
 import { AuditLog, LogCategory } from "@/types/admin";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { checkAdminAuth } from '@/lib/admin-auth';
+import { postgrestOrIlike } from '@/lib/admin/member-search';
 
 export async function getAuditLogs(options: { 
   category?: string; 
@@ -23,7 +24,8 @@ export async function getAuditLogs(options: {
     }
 
     if (search) {
-      query = query.or(`event.ilike.%${search}%,user_name.ilike.%${search}%,target.ilike.%${search}%`);
+      const pattern = postgrestOrIlike(search);
+      query = query.or(`event.ilike.${pattern},user_name.ilike.${pattern},target.ilike.${pattern}`);
     }
 
     const { data, error } = await query

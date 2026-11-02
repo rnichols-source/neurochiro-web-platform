@@ -41,10 +41,11 @@ export default function AdminRevenue() {
 
   if (loading && !data) return <p className="text-gray-500 text-center py-20">Loading...</p>;
 
+  const trendText = (value: number | null | undefined) => (value == null ? "—" : `${value > 0 ? "+" : ""}${Math.round(value)}%`);
   const stats = [
-    { label: "Total Revenue", value: data ? fmt(data.totalRevenue) : "$0" },
-    { label: "MRR", value: data?.mrr == null ? "Unavailable" : fmt(data.mrr) },
-    { label: "Failed Payments", value: data ? String(data.failedPayments) : "0" },
+    { label: "Total Revenue", value: data ? fmt(data.totalRevenue) : "$0", detail: data ? trendText(data.revenueTrend) : "—" },
+    { label: "MRR", value: data?.mrr == null ? "Unavailable" : fmt(data.mrr), detail: data ? trendText(data.mrrTrend) : "—" },
+    { label: "Failed Payments", value: data ? String(data.failedPayments) : "0", detail: "" },
   ];
   const otherMrr = Array.isArray(data?.mrrOther) ? data.mrrOther as { currency: string; amount: number }[] : [];
 
@@ -79,6 +80,7 @@ export default function AdminRevenue() {
           <div key={s.label} className="bg-white/5 border border-white/5 rounded-xl p-5">
             <p className="text-xs text-gray-400 uppercase mb-1">{s.label}</p>
             <p className="text-2xl font-bold">{loading ? "..." : s.value}</p>
+            {s.detail ? <p className="mt-1 text-xs text-gray-400">{s.detail} vs previous period</p> : null}
           </div>
         ))}
       </div>

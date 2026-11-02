@@ -1,11 +1,12 @@
-import { deriveMembership, type Membership, type MembershipStatus } from '../portal/membership.ts'
+import { classifyMemberBilling, type LiveBillingStatus } from './billing-class.ts'
+import { deriveMembership, type Membership } from '../portal/membership.ts'
 
 export type MemberRole = 'doctor' | 'student' | 'vendor'
 export type MemberRoleFilter = '' | MemberRole
 export type MemberStatusFilter = '' | 'verified' | 'pending' | 'onboarding' | 'hidden'
 export type MemberTierFilter = '' | 'paying' | 'trialing' | 'past_due' | 'founding' | 'free'
-export type MemberSort = 'name' | 'recent'
-export type BillingLabel = 'Paying' | 'Trialing' | 'Past due' | 'Founding/Comped' | 'Free'
+export type MemberSort = 'name' | 'recent' | 'newest'
+export type BillingLabel = 'Paying' | 'Trialing' | 'Past due' | 'Founding/Comped' | 'Free' | 'Mismatch'
 
 export type MemberQuery = {
   q: string
@@ -48,11 +49,17 @@ export type MemberListRow = {
   lastActivity: string | null
   slug: string | null
   userId: string | null
+  lastName?: string
+  firstName?: string
+  createdAt?: string | null
+  isTest?: boolean
 }
 
 export type MemberSearchResult = {
   rows: MemberListRow[]
   total: number
+  billingOk: boolean
+  note: string | null
 }
 
 export type DoctorFormValues = {
@@ -128,6 +135,7 @@ export type MemberDetail = {
 }
 
 export type BillingSets = {
+  ok: boolean
   active: ReadonlySet<string>
   trialing: ReadonlySet<string>
   pastDue: ReadonlySet<string>
@@ -161,16 +169,24 @@ export function escapeLikeWildcards(value: string): string {
 
 /**
  * Value for a PostgREST `.or()` ilike clause, including the contains wildcards.
- * The whole value is double-quoted so commas, parentheses, and dots stay inside the value.
+ * LIKE wildcards are escaped first. Inside the double quotes, backslash is `\\` and a quote is `\"`.
  */
 export function postgrestOrIlike(value: string): string {
-  const escaped = escapeLikeWildcards(value).replace(/"/g, '""')
-  return `"%${escaped}%"`
+  const like = escapeLikeWildcards(value)
+  const quoted = like.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  return `"%${quoted}%"`
+}
+
+/** Trim, lowercase, drop a leading "dr" or "dr.", split on whitespace and commas, cap at 4. */
+export function searchTokens(q: string): string[] {
+  const stripped = q.trim().toLowerCase().replace(/^dr\.?(?=\s|,|$)/, '').trim()
+  if (!stripped) return []
+  return stripped.split(/[\s,]+/).filter(Boolean).slice(0, 4)
 }
 
 export function doctorOrFilter(value: string): string {
   const pattern = postgrestOrIlike(value)
-  return ['first_name', 'last_name', 'email', 'clinic_name', 'city', 'state']
+  return ['first_name', 'last_name', 'clinic_name', 'email', 'city', 'slug']
     .map((column) => `${column}.ilike.${pattern}`)
     .join(',')
 }
@@ -178,6 +194,14 @@ export function doctorOrFilter(value: string): string {
 export function profileOrFilter(value: string): string {
   const pattern = postgrestOrIlike(value)
   return ['full_name', 'email'].map((column) => `${column}.ilike.${pattern}`).join(',')
+}
+
+export function doctorTokenFilters(q: string): string[] {
+  return searchTokens(q).map((token) => doctorOrFilter(token))
+}
+
+export function profileTokenFilters(q: string): string[] {
+  return searchTokens(q).map((token) => profileOrFilter(token))
 }
 
 /** Blank, whitespace, and non-finite coordinates become null. A numeric 0 stays 0. */
@@ -202,8 +226,14 @@ export function pickDoctorPatch(input: Record<string, unknown>): Record<string, 
     const value = input[key]
     if (typeof value === 'string' || value === null) patch[key] = value
   }
-  if ('latitude' in input) patch.latitude = blankCoordinate(input.latitude)
-  if ('longitude' in input) patch.longitude = blankCoordinate(input.longitude)
+  if ('latitude' in input) {
+    const latitude = blankCoordinate(input.latitude)
+    if (latitude !== null) patch.latitude = latitude
+  }
+  if ('longitude' in input) {
+    const longitude = blankCoordinate(input.longitude)
+    if (longitude !== null) patch.longitude = longitude
+  }
   if ('graduation_year' in input) patch.graduation_year = blankYear(input.graduation_year)
   if ('verification_status' in input && typeof input.verification_status === 'string' && VERIFICATION.has(input.verification_status)) {
     patch.verification_status = input.verification_status
@@ -235,11 +265,6 @@ export function mapPoint(lat: unknown, lng: unknown): { lat: number; lng: number
   if (latitude === null || longitude === null) return null
   if (latitude === 0 && longitude === 0) return null
   return { lat: latitude, lng: longitude }
-}
-
-export function staticMapUrl(lat: number, lng: number): string {
-  const center = `${lat},${lng}`
-  return `https://staticmap.openstreetmap.de/staticmap.php?center=${encodeURIComponent(center)}&zoom=12&size=640x240&markers=${encodeURIComponent(center)},lightblue1`
 }
 
 export function chunkIds(ids: string[], size = 150): string[][] {
@@ -291,7 +316,7 @@ export function normalizeMemberQuery(input: MemberSearchInput): MemberQuery {
     country: (input.country || '').trim(),
     page: normalizePage(input.page),
     pageSize: normalizePageSize(input.pageSize),
-    sort: input.sort === 'recent' ? 'recent' : 'name',
+    sort: input.sort === 'recent' ? 'recent' : input.sort === 'newest' ? 'newest' : 'name',
     member: (input.member || '').trim(),
   }
 }
@@ -325,11 +350,12 @@ export function memberHref(query: MemberQuery): string {
   if (query.page > 1) params.set('page', String(query.page))
   if (query.member) params.set('member', query.member)
   if (query.sort === 'recent') params.set('sort', 'recent')
+  if (query.sort === 'newest') params.set('sort', 'newest')
   const search = params.toString()
   return search ? `/admin/members?${search}` : '/admin/members'
 }
 
-export function liveStripeStatus(customerId: string | null, sets: BillingSets): MembershipStatus | null {
+export function liveStripeStatus(customerId: string | null, sets: BillingSets): LiveBillingStatus {
   if (!customerId) return null
   if (sets.active.has(customerId)) return 'active'
   if (sets.trialing.has(customerId)) return 'trialing'
@@ -366,10 +392,20 @@ export function resolveDoctorBilling(input: {
     hasStripeCustomer: false,
     stripeStatus: null,
   })
-  if (live === 'active') return { label: 'Paying', membership: withLive }
-  if (live === 'trialing') return { label: 'Trialing', membership: withLive }
-  if (live === 'past_due') return { label: 'Past due', membership: withLive }
-  if (recorded.source === 'founding' || recorded.source === 'comped') {
+  const kind = classifyMemberBilling({
+    stripeOk: input.sets.ok !== false,
+    live,
+    isFoundingMember: input.isFoundingMember,
+    membershipTier: input.membershipTier,
+    profileTier: input.profileTier,
+    neurosTier: input.neurosTier,
+  })
+  if (kind === 'paying') return { label: 'Paying', membership: withLive }
+  if (kind === 'trialing') return { label: 'Trialing', membership: withLive }
+  if (kind === 'past_due') return { label: 'Past due', membership: withLive }
+  if (kind === 'mismatch') return { label: 'Mismatch', membership: recorded }
+  if (kind === 'founding-comped') return { label: 'Founding/Comped', membership: recorded }
+  if (kind === 'unknown' && (recorded.source === 'founding' || recorded.source === 'comped')) {
     return { label: 'Founding/Comped', membership: recorded }
   }
   return { label: 'Free', membership: recorded }
@@ -414,8 +450,15 @@ export function compareMembers(a: MemberListRow, b: MemberListRow, sort: MemberS
     const right = Date.parse(b.lastActivity || '') || 0
     if (left !== right) return right - left
   }
-  const byName = a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
-  if (byName !== 0) return byName
+  if (sort === 'newest') {
+    const left = Date.parse(a.createdAt || '') || 0
+    const right = Date.parse(b.createdAt || '') || 0
+    if (left !== right) return right - left
+  }
+  const byLast = (a.lastName || a.name).localeCompare(b.lastName || b.name, undefined, { sensitivity: 'base' })
+  if (byLast !== 0) return byLast
+  const byFirst = (a.firstName || '').localeCompare(b.firstName || '', undefined, { sensitivity: 'base' })
+  if (byFirst !== 0) return byFirst
   return a.id.localeCompare(b.id)
 }
 

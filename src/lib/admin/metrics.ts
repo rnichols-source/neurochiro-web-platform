@@ -49,6 +49,7 @@ type DoctorMetricRow = {
   created_at?: string | null
   verification_status?: string | null
   subscription_status?: string | null
+  is_test?: boolean | null
 }
 
 type CouponBits = {
@@ -170,7 +171,7 @@ async function eachPage<T>(
 
 async function loadDoctors(admin: ReturnType<typeof createAdminClient>): Promise<DoctorMetricRow[]> {
   const selects = [
-    'id, user_id, membership_tier, is_founding_member, neuros_tier, created_at, verification_status, subscription_status',
+    'id, user_id, membership_tier, is_founding_member, neuros_tier, created_at, verification_status, subscription_status, is_test',
     'id, user_id, membership_tier, is_founding_member, neuros_tier, created_at, verification_status',
     'id, user_id, membership_tier, created_at, verification_status',
   ]
@@ -226,7 +227,10 @@ async function loadAdminTodayUncached(): Promise<AdminToday> {
         profileByUser.set(row.id, { tier: row.tier, stripe_customer_id: row.stripe_customer_id })
       }
     }
-    const created = await admin.from('doctors').select('id', { count: 'exact', head: true }).gte('created_at', since)
+    let created = await admin.from('doctors').select('id', { count: 'exact', head: true }).gte('created_at', since).eq('is_test', false)
+    if (created.error && isMissingColumn(created.error)) {
+      created = await admin.from('doctors').select('id', { count: 'exact', head: true }).gte('created_at', since)
+    }
     if (created.error) throw new Error(created.error.message)
     snapshot.newDoctors7d = created.count || 0
     const pending = await admin.from('doctors').select('id', { count: 'exact', head: true }).eq('verification_status', 'pending')
@@ -317,6 +321,7 @@ async function loadAdminTodayUncached(): Promise<AdminToday> {
     let founding = 0
     let comped = 0
     for (const doctor of doctors) {
+      if (doctor.is_test === true) continue
       const profile = doctor.user_id ? profileByUser.get(doctor.user_id) : undefined
       const customer = profile?.stripe_customer_id || null
       const live: MembershipStatus | null = customer && activeIds.has(customer)

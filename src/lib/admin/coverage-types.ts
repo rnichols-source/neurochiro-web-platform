@@ -1,6 +1,6 @@
-export type Billing = 'paying' | 'founding-comped' | 'free' | 'pending' | 'trialing' | 'unknown'
+export type Billing = 'paying' | 'trialing' | 'past_due' | 'founding-comped' | 'free' | 'pending' | 'mismatch' | 'unknown'
 
-export type StatusFilter = '' | 'paying' | 'founding-comped' | 'free' | 'pending'
+export type StatusFilter = '' | 'paying' | 'trialing' | 'past_due' | 'founding-comped' | 'free' | 'pending' | 'mismatch'
 
 export type MapDoctor = {
   id: string
@@ -82,6 +82,10 @@ export function billingLabel(billing: Billing): string {
       return 'Pending'
     case 'trialing':
       return 'Trialing'
+    case 'past_due':
+      return 'Past due'
+    case 'mismatch':
+      return 'Mismatch'
     default:
       return 'Unknown'
   }

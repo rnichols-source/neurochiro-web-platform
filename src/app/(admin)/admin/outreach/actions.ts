@@ -7,6 +7,7 @@ import { extractInstagramHandle } from '@/lib/instagram'
 import { resolveLocation } from '@/lib/resolve-city'
 import { revalidatePath } from 'next/cache'
 import { getThresholds } from '@/lib/thresholds'
+import { postgrestOrIlike } from '@/lib/admin/member-search'
 
 // ── Voice Validator ──
 
@@ -50,12 +51,12 @@ export async function validateTemplate(text: string): Promise<{ errors: string[]
 export async function searchProspects(query: string, prospectType: string = 'doctor') {
   const user = await checkAdminAuth()
   const db = createAdminClient()
-  const q = `%${query}%`
+  const pattern = postgrestOrIlike(query)
 
   let prospectQuery = db
     .from('outreach_prospects' as any)
     .select('*')
-    .or(`name.ilike.${q},clinic_name.ilike.${q},city.ilike.${q},instagram_handle.ilike.${q},email.ilike.${q}`)
+    .or(`name.ilike.${pattern},clinic_name.ilike.${pattern},city.ilike.${pattern},instagram_handle.ilike.${pattern},email.ilike.${pattern}`)
     .limit(20)
   if (prospectType) prospectQuery = prospectQuery.eq('prospect_type', prospectType)
   const { data: prospects } = await prospectQuery
@@ -63,7 +64,7 @@ export async function searchProspects(query: string, prospectType: string = 'doc
   const { data: members } = await db
     .from('doctors' as any)
     .select('id, first_name, last_name, clinic_name, city, state, email, instagram_url, slug')
-    .or(`first_name.ilike.${q},last_name.ilike.${q},clinic_name.ilike.${q},instagram_url.ilike.${q},email.ilike.${q}`)
+    .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},clinic_name.ilike.${pattern},instagram_url.ilike.${pattern},email.ilike.${pattern}`)
     .limit(20)
 
   return { prospects: prospects || [], members: members || [] }
@@ -670,8 +671,8 @@ export async function getProspects(options: {
   if (state && state !== 'all') query = query.eq('state', state)
   if (prospect_type && prospect_type !== 'all') query = query.eq('prospect_type', prospect_type)
   if (search) {
-    const q = `%${search}%`
-    query = query.or(`name.ilike.${q},clinic_name.ilike.${q},city.ilike.${q},instagram_handle.ilike.${q},email.ilike.${q}`)
+    const pattern = postgrestOrIlike(search)
+    query = query.or(`name.ilike.${pattern},clinic_name.ilike.${pattern},city.ilike.${pattern},instagram_handle.ilike.${pattern},email.ilike.${pattern}`)
   }
 
   const { data, count, error } = await query.order('created_at', { ascending: false }).range(from, to)

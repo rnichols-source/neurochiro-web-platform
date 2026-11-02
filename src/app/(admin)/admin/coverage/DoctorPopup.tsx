@@ -26,22 +26,22 @@ class DomNode implements PopupNode {
   }
 }
 
-export function buildDoctorPopup(doc: PopupFields): HTMLElement {
+export function buildDoctorPopup(doc: PopupFields | PopupFields[]): HTMLElement {
   const root = renderDoctorPopup(doc, (tag) => new DomNode(tag))
   if (!(root instanceof DomNode)) return document.createElement('div')
   root.element.style.padding = '12px'
   root.element.style.maxWidth = '260px'
   root.element.style.fontFamily = 'system-ui, sans-serif'
   root.element.style.color = '#1E2D3B'
-  const link = root.element.querySelector('a')
-  if (link) {
-    link.style.display = 'inline-flex'
-    link.style.alignItems = 'center'
-    link.style.minHeight = '44px'
-    link.style.marginTop = '8px'
-    link.style.color = '#D66829'
-    link.style.fontWeight = '700'
-    link.style.textDecoration = 'none'
-  }
+  root.element.querySelectorAll('a').forEach((link) => {
+    const item = link as HTMLElement
+    item.style.display = 'inline-flex'
+    item.style.alignItems = 'center'
+    item.style.minHeight = '44px'
+    item.style.marginTop = '8px'
+    item.style.color = '#D66829'
+    item.style.fontWeight = '700'
+    item.style.textDecoration = 'none'
+  })
   return root.element
 }

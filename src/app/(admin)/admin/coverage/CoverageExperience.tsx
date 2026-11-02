@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { AdminRefresh } from '@/components/admin/ui/AdminRefresh'
 import { getCountryByIso2 } from '@/config/countries'
 import type { CoverageMapData, MapDoctor, MissingCountryDoctor } from '@/lib/admin/coverage-types'
 import type { InvisibleDoctor } from '../invisible-doctors/actions'
@@ -21,7 +22,7 @@ function sameCountry(value: string, country: string): boolean {
 }
 
 function doctorMatches(doctor: MapDoctor, filters: FilterState): boolean {
-  if (!sameCountry(doctor.country, filters.country)) return false
+  if (!doctor.country || doctor.country !== filters.country) return false
   if (filters.state && doctor.state !== filters.state) return false
   if (filters.status && doctor.billing !== filters.status) return false
   if (filters.specialty && !doctor.specialties.includes(filters.specialty)) return false
@@ -47,11 +48,13 @@ export default function CoverageExperience({
   data,
   invisible,
   missingCountry,
+  updatedAt,
 }: {
   tab: 'map' | 'pins'
   data: CoverageMapData | null
   invisible: InvisibleDoctor[]
   missingCountry: MissingCountryDoctor[]
+  updatedAt: string
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -84,15 +87,15 @@ export default function CoverageExperience({
       .slice(0, 50)
     const countries = [...new Set([
       'US',
-      ...data.doctors.map((doctor) => doctor.country || 'US'),
+      ...data.doctors.map((doctor) => doctor.country).filter(Boolean),
       ...data.demand.map((point) => point.country || 'US'),
       ...data.mentions.map((point) => point.country || 'US'),
     ])].sort((a, b) => (a === 'US' ? -1 : b === 'US' ? 1 : a.localeCompare(b)))
     const states = [...new Set(data.doctors
-      .filter((doctor) => sameCountry(doctor.country, filters.country) && doctor.state)
+      .filter((doctor) => doctor.country === filters.country && doctor.state)
       .map((doctor) => doctor.state))].sort()
     const specialties = [...new Set(data.doctors
-      .filter((doctor) => sameCountry(doctor.country, filters.country))
+      .filter((doctor) => doctor.country === filters.country)
       .flatMap((doctor) => doctor.specialties))].sort()
     return { doctors, demand, mentions, gaps, countries, states, specialties }
   }, [data, filters])
@@ -110,6 +113,7 @@ export default function CoverageExperience({
       <header className="flex shrink-0 items-center justify-between gap-2 border-b border-black/10 px-3 py-2">
         <h1 className="font-heading text-lg font-bold">Coverage</h1>
         <div className="flex items-center gap-2">
+          <AdminRefresh at={updatedAt} />
           <Link href={tabHref('map', queryParams)} className={`inline-flex min-h-11 items-center rounded-xl px-3 text-sm font-bold ${tab === 'map' ? 'bg-neuro-orange text-white' : 'bg-white text-neuro-navy'}`}>
             Map
           </Link>
@@ -141,9 +145,11 @@ export default function CoverageExperience({
                     <span className="text-sm">
                       {doctor.name}
                       {doctor.practice ? ` · ${doctor.practice}` : ''}
+                      {' · Country missing'}
+                      {doctor.address ? ` · ${doctor.address}` : ''}
                       {doctor.city || doctor.state ? ` · ${[doctor.city, doctor.state].filter(Boolean).join(', ')}` : ''}
                     </span>
-                    <Link className="inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink" href={`/admin/members?q=${encodeURIComponent(doctor.name)}`}>
+                    <Link className="inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink" href={`/admin/members?member=${encodeURIComponent(doctor.id)}`}>
                       Open member
                     </Link>
                   </li>
@@ -185,6 +191,12 @@ export default function CoverageExperience({
               zoom={view.zoom}
               flyTo={flyTo}
             />
+            <CoverageLegend />
+            {data && data.stripeOk === false ? (
+              <p className="absolute left-2 right-2 top-16 z-10 rounded-xl bg-white px-3 py-2 text-sm text-neuro-navy shadow md:top-14">
+                Stripe is unavailable right now, so billing labels may be wrong.
+              </p>
+            ) : null}
             {filters.layers.gaps ? (
               <GapPanel
                 gaps={filtered.gaps}
@@ -215,6 +227,35 @@ export default function CoverageExperience({
           ) : null}
         </>
       )}
+    </div>
+  )
+}
+
+const LEGEND = [
+  { label: 'Paying', className: 'bg-[#D66829]' },
+  { label: 'Trialing', className: 'border-2 border-[#D66829] bg-[#F5F3EF]' },
+  { label: 'Past due', className: 'border-2 border-[#1E2D3B] bg-[#D97706]' },
+  { label: 'Founding/comped', className: 'bg-[#1E2D3B]' },
+  { label: 'Free', className: 'border-2 border-[#1E2D3B] bg-white' },
+  { label: 'Pending', className: 'bg-[#9CA3AF]' },
+  { label: 'Mismatch', className: 'border-2 border-[#E11D48] bg-white' },
+]
+
+function CoverageLegend() {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="absolute bottom-16 left-2 z-10 w-40 rounded-xl bg-white/95 text-xs text-neuro-navy shadow md:bottom-3">
+      <button type="button" className="flex min-h-11 w-full items-center justify-between px-3 md:hidden" aria-expanded={open} onClick={() => setOpen((current) => !current)}>
+        Legend
+      </button>
+      <ul className={`${open ? 'block' : 'hidden'} space-y-1 px-3 pb-2 md:block md:pt-2`}>
+        {LEGEND.map((item) => (
+          <li key={item.label} className="flex items-center gap-2">
+            <span className={`h-3 w-3 rounded-full ${item.className}`} />
+            {item.label}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

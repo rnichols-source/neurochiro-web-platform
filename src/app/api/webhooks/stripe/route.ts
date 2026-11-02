@@ -7,6 +7,7 @@ import { checkoutFromStripeSession, fulfillSeminarSession, isSeminarCheckout, re
 import { sendStudentWelcome } from "@/lib/students/welcome-email";
 import { fulfillJobCheckout } from "@/lib/jobs/fulfill";
 import { fulfillSynapseCheckout, lapseSynapseSubscription } from "@/lib/synapse/fulfill";
+import { noteSynapsePaymentFailed, synapseUpdateShouldLapse } from "@/lib/synapse/payment-failed";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 import { accessForStripeStatus } from "@/lib/portal/membership";
 import {
@@ -1106,8 +1107,8 @@ export async function POST(req: Request) {
       case "invoice.payment_failed": {
         const invoice = event.data.object;
         const subscriptionId = readId("subscription" in invoice ? invoice.subscription : null);
-        const lapsedSynapse = await lapseSynapseSubscription(supabase, subscriptionId);
-        if (lapsedSynapse) {
+        const flaggedSynapse = await noteSynapsePaymentFailed(supabase, subscriptionId);
+        if (flaggedSynapse) {
           break;
         }
         const customerId = readId(invoice.customer);
@@ -1134,6 +1135,9 @@ export async function POST(req: Request) {
 
       case "customer.subscription.updated": {
         const subscription = event.data.object;
+        if (synapseUpdateShouldLapse(subscription.status)) {
+          await lapseSynapseSubscription(supabase, subscription.id);
+        }
         const skipMembership = isNonMembershipType(subscription.metadata) || await subscriptionIsSynapseSeat(supabase, subscription.id);
         if (!skipMembership) {
           await applyMembershipFromSubscription(supabase, subscription);

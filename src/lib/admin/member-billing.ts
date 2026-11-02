@@ -68,22 +68,17 @@ async function listCustomerIds(status: Stripe.SubscriptionListParams['status']):
 }
 
 async function loadMemberBillingUncached(): Promise<MemberBillingSnapshot> {
-  try {
-    const [active, trialing, pastDue, unpaid] = await Promise.all([
-      listCustomerIds('active'),
-      listCustomerIds('trialing'),
-      listCustomerIds('past_due'),
-      listCustomerIds('unpaid'),
-    ])
-    return {
-      ok: true,
-      active,
-      trialing,
-      pastDue: [...new Set([...pastDue, ...unpaid])],
-    }
-  } catch (err) {
-    console.error('admin member billing', err instanceof Error ? err.name : 'error')
-    return { ok: false, active: [], trialing: [], pastDue: [] }
+  const [active, trialing, pastDue, unpaid] = await Promise.all([
+    listCustomerIds('active'),
+    listCustomerIds('trialing'),
+    listCustomerIds('past_due'),
+    listCustomerIds('unpaid'),
+  ])
+  return {
+    ok: true,
+    active,
+    trialing,
+    pastDue: [...new Set([...pastDue, ...unpaid])],
   }
 }
 
@@ -93,12 +88,17 @@ const getCachedMemberBilling = unstable_cache(loadMemberBillingUncached, ['admin
 })
 
 export async function memberBillingSnapshot(): Promise<MemberBillingSnapshot> {
-  const cached = await getCachedMemberBilling()
-  return {
-    ok: cached.ok,
-    active: [...cached.active],
-    trialing: [...cached.trialing],
-    pastDue: [...cached.pastDue],
+  try {
+    const cached = await getCachedMemberBilling()
+    return {
+      ok: cached.ok,
+      active: [...cached.active],
+      trialing: [...cached.trialing],
+      pastDue: [...cached.pastDue],
+    }
+  } catch (err) {
+    console.error('admin member billing', err instanceof Error ? err.name : 'error')
+    return { ok: false, active: [], trialing: [], pastDue: [] }
   }
 }
 
@@ -125,6 +125,8 @@ function periodEnd(sub: StripeSubView): number | null {
   return typeof itemEnd === 'number' ? itemEnd : null
 }
 
+const LIVE_RANK = ['active', 'trialing', 'past_due']
+
 function planName(sub: StripeSubView): string | null {
   const price = sub.items?.data?.[0]?.price
   if (!price) return null
@@ -140,7 +142,18 @@ export async function stripeCustomerSummary(customerId: string): Promise<StripeC
       stripe.subscriptions.list({ customer: customerId, status: 'all', limit: 10 }),
       stripe.invoices.list({ customer: customerId, limit: 20 }),
     ])
-    const sub = asSub(subscriptions.data[0])
+    const chosen = [...subscriptions.data].sort((left, right) => {
+      const rank = (status: string) => {
+        const index = LIVE_RANK.indexOf(status)
+        return index === -1 ? LIVE_RANK.length : index
+      }
+      return rank(left.status) - rank(right.status)
+    })[0]
+    let sub = asSub(chosen)
+    if (chosen?.id) {
+      const expanded = await stripe.subscriptions.retrieve(chosen.id, { expand: ['items.data.price.product'] })
+      sub = asSub(expanded) || sub
+    }
     const price = sub?.items?.data?.[0]?.price
     const minor = price?.unit_amount
     const currency = price?.currency || 'usd'

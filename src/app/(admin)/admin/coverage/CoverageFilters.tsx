@@ -20,9 +20,12 @@ export type FilterState = {
 const STATUSES: { value: StatusFilter; label: string }[] = [
   { value: '', label: 'All statuses' },
   { value: 'paying', label: 'Paying' },
+  { value: 'trialing', label: 'Trialing' },
+  { value: 'past_due', label: 'Past due' },
   { value: 'founding-comped', label: 'Founding/Comped' },
   { value: 'free', label: 'Free' },
   { value: 'pending', label: 'Pending' },
+  { value: 'mismatch', label: 'Mismatch' },
 ]
 
 const LAYER_ORDER: { key: keyof LayerFlags; label: string; color: string }[] = [
@@ -172,7 +175,7 @@ export default function CoverageFilters({
       </div>
       <p className="text-xs text-neuro-navy/70">
         {counts.doctors} doctors · {counts.demand} demand · {counts.mentions} mentions · {counts.gaps} gaps
-        {stripeOk ? '' : ' · Billing status unavailable. Pins are still on the map.'}
+        {stripeOk ? '' : ' · Stripe is unavailable right now, so billing labels may be wrong.'}
       </p>
     </div>
   )

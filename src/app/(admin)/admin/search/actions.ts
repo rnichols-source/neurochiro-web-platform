@@ -2,7 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase-admin';
 import { checkAdminAuth } from '@/lib/admin-auth';
-import { doctorOrFilter, escapeLikeWildcards, postgrestOrIlike, profileOrFilter } from '@/lib/admin/member-search';
+import { doctorTokenFilters, escapeLikeWildcards, postgrestOrIlike, profileTokenFilters } from '@/lib/admin/member-search';
 
 export async function searchAllResources(query: string) {
   try {
@@ -10,6 +10,14 @@ export async function searchAllResources(query: string) {
     const supabase = createAdminClient();
     const cleanQuery = query.trim();
     const like = `%${escapeLikeWildcards(cleanQuery)}%`;
+    let doctorQuery = supabase.from('doctors')
+      .select('id, first_name, last_name, clinic_name, city, state, verification_status')
+      .limit(50);
+    for (const filter of doctorTokenFilters(cleanQuery)) doctorQuery = doctorQuery.or(filter);
+    let profileQuery = supabase.from('profiles')
+      .select('id, full_name, email, role')
+      .limit(50);
+    for (const filter of profileTokenFilters(cleanQuery)) profileQuery = profileQuery.or(filter);
 
     const [
       { data: doctors },
@@ -17,14 +25,8 @@ export async function searchAllResources(query: string) {
       { data: seminars },
       { data: logs }
     ] = await Promise.all([
-      supabase.from('doctors')
-        .select('id, first_name, last_name, clinic_name, city, state, verification_status')
-        .or(doctorOrFilter(cleanQuery))
-        .limit(50),
-      supabase.from('profiles')
-        .select('id, full_name, email, role')
-        .or(profileOrFilter(cleanQuery))
-        .limit(50),
+      doctorQuery,
+      profileQuery,
       supabase.from('seminars')
         .select('id, title, city, state')
         .ilike('title', like)

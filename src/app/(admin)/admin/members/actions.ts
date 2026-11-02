@@ -8,12 +8,12 @@ import {
   boolOrNull,
   chunkIds,
   compareMembers,
-  doctorOrFilter,
+  doctorTokenFilters,
   escapeLikeWildcards,
   mapPoint,
   needsOnboardingCall,
   normalizeMemberQuery,
-  profileOrFilter,
+  profileTokenFilters,
   resolveDoctorBilling,
   resolveProfileBilling,
   textOrEmpty,
@@ -35,7 +35,9 @@ import { getDoctorIntroductions } from '@/app/(admin)/admin/directory/actions'
 import { getDoctorRoutingStatsForOne } from '@/app/(admin)/admin/stats/doctors/actions'
 
 const DOCTOR_BASE = 'id, user_id, first_name, last_name, email, clinic_name, city, state, country, verification_status, slug, updated_at, created_at'
-const DOCTOR_FULL = `${DOCTOR_BASE}, membership_tier, is_founding_member, neuros_tier, onboarding_call_status, is_approved`
+const DOCTOR_FULL = `${DOCTOR_BASE}, membership_tier, is_founding_member, neuros_tier, onboarding_call_status, is_approved, is_test`
+const BILLING_SCAN_CAP = 2000
+const BILLING_NOTE = 'Billing filters are slow until the search SQL is run'
 const PROFILE_LIST = 'id, full_name, email, role, updated_at, created_at, stripe_customer_id, tier'
 const DOCTOR_DETAIL = `${DOCTOR_FULL}, address, latitude, longitude, bio, website_url, instagram_url, short_intro, philosophy, chiropractic_school, graduation_year`
 
@@ -52,12 +54,17 @@ type RpcArgs = {
 
 type RpcCall = (fn: 'admin_search_members', args: RpcArgs) => Promise<{ data: unknown; error: PostgrestError }>
 
-function setsFrom(snapshot: { active: string[]; trialing: string[]; pastDue: string[] }): BillingSets {
+function setsFrom(snapshot: { ok: boolean; active: string[]; trialing: string[]; pastDue: string[] }): BillingSets {
   return {
+    ok: snapshot.ok,
     active: new Set(snapshot.active),
     trialing: new Set(snapshot.trialing),
     pastDue: new Set(snapshot.pastDue),
   }
+}
+
+function chainOr<T extends { or: (filters: string) => T }>(query: T, filters: string[]): T {
+  return filters.reduce((next, filter) => next.or(filter), query)
 }
 
 function empty(value: string): string | null {
@@ -99,7 +106,7 @@ function rolesFor(query: MemberQuery): MemberRole[] {
 
 function applyDoctorFilters(query: LooseFilter, filters: MemberQuery, hiddenOnly = false): LooseFilter {
   let next = query
-  if (filters.q) next = next.or(doctorOrFilter(filters.q))
+  next = chainOr(next, doctorTokenFilters(filters.q))
   if (filters.state) next = next.ilike('state', escapeLikeWildcards(filters.state))
   if (filters.country) next = next.ilike('country', escapeLikeWildcards(filters.country))
   if (filters.status === 'verified') next = next.eq('verification_status', 'verified')
@@ -114,6 +121,7 @@ function applyDoctorFilters(query: LooseFilter, filters: MemberQuery, hiddenOnly
       .or('is_founding_member.is.null,is_founding_member.eq.false')
   }
   if (filters.sort === 'recent') next = next.order('updated_at', { ascending: false })
+  else if (filters.sort === 'newest') next = next.order('created_at', { ascending: false })
   else next = next.order('last_name', { ascending: true }).order('first_name', { ascending: true })
   return next
 }
@@ -168,6 +176,10 @@ function doctorRow(row: Record<string, unknown>, sets: BillingSets, profiles: Ma
     lastActivity: textOrNull(row.updated_at) || textOrNull(row.created_at),
     slug: textOrNull(row.slug),
     userId,
+    lastName: textOrEmpty(row.last_name),
+    firstName: textOrEmpty(row.first_name),
+    createdAt: textOrNull(row.created_at),
+    isTest: row.is_test === true,
   }
 }
 
@@ -189,6 +201,10 @@ function profileRow(row: { id: string; full_name: string | null; email: string; 
     lastActivity: row.updated_at || row.created_at,
     slug: null,
     userId: row.id,
+    lastName: row.full_name?.trim() || row.email || '',
+    firstName: '',
+    createdAt: row.created_at,
+    isTest: false,
   }
 }
 
@@ -205,11 +221,11 @@ async function profilesForUsers(admin: ReturnType<typeof createAdminClient>, use
   return map
 }
 
-async function collectDoctors(admin: ReturnType<typeof createAdminClient>, filters: MemberQuery, sets: BillingSets): Promise<{ rows: MemberListRow[]; total: number }> {
+async function collectDoctors(admin: ReturnType<typeof createAdminClient>, filters: MemberQuery, sets: BillingSets, maxRows = 20000): Promise<{ rows: MemberListRow[]; total: number }> {
   const size = 1000
   const records: Record<string, unknown>[] = []
   let total = 0
-  for (let from = 0; from < 20000; from += size) {
+  for (let from = 0; from < maxRows; from += size) {
     const page = await loadDoctors(admin, filters, from, from + size - 1)
     if (page.error) {
       console.error('admin members doctors', page.error.code || 'error')
@@ -218,22 +234,28 @@ async function collectDoctors(admin: ReturnType<typeof createAdminClient>, filte
     const batch = page.data || []
     total = page.count ?? total
     records.push(...batch)
-    if (batch.length < size) break
+    if (batch.length < size || records.length >= maxRows) break
   }
+  records.splice(maxRows)
   const profiles = await profilesForUsers(admin, records.map((row) => textOrEmpty(row.user_id)).filter(Boolean))
   const rows = records.map((row) => doctorRow(row, sets, profiles)).filter((row) => row.id)
   return { rows, total: total || rows.length }
 }
 
-async function collectProfiles(admin: ReturnType<typeof createAdminClient>, role: 'student' | 'vendor', filters: MemberQuery, sets: BillingSets): Promise<{ rows: MemberListRow[]; total: number }> {
+function orderProfiles<T extends { order: (column: string, options: { ascending: boolean }) => T }>(query: T, sort: MemberQuery['sort']): T {
+  if (sort === 'recent') return query.order('updated_at', { ascending: false })
+  if (sort === 'newest') return query.order('created_at', { ascending: false })
+  return query.order('full_name', { ascending: true })
+}
+
+async function collectProfiles(admin: ReturnType<typeof createAdminClient>, role: 'student' | 'vendor', filters: MemberQuery, sets: BillingSets, maxRows = 20000): Promise<{ rows: MemberListRow[]; total: number }> {
   const size = 1000
   const rows: MemberListRow[] = []
   let total = 0
-  for (let from = 0; from < 20000; from += size) {
+  for (let from = 0; from < maxRows; from += size) {
     let query = admin.from('profiles').select(PROFILE_LIST, { count: 'exact' }).eq('role', role)
-    if (filters.q) query = query.or(profileOrFilter(filters.q))
-    if (filters.sort === 'recent') query = query.order('updated_at', { ascending: false })
-    else query = query.order('full_name', { ascending: true })
+    query = chainOr(query, profileTokenFilters(filters.q))
+    query = orderProfiles(query, filters.sort)
     const { data, error, count } = await query.range(from, from + size - 1)
     if (error) {
       console.error('admin members profiles', error.code || 'error')
@@ -244,63 +266,96 @@ async function collectProfiles(admin: ReturnType<typeof createAdminClient>, role
       const mapped = profileRow(row, sets)
       if (mapped) rows.push(mapped)
     }
-    if ((data || []).length < size) break
+    if ((data || []).length < size || rows.length >= maxRows) break
   }
+  rows.splice(maxRows)
   return { rows, total: total || rows.length }
 }
 
-function pageOf(rows: MemberListRow[], query: MemberQuery): MemberSearchResult {
+function pageOf(rows: MemberListRow[], query: MemberQuery, billingOk: boolean, note: string | null): MemberSearchResult {
   const start = (query.page - 1) * query.pageSize
-  return { rows: rows.slice(start, start + query.pageSize), total: rows.length }
+  return { rows: rows.slice(start, start + query.pageSize), total: rows.length, billingOk, note }
+}
+
+async function profilePage(admin: ReturnType<typeof createAdminClient>, role: 'student' | 'vendor', query: MemberQuery, sets: BillingSets, from: number, to: number) {
+  let request = admin.from('profiles').select(PROFILE_LIST, { count: 'exact' }).eq('role', role)
+  request = chainOr(request, profileTokenFilters(query.q))
+  request = orderProfiles(request, query.sort)
+  const { data, error, count } = await request.range(from, to)
+  if (error) {
+    console.error('admin members profiles', error.code || 'error')
+    throw new Error('member search failed')
+  }
+  return {
+    rows: (data || []).map((row) => profileRow(row, sets)).filter((row): row is MemberListRow => Boolean(row)),
+    total: count || 0,
+  }
 }
 
 async function searchFallback(admin: ReturnType<typeof createAdminClient>, query: MemberQuery, sets: BillingSets): Promise<MemberSearchResult> {
   const roles = rolesFor(query)
-  if (roles.length === 0) return { rows: [], total: 0 }
-  if (roles.length === 1 && !query.tier) {
-    const role = roles[0]
-    const from = (query.page - 1) * query.pageSize
-    const to = from + query.pageSize - 1
+  const note = query.tier ? BILLING_NOTE : null
+  if (roles.length === 0) return { rows: [], total: 0, billingOk: sets.ok, note }
+  if (query.tier) {
+    const buckets: MemberListRow[] = []
+    for (const role of roles) {
+      if (role === 'doctor') {
+        const doctors = await collectDoctors(admin, query, sets, BILLING_SCAN_CAP)
+        buckets.push(...doctors.rows)
+      } else {
+        const people = await collectProfiles(admin, role, query, sets, BILLING_SCAN_CAP)
+        buckets.push(...people.rows)
+      }
+    }
+    const filtered = buckets.filter((row) => billingLabelMatches(row.billingLabel, query.tier))
+    filtered.sort((a, b) => compareMembers(a, b, query.sort))
+    return pageOf(filtered, query, sets.ok, note)
+  }
+
+  const from = (query.page - 1) * query.pageSize
+  const to = from + query.pageSize - 1
+  if (roles.length === 1 && roles[0] === 'doctor') {
+    const page = await loadDoctors(admin, query, from, to)
+    if (page.error) {
+      console.error('admin members doctors', page.error.code || 'error')
+      throw new Error('member search failed')
+    }
+    const profiles = await profilesForUsers(admin, (page.data || []).map((row) => textOrEmpty(row.user_id)).filter(Boolean))
+    return {
+      rows: (page.data || []).map((row) => doctorRow(row, sets, profiles)).filter((row) => row.id),
+      total: page.count || 0,
+      billingOk: sets.ok,
+      note: null,
+    }
+  }
+  if (roles.length === 1) {
+    const only = roles[0]
+    if (only === 'student' || only === 'vendor') {
+      const page = await profilePage(admin, only, query, sets, from, to)
+      return { rows: page.rows, total: page.total, billingOk: sets.ok, note: null }
+    }
+  }
+
+  const buckets: MemberListRow[] = []
+  let total = 0
+  for (const role of roles) {
     if (role === 'doctor') {
       const page = await loadDoctors(admin, query, from, to)
       if (page.error) {
         console.error('admin members doctors', page.error.code || 'error')
         throw new Error('member search failed')
       }
+      total += page.count || 0
       const profiles = await profilesForUsers(admin, (page.data || []).map((row) => textOrEmpty(row.user_id)).filter(Boolean))
-      return {
-        rows: (page.data || []).map((row) => doctorRow(row, sets, profiles)).filter((row) => row.id),
-        total: page.count || 0,
-      }
-    }
-    let request = admin.from('profiles').select(PROFILE_LIST, { count: 'exact' }).eq('role', role)
-    if (query.q) request = request.or(profileOrFilter(query.q))
-    if (query.sort === 'recent') request = request.order('updated_at', { ascending: false })
-    else request = request.order('full_name', { ascending: true })
-    const { data, error, count } = await request.range(from, to)
-    if (error) {
-      console.error('admin members profiles', error.code || 'error')
-      throw new Error('member search failed')
-    }
-    return {
-      rows: (data || []).map((row) => profileRow(row, sets)).filter((row): row is MemberListRow => Boolean(row)),
-      total: count || 0,
-    }
-  }
-
-  const buckets: MemberListRow[] = []
-  for (const role of roles) {
-    if (role === 'doctor') {
-      const doctors = await collectDoctors(admin, query, sets)
-      buckets.push(...doctors.rows)
+      buckets.push(...(page.data || []).map((row) => doctorRow(row, sets, profiles)).filter((row) => row.id))
     } else {
-      const people = await collectProfiles(admin, role, query, sets)
-      buckets.push(...people.rows)
+      const page = await profilePage(admin, role, query, sets, from, to)
+      total += page.total
+      buckets.push(...page.rows)
     }
   }
-  const filtered = query.tier ? buckets.filter((row) => billingLabelMatches(row.billingLabel, query.tier)) : buckets
-  filtered.sort((a, b) => compareMembers(a, b, query.sort))
-  return pageOf(filtered, query)
+  buckets.sort((a, b) => compareMembers(a, b, query.sort))
+  return { rows: buckets.slice(0, query.pageSize), total, billingOk: sets.ok, note: null }
 }
 
 function rowFromRpc(row: Record<string, unknown>, sets: BillingSets): MemberListRow | null {
@@ -337,6 +392,10 @@ function rowFromRpc(row: Record<string, unknown>, sets: BillingSets): MemberList
       lastActivity: textOrNull(row.last_activity),
       slug: textOrNull(row.slug),
       userId: textOrNull(row.user_id),
+      lastName: textOrEmpty(row.full_name),
+      firstName: '',
+      createdAt: textOrNull(row.member_created_at),
+      isTest: false,
     }
   }
   const billing = resolveProfileBilling(textOrNull(row.stripe_customer_id), sets, textOrNull(row.profile_tier))
@@ -355,10 +414,16 @@ function rowFromRpc(row: Record<string, unknown>, sets: BillingSets): MemberList
     lastActivity: textOrNull(row.last_activity),
     slug: null,
     userId: textOrNull(row.user_id) || id,
+    lastName: textOrEmpty(row.full_name) || textOrEmpty(row.email),
+    firstName: '',
+    createdAt: textOrNull(row.member_created_at),
+    isTest: false,
   }
 }
 
-async function searchRpc(admin: ReturnType<typeof createAdminClient>, query: MemberQuery, sets: BillingSets): Promise<MemberSearchResult | null> {
+type RpcOutcome = { status: 'ok'; result: MemberSearchResult } | { status: 'missing' } | { status: 'error' }
+
+async function searchRpc(admin: ReturnType<typeof createAdminClient>, query: MemberQuery, sets: BillingSets): Promise<RpcOutcome> {
   const rpc = (admin as unknown as { rpc: RpcCall }).rpc
   let data: unknown
   let error: PostgrestError
@@ -377,18 +442,26 @@ async function searchRpc(admin: ReturnType<typeof createAdminClient>, query: Mem
     error = result.error
   } catch (err) {
     console.error('admin members rpc', err instanceof Error ? err.name : 'error')
-    return null
+    return { status: 'error' }
   }
   if (error) {
-    if (!isMissingSearchRpc(error)) console.error('admin members rpc', error.code || 'error')
-    return null
+    if (isMissingSearchRpc(error)) return { status: 'missing' }
+    console.error('admin members rpc', error.code || 'error')
+    return { status: 'error' }
   }
-  if (!Array.isArray(data)) return null
+  if (!Array.isArray(data)) return { status: 'error' }
   const records = data.map(asRecord).filter((row): row is Record<string, unknown> => Boolean(row))
   const total = records.length ? asCount(records[0].total_count) : 0
   const rows = records.map((row) => rowFromRpc(row, sets)).filter((row): row is MemberListRow => Boolean(row))
-  if (query.tier) return null
-  return { rows, total }
+  const doctorIds = rows.filter((row) => row.role === 'doctor').map((row) => row.id)
+  if (doctorIds.length > 0) {
+    const flags = await looseFrom(admin, 'doctors').select('id, is_test').in('id', doctorIds)
+    if (!flags.error) {
+      const testIds = new Set((flags.data || []).filter((row) => row.is_test === true).map((row) => textOrEmpty(row.id)).filter(Boolean))
+      for (const row of rows) row.isTest = testIds.has(row.id)
+    }
+  }
+  return { status: 'ok', result: { rows, total, billingOk: sets.ok, note: null } }
 }
 
 export async function searchMembers(input: MemberSearchInput): Promise<MemberSearchResult> {
@@ -399,16 +472,8 @@ export async function searchMembers(input: MemberSearchInput): Promise<MemberSea
   const sets = setsFrom(snapshot)
   if (!query.tier) {
     const rpc = await searchRpc(admin, query, sets)
-    if (rpc) return rpc
-  }
-  if (query.tier && rolesFor(query).length === 1) {
-    const role = rolesFor(query)[0]
-    const loaded = role === 'doctor'
-      ? await collectDoctors(admin, query, sets)
-      : await collectProfiles(admin, role, query, sets)
-    const filtered = loaded.rows.filter((row) => billingLabelMatches(row.billingLabel, query.tier))
-    filtered.sort((a, b) => compareMembers(a, b, query.sort))
-    return pageOf(filtered, query)
+    if (rpc.status === 'ok') return rpc.result
+    if (rpc.status === 'error') throw new Error('member search failed')
   }
   return searchFallback(admin, query, sets)
 }

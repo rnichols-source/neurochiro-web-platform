@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { TrendingUp, Download, ArrowUpDown, Filter } from 'lucide-react'
-import { getDoctorRoutingStats } from './actions'
-import type { DoctorRoutingRow, DoctorRoutingData } from './actions'
+import { getDoctorRoutingStats } from '@/app/(admin)/admin/stats/doctors/actions'
+import type { DoctorRoutingRow, DoctorRoutingData } from '@/app/(admin)/admin/stats/doctors/actions'
 
 // ── Types ──
 

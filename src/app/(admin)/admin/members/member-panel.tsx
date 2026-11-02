@@ -1,10 +1,27 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { activateAfterOnboardingCall, updateDoctorManually } from '@/app/(admin)/admin/directory/actions'
-import { staticMapUrl, type DoctorFormValues, type MemberDetail } from '@/lib/admin/member-search'
+import { type DoctorFormValues, type MemberDetail } from '@/lib/admin/member-search'
+
+const MemberMiniMap = dynamic(() => import('./MemberMiniMap'), {
+  ssr: false,
+  loading: () => <div className="h-40 w-full rounded-xl bg-neuro-cream" />,
+})
+
+export function MemberPanelSkeleton() {
+  return (
+    <div className="space-y-3" aria-busy="true" aria-label="Loading member">
+      <div className="h-6 w-48 rounded-xl bg-neuro-cream" />
+      <div className="h-40 w-full rounded-xl bg-neuro-cream" />
+      <div className="h-11 w-full rounded-xl bg-neuro-cream" />
+      <div className="h-11 w-2/3 rounded-xl bg-neuro-cream" />
+    </div>
+  )
+}
 
 function when(value: string | null) {
   if (!value) return 'Unknown'
@@ -71,10 +88,9 @@ function DoctorSections({ detail }: { detail: MemberDetail }) {
         <h3 className="font-heading text-base font-bold">Location</h3>
         {detail.location ? (
           <>
-            {/* External OSM static map. It needs no API key and is not sent through the image optimizer. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={staticMapUrl(detail.location.lat, detail.location.lng)} alt={place ? `Map near ${place}` : 'Practice map'} className="h-40 w-full rounded-xl object-cover" />
+            <MemberMiniMap lat={detail.location.lat} lng={detail.location.lng} label={place ? `Map near ${place}` : 'Practice map'} />
             <p className="tabular-nums text-neuro-gray">{detail.location.lat}, {detail.location.lng}</p>
+            <Link className="inline-flex min-h-11 items-center text-neuro-orange" href="/admin/coverage">Open in coverage map</Link>
           </>
         ) : (
           <>
@@ -144,6 +160,7 @@ function PanelActions({ detail }: { detail: MemberDetail }) {
   }
 
   async function hide() {
+    if (!window.confirm('Hide this doctor from the directory?')) return
     setPending(true)
     setMessage('')
     const result = await updateDoctorManually(detail.id, { verification_status: 'hidden' })

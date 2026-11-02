@@ -1,11 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { GeoJSONSource, Map, NavigationControl, Popup } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import Supercluster from 'supercluster'
 import { billingLabel } from '@/lib/admin/coverage-types'
 import type { DemandPoint, GapSummary, MapDoctor, MentionPoint } from '@/lib/admin/coverage-types'
+import type { PopupFields } from '@/lib/admin/popup-dom'
 import { buildDoctorPopup } from './DoctorPopup'
 
 const STYLE_URL = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -19,6 +20,7 @@ type DoctorProps = {
   billing: string
   paying: number
   other: number
+  doctors: string
 }
 
 type DoctorCluster = { paying: number; other: number }
@@ -83,6 +85,62 @@ function prop(feature: GeoJSON.Feature, key: string): string {
   return value == null ? '' : String(value)
 }
 
+function stackDoctors(doctors: MapDoctor[]): GeoJSON.Feature<GeoJSON.Point, DoctorProps>[] {
+  const groups = new globalThis.Map<string, MapDoctor[]>()
+  for (const doctor of doctors) {
+    const key = `${doctor.lat.toFixed(5)},${doctor.lng.toFixed(5)}`
+    const list = groups.get(key)
+    if (list) list.push(doctor)
+    else groups.set(key, [doctor])
+  }
+  return [...groups.values()].map((group) => {
+    const doctor = group[0]
+    const stack: PopupFields[] = group.map((item) => ({
+      id: item.id,
+      name: item.name,
+      practice: item.practice,
+      city: [item.city, item.state].filter(Boolean).join(', '),
+      billing: billingLabel(item.billing),
+    }))
+    return {
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [doctor.lng, doctor.lat] },
+      properties: {
+        name: doctor.name,
+        practice: doctor.practice,
+        city: [doctor.city, doctor.state].filter(Boolean).join(', '),
+        badge: billingLabel(doctor.billing),
+        billing: doctor.billing,
+        paying: group.some((item) => item.billing === 'paying') ? 1 : 0,
+        other: group.every((item) => item.billing === 'paying') ? 0 : 1,
+        doctors: JSON.stringify(stack),
+      },
+    }
+  })
+}
+
+function readStack(feature: GeoJSON.Feature): PopupFields[] {
+  try {
+    const parsed = JSON.parse(prop(feature, 'doctors')) as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed.flatMap((item) => {
+      if (!item || typeof item !== 'object') return []
+      const row = item as Record<string, unknown>
+      const id = typeof row.id === 'string' ? row.id : ''
+      if (!id) return []
+      return [{
+        id,
+        name: typeof row.name === 'string' ? row.name : '',
+        practice: typeof row.practice === 'string' ? row.practice : '',
+        city: typeof row.city === 'string' ? row.city : '',
+        billing: typeof row.billing === 'string' ? row.billing : '',
+      }]
+    })
+  } catch {
+    return []
+  }
+}
+
 export default function CoverageMap({
   doctors,
   demand,
@@ -106,8 +164,8 @@ export default function CoverageMap({
   const centerRef = useRef(center)
   const zoomRef = useRef(zoom)
 
-  const draw = useCallback((map: Map) => {
-    const doctorIndex = new Supercluster<DoctorProps, DoctorCluster>({
+  const doctorIndex = useMemo(() => {
+    const index = new Supercluster<DoctorProps, DoctorCluster>({
       radius: 48,
       maxZoom: 14,
       map: (item) => ({ paying: item.paying, other: item.other }),
@@ -116,22 +174,12 @@ export default function CoverageMap({
         accumulated.other += item.other
       },
     })
-    doctorIndex.load(doctors.map((doctor) => ({
-      type: 'Feature' as const,
-      geometry: { type: 'Point' as const, coordinates: [doctor.lng, doctor.lat] },
-      properties: {
-        name: doctor.name,
-        practice: doctor.practice,
-        city: [doctor.city, doctor.state].filter(Boolean).join(', '),
-        badge: billingLabel(doctor.billing),
-        billing: doctor.billing,
-        paying: doctor.billing === 'paying' ? 1 : 0,
-        other: doctor.billing === 'paying' ? 0 : 1,
-      },
-    })))
-    doctorIndexRef.current = doctorIndex
+    index.load(stackDoctors(doctors))
+    return index
+  }, [doctors])
 
-    const demandIndex = new Supercluster<DemandProps, DemandCluster>({
+  const demandIndex = useMemo(() => {
+    const index = new Supercluster<DemandProps, DemandCluster>({
       radius: 56,
       maxZoom: 12,
       map: (item) => ({ sum: item.sum }),
@@ -139,7 +187,7 @@ export default function CoverageMap({
         accumulated.sum += item.sum
       },
     })
-    demandIndex.load(demand.map((point) => ({
+    index.load(demand.map((point) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [point.lng, point.lat] },
       properties: {
@@ -150,8 +198,18 @@ export default function CoverageMap({
         sum: point.count,
       },
     })))
-    demandIndexRef.current = demandIndex
+    return index
+  }, [demand])
 
+  useEffect(() => {
+    doctorIndexRef.current = doctorIndex
+    demandIndexRef.current = demandIndex
+  }, [doctorIndex, demandIndex])
+
+  const draw = useCallback((map: Map) => {
+    const doctorClusters = doctorIndexRef.current
+    const demandClusters = demandIndexRef.current
+    if (!doctorClusters || !demandClusters) return
     const bounds = map.getBounds()
     const clusterZoom = Math.round(map.getZoom())
     const bbox: [number, number, number, number] = [
@@ -160,8 +218,8 @@ export default function CoverageMap({
       bounds.getEast(),
       bounds.getNorth(),
     ]
-    source(map, 'doctors')?.setData(collection(doctorIndex.getClusters(bbox, clusterZoom)))
-    source(map, 'demand')?.setData(collection(demandIndex.getClusters(bbox, clusterZoom)))
+    source(map, 'doctors')?.setData(collection(doctorClusters.getClusters(bbox, clusterZoom)))
+    source(map, 'demand')?.setData(collection(demandClusters.getClusters(bbox, clusterZoom)))
     source(map, 'mentions')?.setData(collection(mentions.map((mention) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [mention.lng, mention.lat] },
@@ -187,7 +245,7 @@ export default function CoverageMap({
     show(map, 'demand-points', showDemand)
     show(map, 'mention-points', showMentions)
     show(map, 'gap-rings', showGaps)
-  }, [doctors, demand, mentions, gaps, showDoctors, showDemand, showMentions, showGaps])
+  }, [mentions, gaps, showDoctors, showDemand, showMentions, showGaps])
 
   useEffect(() => {
     drawRef.current = draw
@@ -265,10 +323,37 @@ export default function CoverageMap({
         source: 'doctors',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': ['case', ['==', ['get', 'billing'], 'paying'], '#D66829', '#1E2D3B'],
+          'circle-color': [
+            'match', ['get', 'billing'],
+            'paying', '#D66829',
+            'trialing', '#F5F3EF',
+            'past_due', '#D97706',
+            'founding-comped', '#1E2D3B',
+            'free', '#ffffff',
+            'pending', '#9CA3AF',
+            'mismatch', '#ffffff',
+            '#9CA3AF',
+          ],
           'circle-radius': ['interpolate', ['linear'], ['zoom'], 3, 5, 8, 7, 14, 10],
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': [
+            'match', ['get', 'billing'],
+            'trialing', 3,
+            'past_due', 3,
+            'free', 2,
+            'mismatch', 3,
+            2,
+          ],
+          'circle-stroke-color': [
+            'match', ['get', 'billing'],
+            'paying', '#D66829',
+            'trialing', '#D66829',
+            'past_due', '#1E2D3B',
+            'founding-comped', '#ffffff',
+            'free', '#1E2D3B',
+            'pending', '#6B7280',
+            'mismatch', '#E11D48',
+            '#1E2D3B',
+          ],
         },
       })
       map.addLayer({
@@ -355,12 +440,14 @@ export default function CoverageMap({
         const feature = event.features?.[0]
         const coords = pointCoords(feature)
         if (!feature || !coords) return
-        open(coords, buildDoctorPopup({
+        const stack = readStack(feature)
+        open(coords, buildDoctorPopup(stack.length > 0 ? stack : [{
+          id: prop(feature, 'id'),
           name: prop(feature, 'name'),
           practice: prop(feature, 'practice'),
           city: prop(feature, 'city'),
           billing: prop(feature, 'badge'),
-        }))
+        }]))
       })
       map.on('click', 'demand-points', (event) => {
         const feature = event.features?.[0]

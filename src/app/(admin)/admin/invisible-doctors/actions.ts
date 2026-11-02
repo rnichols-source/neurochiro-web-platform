@@ -2,6 +2,7 @@
 
 import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
 import { checkAdminAuth } from '@/lib/admin-auth'
+import { bustAdminCoverage } from '@/lib/admin/bust-coverage'
 
 export interface InvisibleDoctor {
   id: string
@@ -158,6 +159,7 @@ export async function updateDoctorCoordinates(doctorId: string, lat: number, lng
     .eq('id', doctorId)
 
   if (error) return { error: error.message }
+  bustAdminCoverage()
   return { success: true }
 }
 
@@ -191,7 +193,9 @@ export async function geocodeDoctorFromAdmin(doctorId: string) {
       if (matches && matches.length > 0) {
         const lat = matches[0].coordinates.y
         const lng = matches[0].coordinates.x
-        await supabase.from('doctors').update({ latitude: lat, longitude: lng }).eq('id', doctorId)
+        const { error: censusError } = await supabase.from('doctors').update({ latitude: lat, longitude: lng }).eq('id', doctorId)
+        if (censusError) return { error: censusError.message }
+        bustAdminCoverage()
         return { success: true, lat, lng, method: 'census' }
       }
     } catch {}
@@ -199,6 +203,8 @@ export async function geocodeDoctorFromAdmin(doctorId: string) {
     return { error: `Geocoding failed for "${doc.address}, ${doc.city}, ${doc.state}". Both Nominatim and Census Bureau returned no results.` }
   }
 
-  await supabase.from('doctors').update({ latitude: result.lat, longitude: result.lng }).eq('id', doctorId)
+  const { error: geoError } = await supabase.from('doctors').update({ latitude: result.lat, longitude: result.lng }).eq('id', doctorId)
+  if (geoError) return { error: geoError.message }
+  bustAdminCoverage()
   return { success: true, lat: result.lat, lng: result.lng, method: 'nominatim' }
 }
