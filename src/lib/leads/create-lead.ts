@@ -314,32 +314,30 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   }
 
   try {
-    after(() => {
-      void sendLeadTexts({
-        requestId,
-        smsConsentSaved,
-        doctor: {
-          id: String(doctor.id),
-          state: doctor.state ?? null,
-          country: doctor.country ?? null,
-          lastName: doctor.last_name || '',
-          practice: doctor.clinic_name || '',
-          leadAlertPhones: alerts?.lead_alert_phones || [],
-          smsAlertsEnabled: alerts?.sms_alerts_enabled === true,
-          smsAlertsConsentAt: alerts?.sms_alerts_consent_at || null,
-        },
-        patient: {
-          name,
-          phone: phoneOk ? phone : '',
-          email,
-          smsPhone: normalizedSms,
-          bestTime: preferredTime,
-          message,
-        },
-      }).catch(() => {
-        console.warn('[SMS] lead texts failed')
-      })
-    })
+    after(() => sendLeadTexts({
+      requestId,
+      smsConsentSaved,
+      doctor: {
+        id: String(doctor.id),
+        state: doctor.state ?? null,
+        country: doctor.country ?? null,
+        lastName: doctor.last_name || '',
+        practice: doctor.clinic_name || '',
+        leadAlertPhones: alerts?.lead_alert_phones || [],
+        smsAlertsEnabled: alerts?.sms_alerts_enabled === true,
+        smsAlertsConsentAt: alerts?.sms_alerts_consent_at || null,
+      },
+      patient: {
+        name,
+        phone: phoneOk ? phone : '',
+        email,
+        smsPhone: normalizedSms,
+        bestTime: preferredTime,
+        message,
+      },
+    }).catch(() => {
+      console.warn('[SMS] lead texts failed')
+    }))
   } catch {
     console.warn('[SMS] could not schedule lead texts')
   }
