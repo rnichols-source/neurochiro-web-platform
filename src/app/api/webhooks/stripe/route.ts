@@ -10,6 +10,8 @@ import { fulfillSynapseCheckout, lapseSynapseSubscription } from "@/lib/synapse/
 import { noteSynapsePaymentFailed, synapseUpdateShouldLapse } from "@/lib/synapse/payment-failed";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 import { accessForStripeStatus } from "@/lib/portal/membership";
+import { fulfillDoctorApplicationSetup } from "@/lib/applications/fulfill";
+import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import {
   isUndefinedPaymentIssueColumn,
   planSubscriptionChange,
@@ -155,7 +157,10 @@ async function applyMembershipFromSubscription(
   const customerId = readId(subscription.customer);
   if (!customerId) return;
   const profile = await loadBillingProfile(admin, customerId);
-  if (!profile) return;
+  if (!profile) {
+    await syncDoctorMembershipByCustomer(admin, customerId, subscription.status || "");
+    return;
+  }
 
   const metadataRole = subscription.metadata?.role || "";
   const role = profile.role === "student" || profile.role === "student_paid" || metadataRole === "student"
@@ -188,6 +193,7 @@ async function applyMembershipFromSubscription(
       .eq("user_id", profile.id);
     if (updated.error) console.error("[WEBHOOK] doctor tier update failed", updated.error.code);
   }
+  await syncDoctorMembershipByCustomer(admin, customerId, status);
 }
 
 export async function POST(req: Request) {
@@ -232,6 +238,10 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as any;
+        if (session.metadata?.type === "doctor_application_setup") {
+          await fulfillDoctorApplicationSetup(session);
+          break;
+        }
         if (session.metadata?.type === "synapse_seat" || session.metadata?.type === "synapse_addon") {
           await fulfillSynapseCheckout(supabase, session);
           break;

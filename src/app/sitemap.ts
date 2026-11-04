@@ -5,6 +5,7 @@ import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
 import { getProducts } from '@/lib/shopify';
 import { EUROPEAN_ISO, toDirectoryCountry } from '@/lib/directory-countries';
 import { excludeDemo } from '@/lib/directory/exclude-demo';
+import { applyPublicListing } from '@/lib/directory/visibility';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,11 +16,11 @@ async function fetchPublishedDoctors(supabase: ReturnType<typeof createServerSup
   const doctors: { slug: string; created_at: string | null }[] = [];
 
   for (let from = 0; ; from += pageSize) {
-    const { data, error } = await excludeDemo(supabase
+    const { data, error } = await applyPublicListing(excludeDemo(supabase
       .from('doctors')
       .select('slug, created_at')
       .eq('verification_status', 'verified')
-      .not('slug', 'is', null))
+      .not('slug', 'is', null)))
       .order('created_at', { ascending: true })
       .range(from, from + pageSize - 1);
 
@@ -43,10 +44,10 @@ async function directoryRegionCounts(supabase: ReturnType<typeof createServerSup
   const pageSize = 1000;
 
   for (let from = 0; ; from += pageSize) {
-    const { data, error } = await excludeDemo(supabase
+    const { data, error } = await applyPublicListing(excludeDemo(supabase
       .from('doctors')
       .select('country')
-      .in('verification_status', ['verified', 'pending']))
+      .in('verification_status', ['verified', 'pending'])))
       .range(from, from + pageSize - 1);
 
     if (error || !data?.length) break;

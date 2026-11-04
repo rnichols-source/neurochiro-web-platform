@@ -48,6 +48,8 @@ function RegisterForm() {
     if (licenseState) formData.append("licenseState", licenseState);
     if (billing) formData.append("billing", billing);
     if (region) formData.append("region", region);
+    const referralCode = searchParams.get("ref");
+    if (referralCode) formData.append("ref", referralCode);
     if (chiropracticApproach) formData.append("chiropracticApproach", chiropracticApproach);
 
     // Force doctor role when claiming a profile
@@ -63,9 +65,13 @@ function RegisterForm() {
     if (result.user && claimId) {
       const claimResult = await claimDoctorProfileAction(result.user.id, claimId);
       if (claimResult?.error) {
-        // If claim fails, still redirect to dashboard — profile role is already set to doctor
         console.error("Claim error (non-blocking):", claimResult.error);
       }
+    }
+
+    if (result.nextPath) {
+      router.push(result.nextPath);
+      return;
     }
 
     // Patient: redirect immediately (free, no verification needed)

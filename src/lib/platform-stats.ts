@@ -15,6 +15,7 @@ import { looseFrom } from '@/lib/admin/loose-query'
 import { normalizeCountry, normalizeState } from '@/lib/admin/geo-normalize'
 import { isMissingColumn } from '@/lib/leads/schema'
 import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
+import { applyPublicListing } from '@/lib/directory/visibility'
 
 export interface DoctorCounts {
   active: number         // verified + valid coords + US
@@ -57,18 +58,18 @@ export async function getDoctorCounts(): Promise<DoctorCounts> {
   const supabase = createAdminClient()
   const withTest = 'verification_status, state, country, latitude, longitude, is_test'
   const base = 'verification_status, state, country, latitude, longitude'
-  const probe = await looseFrom(supabase, 'doctors')
+  const probe = await applyPublicListing(looseFrom(supabase, 'doctors')
     .select(withTest)
     .in('verification_status', ['verified', 'pending'])
-    .eq('is_test', 'false')
+    .eq('is_test', 'false'))
     .range(0, 0)
   const rows = probe.error && isMissingColumn(probe.error)
-    ? await fetchAllRows(supabase, 'doctors', base, (query) => query.in('verification_status', ['verified', 'pending']))
+    ? await fetchAllRows(supabase, 'doctors', base, (query) => applyPublicListing(query.in('verification_status', ['verified', 'pending'])))
     : await fetchAllRows(
       supabase,
       'doctors',
       withTest,
-      (query) => query.in('verification_status', ['verified', 'pending']).eq('is_test', false),
+      (query) => applyPublicListing(query.in('verification_status', ['verified', 'pending']).eq('is_test', false)),
     )
 
   const docs = rows.flatMap((row) => {

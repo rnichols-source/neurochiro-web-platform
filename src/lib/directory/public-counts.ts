@@ -3,6 +3,7 @@ import { EUROPEAN_ISO, countryMeta, toDirectoryCountry } from "@/lib/directory-c
 import { isValidCoord } from "@/lib/geo";
 import type { RegionCode } from "@/lib/regions";
 import { excludeDemo } from "@/lib/directory/exclude-demo";
+import { applyPublicListing } from "@/lib/directory/visibility";
 
 export interface PublicDirectoryCounts {
   total: number;
@@ -23,12 +24,12 @@ const EMPTY: PublicDirectoryCounts = {
 export async function getPublicDirectoryCounts(): Promise<PublicDirectoryCounts> {
   try {
     const supabase = createAdminClient();
-    const { data } = await excludeDemo(
+    const { data } = await applyPublicListing(excludeDemo(
       supabase
         .from("doctors")
         .select("country, latitude, longitude")
         .in("verification_status", ["verified", "pending"])
-    );
+    ));
     const rows = (data || []).filter((row) => isValidCoord(row.latitude, row.longitude));
     const byCountry: Record<RegionCode, number> = { ...EMPTY.byCountry };
     const isos = new Set<string>();

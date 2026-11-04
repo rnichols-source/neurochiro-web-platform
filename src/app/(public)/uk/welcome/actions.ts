@@ -2,12 +2,14 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { normalizeCoords } from '@/lib/geo'
+import { isPaidCheckoutSession } from '@/lib/applications/welcome-session'
 
 export async function lookupStripeSession(sessionId: string): Promise<{ name: string; email: string } | null> {
   if (!sessionId) return null
   try {
     const { stripe } = await import('@/lib/stripe')
     const session = await stripe.checkout.sessions.retrieve(sessionId)
+    if (!isPaidCheckoutSession(session)) return null
     return {
       name: session.customer_details?.name || '',
       email: session.customer_details?.email || session.customer_email || '',
@@ -30,7 +32,27 @@ export async function submitUKProfile(data: {
   country_code?: string
   source?: string
 }): Promise<{ success: boolean; error?: string }> {
+  if (!data.stripe_session_id) {
+    return { success: false, error: 'This form opens after a paid Stripe checkout.' }
+  }
   const supabase = createAdminClient()
+  try {
+    const { stripe } = await import('@/lib/stripe')
+    const session = await stripe.checkout.sessions.retrieve(data.stripe_session_id)
+    if (!isPaidCheckoutSession(session)) {
+      return { success: false, error: 'Stripe has not confirmed this payment yet.' }
+    }
+    const { data: existing } = await (supabase as any)
+      .from('doctors')
+      .select('id')
+      .eq('stripe_session_id', data.stripe_session_id)
+      .maybeSingle()
+    if (existing?.id) {
+      return { success: false, error: 'This payment was already used to create a listing.' }
+    }
+  } catch {
+    return { success: false, error: 'We could not verify that Stripe payment.' }
+  }
 
   const nameParts = data.name.trim().split(' ')
   const firstName = nameParts[0] || ''

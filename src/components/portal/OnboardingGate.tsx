@@ -1,25 +1,91 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Calendar, CheckCircle2, Clock, Phone, Image as ImageIcon, Video, Star, Zap, BarChart3, Mail } from 'lucide-react';
+import Link from 'next/link';
+import { Calendar, CheckCircle2, Phone, Image as ImageIcon, Video, Star, Zap, BarChart3, Mail } from 'lucide-react';
 import { DOCTOR_PRO_FEATURES_MINIMAL } from '@/lib/membership-value';
 import { createClient } from '@/lib/supabase';
 import { firstName } from '@/lib/portal/greeting';
+import type { ApplicationGate } from '@/lib/applications/gate-kind';
 
 const CALENDLY_URL = 'https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call';
+
+function ReviewScreen({ title, body, action }: { title: string; body: string; action?: { href: string; label: string } }) {
+  return (
+    <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
+      <div className="max-w-lg w-full text-center">
+        <h1 className="text-2xl font-bold text-white mb-3">{title}</h1>
+        <p className="text-white/70 leading-relaxed mb-6">{body}</p>
+        {action ? (
+          <Link href={action.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-neuro-orange px-5 font-bold text-white">
+            {action.label}
+          </Link>
+        ) : null}
+        <div className="mt-6">
+          <button
+          type="button"
+          onClick={() => { createClient().auth.signOut().then(() => { window.location.href = '/'; }); }}
+          className="w-full min-h-11 text-sm text-white/70"
+        >
+          Sign out
+        </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function OnboardingGate({
   needsCall,
   callStatus,
   doctorName,
+  applicationGate,
   children,
 }: {
   needsCall: boolean;
   callStatus: string;
   doctorName: string | null;
+  applicationGate?: ApplicationGate | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const onApply = pathname === '/doctor/apply' || pathname.startsWith('/doctor/apply/');
+
+  if (applicationGate === 'finish' && onApply) return children;
+  if (applicationGate === 'finish') {
+    return (
+      <ReviewScreen
+        title="Finish your application"
+        body="Answer a few questions and save a card. You are not charged unless the application is approved. Your listing stays off the directory until then."
+        action={{ href: '/doctor/apply', label: 'Continue application' }}
+      />
+    );
+  }
+  if (applicationGate === 'review') {
+    return (
+      <ReviewScreen
+        title="Application under review"
+        body="Raymond has your application and the card on file. Nothing has been charged. Your listing stays off the directory until he approves it."
+      />
+    );
+  }
+  if (applicationGate === 'needs_action') {
+    return (
+      <ReviewScreen
+        title="Confirm your card"
+        body="Your application is approved, and your bank needs one more confirmation. Use the Stripe link in your email. The onboarding call link is in that email too."
+      />
+    );
+  }
+  if (applicationGate === 'declined') {
+    return (
+      <ReviewScreen
+        title="Application closed"
+        body="This application was not approved. The card was not charged, and the saved card was removed. Reply to the email if you think this was a mistake."
+      />
+    );
+  }
+
   if (!needsCall || pathname === '/doctor/onboarding') return children;
 
   const icons = [Phone, ImageIcon, Video, Star, Zap, BarChart3, Mail];
