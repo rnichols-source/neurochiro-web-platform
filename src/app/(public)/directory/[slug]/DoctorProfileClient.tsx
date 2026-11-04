@@ -18,6 +18,7 @@ import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
 import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-display";
 import { containsHealthWords } from "@/lib/leads/validate";
+import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
 
 function parseContact(value: string): { email: string; phone: string; valid: boolean } {
   const trimmed = value.trim();
@@ -62,7 +63,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [submittingStory, setSubmittingStory] = useState(false);
   const [appointmentSubmitted, setAppointmentSubmitted] = useState(false);
   const [submittingAppointment, setSubmittingAppointment] = useState(false);
-  const [appointmentForm, setAppointmentForm] = useState({ name: '', contact: '', bestTime: '', message: '' });
+  const [appointmentForm, setAppointmentForm] = useState({ name: '', contact: '', bestTime: '', message: '', smsConsent: false, smsPhone: '' });
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const supabase = createClient();
@@ -202,6 +203,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           preferredDate: appointmentForm.bestTime,
           message: appointmentForm.message,
           doctorId: doctor.id,
+          smsConsent: appointmentForm.smsConsent === true,
+          smsPhone: appointmentForm.smsConsent
+            ? (parsedContact.phone || appointmentForm.smsPhone.trim() || null)
+            : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -215,7 +220,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
     setSubmittingAppointment(false);
   };
 
-  const requestFields = () => (
+  const requestFields = (idPrefix: string) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
       <input type="text" placeholder="Your name *" autoComplete="name" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({ ...f, name: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
       <input type="text" placeholder="Phone or email *" autoComplete="tel" value={appointmentForm.contact} onChange={e => setAppointmentForm(f => ({ ...f, contact: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
@@ -223,6 +228,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <textarea placeholder="Message (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({ ...f, message: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, height: 72, resize: "none", outline: "none", width: "100%" }} />
       <p style={{ fontSize: 11, color: "#b0b8c4", margin: 0 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
       {containsHealthWords(appointmentForm.message) ? <p style={{ fontSize: 12, color: "#b45309", margin: 0 }}>Please don&apos;t include medical details.</p> : null}
+      <label htmlFor={`${idPrefix}-sms`} style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 12, color: "#4b5563", lineHeight: 1.45 }}>
+        <input id={`${idPrefix}-sms`} type="checkbox" checked={appointmentForm.smsConsent} onChange={e => setAppointmentForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: 2, width: 18, height: 18, flexShrink: 0 }} />
+        <span><PatientSmsConsentLabel /></span>
+      </label>
+      {appointmentForm.smsConsent && parsedContact.email ? (
+        <label htmlFor={`${idPrefix}-sms-phone`} style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "#4b5563" }}>
+          Mobile number for text updates
+          <input id={`${idPrefix}-sms-phone`} type="tel" inputMode="tel" autoComplete="tel" placeholder="Mobile number for text updates" value={appointmentForm.smsPhone} onChange={e => setAppointmentForm(f => ({ ...f, smsPhone: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, width: "100%" }} />
+        </label>
+      ) : null}
       <button type="button" disabled={submittingAppointment || !canSendRequest} onClick={sendAppointmentRequest} style={{ padding: "14px 18px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !canSendRequest ? 0.5 : 1 }}>
         {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send request</>}
       </button>
@@ -431,7 +446,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   <p style={{ fontSize: 13, fontWeight: 800, color: "#15803d", margin: "0 0 4px" }}>New patients welcome</p>
                 )}
                 <p style={{ fontSize: 13, color: "#4a5568", margin: "0 0 12px" }}>The office typically replies within 1 business day.</p>
-                {requestFields()}
+                {requestFields("appt-side")}
                 {bookingUrl && (
                   <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 12, fontSize: 13, fontWeight: 800, color: "#1E2D3B", textDecoration: "none" }}>
                     <ExternalLink style={{ width: 14, height: 14 }} /> Or book on their website
@@ -897,7 +912,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <p style={{ textAlign: "center", fontSize: 13, color: "#4a5568", marginBottom: 20 }}>The office typically replies within 1 business day.</p>
               {appointmentSubmitted ? requestSuccess() : (
                 <>
-                  {requestFields()}
+                  {requestFields("appt")}
                   <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", marginTop: 12 }}>Your request goes to the doctor&apos;s office. NeuroChiro stores it to make sure it gets there, and we never sell or share it with third parties.</p>
                 </>
               )}

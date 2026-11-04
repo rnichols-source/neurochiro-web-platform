@@ -84,6 +84,10 @@
     {
       "path": "/api/cron/match-outcomes",
       "schedule": "0 16 * * *"
+    },
+    {
+      "path": "/api/cron/sms-release",
+      "schedule": "*/15 * * * *"
     }
   ],
   "redirects": [

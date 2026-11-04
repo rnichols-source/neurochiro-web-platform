@@ -6,6 +6,7 @@ import { deleteAccount } from "@/app/actions/account";
 import { listBlockedPeople, saveNotificationPrefs, unblockUser } from "@/app/actions/messaging-actions";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
+import LeadTextAlerts from "./LeadTextAlerts";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -131,6 +132,8 @@ export default function SettingsPage() {
           {prefsSaved ? 'Saved!' : savingPrefs ? 'Saving...' : 'Save Preferences'}
         </button>
       </div>
+
+      <LeadTextAlerts />
 
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <h2 className="text-sm font-bold text-gray-400 tracking-wide mb-4">Blocked people</h2>
