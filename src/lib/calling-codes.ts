@@ -15,6 +15,7 @@ const CALLING: Record<string, string> = {
   AR: '54', AT: '43', BE: '32', BR: '55', CN: '86', CO: '57', EG: '20', FI: '358',
   GH: '233', GR: '30', IS: '354', ID: '62', IL: '972', IT: '39', MY: '60', NL: '31',
   NO: '47', PE: '51', PL: '48', RO: '40', KR: '82', ES: '34', TW: '886', TH: '66', VN: '84',
+  RS: '381', BW: '267', BO: '591', LB: '961', JM: '1876',
 }
 
 export function callingCode(country: string): string {

@@ -413,6 +413,7 @@ async function setCachedGeocode(supabase: any, key: string, result: NominatimRes
 
 const ISO_TO_NOMINATIM: Record<string, string> = {
   'US': 'us', 'CA': 'ca', 'GB': 'gb', 'UK': 'gb', 'NZ': 'nz', 'AU': 'au', 'EU': 'de',
+  'RS': 'rs', 'BW': 'bw', 'BO': 'bo', 'LB': 'lb', 'JM': 'jm',
 }
 
 function nominatimCountry(country: string): string {

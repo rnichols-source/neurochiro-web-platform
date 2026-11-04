@@ -20,11 +20,11 @@ export interface PostalDetection {
   country: string
 }
 
-/** Countries where a postal code is not part of a normal address. */
-const POSTAL_OPTIONAL = new Set(['AE'])
-
-/** Shown first on the patient waitlist. The rest of ALL_COUNTRIES follows. */
-export const WAITLIST_PRIORITY = ['US', 'CA', 'GB', 'IE', 'AU', 'NZ', 'IN', 'AE'] as const
+/**
+ * Shown first on the patient waitlist, in the order patients actually come from.
+ * The rest of ALL_COUNTRIES follows, alphabetically.
+ */
+export const WAITLIST_PRIORITY = ['US', 'CA', 'GB', 'AU', 'IN', 'ZA', 'DE', 'AE', 'NL', 'IE', 'NZ'] as const
 
 const PLACEHOLDERS: Record<string, string> = {
   US: '12345',
@@ -36,6 +36,11 @@ const PLACEHOLDERS: Record<string, string> = {
   IE: 'D02 AF30',
   AE: 'Dubai',
   DE: '10115',
+  RS: '11000',
+  BW: 'Gaborone',
+  BO: 'La Paz',
+  JM: 'Kingston',
+  LB: 'Beirut',
   FR: '75001',
   MX: '06600',
   SG: '018956',
@@ -52,7 +57,7 @@ export function normalizeCountryHint(regionHint: string | null | undefined): str
 }
 
 export function isPostalOptional(country: string): boolean {
-  return POSTAL_OPTIONAL.has(normalizeCountryHint(country))
+  return getCountryByIso2(normalizeCountryHint(country))?.postalOptional === true
 }
 
 export interface PostalField {
