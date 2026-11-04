@@ -95,6 +95,8 @@ export async function requestAppointment(raw: unknown) {
       consentText: input.consentText,
       source: 'quiz',
       ip,
+      smsConsent: input.smsConsent === true,
+      smsPhone: input.smsConsent === true ? (input.phone || null) : null,
     })
     if (!result.ok) {
       const message = result.error === 'Doctor not found.'

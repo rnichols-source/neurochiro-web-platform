@@ -64,6 +64,7 @@ export const requestInputSchema = z.object({
   message: z.string().trim().max(500).optional().default(''),
   consent: z.literal(true),
   consentText: z.literal(QUIZ_REQUEST_CONSENT_STORED),
+  smsConsent: z.boolean().optional().default(false),
   _hp: z.string().max(200).optional().default(''),
   startedAt: z.number(),
   sessionId: z.string().uuid(),
