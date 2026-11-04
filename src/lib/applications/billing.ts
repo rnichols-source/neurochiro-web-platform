@@ -2,6 +2,7 @@ import 'server-only'
 
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
+import { formatStripeAmount } from './prices.ts'
 import type { BillingPort, ChargeResult } from './decide.ts'
 
 function siteUrl(): string {
@@ -14,17 +15,27 @@ function invoiceOf(sub: Stripe.Subscription): Stripe.Invoice | null {
   return invoice
 }
 
+function chargeMoney(invoice: Stripe.Invoice | null): { amountLabel: string | null; receiptUrl: string | null } {
+  if (!invoice) return { amountLabel: null, receiptUrl: null }
+  const minor = invoice.amount_paid || invoice.total || invoice.amount_due || null
+  return {
+    amountLabel: minor == null ? null : formatStripeAmount(minor, invoice.currency || 'usd'),
+    receiptUrl: invoice.hosted_invoice_url || invoice.invoice_pdf || null,
+  }
+}
+
 async function classify(sub: Stripe.Subscription): Promise<ChargeResult> {
   const invoice = invoiceOf(sub)
   const hosted = invoice?.hosted_invoice_url || null
+  const money = chargeMoney(invoice)
   if (sub.status === 'active' || sub.status === 'trialing') {
-    return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'paid' }
+    return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'paid', ...money }
   }
 
   const payments = invoice?.payments?.data || []
   for (const payment of payments) {
     if (payment.status === 'paid') {
-      return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'paid' }
+      return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'paid', ...money }
     }
     let intent = payment.payment?.payment_intent
     if (typeof intent === 'string') {
@@ -32,10 +43,10 @@ async function classify(sub: Stripe.Subscription): Promise<ChargeResult> {
     }
     if (intent && typeof intent !== 'string') {
       if (intent.status === 'succeeded' || intent.status === 'processing') {
-        return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'paid' }
+        return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'paid', ...money }
       }
       if (intent.status === 'requires_action' || intent.status === 'requires_confirmation') {
-        return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'requires_action' }
+        return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'requires_action', ...money }
       }
     }
   }
@@ -43,7 +54,7 @@ async function classify(sub: Stripe.Subscription): Promise<ChargeResult> {
   if (sub.status === 'incomplete' && hosted) {
     const open = payments.length === 0
     if (open) {
-      return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'requires_action' }
+      return { subscriptionId: sub.id, status: sub.status, hostedInvoiceUrl: hosted, paymentState: 'requires_action', ...money }
     }
   }
 
@@ -53,6 +64,7 @@ async function classify(sub: Stripe.Subscription): Promise<ChargeResult> {
     hostedInvoiceUrl: hosted,
     paymentState: 'failed',
     errorMessage: 'The card was declined. Nothing was published.',
+    ...money,
   }
 }
 

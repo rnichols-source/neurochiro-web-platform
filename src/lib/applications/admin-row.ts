@@ -20,5 +20,7 @@ export type AdminApplicationRow = {
   heardAbout: string
   whyJoin: string
   notes: string
+  mobile: string
+  smsConsent: string
   createdAt: string
 }

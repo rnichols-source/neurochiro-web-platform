@@ -23,6 +23,11 @@ function application(overrides: Partial<ApplicationRecord> = {}): ApplicationRec
     chargeAttempt: 0,
     email: 'ada@example.com',
     firstName: 'Ada',
+    lastName: 'Lovelace',
+    profileUrl: 'https://neurochiro.co/directory/ada-lovelace',
+    mobileE164: '+18645550100',
+    smsConsent: true,
+    priceLabel: '$99 per month',
     ...overrides,
   }
 }
