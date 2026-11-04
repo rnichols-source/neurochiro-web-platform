@@ -35,7 +35,16 @@ const MOBILE_PATIENT_LINKS = [
 
 type SessionUser = { id: string };
 
-export default function Navbar() {
+const JOIN_HREF = "/get-started?source=nav_join";
+const JOIN_MENU_HREF = "/get-started?source=nav_dropdown";
+
+export default function Navbar({
+  joinCtaLabel,
+  joinMenuLabel,
+}: {
+  joinCtaLabel: string;
+  joinMenuLabel: string;
+}) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuPath, setMenuPath] = useState<string | null>(null);
   const [chiroPath, setChiroPath] = useState<string | null>(null);
@@ -128,6 +137,9 @@ export default function Navbar() {
 
   const isDirectoryPage = pathname === "/directory";
   const linkClass = "inline-flex min-h-11 items-center text-sm font-bold text-gray-300 hover:text-white";
+  const chiroLinks = [{ name: joinMenuLabel, href: JOIN_MENU_HREF }, ...CHIRO_LINKS];
+  const joinButtonClass =
+    "inline-flex h-11 shrink-0 items-center justify-center whitespace-nowrap rounded-full border-2 border-white/80 bg-transparent px-4 text-sm font-bold text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white";
 
   return (
     <>
@@ -163,11 +175,13 @@ export default function Navbar() {
               </button>
               {chiroOpen && (
                 <div id="chiro-menu" className="absolute right-0 top-full z-[120] mt-2 w-64 rounded-2xl border border-gray-100 bg-white p-2 shadow-2xl">
-                  {CHIRO_LINKS.map((link) => (
+                  {chiroLinks.map((link, index) => (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="flex min-h-11 items-center rounded-xl px-3 text-sm font-bold text-neuro-navy hover:bg-gray-50"
+                      className={`flex min-h-11 items-center rounded-xl px-3 text-sm font-bold hover:bg-gray-50 ${
+                        index === 0 ? "text-neuro-orange-ink" : "text-neuro-navy"
+                      }`}
                       onClick={() => setChiroPath(null)}
                     >
                       {link.name}
@@ -196,7 +210,10 @@ export default function Navbar() {
                 Log in
               </Link>
             )}
-            <Link href="/directory" className="inline-flex h-11 items-center rounded-full bg-neuro-orange-ink px-4 text-sm font-bold text-white">
+            <Link href={JOIN_HREF} className={joinButtonClass}>
+              {joinCtaLabel}
+            </Link>
+            <Link href="/directory" className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full bg-neuro-orange-ink px-4 text-sm font-bold text-white">
               Find a doctor
             </Link>
           </div>
@@ -262,8 +279,12 @@ export default function Navbar() {
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-300">For chiropractors</p>
                 <div className="mt-2">
-                  {CHIRO_LINKS.map((link) => (
-                    <Link key={link.href} href={link.href} className="flex min-h-11 items-center text-base font-bold text-gray-300">
+                  {chiroLinks.map((link, index) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`flex min-h-11 items-center text-base font-bold ${index === 0 ? "text-white" : "text-gray-300"}`}
+                    >
                       {link.name}
                     </Link>
                   ))}
@@ -287,6 +308,12 @@ export default function Navbar() {
                   <User className="h-5 w-5" aria-hidden /> Log in
                 </Link>
               )}
+              <Link
+                href={JOIN_HREF}
+                className="flex min-h-11 items-center justify-center rounded-xl border-2 border-white px-4 text-base font-bold text-white hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                {joinCtaLabel}
+              </Link>
               <Link href="/directory" className="flex h-[52px] items-center justify-center rounded-xl bg-neuro-orange-ink text-base font-bold text-white">
                 Find a doctor
               </Link>

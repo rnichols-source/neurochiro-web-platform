@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import { ShopifyCartProvider } from "@/components/store/ShopifyCartProvider";
 import { CartDrawer } from "@/components/store/CartDrawer";
 import ActivityTracker from "@/components/common/ActivityTracker";
+import { doctorJoinCtaLabel, doctorJoinMenuLabel } from "@/lib/applications/flag";
 import { isShopifyConfigured } from "@/lib/shopify";
 
 export default function PublicLayout({
@@ -12,7 +13,7 @@ export default function PublicLayout({
 }) {
   return (
     <ShopifyCartProvider configured={isShopifyConfigured()}>
-      <Navbar />
+      <Navbar joinCtaLabel={doctorJoinCtaLabel()} joinMenuLabel={doctorJoinMenuLabel()} />
       <div className="min-h-dvh">
         {children}
       </div>

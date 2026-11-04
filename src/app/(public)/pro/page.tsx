@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { doctorJoinCtaLabel } from "@/lib/applications/flag";
 import { getProPageStats, getDemandMapData } from "./actions";
 import { ProCountryProvider } from "./ProCountryContext";
 import ProDemandSection from "./ProDemandSection";
@@ -16,7 +17,39 @@ const css = `
   header.fixed { display: none !important; }
   .pro-page h1, .pro-page h2, .pro-page h3 { color: #F1EDE7 !important; }
   .pro-page p, .pro-page li, .pro-page span { color: inherit; }
+  .pro-join-btn {
+    font-family: Archivo, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.2;
+    text-decoration: none;
+    padding: 0 22px;
+    min-height: 52px;
+    border-radius: 6px;
+    background: #D66829;
+    color: #fff;
+    border: 2px solid #D66829;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .pro-join-btn:hover { background: #c45e24; border-color: #c45e24; }
+  .pro-join-btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  @media (min-width: 640px) {
+    .pro-join-btn { width: auto; min-width: 220px; }
+  }
 `;
+
+function ProJoinLink({ label }: { label: string }) {
+  return (
+    <Link href="/get-started?source=pro_page" className="pro-join-btn">
+      {label}
+    </Link>
+  );
+}
 
 const faqs = [
   { q: "Is $99 a month worth it if I'm already busy?", a: "If your schedule is full and you never want another new patient, probably not. Most doctors joining aren't short on patients in general, they're short on the right ones: people who understand nervous system care before they walk in. That's who searches this directory." },
@@ -30,6 +63,7 @@ const faqs = [
 ];
 
 export default async function ProPage() {
+  const joinLabel = doctorJoinCtaLabel();
   const [stats, mapData] = await Promise.all([
     getProPageStats(),
     getDemandMapData(),
@@ -55,6 +89,7 @@ export default async function ProPage() {
             <p style={{ color: "#93A0AC", fontSize: 18, maxWidth: "30em", margin: "0 0 16px" }}>
               NeuroChiro is the directory that puts you in front of them, and a content engine that keeps you in front of them all year.
             </p>
+            <ProJoinLink label={joinLabel} />
 
             <HeroMathBlock />
             <p style={{ color: "#93A0AC", fontSize: 15, marginTop: 18 }}>
@@ -219,6 +254,9 @@ export default async function ProPage() {
             <p style={{ color: "#93A0AC", margin: "0 0 6px" }}>
               If you know it's a fit, join and book your onboarding call today. If you want to ask me something first, take fifteen minutes on my calendar. No pitch, just a straight conversation about whether this is right for your practice.
             </p>
+            <div style={{ marginTop: 20 }}>
+              <ProJoinLink label={joinLabel} />
+            </div>
             <Suspense fallback={<div style={{ height: 56 }} />}>
               <ProCTA variant="close" />
             </Suspense>
