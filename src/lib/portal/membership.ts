@@ -1,5 +1,5 @@
 export const LEGACY_PRACTICE_TOOLS_CUTOFF = '2026-07-15T00:00:00Z';
-export const PRO_PRICE_LABEL = '$49/mo';
+export const PRO_PRICE_LABEL = '$99/mo';
 
 export type MembershipTier = 'free' | 'pro' | 'neuros';
 export type MembershipSource = 'stripe' | 'founding' | 'comped' | 'none';
