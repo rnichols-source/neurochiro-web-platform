@@ -14,6 +14,7 @@
     "test:billing-geo": "node --experimental-strip-types --test src/lib/billing/plan-subscription-change.test.ts src/lib/portal/membership.test.ts src/lib/geo-coords.test.ts",
     "test:e2e": "playwright test",
     "test:leads": "node --experimental-strip-types --test src/lib/doctor-timezone.test.ts src/lib/leads/escalation.test.ts src/lib/leads/validate.test.ts",
+    "test:sms": "node --experimental-strip-types --test src/lib/sms/*.test.ts",
     "test:quiz": "node --experimental-strip-types --test src/lib/quiz/*.test.ts",
     "test:seminars": "node --experimental-strip-types --test src/lib/seminars/seminars.test.ts src/lib/seminars/checkin-window.test.ts",
     "test:messaging": "node --experimental-strip-types --test src/lib/messaging/access.test.ts src/lib/messaging/validate.test.ts src/lib/messaging/send.test.ts src/lib/messaging/email.test.ts src/lib/messaging/notify.test.ts src/lib/messaging/realtime.test.ts",
