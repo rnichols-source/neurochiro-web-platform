@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { zipToState } from '@/lib/zip-to-state'
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email'
 import { getThresholds } from '@/lib/thresholds'
-import { detectPostalCode } from '@/lib/detect-postal'
+import { detectPostalCode, isPostalOptional } from '@/lib/detect-postal'
 
 const SOURCE_ALLOWLIST = [
   'website', 'homepage', 'directory_empty', 'profile_footer', 'site_footer',
@@ -57,6 +57,12 @@ export type SubscribeEmailInput = {
   ip?: string
   userAgent?: string
   skipCoverageCheck?: boolean
+  /** E.164. Saved only when smsConsent is true. */
+  smsPhone?: string | null
+  smsConsent?: boolean
+  smsConsentVersion?: string | null
+  smsConsentText?: string | null
+  allowEmptyPostal?: boolean
 }
 
 export type SubscribeEmailResult = {
@@ -98,17 +104,60 @@ async function sendConfirmationEmail(email: string, token: string) {
  * skipCoverageCheck false so a nearby doctor still returns the coverage
  * response instead of a subscription. The quiz passes true.
  */
+const NEW_SUBSCRIBER_FIELDS = [
+  'sms_phone', 'sms_consent', 'sms_consent_at', 'sms_consent_version', 'sms_consent_text',
+  'latitude', 'longitude',
+] as const
+
+async function saveSubscriber(
+  db: LooseClient,
+  kind: 'insert' | 'update',
+  id: string,
+  row: Record<string, unknown>,
+): Promise<LooseError> {
+  const attempt = (payload: Record<string, unknown>) => {
+    if (kind === 'insert') return db.from('subscribers').insert(payload)
+    return db.from('subscribers').update(payload).eq('id', id)
+  }
+  let result = await attempt(row)
+  if (missingNewColumn(result.error)) result = await attempt(withoutNewColumns(row))
+  return result.error
+}
+
+function missingNewColumn(error: LooseError): boolean {
+  if (!error) return false
+  if (error.code === '42703' || error.code === 'PGRST204') return true
+  const message = (error.message || '').toLowerCase()
+  return NEW_SUBSCRIBER_FIELDS.some((field) => message.includes(field))
+}
+
+function withoutNewColumns(row: Record<string, unknown>): Record<string, unknown> {
+  const copy = { ...row }
+  for (const field of NEW_SUBSCRIBER_FIELDS) delete copy[field]
+  return copy
+}
+
 export async function subscribeEmail(input: SubscribeEmailInput): Promise<SubscribeEmailResult> {
   const hint = input.country === 'UK' ? 'GB' : (input.country || 'US')
-  const detection = detectPostalCode(input.zip, hint)
-  if (!detection) {
+  const postalText = input.zip.trim()
+  const allowEmpty = input.allowEmptyPostal === true || (isPostalOptional(hint) && !postalText)
+  const detection = postalText ? detectPostalCode(postalText, hint) : null
+  if (!detection && !allowEmpty) {
     return { status: 400, body: { ok: false, error: 'Please enter a valid postal code for your country.' } }
   }
 
   const normalizedEmail = input.email.trim().toLowerCase()
-  const normalizedZip = detection.code
-  const detectedCountry = detection.country
+  const normalizedZip = detection?.code || ''
+  const detectedCountry = detection?.country || hint
   const state = detectedCountry === 'US' ? zipToState(normalizedZip) : ''
+  const smsConsent = input.smsConsent === true && Boolean(input.smsPhone)
+  const smsFields = {
+    sms_phone: smsConsent ? input.smsPhone : null,
+    sms_consent: smsConsent,
+    sms_consent_at: smsConsent ? new Date().toISOString() : null,
+    sms_consent_version: smsConsent ? (input.smsConsentVersion || null) : null,
+    sms_consent_text: smsConsent ? (input.smsConsentText || null) : null,
+  }
   const source = normalizeSubscribeSource(input.source)
   const ip = input.ip || ''
   const userAgent = input.userAgent || ''
@@ -116,7 +165,10 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
   // subscribers, zip_codes, and conversion_events are not in the generated Database type.
   const db = supabase as unknown as LooseClient
 
-  if (!input.skipCoverageCheck) {
+  let latitude: number | null = null
+  let longitude: number | null = null
+
+  if (!input.skipCoverageCheck && normalizedZip) {
     try {
       const { data: zipCoord } = await db
         .from('zip_codes')
@@ -125,11 +177,27 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
         .eq('zip', normalizedZip)
         .maybeSingle()
 
-      if (zipCoord) {
+      if (zipCoord && zipCoord.lat != null && zipCoord.lng != null) {
+        latitude = Number(zipCoord.lat)
+        longitude = Number(zipCoord.lng)
+      } else if (detectedCountry !== 'US') {
+        try {
+          const { geocodePostalFallback } = await import('@/lib/resolve-city')
+          const geo = await geocodePostalFallback(postalText || normalizedZip, detectedCountry)
+          if (geo) {
+            latitude = geo.lat
+            longitude = geo.lng
+          }
+        } catch {
+          // A missing coordinate only skips the nearby-doctor check.
+        }
+      }
+
+      if (latitude != null && longitude != null) {
         const { haversineDistance, isValidCoord } = await import('@/lib/geo')
         const t = await getThresholds()
-        const lat = Number(zipCoord.lat)
-        const lng = Number(zipCoord.lng)
+        const lat = latitude
+        const lng = longitude
 
         let docQuery = supabase
           .from('doctors')
@@ -208,20 +276,24 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
       const token = crypto.randomBytes(32).toString('hex')
       const tokenHash = hashToken(token)
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-      await db
-        .from('subscribers')
-        .update({
-          status: 'pending',
-          zip: normalizedZip,
-          state,
-          country: detectedCountry,
-          token_hash: tokenHash,
-          token_expires_at: expiresAt,
-          unsubscribed_at: null,
-          ip,
-          user_agent: userAgent,
-        })
-        .eq('id', existingId)
+      const writeError = await saveSubscriber(db, 'update', existingId, {
+        status: 'pending',
+        zip: normalizedZip,
+        state,
+        country: detectedCountry,
+        token_hash: tokenHash,
+        token_expires_at: expiresAt,
+        unsubscribed_at: null,
+        ip,
+        user_agent: userAgent,
+        latitude,
+        longitude,
+        ...smsFields,
+      })
+      if (writeError) {
+        console.error('[SUBSCRIBE] Update error:', writeError)
+        return { status: 500, body: { ok: false, error: 'Something went wrong. Please try again.' } }
+      }
       await sendConfirmationEmail(normalizedEmail, token)
       return { status: 200, body: SUCCESS }
     }
@@ -234,17 +306,22 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
     const token = crypto.randomBytes(32).toString('hex')
     const tokenHash = hashToken(token)
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-    await db
-      .from('subscribers')
-      .update({
-        zip: normalizedZip,
-        state,
-        token_hash: tokenHash,
-        token_expires_at: expiresAt,
-        ip,
-        user_agent: userAgent,
-      })
-      .eq('id', existingId)
+    const writeError = await saveSubscriber(db, 'update', existingId, {
+      zip: normalizedZip,
+      state,
+      country: detectedCountry,
+      token_hash: tokenHash,
+      token_expires_at: expiresAt,
+      ip,
+      user_agent: userAgent,
+      latitude,
+      longitude,
+      ...smsFields,
+    })
+    if (writeError) {
+      console.error('[SUBSCRIBE] Update error:', writeError)
+      return { status: 500, body: { ok: false, error: 'Something went wrong. Please try again.' } }
+    }
     await sendConfirmationEmail(normalizedEmail, token)
     return { status: 200, body: SUCCESS }
   }
@@ -252,24 +329,28 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
   const token = crypto.randomBytes(32).toString('hex')
   const tokenHash = hashToken(token)
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-  const { error: insertError } = await db
-    .from('subscribers')
-    .insert({
-      email: normalizedEmail,
-      zip: normalizedZip,
-      state,
-      country: detectedCountry,
-      status: 'pending',
-      token_hash: tokenHash,
-      token_expires_at: expiresAt,
-      source,
-      ip,
-      user_agent: userAgent,
-    })
+  const insertError = await saveSubscriber(db, 'insert', '', {
+    email: normalizedEmail,
+    zip: normalizedZip,
+    state,
+    country: detectedCountry,
+    status: 'pending',
+    token_hash: tokenHash,
+    token_expires_at: expiresAt,
+    source,
+    ip,
+    user_agent: userAgent,
+    latitude,
+    longitude,
+    ...smsFields,
+  })
 
   if (insertError) {
     if (insertError.code === '23505') return { status: 200, body: SUCCESS }
     console.error('[SUBSCRIBE] Insert error:', insertError)
+    if (insertError.code === '23514') {
+      return { status: 400, body: { ok: false, error: 'That postal code could not be saved yet. Please try again later.' } }
+    }
     return { status: 500, body: { ok: false, error: 'Something went wrong. Please try again.' } }
   }
 

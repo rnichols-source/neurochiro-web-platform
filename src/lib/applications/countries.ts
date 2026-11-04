@@ -6,6 +6,7 @@ export const APPLICATION_COUNTRIES = [
   { code: 'NZ', name: 'New Zealand' },
   { code: 'AE', name: 'United Arab Emirates' },
   { code: 'IE', name: 'Ireland' },
+  { code: 'IN', name: 'India' },
   { code: 'DE', name: 'Germany' },
   { code: 'FR', name: 'France' },
   { code: 'NL', name: 'Netherlands' },

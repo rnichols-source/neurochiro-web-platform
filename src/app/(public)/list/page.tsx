@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { Mail, MapPin, CheckCircle2, AlertCircle, ArrowRight, Loader2, Globe } from "lucide-react";
+import { Mail, MapPin, CheckCircle2, AlertCircle, ArrowRight, Loader2, Phone } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
 import { useRegion } from "@/context/RegionContext";
-import { detectPostalCode } from "@/lib/detect-postal";
+import { postalFieldFor, validatePostalFormat, waitlistCountryGroups } from "@/lib/detect-postal";
+import { callingCode, toInternationalE164 } from "@/lib/calling-codes";
+import { WAITLIST_SMS_CONSENT_V1 } from "@/lib/sms/consent";
 
 export default function SubscribeListPage() {
   return (
@@ -33,12 +35,18 @@ function SubscribeListContent() {
   }
   const [country, setCountry] = useState(regionToCountry(region.code));
   const [consent, setConsent] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [smsConsent, setSmsConsent] = useState(false);
   const [honeypot, setHoneypot] = useState("");
+  const countryGroups = waitlistCountryGroups();
+  const postal = postalFieldFor(country);
+  const dial = callingCode(country);
 
   // Sync country when region auto-detects from timezone (runs after initial render)
   const regionSynced = useRef(false);
+  const countryTouched = useRef(false);
   useEffect(() => {
-    if (!regionSynced.current && region.code !== 'US') {
+    if (!regionSynced.current && !countryTouched.current && region.code !== 'US') {
       setCountry(regionToCountry(region.code));
       regionSynced.current = true;
     }
@@ -59,24 +67,15 @@ function SubscribeListContent() {
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       e.email = "Please enter a valid email address.";
     }
-    if (!zip.trim()) {
-      e.zip = "Please enter your postal code.";
-    } else {
-      // Validate format based on country
-      const detection = detectPostalCode(zip.trim(), country);
-      if (!detection) {
-        const hints: Record<string, string> = {
-          US: 'Please enter a valid 5-digit ZIP code.',
-          CA: 'Please enter a valid postal code (e.g. V5K 1A1).',
-          GB: 'Please enter a valid postcode (e.g. SW1A 1AA).',
-          NZ: 'Please enter a valid 4-digit postcode.',
-          AU: 'Please enter a valid 4-digit postcode.',
-        };
-        e.zip = hints[country] || 'Please enter a valid postal code.';
-      }
-    }
+    const postalError = validatePostalFormat(zip, country);
+    if (postalError) e.zip = postalError;
     if (!consent) {
       e.consent = "You must agree to receive emails.";
+    }
+    if (smsConsent && !toInternationalE164(phone, country)) {
+      e.phone = phone.trim()
+        ? "Enter a mobile number we can text."
+        : "Enter a mobile number, or leave the text box unchecked.";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -98,6 +97,8 @@ function SubscribeListContent() {
           zip: zip.trim(),
           country,
           consent: true,
+          phone: phone.trim(),
+          smsConsent,
           source: urlSource,
           _hp: honeypot,
           _ts: tsRef.current,
@@ -277,43 +278,83 @@ function SubscribeListContent() {
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
 
-            {/* Postal Code + Country */}
+            {/* Country */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-bold text-neuro-navy">
-                  {country === 'US' ? 'ZIP Code' : 'Postal Code'}
-                </label>
-                <select
-                  value={country}
-                  onChange={(e) => { setCountry(e.target.value); setErrors((p) => ({ ...p, zip: "" })); }}
-                  className="text-xs text-gray-500 bg-transparent border-none focus:outline-none cursor-pointer"
-                >
-                  <option value="US">🇺🇸 US</option>
-                  <option value="CA">🇨🇦 Canada</option>
-                  <option value="GB">🇬🇧 UK</option>
-                  <option value="NZ">🇳🇿 NZ</option>
-                  <option value="AU">🇦🇺 Australia</option>
-                </select>
-              </div>
+              <label htmlFor="waitlist-country" className="block text-sm font-bold text-neuro-navy mb-1.5">
+                Country
+              </label>
+              <select
+                id="waitlist-country"
+                value={country}
+                onChange={(e) => { countryTouched.current = true; setCountry(e.target.value); setErrors((p) => ({ ...p, zip: "", phone: "" })); }}
+                className="w-full px-3 py-3 rounded-xl border border-gray-200 text-neuro-navy text-base bg-white focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange"
+              >
+                <optgroup label="Common">
+                  {countryGroups.priority.map((item) => (
+                    <option key={item.iso2} value={item.iso2}>{item.flag} {item.name}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="All countries">
+                  {countryGroups.rest.map((item) => (
+                    <option key={item.iso2} value={item.iso2}>{item.flag} {item.name}</option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            {/* Postal code */}
+            <div>
+              <label htmlFor="waitlist-postal" className="block text-sm font-bold text-neuro-navy mb-1.5">
+                {postal.label}
+              </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
+                  id="waitlist-postal"
                   type="text"
-                  inputMode={country === 'US' || country === 'NZ' || country === 'AU' ? 'numeric' : 'text'}
-                  maxLength={country === 'US' ? 10 : country === 'CA' ? 7 : country === 'GB' ? 8 : 4}
+                  inputMode={postal.inputMode}
+                  autoComplete="postal-code"
+                  maxLength={postal.maxLength}
+                  required={postal.required}
                   value={zip}
                   onChange={(e) => { setZip(e.target.value); setErrors((p) => ({ ...p, zip: "" })); }}
-                  placeholder={
-                    country === 'US' ? '12345' :
-                    country === 'CA' ? 'V5K 1A1' :
-                    country === 'GB' ? 'SW1A 1AA' :
-                    country === 'NZ' ? '1010' :
-                    country === 'AU' ? '3000' : '12345'
-                  }
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl border ${errors.zip ? "border-red-400" : "border-gray-200"} text-neuro-navy text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange transition-colors`}
+                  placeholder={postal.placeholder}
+                  aria-invalid={errors.zip ? true : undefined}
+                  className={`w-full pl-10 pr-4 py-3 rounded-xl border ${errors.zip ? "border-red-400" : "border-gray-200"} text-neuro-navy text-base focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange transition-colors`}
                 />
               </div>
+              {postal.hint && !errors.zip && <p className="text-gray-400 text-xs mt-1">{postal.hint}</p>}
               {errors.zip && <p className="text-red-500 text-xs mt-1">{errors.zip}</p>}
+            </div>
+
+            {/* Optional mobile */}
+            <div>
+              <label htmlFor="waitlist-phone" className="block text-sm font-bold text-neuro-navy mb-1.5">
+                Mobile number <span className="font-normal text-gray-400">(optional)</span>
+              </label>
+              <div className={`flex rounded-xl border ${errors.phone ? "border-red-400" : "border-gray-200"} overflow-hidden focus-within:ring-2 focus-within:ring-neuro-orange/30 focus-within:border-neuro-orange`}>
+                <span className="flex items-center px-3 bg-gray-50 text-sm font-bold text-neuro-navy border-r border-gray-200 shrink-0">
+                  +{dial}
+                </span>
+                <div className="relative flex-1 min-w-0">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    id="waitlist-phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel-national"
+                    value={phone}
+                    onChange={(e) => { setPhone(e.target.value); setErrors((p) => ({ ...p, phone: "" })); }}
+                    placeholder="Mobile number"
+                    aria-invalid={errors.phone ? true : undefined}
+                    className="w-full pl-10 pr-3 py-3 text-neuro-navy text-base focus:outline-none"
+                  />
+                </div>
+              </div>
+              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              {phone.trim() && !smsConsent && !errors.phone && (
+                <p className="text-gray-400 text-xs mt-1">This number is only saved if you opt in to texts below.</p>
+              )}
             </div>
 
             {/* Consent */}
@@ -330,6 +371,21 @@ function SubscribeListContent() {
                 </span>
               </label>
               {errors.consent && <p className="text-red-500 text-xs mt-1">{errors.consent}</p>}
+            </div>
+
+            <div>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={smsConsent}
+                  onChange={(e) => { setSmsConsent(e.target.checked); setErrors((p) => ({ ...p, phone: "" })); }}
+                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange"
+                />
+                <span className="text-xs text-gray-500 leading-relaxed">
+                  {WAITLIST_SMS_CONSENT_V1}{" "}
+                  <Link href="/sms-terms" className="underline underline-offset-2">SMS Terms</Link>
+                </span>
+              </label>
             </div>
 
             {/* Server error */}
@@ -374,7 +430,7 @@ function SubscribeListContent() {
               <MapPin className="w-5 h-5 text-neuro-orange" />
             </div>
             <h3 className="font-bold text-neuro-navy text-sm mb-1">Doctor Alerts</h3>
-            <p className="text-gray-500 text-sm">When a NeuroChiro doctor joins near your ZIP code, you'll be the first to know.</p>
+            <p className="text-gray-500 text-sm">When a NeuroChiro doctor joins near you, you'll be the first to know.</p>
           </div>
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
             <div className="w-10 h-10 rounded-xl bg-neuro-orange/10 flex items-center justify-center mb-4">

@@ -124,9 +124,9 @@ export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demand
 
   const zipCounts = new Map<string, { count: number; country: string }>()
   for (const s of (subscribers || [])) {
-    const z = (s.zip || '').trim().slice(0, 5)
-    if (/^\d{5}$/.test(z)) {
-      const cc = s.country || 'US'
+    const cc = (s.country || 'US').toUpperCase()
+    const z = cc === 'US' ? (s.zip || '').trim().slice(0, 5) : (s.zip || '').trim()
+    if (z && (cc !== 'US' || /^\d{5}$/.test(z))) {
       const key = `${cc}|${z}`
       const existing = zipCounts.get(key)
       if (existing) existing.count++
@@ -230,8 +230,8 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
 
   const subZips = new Set<string>()
   for (const s of (allSubs || [])) {
-    const z = (s.zip || '').trim().slice(0, 5)
-    if (/^\d{5}$/.test(z)) subZips.add(z)
+    const z = resolveCountry === 'US' ? (s.zip || '').trim().slice(0, 5) : (s.zip || '').trim()
+    if (z && (resolveCountry !== 'US' || /^\d{5}$/.test(z))) subZips.add(z)
   }
 
   let subscribersNearby = 0
@@ -248,7 +248,7 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
     }
 
     for (const s of (allSubs || [])) {
-      const z = (s.zip || '').trim().slice(0, 5)
+      const z = resolveCountry === 'US' ? (s.zip || '').trim().slice(0, 5) : (s.zip || '').trim()
       const coord = zipToCoord.get(z)
       if (coord && haversineDistance(lat, lng, coord.lat, coord.lng) <= t.gap_radius) subscribersNearby++
     }

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { doctorNewLead, patientRequestConfirm } from './templates.ts'
+import { doctorNewLead, patientRequestConfirm, waitlistDoctorJoinedText } from './templates.ts'
 
 const patient = patientRequestConfirm({
   patientFirst: 'Jamie',
@@ -108,4 +108,20 @@ test('empty practice, empty details, health words, and long fields are cleaned u
   })
   assert.ok(longNote.includes('Note: Please call the front desk after lunch and ask for the ne...'))
   assert.equal(longNote.includes('coordinator'), false)
+})
+
+test('waitlist doctor-joined text points at neurochiro.co and includes STOP', () => {
+  const body = waitlistDoctorJoinedText(
+    'Dr. Priya Shah',
+    'Mumbai',
+    'https://neurochiro.co/directory/priya-shah',
+  )
+  assert.equal(
+    body,
+    'NeuroChiro: Good news! A nervous system chiropractor just joined near you: Dr. Priya Shah, Mumbai. See their profile: https://neurochiro.co/directory/priya-shah. Reply STOP to opt out.',
+  )
+  assert.equal(body.includes('neurochirodirectory.com'), false)
+  const foreign = waitlistDoctorJoinedText('Dr. Priya Shah', 'Mumbai', 'https://example.com/nope')
+  assert.ok(foreign.includes('https://neurochiro.co'))
+  assert.equal(foreign.includes('example.com'), false)
 })

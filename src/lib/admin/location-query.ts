@@ -116,12 +116,31 @@ function postalQuery(raw: string, hint?: { country?: string }): LocationQuery | 
       }],
     }
   }
+  const hinted = hintIso(hint)
+  if (hinted && hinted !== 'US' && hinted !== 'AU' && hinted !== 'NZ') {
+    const hintedPostal = detectPostalCode(trimmed, hinted)
+    if (hintedPostal) {
+      return {
+        ...emptyQuery(),
+        postal: { code: hintedPostal.code, compact: collapsed, country: hintedPostal.country, prefix: false },
+      }
+    }
+    if (hinted === 'IN' || hinted === 'CA' || hinted === 'GB' || hinted === 'SG') return null
+  }
+
   const us = collapsed.match(/^(\d{5})(?:-?\d{4})?$/)
   if (us && us[1] !== '00000') {
     return { ...emptyQuery(), postal: { code: us[1], compact: us[1], country: 'US', prefix: false } }
   }
 
-  const detected = detectPostalCode(trimmed, hintIso(hint) || 'US')
+  if (/^\d{6}$/.test(collapsed)) {
+    const india = detectPostalCode(trimmed, hinted === 'SG' ? 'SG' : 'IN')
+    if (india) {
+      return { ...emptyQuery(), postal: { code: india.code, compact: collapsed, country: india.country, prefix: false } }
+    }
+  }
+
+  const detected = detectPostalCode(trimmed, hinted || 'US')
   if (!detected) return null
   return {
     ...emptyQuery(),
