@@ -4,6 +4,7 @@ import { approveApplication, declineApplication, type ApplicationRecord, type Bi
 import { ONBOARDING_CALL_URL } from './emails.ts'
 import { membershipTierForStripeStatus } from './membership.ts'
 import { doctorSignupStatus } from './signup.ts'
+import { doctorJoinCtaLabel, doctorJoinHomeLine, doctorJoinMenuLabel } from './flag.ts'
 
 const NOW = '2026-11-04T16:00:00.000Z'
 
@@ -178,5 +179,16 @@ describe('subscription status and the signup flag', () => {
     assert.equal(doctorSignupStatus({ APPLICATION_FLOW_ENABLED: 'true' } as unknown as NodeJS.ProcessEnv), 'hidden')
     assert.equal(doctorSignupStatus({} as unknown as NodeJS.ProcessEnv), 'pending')
     assert.equal(doctorSignupStatus({ APPLICATION_FLOW_ENABLED: 'false' } as unknown as NodeJS.ProcessEnv), 'pending')
+  })
+
+  it('switches the public join wording with the same flag', () => {
+    const on = { APPLICATION_FLOW_ENABLED: 'true' } as unknown as NodeJS.ProcessEnv
+    const off = { APPLICATION_FLOW_ENABLED: 'false' } as unknown as NodeJS.ProcessEnv
+    assert.equal(doctorJoinCtaLabel(on), 'Apply to join')
+    assert.equal(doctorJoinMenuLabel(on), 'Apply to join')
+    assert.equal(doctorJoinHomeLine(on), 'Are you a nervous system chiropractor? Apply to join')
+    assert.equal(doctorJoinCtaLabel(off), 'Join as a doctor')
+    assert.equal(doctorJoinMenuLabel(off), 'Join NeuroChiro')
+    assert.equal(doctorJoinHomeLine({} as unknown as NodeJS.ProcessEnv), 'Are you a nervous system chiropractor? Join NeuroChiro')
   })
 })

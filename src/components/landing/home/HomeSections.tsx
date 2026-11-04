@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Brain, Heart, Users, Play } from "lucide-react";
+import { doctorJoinMenuLabel } from "@/lib/applications/flag";
 import { homepageFaqs } from "@/lib/content/faq";
 import { patientSpotlightEpisodes } from "@/app/(public)/spotlight/spotlight-data";
 import type { PublicDirectoryCounts } from "@/lib/directory/public-counts";
@@ -214,6 +215,12 @@ export function DoctorStrip({ counts }: { counts: PublicDirectoryCounts }) {
             {counts.total} verified doctors in {counts.countries} {counts.countries === 1 ? "country" : "countries"}.
           </p>
         )}
+        <Link
+          href="/get-started?source=homepage_join"
+          className="inline-flex min-h-11 items-center text-sm font-bold text-white underline decoration-white/40 underline-offset-4 hover:text-neuro-orange-light"
+        >
+          {doctorJoinMenuLabel()}
+        </Link>
         <Link
           href="/pro?source=homepage_cta"
           className="inline-flex h-[52px] items-center justify-center rounded-xl bg-neuro-orange-ink px-6 text-base font-bold text-white"

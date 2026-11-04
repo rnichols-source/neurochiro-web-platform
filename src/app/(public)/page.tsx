@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { excludeDemo } from "@/lib/directory/exclude-demo";
 import { getPublicDirectoryCounts } from "@/lib/directory/public-counts";
+import { doctorJoinMenuLabel } from "@/lib/applications/flag";
 import { homepageFaqs } from "@/lib/content/faq";
 import Footer from "@/components/landing/Footer";
 import HeroSearch from "@/components/landing/HeroSearch";
@@ -155,6 +157,17 @@ export default async function HomePage() {
               </div>
             </aside>
           </div>
+          <p className="mx-auto mt-4 max-w-6xl text-center lg:mt-6 lg:text-left">
+            <Link
+              href="/get-started?source=homepage_join"
+              className="inline-flex min-h-11 max-w-full flex-wrap items-center justify-center gap-x-1 text-center text-sm leading-snug text-gray-300 hover:text-white lg:justify-start lg:text-left"
+            >
+              Are you a nervous system chiropractor?{" "}
+              <span className="ml-1 font-bold text-white underline decoration-white/50 underline-offset-4">
+                {doctorJoinMenuLabel()}
+              </span>
+            </Link>
+          </p>
         </section>
 
         <NearbyDoctors />
