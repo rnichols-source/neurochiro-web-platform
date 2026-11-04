@@ -1,3 +1,5 @@
+import type { OfficeCalendar } from './calendar.ts'
+import { DEFAULT_CALENDAR } from './calendar.ts'
 import { comparisonPhraseKey, currentSpan, goalStatus, metricValueBetween, periodChange, previousSpan, scaledGoal, usesWeeklyInputs, type ValueIndex } from './calc.ts'
 import { formatMoney } from './currency.ts'
 import type { GoalStatus, KpiDefinition, KpiUnit, PeriodKey } from './types.ts'
@@ -79,13 +81,14 @@ export function snapshotFor(
   period: PeriodKey,
   today: string,
   currency: string,
+  calendar: OfficeCalendar = DEFAULT_CALENDAR,
 ): PeriodSnapshot {
   const current = currentSpan(definition, period, today, bySlug)
   const previous = previousSpan(definition, period, today, bySlug)
-  const value = metricValueBetween(definition, bySlug, indexed, current.start, current.end)
-  const prior = metricValueBetween(definition, bySlug, indexed, previous.start, previous.end)
+  const value = metricValueBetween(definition, bySlug, indexed, current.start, current.end, new Set(), calendar)
+  const prior = metricValueBetween(definition, bySlug, indexed, previous.start, previous.end, new Set(), calendar)
   const change = periodChange(value, prior)
-  const goal = scaledGoal(definition, period, today, bySlug)
+  const goal = scaledGoal(definition, period, today, bySlug, calendar)
   const weekly = usesWeeklyInputs(definition, bySlug)
   return {
     value,

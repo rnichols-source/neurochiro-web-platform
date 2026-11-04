@@ -4,10 +4,15 @@ import { useState } from 'react'
 import PageHeader from '@/components/portal/PageHeader'
 import type { CustomKpiInput, GoalPeriod, KpiDefinition, KpiValue, KpiWorkspace } from '@/lib/kpi/types'
 import {
+  addClosedDate,
   createCustomKpi,
+  inviteOfficeMember,
   moveKpi,
+  removeClosedDate,
+  removeOfficeMember,
   renameKpi,
   saveKpiValue,
+  saveOfficeWeekdays,
   setKpiEnabled,
   setKpiGoal,
 } from './actions'
@@ -21,6 +26,10 @@ export default function KpiApp({ initial, clientTimeZone }: { initial: KpiWorksp
   const [definitions, setDefinitions] = useState(initial.definitions)
   const [values, setValues] = useState(initial.values)
   const [loggedDates, setLoggedDates] = useState(initial.loggedDates)
+  const [openWeekdays, setOpenWeekdays] = useState(initial.openWeekdays)
+  const [closedDates, setClosedDates] = useState(initial.closedDates)
+  const [autoLeadDates, setAutoLeadDates] = useState(initial.autoLeadDates)
+  const [members, setMembers] = useState(initial.members)
   const [tab, setTab] = useState<Tab>('today')
   const [banner, setBanner] = useState<{ kind: 'saved' | 'error'; text: string } | null>(null)
 
@@ -70,6 +79,9 @@ export default function KpiApp({ initial, clientTimeZone }: { initial: KpiWorksp
           loggedDates={loggedDates}
           today={initial.today}
           currency={initial.currency}
+          openWeekdays={openWeekdays}
+          closedDates={closedDates}
+          autoLeadDates={autoLeadDates}
           onEdit={() => setBanner(null)}
           onSave={async (definitionId, date, value) => {
             const result = await saveKpiValue(definitionId, date, value, clientTimeZone)
@@ -77,17 +89,27 @@ export default function KpiApp({ initial, clientTimeZone }: { initial: KpiWorksp
               setBanner({ kind: 'error', text: result.error })
               return result
             }
-            const nextValues = replaceValue(values, definitionId, result.savedDate, value)
+            const lead = definitions.find((item) => item.slug === 'neurochiro_leads')
+            let nextValues = replaceValue(values, definitionId, result.savedDate, value)
+            if (lead && lead.id === definitionId && value == null) {
+              const counted = initial.leadCounts.find((item) => item.date === result.savedDate)?.count ?? 0
+              nextValues = [...nextValues, { definitionId, date: result.savedDate, value: counted, source: 'auto' }]
+            }
             setValues(nextValues)
             setLoggedDates((current) => {
               const set = new Set(current)
               if (value != null) set.add(result.savedDate)
-              else if (result.savedDate >= initial.valuesFrom && !nextValues.some((item) => item.date === result.savedDate)) {
+              else if (result.savedDate >= initial.valuesFrom && !nextValues.some((item) => item.date === result.savedDate && item.source !== 'auto')) {
                 set.delete(result.savedDate)
               }
               return Array.from(set)
             })
             setBanner({ kind: 'saved', text: value == null ? 'Cleared' : 'Saved' })
+            if (lead && lead.id === definitionId) {
+              setAutoLeadDates((current) => value == null
+                ? Array.from(new Set([...current, result.savedDate]))
+                : current.filter((date) => date !== result.savedDate))
+            }
             return result
           }}
         />
@@ -99,12 +121,58 @@ export default function KpiApp({ initial, clientTimeZone }: { initial: KpiWorksp
           loggedDates={loggedDates}
           today={initial.today}
           currency={initial.currency}
+          openWeekdays={openWeekdays}
+          closedDates={closedDates}
+          plMonths={initial.plMonths}
+          plNote={initial.plNote}
         />
       ) : null}
       {tab === 'settings' ? (
         <KpiSettings
           definitions={definitions}
           currency={initial.currency}
+          openWeekdays={openWeekdays}
+          closedDates={closedDates}
+          isOwner={initial.access.role === 'owner'}
+          members={members}
+          onSaveWeekdays={async (days) => {
+            const result = await saveOfficeWeekdays(days)
+            if (!result.ok) return result
+            setOpenWeekdays(result.openWeekdays)
+            setBanner({ kind: 'saved', text: 'Open days saved' })
+            return result
+          }}
+          onAddClosed={async (date, note) => {
+            const result = await addClosedDate(date, note)
+            if (!result.ok) return result
+            setClosedDates((current) => Array.from(new Set([...current, date])).sort())
+            setBanner({ kind: 'saved', text: 'Day marked closed' })
+            return result
+          }}
+          onRemoveClosed={async (date) => {
+            const result = await removeClosedDate(date)
+            if (!result.ok) return result
+            setClosedDates((current) => current.filter((item) => item !== date))
+            setBanner({ kind: 'saved', text: 'Day reopened' })
+            return result
+          }}
+          onInvite={async (email, role, canViewPl) => {
+            const result = await inviteOfficeMember(email, role, canViewPl)
+            if (!result.ok) return result
+            setMembers((current) => {
+              const rest = current.filter((item) => item.email !== result.member.email)
+              return [...rest, result.member]
+            })
+            setBanner({ kind: 'saved', text: 'Invite saved' })
+            return result
+          }}
+          onRemoveMember={async (id) => {
+            const result = await removeOfficeMember(id)
+            if (!result.ok) return result
+            setMembers((current) => current.filter((item) => item.id !== id))
+            setBanner({ kind: 'saved', text: 'Removed' })
+            return result
+          }}
           onToggle={async (id, enabled) => {
             const result = await setKpiEnabled(id, enabled)
             if (!result.ok) {

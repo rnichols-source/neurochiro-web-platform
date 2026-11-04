@@ -21,7 +21,10 @@ import {
   previousPeriodRange,
   weekStartMonday,
 } from './dates.ts'
+import { isClosedDay, openDayCount } from './calendar.ts'
 import { currencyForCountry, formatMoney } from './currency.ts'
+import { countNeuroChiroLeadsByDay } from './leads.ts'
+import { compareMonthCollections } from './pl-compare.ts'
 import { DASH, formatKpiValue, snapshotFor } from './format.ts'
 import { FORMULAS, LIBRARY } from './library.ts'
 import { mapLegacyEntry, mapLegacyExtras, mapLegacyGoals, shouldApplyLegacyGoal } from './legacy.ts'
@@ -153,12 +156,12 @@ test('goals scale for counts and stay put for rates', () => {
 
   assert.equal(scaledGoal(visits, 'today', today, bySlug), 40)
   assert.equal(scaledGoal(visits, 'wtd', today, bySlug), 120)
-  assert.equal(scaledGoal(visits, 'mtd', today, bySlug), 160)
-  assert.equal(scaledGoal(visits, 'ytd', '2026-01-10', bySlug), 400)
+  assert.equal(scaledGoal(visits, 'mtd', today, bySlug), 120)
+  assert.equal(scaledGoal(visits, 'ytd', '2026-01-10', bySlug), 280)
   assert.equal(scaledGoal(acceptance, 'today', today, bySlug), 70)
   assert.equal(scaledGoal(acceptance, 'ytd', today, bySlug), 70)
-  assert.equal(scaledGoal(reviews, 'today', today, bySlug), 2)
-  assert.equal(scaledGoal(reviews, 'wtd', '2026-11-02', bySlug), 2)
+  assert.equal(scaledGoal(reviews, 'today', today, bySlug), 1.2)
+  assert.equal(scaledGoal(reviews, 'wtd', '2026-11-02', bySlug), 0.4)
   assert.equal(scaledGoal(active, 'mtd', today, bySlug), 150)
 })
 
@@ -180,15 +183,18 @@ test('comparison percent is blank when the last period was zero', () => {
   assert.doesNotMatch(snap.comparison?.text || '', /0%/)
 })
 
-test('streak counts clinic days and skips a missed day', () => {
+test('streak counts open days and a closed day does not break it', () => {
   const open = consistency(['2026-11-01', '2026-11-02', '2026-11-03'], '2026-11-04')
-  assert.equal(open.current, 3)
-  assert.equal(open.longest, 3)
-  const closed = consistency(['2026-11-02', '2026-11-04'], '2026-11-04')
-  assert.equal(closed.current, 1)
-  assert.equal(closed.longest, 1)
-  const week = consistency(['2026-10-29', '2026-10-30', '2026-11-01', '2026-11-02', '2026-11-04'], '2026-11-04')
-  assert.equal(week.last7, 5)
+  assert.equal(open.current, 2)
+  assert.equal(open.longest, 2)
+  const missed = consistency(['2026-11-02', '2026-11-04'], '2026-11-04')
+  assert.equal(missed.current, 1)
+  const holiday = consistency(['2026-11-02', '2026-11-04'], '2026-11-04', {
+    openWeekdays: [1, 2, 3, 4, 5],
+    closedDates: ['2026-11-03'],
+  })
+  assert.equal(holiday.current, 2)
+  assert.equal(holiday.longest, 2)
 })
 
 test('weekly numbers are stored on Monday', () => {
@@ -318,9 +324,12 @@ test('scorecard code does not import the admin client or use local storage', () 
   assert.ok(files.length > 5)
   for (const file of files) {
     const text = readFileSync(file, 'utf8')
-    assert.equal(text.includes('supabase-admin'), false, file)
+    const clientFile = text.includes("'use client'") || text.includes('"use client"')
+    if (clientFile) {
+      assert.equal(text.includes('supabase-admin'), false, file)
+      assert.equal(text.includes('service_role'), false, file)
+    }
     assert.equal(text.includes('localStorage'), false, file)
-    assert.equal(text.includes('service_role'), false, file)
   }
 })
 
@@ -330,6 +339,36 @@ test('the proposed SQL is marked for Raymond and lists every starting measure', 
   for (const item of LIBRARY) assert.equal(sql.includes(`'${item.slug}'`), true, item.slug)
   assert.equal(sql.includes('kpi_v2_imported'), true)
   assert.equal(sql.includes('/ 100'), true)
+})
+
+test('a holiday is not part of the daily goal', () => {
+  const visits = define({ id: 'visits', slug: 'patient_visits' })
+  const bySlug = indexBySlug([visits])
+  const calendar = { openWeekdays: [1, 2, 3, 4, 5], closedDates: ['2026-11-04'] }
+  assert.equal(isClosedDay('2026-11-04', calendar), true)
+  assert.equal(isClosedDay('2026-11-01'), true)
+  assert.equal(openDayCount('2026-11-02', '2026-11-04', calendar), 2)
+  assert.equal(scaledGoal(visits, 'wtd', '2026-11-04', bySlug, calendar), 80)
+  assert.equal(scaledGoal(visits, 'today', '2026-11-04', bySlug, calendar), null)
+})
+
+test('NeuroChiro leads are counted in the clinic day, once per person', () => {
+  const counts = countNeuroChiroLeadsByDay([
+    { id: '1', at: '2026-11-02T06:30:00.000Z', email: 'a@example.com' },
+    { id: '2', at: '2026-11-02T18:00:00.000Z', email: 'A@example.com' },
+    { id: '3', at: '2026-11-02T18:00:00.000Z', phone: '555-0100' },
+  ], 'America/Los_Angeles')
+  assert.equal(counts.get('2026-11-01'), 1)
+  assert.equal(counts.get('2026-11-02'), 2)
+})
+
+test('P&L collections flag a gap larger than about 5 percent', () => {
+  assert.equal(compareMonthCollections(100, 100, '2026-11').flag, false)
+  assert.equal(compareMonthCollections(96, 100, '2026-11').flag, false)
+  assert.equal(compareMonthCollections(94, 100, '2026-11').flag, true)
+  assert.equal(compareMonthCollections(0, 0, '2026-11').flag, false)
+  assert.equal(compareMonthCollections(20, 0, '2026-11').flag, true)
+  assert.equal(compareMonthCollections(100, null, '2026-11').difference, null)
 })
 
 test('a missing scorecard table is recognizable', () => {

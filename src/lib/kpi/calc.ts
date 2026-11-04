@@ -1,10 +1,16 @@
 import {
+  DEFAULT_CALENDAR,
+  isClosedDay,
+  monthEnd,
+  monthStartOf,
+  openDayCount,
+  yearOpenGoal,
+  consistencyWithCalendar,
+  type OfficeCalendar,
+} from './calendar.ts'
+import {
   compareYmd,
-  countMondays,
-  dayOfYear,
-  daysInMonth,
   diffDays,
-  parseYmd,
   periodRange,
   previousPeriodRange,
   shiftYmd,
@@ -79,7 +85,13 @@ export function previousSpan(
   return previousPeriodRange(period, today)
 }
 
-function aggregate(kind: KpiAggregation, dates: Map<string, number> | undefined, start: string, end: string): number | null {
+function aggregate(
+  kind: KpiAggregation,
+  dates: Map<string, number> | undefined,
+  start: string,
+  end: string,
+  calendar: OfficeCalendar,
+): number | null {
   if (!dates || dates.size === 0) return null
   if (kind === 'ratio') return null
   if (kind === 'latest') {
@@ -98,6 +110,7 @@ function aggregate(kind: KpiAggregation, dates: Map<string, number> | undefined,
   let count = 0
   for (const [date, value] of dates) {
     if (compareYmd(date, start) < 0 || compareYmd(date, end) > 0) continue
+    if (kind === 'average' && isClosedDay(date, calendar)) continue
     if (!Number.isFinite(value)) continue
     sum += value
     count += 1
@@ -135,6 +148,7 @@ export function metricValueBetween(
   start: string,
   end: string,
   visiting: Set<string> = new Set(),
+  calendar: OfficeCalendar = DEFAULT_CALENDAR,
 ): number | null {
   if (definition.kind === 'calculated') {
     if (!definition.formula || visiting.has(definition.slug)) return null
@@ -142,12 +156,12 @@ export function metricValueBetween(
     const value = evaluateFormula(definition.formula, (slug) => {
       const component = bySlug.get(slug)
       if (!component) return null
-      return metricValueBetween(component, bySlug, indexed, start, end, visiting)
+      return metricValueBetween(component, bySlug, indexed, start, end, visiting, calendar)
     })
     visiting.delete(definition.slug)
     return value
   }
-  return aggregate(definition.aggregation, indexed.get(definition.id), start, end)
+  return aggregate(definition.aggregation, indexed.get(definition.id), start, end, calendar)
 }
 
 export function metricValue(
@@ -156,17 +170,10 @@ export function metricValue(
   indexed: ValueIndex,
   period: PeriodKey,
   today: string,
+  calendar: OfficeCalendar = DEFAULT_CALENDAR,
 ): number | null {
   const span = currentSpan(definition, period, today, bySlug)
-  return metricValueBetween(definition, bySlug, indexed, span.start, span.end)
-}
-
-function yearProratedMonthly(monthlyGoal: number, today: string): number {
-  const { year, month, day } = parseYmd(today)
-  let total = 0
-  for (let cursor = 1; cursor < month; cursor += 1) total += monthlyGoal
-  total += monthlyGoal * (day / daysInMonth(year, month))
-  return total
+  return metricValueBetween(definition, bySlug, indexed, span.start, span.end, new Set(), calendar)
 }
 
 export function scaledGoal(
@@ -174,6 +181,7 @@ export function scaledGoal(
   period: PeriodKey,
   today: string,
   bySlug: Map<string, KpiDefinition>,
+  calendar: OfficeCalendar = DEFAULT_CALENDAR,
 ): number | null {
   if (definition.goalValue == null) return null
   if (definition.aggregation === 'ratio' || definition.aggregation === 'latest' || definition.unit === 'percent' || definition.aggregation === 'average') {
@@ -182,28 +190,15 @@ export function scaledGoal(
   const goal = definition.goalValue
   const periodKind: GoalPeriod = definition.goalPeriod ?? (definition.frequency === 'weekly' ? 'weekly' : 'daily')
   const span = currentSpan(definition, period, today, bySlug)
-  const days = diffDays(span.start, span.end) + 1
-
-  if (definition.frequency === 'weekly') {
-    const weeks = period === 'today' || period === 'wtd' ? 1 : countMondays(span.start, span.end)
-    if (weeks === 0) return null
-    if (periodKind === 'daily') return goal * 7 * weeks
-    if (periodKind === 'monthly') {
-      if (period === 'mtd') return goal
-      if (period === 'ytd') return yearProratedMonthly(goal, today)
-      return goal * (7 / daysInMonth(parseYmd(today).year, parseYmd(today).month)) * weeks
-    }
-    return goal * weeks
-  }
-
-  if (periodKind === 'weekly') return goal * (days / 7)
-  if (periodKind === 'monthly') {
-    if (period === 'mtd') return goal
-    if (period === 'ytd') return yearProratedMonthly(goal, today)
-    return goal * (days / daysInMonth(parseYmd(today).year, parseYmd(today).month))
-  }
-  if (period === 'ytd') return goal * dayOfYear(today)
-  return goal * days
+  const open = openDayCount(span.start, span.end, calendar)
+  if (open === 0) return null
+  const usualWeek = Math.max(calendar.openWeekdays.length, 1)
+  if (periodKind === 'daily') return goal * open
+  if (periodKind === 'weekly') return goal * (open / usualWeek)
+  if (period === 'ytd') return yearOpenGoal(goal, today, calendar)
+  const fullMonth = openDayCount(monthStartOf(today), monthEnd(today), calendar)
+  if (fullMonth === 0) return null
+  return goal * (open / fullMonth)
 }
 
 export function goalStatus(value: number | null, goal: number | null, direction: KpiDirection): GoalStatus {
@@ -234,6 +229,7 @@ export function trendSeries(
   bySlug: Map<string, KpiDefinition>,
   indexed: ValueIndex,
   today: string,
+  calendar: OfficeCalendar = DEFAULT_CALENDAR,
 ): TrendPoint[] {
   if (usesWeeklyInputs(definition, bySlug)) {
     const endMonday = weekStartMonday(today)
@@ -244,7 +240,7 @@ export function trendSeries(
       const capped = compareYmd(end, today) > 0 ? today : end
       points.push({
         label: shortLabel(start),
-        value: metricValueBetween(definition, bySlug, indexed, start, capped),
+        value: metricValueBetween(definition, bySlug, indexed, start, capped, new Set(), calendar),
       })
     }
     return points
@@ -254,37 +250,18 @@ export function trendSeries(
     const date = shiftYmd(today, -i)
     points.push({
       label: shortLabel(date),
-      value: metricValueBetween(definition, bySlug, indexed, date, date),
+      value: metricValueBetween(definition, bySlug, indexed, date, date, new Set(), calendar),
     })
   }
   return points
 }
 
-export function consistency(dates: Iterable<string>, today: string): { current: number; longest: number; last7: number } {
-  const set = new Set(dates)
-  let current = 0
-  let cursor = set.has(today) ? today : shiftYmd(today, -1)
-  while (set.has(cursor)) {
-    current += 1
-    cursor = shiftYmd(cursor, -1)
-  }
-
-  const sorted = Array.from(set).filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)).sort()
-  let longest = 0
-  let run = 0
-  let previous: string | null = null
-  for (const date of sorted) {
-    if (previous && diffDays(previous, date) === 1) run += 1
-    else run = 1
-    if (run > longest) longest = run
-    previous = date
-  }
-
-  let last7 = 0
-  for (let i = 0; i < 7; i += 1) {
-    if (set.has(shiftYmd(today, -i))) last7 += 1
-  }
-  return { current, longest, last7 }
+export function consistency(
+  dates: Iterable<string>,
+  today: string,
+  calendar: OfficeCalendar = DEFAULT_CALENDAR,
+): { current: number; longest: number; last7: number } {
+  return consistencyWithCalendar(dates, today, calendar)
 }
 
 export function comparisonPhraseKey(period: PeriodKey, weekly: boolean): 'yesterday' | 'last week' | 'last month' | 'last year' {

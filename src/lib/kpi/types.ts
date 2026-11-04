@@ -30,6 +30,31 @@ export type KpiValue = {
   definitionId: string
   date: string
   value: number
+  source?: 'manual' | 'auto'
+  enteredByName?: string | null
+}
+
+export type OfficeAccess = {
+  role: 'owner' | 'associate' | 'front_desk'
+  canViewPl: boolean
+  clinicName: string | null
+  actorName: string
+}
+
+export type OfficeMember = {
+  id: string
+  email: string
+  role: 'associate' | 'front_desk'
+  canViewPl: boolean
+  status: 'invited' | 'active' | 'removed'
+}
+
+export type MonthComparison = {
+  month: string
+  kpi: number | null
+  pl: number | null
+  difference: number | null
+  flag: boolean
 }
 
 export type KpiWorkspace = {
@@ -40,6 +65,15 @@ export type KpiWorkspace = {
   definitions: KpiDefinition[]
   values: KpiValue[]
   loggedDates: string[]
+  openWeekdays: number[]
+  closedDates: string[]
+  autoLeadDates: string[]
+  leadCounts: { date: string; count: number }[]
+  leadCountReady: boolean
+  plMonths: MonthComparison[] | null
+  plNote: string | null
+  access: OfficeAccess
+  members: OfficeMember[]
 }
 
 export type CustomKpiInput = {

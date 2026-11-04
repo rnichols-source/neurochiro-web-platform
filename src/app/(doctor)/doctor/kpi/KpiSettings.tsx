@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { currencySymbol } from '@/lib/kpi/currency'
-import type { CustomKpiInput, GoalPeriod, KpiDefinition, KpiUnit } from '@/lib/kpi/types'
+import type { CustomKpiInput, GoalPeriod, KpiDefinition, KpiUnit, OfficeMember } from '@/lib/kpi/types'
+import OfficeExtras from './OfficeExtras'
 
 type GoalResult = { ok: true; goalValue: number | null; goalPeriod: GoalPeriod | null } | { ok: false; error: string }
 
@@ -23,9 +24,27 @@ export default function KpiSettings({
   onGoal,
   onCreate,
   onRename,
+  openWeekdays,
+  closedDates,
+  isOwner,
+  members,
+  onSaveWeekdays,
+  onAddClosed,
+  onRemoveClosed,
+  onInvite,
+  onRemoveMember,
 }: {
   definitions: KpiDefinition[]
   currency: string
+  openWeekdays: number[]
+  closedDates: string[]
+  isOwner: boolean
+  members: OfficeMember[]
+  onSaveWeekdays: (days: number[]) => Promise<{ ok: boolean; error?: string }>
+  onAddClosed: (date: string, note: string) => Promise<{ ok: boolean; error?: string }>
+  onRemoveClosed: (date: string) => Promise<{ ok: boolean; error?: string }>
+  onInvite: (email: string, role: 'associate' | 'front_desk', canViewPl: boolean) => Promise<{ ok: boolean; error?: string }>
+  onRemoveMember: (id: string) => Promise<{ ok: boolean; error?: string }>
   onToggle: (id: string, enabled: boolean) => Promise<{ ok: boolean; error?: string }>
   onMove: (id: string, direction: 'up' | 'down') => Promise<{ ok: boolean; error?: string }>
   onGoal: (id: string, goalValue: number | null, goalPeriod: GoalPeriod | null) => Promise<GoalResult>
@@ -36,6 +55,17 @@ export default function KpiSettings({
   const hidden = ordered(definitions).filter((definition) => !definition.enabled)
   return (
     <div className="space-y-5" data-testid="kpi-settings">
+      <OfficeExtras
+        openWeekdays={openWeekdays}
+        closedDates={closedDates}
+        isOwner={isOwner}
+        members={members}
+        onSaveWeekdays={onSaveWeekdays}
+        onAddClosed={onAddClosed}
+        onRemoveClosed={onRemoveClosed}
+        onInvite={onInvite}
+        onRemoveMember={onRemoveMember}
+      />
       <p className="text-sm text-portal-ink-2">
         Turn measures on or off, change the order, and set a goal. Hiding one keeps every number you already saved. You can turn it back on.
       </p>

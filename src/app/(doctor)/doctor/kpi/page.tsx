@@ -1,12 +1,12 @@
-'use client'
-
-import { useEffect, useState } from 'react'
 import UpgradeGate from '@/components/doctor/UpgradeGate'
-import { getKpiWorkspace } from './actions'
-import KpiApp from './KpiApp'
-import type { KpiWorkspace } from '@/lib/kpi/types'
+import { getPortalContext } from '@/lib/portal/context'
+import { lookupStaffOffice } from './actions'
+import KpiLoader from './KpiLoader'
 
-export default function KpiTrackerPage() {
+export default async function KpiTrackerPage() {
+  const ctx = await getPortalContext()
+  const staff = ctx && !ctx.doctor ? await lookupStaffOffice(ctx.userId) : false
+  if (staff) return <KpiLoader />
   return (
     <UpgradeGate
       feature="KPI Tracker"
@@ -16,51 +16,4 @@ export default function KpiTrackerPage() {
       <KpiLoader />
     </UpgradeGate>
   )
-}
-
-function KpiLoader() {
-  const [workspace, setWorkspace] = useState<KpiWorkspace | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [zone, setZone] = useState('America/New_York')
-
-  useEffect(() => {
-    let browserZone = 'America/New_York'
-    try {
-      browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone || browserZone
-    } catch {
-      browserZone = 'America/New_York'
-    }
-    let cancelled = false
-    getKpiWorkspace(browserZone).then((result) => {
-      if (cancelled) return
-      setZone(browserZone)
-      if (!result.ok) {
-        setError(result.error)
-        return
-      }
-      setWorkspace(result.workspace)
-    }).catch(() => {
-      if (!cancelled) setError('We could not open the scorecard. Refresh and try again.')
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  if (error) {
-    return (
-      <div className="max-w-lg mx-auto rounded-2xl border border-portal-border bg-white p-5" role="alert">
-        <h1 className="text-[26px] leading-8 font-bold text-portal-ink">KPI tracker</h1>
-        <p className="mt-2 text-[15px] leading-6 text-portal-ink-2">{error}</p>
-      </div>
-    )
-  }
-  if (!workspace) {
-    return (
-      <div className="min-h-40 flex items-center justify-center" role="status" aria-live="polite">
-        <p className="text-sm font-bold text-portal-ink-2">Opening your scorecard…</p>
-      </div>
-    )
-  }
-  return <KpiApp initial={workspace} clientTimeZone={zone} />
 }

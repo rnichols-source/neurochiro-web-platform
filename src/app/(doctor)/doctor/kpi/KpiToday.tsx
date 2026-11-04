@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { consistency, indexBySlug, indexValues, metricValue } from '@/lib/kpi/calc'
+import { normalizeCalendar } from '@/lib/kpi/calendar'
 import { compareYmd, longLabel, shiftYmd, weekRangeLabel } from '@/lib/kpi/dates'
 import { formatKpiValue } from '@/lib/kpi/format'
 import type { KpiDefinition, KpiValue, PeriodKey } from '@/lib/kpi/types'
@@ -21,6 +22,9 @@ export default function KpiToday({
   loggedDates,
   today,
   currency,
+  openWeekdays,
+  closedDates,
+  autoLeadDates,
   onSave,
   onEdit,
 }: {
@@ -29,6 +33,9 @@ export default function KpiToday({
   loggedDates: string[]
   today: string
   currency: string
+  openWeekdays: number[]
+  closedDates: string[]
+  autoLeadDates: string[]
   onSave: (definitionId: string, date: string, value: number | null) => Promise<SaveResult>
   onEdit: () => void
 }) {
@@ -38,7 +45,8 @@ export default function KpiToday({
   const [index, setIndex] = useState(0)
   const safeIndex = entered.length === 0 ? 0 : Math.min(index, entered.length - 1)
   const current = entered[safeIndex]
-  const stats = consistency(loggedDates, today)
+  const calendar = normalizeCalendar({ openWeekdays, closedDates })
+  const stats = consistency(loggedDates, today, calendar)
 
   return (
     <div className="space-y-4" data-testid="kpi-today">
@@ -80,6 +88,8 @@ export default function KpiToday({
           total={entered.length}
           selectedDate={selectedDate}
           stored={values.find((value) => value.definitionId === current.id && value.date === storageDateFor(current, selectedDate))?.value ?? null}
+          auto={current.slug === 'neurochiro_leads' && autoLeadDates.includes(storageDateFor(current, selectedDate))}
+          enteredByName={values.find((value) => value.definitionId === current.id && value.date === storageDateFor(current, selectedDate))?.enteredByName || null}
           currency={currency}
           onEdit={onEdit}
           onSave={onSave}
@@ -112,6 +122,8 @@ function EntryCard({
   total,
   selectedDate,
   stored,
+  auto,
+  enteredByName,
   currency,
   onEdit,
   onSave,
@@ -123,6 +135,8 @@ function EntryCard({
   total: number
   selectedDate: string
   stored: number | null
+  auto: boolean
+  enteredByName: string | null
   currency: string
   onEdit: () => void
   onSave: (definitionId: string, date: string, value: number | null) => Promise<SaveResult>
@@ -167,6 +181,8 @@ function EntryCard({
           <h2 className="text-xl font-bold text-portal-ink">{definition.name}</h2>
           <p className="mt-1 text-sm text-portal-ink-2">{definition.description}</p>
           {week ? <p className="mt-1 text-sm font-bold text-portal-ink">This week · {weekRangeLabel(selectedDate)}</p> : null}
+          {auto ? <p className="mt-2 inline-flex min-h-11 items-center rounded-full bg-portal-info-bg px-3 text-sm font-bold text-portal-info">Auto · counted from NeuroChiro</p> : null}
+          {!auto && enteredByName ? <p className="mt-2 text-sm text-portal-ink-2">Entered by {enteredByName}</p> : null}
         </div>
       </div>
       <p className="text-4xl font-bold text-portal-ink tabular-nums" data-testid="kpi-entry-value">
