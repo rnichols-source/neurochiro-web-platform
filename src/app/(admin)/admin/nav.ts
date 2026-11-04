@@ -28,6 +28,7 @@ export type AdminNavItem = {
 export const primaryNav: AdminNavItem[] = [
   { name: 'Today', href: '/admin', icon: LayoutDashboard },
   { name: 'Members', href: '/admin/members', icon: Stethoscope },
+  { name: 'Applications', href: '/admin/applications', icon: FileText },
   { name: 'Coverage', href: '/admin/coverage', icon: Map },
   { name: 'Leads', href: '/admin/leads', icon: Inbox, badge: 'leads' },
   { name: 'Revenue', href: '/admin/revenue', icon: Wallet },

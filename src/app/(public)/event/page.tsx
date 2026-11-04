@@ -40,7 +40,7 @@ export default function EventPage() {
     }
 
     if (role === "doctor") {
-      window.location.href = "/doctor/onboarding";
+      window.location.href = result.nextPath || "/doctor/onboarding";
     } else {
       window.location.href = "/student/dashboard";
     }

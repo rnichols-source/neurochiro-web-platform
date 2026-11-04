@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { EUROPEAN_ISO } from '@/lib/directory-countries';
 import { excludeDemo } from '@/lib/directory/exclude-demo';
+import { applyPublicListing } from '@/lib/directory/visibility';
 import { countryChipPayload, getPublicDirectoryCounts } from '@/lib/directory/public-counts';
 
 export const revalidate = 300;
@@ -12,10 +13,10 @@ export async function GET(request: NextRequest) {
 
   if (request.nextUrl.searchParams.get('cities') === '1') {
     const iso = country === 'UK' ? 'GB' : country;
-    let query = excludeDemo(supabase
+    let query = applyPublicListing(excludeDemo(supabase
       .from('doctors')
       .select('city, state, country')
-      .in('verification_status', ['verified', 'pending']));
+      .in('verification_status', ['verified', 'pending'])));
     if (country === 'EU') query = query.in('country', EUROPEAN_ISO);
     else if (country === 'US' || !country) query = query.or('country.is.null,country.eq.US');
     else if (country !== 'ALL') query = query.eq('country', iso);

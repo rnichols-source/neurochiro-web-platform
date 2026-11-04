@@ -2,30 +2,31 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { resolveStateCode } from '@/lib/resolve-state'
+import { applyPublicListing } from '@/lib/directory/visibility'
 
 export async function getMarketData(city: string, state: string) {
   const supabase = createAdminClient();
 
   // Count doctors in this city
-  const { count: cityCount } = await supabase
+  const { count: cityCount } = await applyPublicListing(supabase
     .from('doctors')
     .select('id', { count: 'exact', head: true })
     .ilike('city', city)
     .eq('state', resolveStateCode(state) || state)
-    .in('verification_status', ['verified', 'pending']);
+    .in('verification_status', ['verified', 'pending']));
 
   // Count doctors in this state
-  const { count: stateCount } = await supabase
+  const { count: stateCount } = await applyPublicListing(supabase
     .from('doctors')
     .select('id', { count: 'exact', head: true })
     .eq('state', resolveStateCode(state) || state)
-    .in('verification_status', ['verified', 'pending']);
+    .in('verification_status', ['verified', 'pending']));
 
   // Total nationwide
-  const { count: totalCount } = await supabase
+  const { count: totalCount } = await applyPublicListing(supabase
     .from('doctors')
     .select('id', { count: 'exact', head: true })
-    .in('verification_status', ['verified', 'pending']);
+    .in('verification_status', ['verified', 'pending']));
 
   return {
     cityCount: cityCount || 0,
@@ -40,12 +41,12 @@ export async function getLocationSuggestions(query: string) {
   if (!query || query.length < 2) return [];
 
   const supabase = createAdminClient();
-  const { data } = await supabase
+  const { data } = await applyPublicListing(supabase
     .from('doctors')
     .select('city, state')
     .or(`city.ilike.%${query}%${resolveStateCode(query) ? `,state.eq.${resolveStateCode(query)}` : ''}`)
     .in('verification_status', ['verified', 'pending'])
-    .limit(50);
+    .limit(50));
 
   if (!data) return [];
 

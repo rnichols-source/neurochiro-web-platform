@@ -7,6 +7,7 @@ import { resolveStateCode } from '@/lib/resolve-state'
 import { Doctor } from '@/types/directory'
 import { revalidatePath } from 'next/cache'
 import { getThresholds } from '@/lib/thresholds'
+import { applyPublicListing, isDoctorPubliclyVisible, type PublicListingRow } from '@/lib/directory/visibility'
 
 export async function getDoctors(options: {
   regionCode?: string;
@@ -21,12 +22,12 @@ export async function getDoctors(options: {
   try {
     // DATA MINIMIZATION: Only fetch essential columns for the LIST view
     // Removed: email, website_url, instagram_url, facebook_url, address (private-ish)
-    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at, accepting_new_patients, booking_url, offers_telehealth, accepts_walkins';
+    const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, latitude, longitude, bio, specialties, region_code, phone, photo_url, created_at, accepting_new_patients, booking_url, offers_telehealth, accepts_walkins';
     
-    let query = supabase
+    let query = applyPublicListing(supabase
       .from('doctors')
       .select(selectFields, { count: 'exact' })
-      .in('verification_status', ['verified', 'pending']);
+      .in('verification_status', ['verified', 'pending']));
 
     const region = (regionCode || '').toUpperCase();
     if (region === 'EU') {
@@ -107,7 +108,7 @@ export async function getDoctors(options: {
     // A region page with no doctors stays empty. A nationwide fill used to show US doctors on /au.
     
     return {
-      doctors: (data || []) as unknown as Doctor[],
+      doctors: ((data || []) as unknown as Doctor[]).filter((doctor) => isDoctorPubliclyVisible(doctor)),
       total: count || 0,
       error: false
     };
@@ -121,7 +122,7 @@ export async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
   // Full profile select — includes all extended fields for ultimate profile page
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, tiktok_url, user_id, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, created_at, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, profile_style';
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, tiktok_url, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, created_at, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, profile_style';
   
   try {
     let { data, error } = await supabase
@@ -153,6 +154,10 @@ export async function getDoctorBySlug(slug: string) {
     if (error) {
       console.error("[DIRECTORY_ACTION] Error fetching doctor by slug/id:", error.message);
       return { doctor: null, error: true };
+    }
+
+    if (data && !isDoctorPubliclyVisible(data as unknown as PublicListingRow)) {
+      return { doctor: null, error: false }
     }
 
     return { doctor: data as unknown as Doctor | null, error: false }
@@ -227,12 +232,12 @@ export async function getCityDoctorCount(city: string, state: string): Promise<n
   if (!city) return 0;
   const supabase = createServerSupabase();
   try {
-    const { count } = await supabase
+    const { count } = await applyPublicListing(supabase
       .from('doctors')
       .select('id', { count: 'exact', head: true })
       .in('verification_status', ['verified', 'pending'])
       .ilike('city', city)
-      .eq('state', resolveStateCode(state) || state);
+      .eq('state', resolveStateCode(state) || state));
     return count || 0;
   } catch { return 0; }
 }
@@ -271,12 +276,12 @@ export async function getCitySearchVolume(city: string, state: string): Promise<
   if (!city) return 0;
   const supabase = createServerSupabase();
   try {
-    const { data } = await supabase
+    const { data } = await applyPublicListing(supabase
       .from('doctors')
       .select('profile_views')
       .in('verification_status', ['verified', 'pending'])
       .ilike('city', city)
-      .eq('state', resolveStateCode(state) || state);
+      .eq('state', resolveStateCode(state) || state));
     return (data || []).reduce((sum, d) => sum + (d.profile_views || 0), 0);
   } catch { return 0; }
 }

@@ -5,6 +5,7 @@ import { resolveStateCode } from '@/lib/resolve-state';
 import { getThresholds } from '@/lib/thresholds';
 import { EUROPEAN_ISO, countryHint, toDirectoryCountry } from '@/lib/directory-countries';
 import { excludeDemo } from '@/lib/directory/exclude-demo';
+import { applyPublicListing, isDoctorPubliclyVisible } from '@/lib/directory/visibility';
 import { hiddenTestUserIds } from '@/lib/profiles/test-users';
 // city-data import removed — using resolve-city.ts shared resolver
 
@@ -147,14 +148,14 @@ async function lookupPostalCode(supabase: any, code: string, country: string): P
 }
 
 // Phone stays so DoctorCard can render a tel: link. Section E of the lockdown migration is the ask-first revoke. PUBLIC_DOCTOR_COLUMNS excludes phone.
-const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
+const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
 
 /** Country-aware doctors query. `US` includes legacy null country. `EU` is the European set. `ALL` is worldwide. */
 function doctorsQuery(sb: any, regionOrCountry: string, hiddenUserIds: string[] = []) {
-  let q = excludeDemo(sb
+  let q = applyPublicListing(excludeDemo(sb
     .from('doctors')
     .select(SELECT_FIELDS)
-    .in('verification_status', ['verified', 'pending']))
+    .in('verification_status', ['verified', 'pending'])))
   if (hiddenUserIds.length) q = q.not('user_id', 'in', `(${hiddenUserIds.join(',')})`)
   const code = (regionOrCountry || 'US').toUpperCase()
   if (code === 'ALL') return q
@@ -617,7 +618,7 @@ export async function searchDirectory(request: NextRequest) {
 }
 
 function enrichWithDistance(doctors: any[], userLat: number, userLng: number, hasCoords: boolean): any[] {
-  return doctors.map(d => {
+  return doctors.filter((doctor) => isDoctorPubliclyVisible(doctor)).map(d => {
     let distance_miles: number | null = null;
     if (hasCoords && isValidCoord(d.latitude, d.longitude)) {
       distance_miles = haversineDistance(userLat, userLng, d.latitude, d.longitude);

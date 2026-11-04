@@ -7,6 +7,8 @@ import { cookies } from 'next/headers'
 import { isFounderEmail } from '@/lib/founder'
 import { assertSelfServeRole } from '@/lib/auth/roles'
 import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
+import { isApplicationFlowEnabled } from '@/lib/applications/flag'
+import { ensureDraftApplication } from '@/lib/applications/store'
 
 /**
  * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
@@ -154,6 +156,8 @@ export async function createAccountAction(formData: FormData, role: string, _tie
   const licenseState = formData.get('licenseState') as string || ''
   const region = formData.get('region') as string || ''
   const chiropracticApproach = formData.get('chiropracticApproach') as string || ''
+  const referralCode = (formData.get('ref') as string) || ''
+  const flow = isApplicationFlowEnabled() && role === 'doctor'
   const supabase = createServerSupabase()
 
   const { data, error } = await supabase.auth.signUp({
@@ -193,7 +197,7 @@ export async function createAccountAction(formData: FormData, role: string, _tie
       // Only create if no doctors row exists yet
       const { data: existingDoc } = await adminDb.from('doctors').select('id').eq('user_id', data.user.id).maybeSingle();
       if (!existingDoc) {
-        await adminDb.from('doctors').insert({
+        const { data: doctorRow } = await adminDb.from('doctors').insert({
           user_id: data.user.id,
           first_name: firstName,
           last_name: lastName,
@@ -206,12 +210,20 @@ export async function createAccountAction(formData: FormData, role: string, _tie
           address: '',
           bio: '',
           specialties: [],
-          verification_status: 'pending',
+          verification_status: flow ? 'hidden' : 'pending',
           membership_tier: 'free',
           region_code: 'US',
           is_approved: false,
           onboarding_call_status: 'not_booked',
-        } as any);
+        } as any).select('id').maybeSingle();
+        if (flow && doctorRow?.id) {
+          await ensureDraftApplication({
+            doctorId: doctorRow.id,
+            userId: data.user.id,
+            email,
+            referralCode,
+          });
+        }
       }
     }
 
@@ -236,7 +248,7 @@ export async function createAccountAction(formData: FormData, role: string, _tie
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🆕 **NEW ${roleLabel} SIGNUP — PENDING APPROVAL**\n\n**Name:** ${cleanDoctorName(name).firstName || 'New doctor'}${approachLine}\n\n⏳ Approve at: https://neurochiro.co/admin/moderation`,
+            content: `🆕 **NEW ${roleLabel} SIGNUP${flow ? ' — APPLICATION' : ' — PENDING APPROVAL'}**\n\n**Name:** ${cleanDoctorName(name).firstName || 'New doctor'}${approachLine}\n\n${flow ? 'Review at: https://neurochiro.co/admin/applications' : '⏳ Approve at: https://neurochiro.co/admin/moderation'}`,
           }),
         }).catch(() => {});
       }
@@ -245,7 +257,8 @@ export async function createAccountAction(formData: FormData, role: string, _tie
     return {
       success: true,
       user: data.user,
-      sessionActive: !!data.session
+      sessionActive: !!data.session,
+      nextPath: flow ? '/doctor/apply' : null,
     };
   }
 
@@ -274,7 +287,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
   // Verify the doctor record exists and is unclaimed
   const { data: doctor, error: fetchError } = await admin
     .from('doctors')
-    .select('id, user_id, first_name, last_name')
+    .select('id, user_id, first_name, last_name, verification_status')
     .eq('id', claimId)
     .single();
 
@@ -286,23 +299,33 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
     return { error: 'This profile has already been claimed.' };
   }
 
-  // Link the doctor record to the new user (pending approval)
+  const flow = isApplicationFlowEnabled();
+  const claimPatch: Record<string, unknown> = { user_id: userId, is_approved: false };
+  if (flow && doctor.verification_status === 'pending') claimPatch.verification_status = 'hidden';
+
   const { error: updateError } = await admin
     .from('doctors')
-    .update({ user_id: userId, is_approved: false } as any)
+    .update(claimPatch as any)
     .eq('id', claimId);
 
   if (updateError) {
     console.error("Failed to claim doctor profile:", updateError);
-    // Retry without RLS constraints
     const { error: retryError } = await admin
       .from('doctors')
-      .update({ user_id: userId, is_approved: false } as any)
+      .update(claimPatch as any)
       .eq('id', claimId);
     if (retryError) {
       console.error("Retry also failed:", retryError);
       return { error: 'Failed to claim profile. Please contact support.' };
     }
+  }
+
+  if (flow) {
+    await ensureDraftApplication({
+      doctorId: claimId,
+      userId,
+      email: user.email || '',
+    });
   }
 
   // Update the user's profile role to doctor and set their name

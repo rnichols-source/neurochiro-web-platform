@@ -1,4 +1,5 @@
 import { lookupReferralCode } from "@/app/actions/referral-program";
+import { joinRoleHref } from "@/lib/applications/join-link";
 import Link from "next/link";
 import { ArrowRight, Gift, ShieldCheck, Users } from "lucide-react";
 import Footer from "@/components/landing/Footer";
@@ -58,13 +59,13 @@ export default async function JoinReferralPage({ searchParams }: Props) {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={`/get-started${code ? `&ref=${code}` : ''}`}
+              href={joinRoleHref('doctor', code)}
               className="px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors inline-flex items-center justify-center gap-2"
             >
               Join as a Doctor <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href={`/get-started?role=student${code ? `&ref=${code}` : ''}`}
+              href={joinRoleHref('student', code)}
               className="px-8 py-4 bg-white/10 text-white font-bold rounded-xl hover:bg-white/20 transition-colors border border-white/20"
             >
               Join as a Student
