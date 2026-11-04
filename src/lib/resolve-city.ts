@@ -10,6 +10,7 @@
  */
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { matchesCountryPostal } from '@/lib/referrals/pure'
 import { resolveStateCode } from '@/lib/resolve-state'
 
 export interface CityResolution {
@@ -70,6 +71,36 @@ export async function resolveLocation(
       }
     }
     return { resolved: null, ambiguous: null, label: `We couldn't find postal code ${zipMatch[1]}.` }
+  }
+
+  // Country postal codes, including India's 6-digit PIN. US ZIP is handled above.
+  const foreignPostal = matchesCountryPostal(raw, country)
+  if (foreignPostal) {
+    const iso = country.toUpperCase() === 'UK' ? 'GB' : country.toUpperCase()
+    const { data } = await (supabase as any)
+      .from('zip_codes')
+      .select('city, state, lat, lng')
+      .eq('zip', foreignPostal)
+      .eq('country', iso)
+      .limit(1)
+    const row = Array.isArray(data) ? data[0] : null
+    if (row && row.lat != null && row.lng != null) {
+      return {
+        resolved: { city: row.city, state: row.state, lat: Number(row.lat), lng: Number(row.lng) },
+        ambiguous: null, confidence: 'exact' as const,
+        label: `Showing doctors near ${row.city}${row.state ? ', ' + row.state : ''}`,
+      }
+    }
+    const geo = await nominatimGeocode(foreignPostal, iso)
+    if (geo && Number.isFinite(geo.lat) && Number.isFinite(geo.lng)) {
+      const displayCity = geo.city || foreignPostal
+      return {
+        resolved: { city: displayCity, state: geo.state || '', lat: geo.lat, lng: geo.lng },
+        ambiguous: null, confidence: 'approximate' as const,
+        label: `Showing doctors near ${displayCity}${geo.state ? ', ' + geo.state : ''}`,
+      }
+    }
+    return { resolved: null, ambiguous: null, label: `We couldn't find postal code ${foreignPostal}.` }
   }
 
   // ── Parse city and state ──

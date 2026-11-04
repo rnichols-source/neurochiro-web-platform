@@ -18,6 +18,7 @@ import {
 
 export async function searchReferralDoctors(input: {
   query: string;
+  country?: string;
   specialty?: string | null;
   acceptingOnly?: boolean;
   place?: { city: string; state: string; lat: number; lng: number } | null;

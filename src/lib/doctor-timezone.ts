@@ -59,6 +59,7 @@ const CA_PROVINCE_NAMES: Record<string, string> = {
 
 const COUNTRY_TZ: Record<string, string> = {
   GB: 'Europe/London', UK: 'Europe/London', ENG: 'Europe/London',
+  IN: 'Asia/Kolkata',
   NZ: 'Pacific/Auckland', AU: 'Australia/Sydney',
   DE: 'Europe/Berlin', IE: 'Europe/Dublin', FR: 'Europe/Paris',
   ZA: 'Africa/Johannesburg', NG: 'Africa/Lagos',
@@ -79,6 +80,7 @@ const COUNTRY_NAMES: Record<string, string> = {
   ng: 'NG', nigeria: 'NG',
   sg: 'SG', singapore: 'SG',
   jp: 'JP', japan: 'JP',
+  in: 'IN', india: 'IN',
 }
 
 function normalizeKey(value: string): string {
