@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
   if (!consentText) return NextResponse.json({ error: 'Missing consent text.' }, { status: 400 })
 
   const validSource = VALID_SOURCES.includes(source) ? source : 'doctor_joined'
+  const smsConsent = body.smsConsent === true
   const result = await createLead({
     doctorId,
     name,
@@ -41,6 +42,8 @@ export async function POST(req: NextRequest) {
     consentText,
     source: validSource,
     ip,
+    smsConsent,
+    smsPhone: smsConsent && typeof body.smsPhone === 'string' ? body.smsPhone : null,
   })
 
   if (!result.ok) {

@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { patientName, patientEmail, patientPhone, preferredDate, message, doctorId } = body
+    const smsConsent = body.smsConsent === true
     const result = await createLead({
       doctorId,
       name: patientName,
@@ -28,6 +29,8 @@ export async function POST(request: NextRequest) {
       consentText: 'Patient submitted an appointment request form on neurochiro.co',
       source: 'appointment',
       ip: getIP(request),
+      smsConsent,
+      smsPhone: smsConsent && typeof body.smsPhone === 'string' ? body.smsPhone : null,
     })
 
     if (!result.ok) {

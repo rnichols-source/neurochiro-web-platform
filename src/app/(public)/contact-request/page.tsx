@@ -6,6 +6,7 @@ import { Phone, User, MessageSquare, CheckCircle2, AlertCircle, Loader2, ShieldC
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
 import { containsHealthWords, isPlausibleEmail, isPlausiblePhone } from "@/lib/leads/validate";
+import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
 
 export default function ContactRequestPage() {
   return (
@@ -30,6 +31,7 @@ function ContactRequestContent() {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [consent, setConsent] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [joinList, setJoinList] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -108,6 +110,8 @@ function ContactRequestContent() {
           note: note.trim() || undefined,
           consent: true,
           consentText,
+          smsConsent: smsConsent === true,
+          smsPhone: smsConsent ? phone.trim() : null,
           source: urlSource,
           joinList: joinList && email.trim() ? true : false,
         }),
@@ -364,6 +368,21 @@ function ContactRequestContent() {
                 </span>
               </label>
               {errors.consent && <p className="text-red-500 text-xs mt-1">{errors.consent}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="contact-sms-consent" className="flex items-start gap-3 cursor-pointer">
+                <input
+                  id="contact-sms-consent"
+                  type="checkbox"
+                  checked={smsConsent}
+                  onChange={(e) => setSmsConsent(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange"
+                />
+                <span className="text-sm text-gray-600 leading-relaxed">
+                  <PatientSmsConsentLabel />
+                </span>
+              </label>
             </div>
 
             {/* Server error */}

@@ -1,5 +1,9 @@
 import crypto from 'crypto'
+import { after } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { PATIENT_SMS_CONSENT_V1, PATIENT_SMS_CONSENT_VERSION } from '@/lib/sms/consent'
+import { toE164 } from '@/lib/sms/phone'
+import { sendLeadTexts } from '@/lib/sms/send-lead-texts'
 import { ACK_TOKEN_DAYS, siteUrl } from './config'
 import { postDiscord } from './discord'
 import {
@@ -10,7 +14,7 @@ import {
   type LeadMail,
 } from './deliver'
 import { getDoctorRecipients } from './recipients'
-import { isMissingColumn, updateContactRequest } from './schema'
+import { isMissingColumn, isMissingTable, updateContactRequest } from './schema'
 import { containsHealthWords, isPlausibleEmail, isPlausiblePhone, normalizeEmail } from './validate'
 
 export type CreateLeadInput = {
@@ -23,6 +27,8 @@ export type CreateLeadInput = {
   consentText: string
   source: string
   ip?: string | null
+  smsConsent?: boolean
+  smsPhone?: string | null
 }
 
 export type CreateLeadResult = {
@@ -63,6 +69,55 @@ function noteFor(input: { preferredTime: string; email: string; message: string 
   if (input.email) parts.push(`Email: ${input.email}`)
   if (input.message) parts.push(input.message)
   return parts.join('. ') || null
+}
+
+let warnedAlertColumns = false
+
+type AlertRow = {
+  lead_alert_phones?: unknown
+  sms_alerts_enabled?: boolean | null
+  sms_alerts_consent_at?: string | null
+}
+type AlertError = { message?: string; code?: string; details?: string } | null
+type AlertQuery = {
+  select: (columns: string) => {
+    eq: (column: string, value: string) => {
+      maybeSingle: () => Promise<{ data: AlertRow | null; error: AlertError }>
+    }
+  }
+}
+
+async function loadDoctorAlerts(db: { from: (table: string) => AlertQuery }, doctorId: string): Promise<{
+  lead_alert_phones: string[]
+  sms_alerts_enabled: boolean
+  sms_alerts_consent_at: string | null
+} | null> {
+  try {
+    const result = await db.from('doctors')
+      .select('lead_alert_phones, sms_alerts_enabled, sms_alerts_consent_at')
+      .eq('id', doctorId)
+      .maybeSingle()
+    if (result.error) {
+      if (isMissingColumn(result.error) || isMissingTable(result.error)) {
+        if (!warnedAlertColumns) {
+          warnedAlertColumns = true
+          console.warn('[SMS] doctor text-alert columns are missing. Apply supabase/migrations/proposed/20261108000000_instant_lead_texts.sql')
+        }
+        return null
+      }
+      console.warn('[SMS] could not load doctor text alerts')
+      return null
+    }
+    const row = result.data
+    if (!row) return null
+    return {
+      lead_alert_phones: Array.isArray(row.lead_alert_phones) ? row.lead_alert_phones.filter((value): value is string => typeof value === 'string') : [],
+      sms_alerts_enabled: row.sms_alerts_enabled === true,
+      sms_alerts_consent_at: typeof row.sms_alerts_consent_at === 'string' ? row.sms_alerts_consent_at : null,
+    }
+  } catch {
+    return null
+  }
 }
 
 async function loadDoctor(db: any, doctorId: string): Promise<{ doctor: any | null; error?: string }> {
@@ -106,6 +161,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
     return { ...EMPTY, error: loaded.error ? 'Something went wrong. Please try again.' : 'Doctor not found.', healthWarning }
   }
   const doctor = loaded.doctor
+  const alerts = await loadDoctorAlerts(db, doctor.id)
   const docName = doctorNameOf(doctor)
   const practiceName = doctor.clinic_name || docName
   const officePhone = doctor.phone || null
@@ -199,6 +255,19 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   const requestId = inserted.data.id as string
   mailBase.requestId = requestId
 
+  let smsConsentSaved = false
+  const normalizedSms = input.smsConsent === true ? toE164(input.smsPhone || null) : null
+  if (input.smsConsent === true && normalizedSms) {
+    const savedConsent = await updateContactRequest(db, requestId, {
+      sms_consent: true,
+      sms_consent_at: new Date().toISOString(),
+      sms_consent_version: PATIENT_SMS_CONSENT_VERSION,
+      sms_consent_text: PATIENT_SMS_CONSENT_V1,
+      sms_phone: normalizedSms,
+    })
+    smsConsentSaved = savedConsent.ok === true && !savedConsent.missingColumn
+  }
+
   const recipients = await getDoctorRecipients({
     id: doctor.id,
     email: doctor.email,
@@ -242,6 +311,35 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   if (emailOk) {
     const confirm = await sendPatientConfirmation(mailBase)
     if (!confirm.ok) console.error('[LEADS] patient confirmation failed:', confirm.error)
+  }
+
+  try {
+    after(() => sendLeadTexts({
+      requestId,
+      smsConsentSaved,
+      doctor: {
+        id: String(doctor.id),
+        state: doctor.state ?? null,
+        country: doctor.country ?? null,
+        lastName: doctor.last_name || '',
+        practice: doctor.clinic_name || '',
+        leadAlertPhones: alerts?.lead_alert_phones || [],
+        smsAlertsEnabled: alerts?.sms_alerts_enabled === true,
+        smsAlertsConsentAt: alerts?.sms_alerts_consent_at || null,
+      },
+      patient: {
+        name,
+        phone: phoneOk ? phone : '',
+        email,
+        smsPhone: normalizedSms,
+        bestTime: preferredTime,
+        message,
+      },
+    }).catch(() => {
+      console.warn('[SMS] lead texts failed')
+    }))
+  } catch {
+    console.warn('[SMS] could not schedule lead texts')
   }
 
   const copy = await sendAdminCopy(mailBase)

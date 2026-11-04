@@ -7,6 +7,7 @@ import { doctorLastName } from '@/lib/quiz/copy'
 import type { QuizMatch } from '@/lib/quiz/match'
 import { requestAppointment } from './actions'
 import { ConsentText } from './ConsentText'
+import { PatientSmsConsentLabel } from '@/components/sms/SmsConsentLabel'
 
 const focusRing = 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange focus-visible:ring-offset-2'
 const field = `mt-1 w-full min-h-11 rounded-xl border border-gray-300 bg-white px-3 text-base text-neuro-navy ${focusRing}`
@@ -29,6 +30,7 @@ export function RequestDialog({ doctor, sessionId, source, startedAt, onClose }:
   const [bestTime, setBestTime] = useState('')
   const [message, setMessage] = useState('')
   const [consent, setConsent] = useState(false)
+  const [smsConsent, setSmsConsent] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -78,6 +80,7 @@ export function RequestDialog({ doctor, sessionId, source, startedAt, onClose }:
     setBestTime('')
     setMessage('')
     setConsent(false)
+    setSmsConsent(false)
     setErrors({})
     setFormError('')
     setSuccess(null)
@@ -117,6 +120,7 @@ export function RequestDialog({ doctor, sessionId, source, startedAt, onClose }:
         message,
         consent: true,
         consentText: QUIZ_REQUEST_CONSENT_STORED,
+        smsConsent,
         _hp: honeypot,
         startedAt,
         sessionId,
@@ -197,6 +201,12 @@ export function RequestDialog({ doctor, sessionId, source, startedAt, onClose }:
               </label>
             </div>
             {errors.consent ? <p id="quiz-request-consent-error" className="text-sm text-red-700">{errors.consent}</p> : null}
+            <div className="flex items-start gap-3">
+              <input id="quiz-request-sms" type="checkbox" checked={smsConsent} onChange={(event) => setSmsConsent(event.target.checked)} className={`mt-1 h-5 w-5 ${focusRing}`} />
+              <label htmlFor="quiz-request-sms" className="text-sm text-neuro-navy">
+                <PatientSmsConsentLabel />
+              </label>
+            </div>
             {formError ? <p className="text-sm text-red-700" role="alert">{formError}</p> : null}
             <input type="text" name="_hp" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value={honeypot} onChange={(event) => setHoneypot(event.target.value)} />
             <div className="flex flex-col gap-3 sm:flex-row">

@@ -69,6 +69,33 @@ test('request schema requires contact and the stored consent text', () => {
   assert.equal(missing.success, false)
 })
 
+test('text consent is optional and stays off unless checked', () => {
+  const omitted = requestInputSchema.parse({
+    doctorId,
+    name: 'Jamie Lee',
+    email: 'jamie@example.com',
+    consent: true,
+    consentText: QUIZ_REQUEST_CONSENT_STORED,
+    _hp: '',
+    startedAt: Date.now() - 5000,
+    sessionId,
+  })
+  assert.equal(omitted.smsConsent, false)
+
+  const checked = requestInputSchema.parse({
+    doctorId,
+    name: 'Jamie Lee',
+    phone: '8645550100',
+    consent: true,
+    consentText: QUIZ_REQUEST_CONSENT_STORED,
+    smsConsent: true,
+    _hp: '',
+    startedAt: Date.now() - 5000,
+    sessionId,
+  })
+  assert.equal(checked.smsConsent, true)
+})
+
 test('honeypot and fast submits are bots without failing the schema', () => {
   const parsed = requestInputSchema.parse({
     doctorId,
