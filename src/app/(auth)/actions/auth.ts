@@ -9,6 +9,7 @@ import { assertSelfServeRole } from '@/lib/auth/roles'
 import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { ensureDraftApplication } from '@/lib/applications/store'
+import { safeReturnPath } from '@/lib/auth/safe-return-path'
 
 /**
  * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
@@ -32,7 +33,14 @@ function cleanDoctorName(raw: string | null | undefined): { firstName: string; l
   }
 }
 
+function loginErrorRedirect(code: string, next: string | null) {
+  const params = new URLSearchParams({ error: code })
+  if (next) params.set('next', next)
+  return redirect(`/login?${params.toString()}`)
+}
+
 export async function login(formData: FormData, redirectUrl?: string | null) {
+  const next = safeReturnPath(redirectUrl)
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const supabase = createServerSupabase()
@@ -44,13 +52,13 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   if (error) {
     if (error.message.toLowerCase().includes('email not confirmed')) {
-      return redirect(`/login?error=email_not_confirmed`)
+      return loginErrorRedirect('email_not_confirmed', next)
     }
-    return redirect(`/login?error=auth_failed`)
+    return loginErrorRedirect('auth_failed', next)
   }
 
   if (!data?.user) {
-    return redirect(`/login?error=auth_failed`)
+    return loginErrorRedirect('auth_failed', next)
   }
 
   const { data: profile } = await supabase
@@ -82,18 +90,17 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     role = 'founder';
   }
 
+  const cookieStore = await cookies();
+  if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(role)) {
+    cookieStore.delete('nc_demo_role');
+  }
+
+  // Same-site return path only. An unfinished application comes back to /doctor/apply.
+  if (next) return redirect(next);
+
   // Check if first-time user (name not set)
   if (!(profile as any)?.full_name && ['doctor', 'student'].includes(role)) {
     return redirect(`/onboarding?role=${role}`);
-  }
-
-  // Free tier — students can access portal without payment
-  // Features gated inside via UpgradeGate components
-
-  // Honor redirect param only after subscription is verified.
-  // Login accepts ?redirect= and ?next=. Only same-site paths are followed.
-  if (redirectUrl && redirectUrl.startsWith("/") && !redirectUrl.startsWith("//") && !redirectUrl.includes("://")) {
-    return redirect(redirectUrl);
   }
 
   // Standardize the dashboard routes
@@ -119,16 +126,25 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     destination = '/';
   }
 
-  // Clear any existing demo role cookie for admin logins
-  const cookieStore = await cookies();
-  if (['admin', 'founder', 'super_admin', 'regional_admin'].includes(role)) {
-    cookieStore.delete('nc_demo_role');
-  }
-
   return redirect(destination)
 }
 
-export async function signInWithProvider(provider: 'google') {
+export async function signInWithProvider(provider: 'google', redirectUrl?: string | null) {
+  const next = safeReturnPath(redirectUrl)
+  const cookieStore = await cookies()
+  if (next) {
+    cookieStore.set({
+      name: 'nc_return_path',
+      value: next,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+      maxAge: 60 * 10,
+    })
+  } else {
+    cookieStore.delete('nc_return_path')
+  }
   const supabase = createServerSupabase()
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://neurochiro.co'
   const { data, error } = await supabase.auth.signInWithOAuth({

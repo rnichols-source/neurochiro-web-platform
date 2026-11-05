@@ -72,7 +72,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
             </p>
 
             <Link
-              href="/login"
+              href={role === "doctor" && applicationFlow ? "/login?next=%2Fdoctor%2Fapply" : "/login"}
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
             >
               Log In Now
@@ -205,7 +205,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
 
           <p className="text-center text-xs text-gray-400">
             {role === "doctor"
-              ? (applicationFlow ? "You are not charged unless the application is approved." : "Personal onboarding call with Dr. Ray included.")
+              ? (applicationFlow ? "Next: a 5-minute application. You'll save a card, but you're not charged unless you're approved." : "Personal onboarding call with Dr. Ray included.")
               : "Includes monthly group call with Dr. Ray."}
           </p>
         </form>
