@@ -1,6 +1,9 @@
 import { cookies } from 'next/headers'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { safeReturnPath } from '@/lib/auth/safe-return-path'
+import { shouldAttemptDoctorClaim } from '@/lib/doctors/claim-existing'
+import { claimUnclaimedDoctor } from '@/lib/doctors/claim-existing-run'
+import { isFounderEmail } from '@/lib/founder'
 import { NextResponse } from 'next/server'
 
 function redirectClearingReturn(url: string) {
@@ -27,23 +30,31 @@ export async function GET(request: Request) {
         return redirectClearingReturn(`${origin}/reset-password`)
       }
 
-      // Check if this is a student without an active subscription
-      // Prevents OAuth from bypassing the paywall
+      // Google sign-in does not create a doctor row. Link an admin-built profile by email.
       const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
+      let destination = next
+      if (user?.email && !isFounderEmail(user.email)) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role, tier, stripe_customer_id')
+          .select('role, full_name')
           .eq('id', user.id)
-          .single()
-
-        // Free tier — no subscription redirects needed
-        // All doctors and students can access their portals
-        // Features are gated inside via sidebar locks and UpgradeGate components
+          .maybeSingle()
+        const storedRole = (profile as { role?: string | null } | null)?.role
+        if (shouldAttemptDoctorClaim(storedRole)) {
+          const claim = await claimUnclaimedDoctor({
+            userId: user.id,
+            email: user.email,
+            source: 'login',
+            displayName: (profile as { full_name?: string | null } | null)?.full_name || '',
+          })
+          if (claim.status === 'claimed' && (next === '/' || next === '')) {
+            destination = '/doctor/dashboard'
+          }
+        }
       }
 
-      console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${next}`);
-      return redirectClearingReturn(`${origin}${next}`)
+      console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${destination}`);
+      return redirectClearingReturn(`${origin}${destination}`)
     } else {
       console.error("[AUTH_CALLBACK] Exchange error:", error.message);
     }

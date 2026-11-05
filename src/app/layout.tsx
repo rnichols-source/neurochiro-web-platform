@@ -64,16 +64,21 @@ export const viewport = {
   interactiveWidget: "resizes-content" as const,
 };
 
+import { headers } from "next/headers";
 import { RegionProvider } from "@/context/RegionContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import LazyOverlays from "@/components/layout/LazyOverlays";
 import RecoveryRedirect from "@/components/auth/RecoveryRedirect";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Preview builds do not have the public Supabase key. Pages that open a client
+  // during static generation then fail the deploy. Reading the request here renders
+  // pages on demand instead of baking that failure into the build.
+  await headers();
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@graph": [

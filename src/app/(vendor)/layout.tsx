@@ -1,12 +1,16 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { LayoutDashboard, Store, LogOut, ChevronRight } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase-server";
+
+export const dynamic = 'force-dynamic';
 
 export default async function VendorLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await headers();
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   let profileHref = "/marketplace";

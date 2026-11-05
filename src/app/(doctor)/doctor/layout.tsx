@@ -18,7 +18,12 @@ import StaffScorecardFrame from './StaffScorecardFrame';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
+export const dynamic = 'force-dynamic';
+
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
+  // Read the request before Supabase. A preview build has no public key, and throwing
+  // here used to fail static export. headers() marks the doctor portal on-demand.
+  await headers();
   const ctx = await getPortalContext();
   if (!ctx) {
     const path = (await headers()).get('x-pathname') || '';

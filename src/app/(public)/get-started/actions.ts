@@ -5,6 +5,7 @@ import { assertSelfServeRole } from '@/lib/auth/roles'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { doctorSignupStatus } from '@/lib/applications/signup'
 import { ensureDraftApplication } from '@/lib/applications/store'
+import { claimUnclaimedDoctor } from '@/lib/doctors/claim-existing-run'
 
 export async function createFreeAccount(data: {
   name: string;
@@ -44,8 +45,21 @@ export async function createFreeAccount(data: {
       tier: 'free',
     });
 
-    // If doctor, create doctor record
+    // If doctor, link an admin-built profile with this email, or create a new one.
+    let claimedExisting = false
     if (data.role === 'doctor') {
+      const claim = await claimUnclaimedDoctor({
+        userId,
+        email: data.email,
+        source: 'signup',
+        displayName: data.name,
+      })
+      if (claim.status === 'claimed' || claim.status === 'already-linked') {
+        claimedExisting = true
+      }
+    }
+
+    if (data.role === 'doctor' && !claimedExisting) {
       const nameParts = data.name.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
@@ -94,21 +108,29 @@ export async function createFreeAccount(data: {
       });
     }
 
-    // Discord notification
-    try {
-      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
-      if (discordUrl) {
-        await fetch(discordUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `🔔 **NEW SIGNUP**\n\n**${data.name}** signed up as a **${data.role}**\nEmail: ${data.email}\nPhone: ${data.phone || 'Not provided'}${isApplicationFlowEnabled() && data.role === 'doctor' ? '\n\nDoctor application started. Review at https://neurochiro.co/admin/applications' : '\n\nThey need to book their onboarding call before activation.'}`,
-          }),
-        }).catch(() => {});
-      }
-    } catch {}
+    // Discord notification. A linked existing member already got their own alert.
+    if (!claimedExisting) {
+      try {
+        const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+        if (discordUrl) {
+          await fetch(discordUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `🔔 **NEW SIGNUP**\n\n**${data.name}** signed up as a **${data.role}**\nEmail: ${data.email}\nPhone: ${data.phone || 'Not provided'}${isApplicationFlowEnabled() && data.role === 'doctor' ? '\n\nDoctor application started. Review at https://neurochiro.co/admin/applications' : '\n\nThey need to book their onboarding call before activation.'}`,
+            }),
+          }).catch(() => {});
+        }
+      } catch {}
+    }
 
-    return { success: true, userId, nextPath: isApplicationFlowEnabled() && data.role === 'doctor' ? '/doctor/apply' : null };
+    return {
+      success: true,
+      userId,
+      nextPath: claimedExisting
+        ? '/doctor/dashboard'
+        : (isApplicationFlowEnabled() && data.role === 'doctor' ? '/doctor/apply' : null),
+    };
   } catch (err: any) {
     console.error('Free signup error:', err);
     return { error: 'Something went wrong. Please try again.' };
