@@ -4,8 +4,10 @@ import { useState } from "react";
 import { ShieldCheck, Heart, Phone, MapPin, Calendar } from "lucide-react";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
 import { motion, useReducedMotion } from "framer-motion";
-import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill } from "@/i18n/config";
+import { useDictionary } from "@/i18n/locale-context";
 import type { DirectoryDoctor } from "@/components/directory/useDirectorySearch";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +34,7 @@ interface DoctorCardProps {
 
 export default function DoctorCard({ doc, index, onHover, onNavigate, dark = false, distanceUnit = "mi" }: DoctorCardProps) {
   const { isSaved, toggleSave } = useUserPreferences();
+  const t = useDictionary();
   const reduce = useReducedMotion();
   const docId = doc.id.toString();
   const saved = isSaved("doctors", docId);
@@ -83,17 +86,17 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
             <h3 className={cn("font-bold truncate", dark ? "text-white" : "text-neuro-navy")}>{name}</h3>
             {doc.verification_status === "verified" && (
               <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-bold rounded-md", dark ? "bg-blue-500/15 text-blue-300" : "bg-blue-50 text-blue-800")}>
-                <ShieldCheck className="w-3 h-3" /> Verified
+                <ShieldCheck className="w-3 h-3" /> {t.directory.verified}
               </span>
             )}
           </div>
-          <p className={cn("text-sm truncate", dark ? "text-white/70" : "text-gray-600")}>{doc.clinic_name || "Private practice"}</p>
+          <p className={cn("text-sm truncate", dark ? "text-white/70" : "text-gray-600")}>{doc.clinic_name || t.directory.privatePractice}</p>
           <p className={cn("text-sm mt-0.5", dark ? "text-white/70" : "text-gray-600")}>
             {distanceMiles != null && <span className={cn("font-bold", dark ? "text-neuro-orange" : "text-neuro-orange-ink")}>{formatDistance(distanceMiles, distanceUnit)} · </span>}
             {location && <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" />{location}</span>}
           </p>
           {doc.accepting_new_patients && (
-            <p className={cn("text-sm font-semibold mt-1", dark ? "text-green-400" : "text-green-700")}>Accepting new patients</p>
+            <p className={cn("text-sm font-semibold mt-1", dark ? "text-green-400" : "text-green-700")}>{t.directory.accepting}</p>
           )}
           {specialties.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -110,11 +113,11 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
         onClick={() => {
           const wasSaved = saved;
           toggleSave("doctors", docId);
-          setShowToast(wasSaved ? "Removed" : "Saved");
+          setShowToast(wasSaved ? t.directory.removed : t.directory.saved);
           setTimeout(() => setShowToast(null), 1600);
         }}
         className="absolute top-3 right-3 z-10 w-11 h-11 rounded-full flex items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange"
-        aria-label={saved ? "Unsave doctor" : "Save doctor"}
+        aria-label={saved ? t.directory.unsave : t.directory.save}
       >
         <Heart className={cn("w-5 h-5", saved ? "text-red-500 fill-red-500" : dark ? "text-white/70" : "text-gray-500")} />
         {showToast && <span className="sr-only">{showToast}</span>}
@@ -127,16 +130,16 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
           onClick={() => { trackConversion(doc.id, "request_click"); onNavigate?.(); }}
           className={cn("inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-4 text-sm font-bold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white", dark ? "bg-neuro-orange hover:bg-[#B8551F]" : "bg-neuro-orange-ink hover:bg-neuro-orange")}
         >
-          <Calendar className="w-4 h-4" /> Request appointment
+          <Calendar className="w-4 h-4" /> {t.directory.request}
         </Link>
         {doc.phone && (
           <a
             href={`tel:${doc.phone}`}
             onClick={() => trackConversion(doc.id, "call")}
             className={cn("inline-flex min-h-12 min-w-12 items-center justify-center gap-1.5 rounded-xl px-3 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange", dark ? "bg-white/10 text-white" : "border border-gray-200 bg-white text-neuro-navy")}
-            aria-label={`Call ${name}`}
+            aria-label={fill(t.directory.callName, { name })}
           >
-            <Phone className="w-4 h-4" /> Call
+            <Phone className="w-4 h-4" /> {t.directory.call}
           </a>
         )}
         {doc.booking_url && (
@@ -147,7 +150,7 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
             onClick={() => trackConversion(doc.id, "book")}
             className={cn("inline-flex min-h-12 items-center justify-center rounded-xl px-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange", dark ? "bg-white/10 text-white" : "border border-gray-200 bg-white text-neuro-navy")}
           >
-            Book online
+            {t.directory.book}
           </a>
         )}
       </div>

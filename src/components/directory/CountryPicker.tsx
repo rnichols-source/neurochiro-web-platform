@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import type { CountryOption } from "./useDirectorySearch";
+import { countryName } from "@/i18n/countries";
+import { useDictionary, useLocale } from "@/i18n/locale-context";
 
 export default function CountryPicker({
   open,
@@ -17,6 +19,8 @@ export default function CountryPicker({
   onSelect: (code: string) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const locale = useLocale();
+  const t = useDictionary();
 
   useEffect(() => {
     if (!open) return;
@@ -48,11 +52,11 @@ export default function CountryPicker({
         ref={ref}
         role="dialog"
         aria-modal="true"
-        aria-label="Where are you looking?"
+        aria-label={t.directory.whereLabel}
         className="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto rounded-t-3xl bg-[#1c1c1e] p-4 pb-[calc(16px+env(safe-area-inset-bottom))]"
         onClick={(event) => event.stopPropagation()}
       >
-        <h2 className="text-lg font-bold text-white mb-3">Where are you looking?</h2>
+        <h2 className="text-lg font-bold text-white mb-3">{t.directory.where}</h2>
         <ul className="space-y-1">
           {countries.map((country) => (
             <li key={country.code}>
@@ -62,7 +66,7 @@ export default function CountryPicker({
                 className={`flex min-h-14 w-full items-center gap-3 rounded-xl px-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange ${selected === country.code ? "bg-neuro-orange text-white" : "text-white"}`}
               >
                 <span className="text-2xl" aria-hidden>{country.flag}</span>
-                <span className="flex-1 font-semibold">{country.label}</span>
+                <span className="flex-1 font-semibold">{countryName(country.code, locale, country.label)}</span>
                 <span className="text-sm opacity-80">{country.count}</span>
               </button>
             </li>

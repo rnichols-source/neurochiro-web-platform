@@ -9,6 +9,9 @@ import { getApprovedStories } from "@/app/actions/patient-stories";
 import { isDemoSlug } from "@/lib/directory/exclude-demo";
 import { trackProfileView } from "@/lib/portal/track-view";
 import { loadEarnedBadgeIds } from "@/lib/badges/compute";
+import { localizePath } from "@/i18n/config";
+import { languageAlternates, openGraphLocale, publicUrl } from "@/i18n/alternates";
+import { getLocale } from "@/i18n/get-locale";
 
 export const revalidate = 60; // ISR: cache for 60 seconds
 
@@ -20,38 +23,44 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   if (isDemoSlug(resolvedParams.slug)) {
-    return { title: "Doctor Profile Not Found | NeuroChiro" };
+    const locale = await getLocale();
+    return { title: locale === "fr" ? "Fiche introuvable | NeuroChiro" : "Doctor Profile Not Found | NeuroChiro" };
   }
   const { doctor } = await getDoctorBySlug(resolvedParams.slug);
 
   if (!doctor) {
     return {
-      title: "Doctor Profile Not Found | NeuroChiro",
+      title: (await getLocale()) === "fr" ? "Fiche introuvable | NeuroChiro" : "Doctor Profile Not Found | NeuroChiro",
     };
   }
 
   const name = `Dr. ${doctor.first_name} ${doctor.last_name}`.replace(/\s+/g, " ").trim();
   const location = `${doctor.city}, ${doctor.state || doctor.country}`;
   const specialtyList = (doctor.specialties || []).slice(0, 3).join(", ");
-  const profileUrl = `https://www.neurochiro.co/directory/${doctor.slug || doctor.id}`;
+  const locale = await getLocale();
+  const profilePath = `/directory/${doctor.slug || doctor.id}`;
+  const profileUrl = publicUrl(profilePath, locale);
   
-  const title = `${name} | Nervous System Specialist at ${doctor.clinic_name}`;
-  const description = `Visit ${name} in ${location}. Specializing in ${specialtyList || 'Nervous System Chiropractic'}. Verified member of the NeuroChiro network of elite clinical practitioners.`;
+  const title = locale === "fr"
+    ? `${name} | Chiropraticien du système nerveux — ${doctor.clinic_name} | NeuroChiro`
+    : `${name} | Nervous System Specialist at ${doctor.clinic_name}`;
+  const description = locale === "fr"
+    ? `Consultez ${name} à ${location}.${specialtyList ? ` Approche : ${specialtyList}.` : ""} Membre vérifié de NeuroChiro. Demandez un rendez-vous en ligne.`
+    : `Visit ${name} in ${location}. Specializing in ${specialtyList || 'Nervous System Chiropractic'}. Verified member of the NeuroChiro network of elite clinical practitioners.`;
 
   const ogImage = `https://www.neurochiro.co/api/og/profile?slug=${doctor.slug || doctor.id}&format=landscape`;
 
   return {
     title,
     description,
-    alternates: {
-      canonical: profileUrl,
-    },
+    alternates: languageAlternates(profilePath, locale),
     keywords: doctor.seo_keywords ? doctor.seo_keywords.split(',').map((k: string) => k.trim()) : undefined,
     openGraph: {
       title,
       description,
       type: "profile",
       url: profileUrl,
+      locale: openGraphLocale(locale),
       images: [
         {
           url: ogImage,
@@ -84,7 +93,7 @@ export default async function DoctorProfilePage({ params }: Props) {
       .eq('old_slug', resolvedParams.slug)
       .maybeSingle();
     if (redir?.new_slug) {
-      permanentRedirect(`/directory/${redir.new_slug}`);
+      permanentRedirect(localizePath(`/directory/${redir.new_slug}`, await getLocale()));
     }
     notFound();
   }
@@ -110,7 +119,8 @@ export default async function DoctorProfilePage({ params }: Props) {
     loadEarnedBadgeIds(doctor),
   ]);
 
-  const profileUrl = `https://www.neurochiro.co/directory/${doctor.slug || doctor.id}`;
+  const locale = await getLocale();
+  const profileUrl = publicUrl(`/directory/${doctor.slug || doctor.id}`, locale);
   const place = addressForSchema(doctor.address, doctor.city, doctor.state);
   const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`.replace(/\s+/g, " ").trim();
   const faqItems = Array.isArray(record.faq)

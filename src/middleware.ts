@@ -3,11 +3,37 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
 import { SUPABASE_PUBLIC_KEY, SUPABASE_URL } from '@/lib/supabase-env';
+import { LOCALE_COOKIE, LOCALE_HEADER, splitLocalePrefix } from '@/i18n/config';
 
 export async function middleware(req: NextRequest) {
+  const { locale, pathname } = splitLocalePrefix(req.nextUrl.pathname);
   const requestHeaders = new Headers(req.headers);
-  requestHeaders.set('x-pathname', req.nextUrl.pathname);
-  const res = NextResponse.next({ request: { headers: requestHeaders } });
+  requestHeaders.set('x-pathname', pathname);
+  requestHeaders.set(LOCALE_HEADER, locale);
+
+  const url = req.nextUrl.clone();
+  url.pathname = pathname;
+
+  const res = locale === 'en'
+    ? NextResponse.next({ request: { headers: requestHeaders } })
+    : NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+
+  if (locale === 'fr') {
+    res.cookies.set(LOCALE_COOKIE, 'fr', {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+  }
+
+  const schoolVerify = pathname === '/student/verify';
+  const protectedPath = pathname.startsWith('/portal') ||
+    pathname.startsWith('/doctor') ||
+    pathname.startsWith('/student') ||
+    pathname.startsWith('/admin');
+
+  if (!protectedPath) return res;
 
   const supabase = createServerClient(
     SUPABASE_URL,
@@ -29,16 +55,9 @@ export async function middleware(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession();
 
-  const path = req.nextUrl.pathname
-  const schoolVerify = path === '/student/verify'
-  if (!session && !schoolVerify && (
-    path.startsWith('/portal') ||
-    path.startsWith('/doctor') ||
-    path.startsWith('/student') ||
-    path.startsWith('/admin')
-  )) {
-    const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
-    const dest = applying ? loginPathWithReturn(`${path}${req.nextUrl.search}`) : '/login';
+  if (!session && !schoolVerify) {
+    const applying = pathname === '/doctor/apply' || pathname.startsWith('/doctor/apply/');
+    const dest = applying ? loginPathWithReturn(`${pathname}${req.nextUrl.search}`) : '/login';
     return NextResponse.redirect(new URL(dest, req.url));
   }
 
@@ -52,5 +71,7 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/portal/:path*', '/doctor/:path*', '/student/:path*', '/admin/:path*'],
+  matcher: [
+    '/((?!api/|_next/|monitoring|.*\\..*).*)',
+  ],
 };

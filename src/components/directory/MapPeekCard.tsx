@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { useDictionary } from "@/i18n/locale-context";
 
 export type PeekDoctor = {
   name?: string;
@@ -22,7 +23,8 @@ export default function MapPeekCard({
   unit: "mi" | "km";
   onClose: () => void;
 }) {
-  const name = doctor.name || "Doctor";
+  const t = useDictionary();
+  const name = doctor.name || t.directory.doctorFallback;
   const slug = doctor.slug || doctor.doctorId;
   const miles = doctor.distance_miles as number | null | undefined;
   return (
@@ -37,9 +39,9 @@ export default function MapPeekCard({
         </div>
       </div>
       <div className="mt-3 flex gap-2">
-        <Link href={`/directory/${slug}#appointment-form`} prefetch={false} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-neuro-orange text-sm font-bold">Request appointment</Link>
-        <Link href={`/directory/${slug}`} prefetch={false} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white/10 px-3 text-sm font-bold">View profile</Link>
-        <button type="button" onClick={onClose} className="min-h-11 min-w-11 rounded-xl bg-white/10" aria-label="Close doctor preview">✕</button>
+        <Link href={`/directory/${slug}#appointment-form`} prefetch={false} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-neuro-orange text-sm font-bold">{t.directory.request}</Link>
+        <Link href={`/directory/${slug}`} prefetch={false} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white/10 px-3 text-sm font-bold">{t.directory.viewProfile}</Link>
+        <button type="button" onClick={onClose} className="min-h-11 min-w-11 rounded-xl bg-white/10" aria-label={t.directory.closePreview}>✕</button>
       </div>
     </div>
   );

@@ -32,22 +32,27 @@ export async function submitPatientStory(doctorId: string, data: {
 }
 
 export async function getApprovedStories(doctorId: string) {
-  const supabase = createAdminClient()
+  try {
+    const supabase = createAdminClient()
 
-  const { data, error } = await supabase
-    .from('patient_stories')
-    .select('id, patient_first_name, condition_before, outcome_after, story_text, created_at')
-    .eq('doctor_id', doctorId)
-    .eq('approved', true)
-    .order('created_at', { ascending: false })
-    .limit(10)
+    const { data, error } = await supabase
+      .from('patient_stories')
+      .select('id, patient_first_name, condition_before, outcome_after, story_text, created_at')
+      .eq('doctor_id', doctorId)
+      .eq('approved', true)
+      .order('created_at', { ascending: false })
+      .limit(10)
 
-  if (error) {
+    if (error) {
+      console.error("Error fetching patient stories:", error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
     console.error("Error fetching patient stories:", error)
     return []
   }
-
-  return data || []
 }
 
 export async function getPendingStories() {

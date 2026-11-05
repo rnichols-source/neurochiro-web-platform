@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { excludeDemo } from "@/lib/directory/exclude-demo";
 import { getPublicDirectoryCounts } from "@/lib/directory/public-counts";
 import { doctorJoinMenuLabel } from "@/lib/applications/flag";
-import { homepageFaqs } from "@/lib/content/faq";
 import Footer from "@/components/landing/Footer";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { languageAlternates, openGraphLocale } from "@/i18n/alternates";
+import { getRequestDictionary } from "@/i18n/get-locale";
 import HeroSearch from "@/components/landing/HeroSearch";
 import {
   WhatIsNSC,
@@ -22,41 +23,43 @@ const NearbyDoctors = dynamic(() => import("@/components/landing/home/NearbyDoct
 
 export const revalidate = 300;
 
-const TITLE = "NeuroChiro | Find a Nervous System Chiropractor Near You";
-const DESCRIPTION =
-  "Free directory of verified nervous system chiropractors. Search by city or ZIP, compare doctors, and request an appointment online.";
-
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: "https://www.neurochiro.co" },
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: "https://www.neurochiro.co",
-    siteName: "NeuroChiro",
-    images: [
-      {
-        url: "/opengraph-image",
-        width: 1200,
-        height: 630,
-        alt: "Find a nervous system chiropractor near you",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: ["/opengraph-image"],
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { locale, t } = await getRequestDictionary();
+  const title = t.meta.homeTitle;
+  const description = t.meta.homeDescription;
+  const alternates = languageAlternates("/", locale);
+  return {
+    title,
+    description,
+    alternates,
+    openGraph: {
+      title,
+      description,
+      url: String(alternates.canonical),
+      siteName: "NeuroChiro",
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: t.meta.homeImageAlt,
+        },
+      ],
+      locale: openGraphLocale(locale),
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/opengraph-image"],
+    },
+  };
+}
 
 /**
  * Hero options. B is active because the build brief says Raymond chose B.
- * The handoff checklist says the default is A. Switch ACTIVE_HERO to change it.
+ * The handoff checklist says the default is A. The live line is B, in the locale dictionaries.
  */
 export const HERO_COPY = {
   A: {
@@ -75,8 +78,6 @@ export const HERO_COPY = {
     sub: "Verified chiropractors for families, pregnancy, headaches and stress. Find one near you and request a visit, free.",
   },
 } as const;
-
-const ACTIVE_HERO = "B" as const;
 
 async function getTrustFaces() {
   try {
@@ -102,33 +103,35 @@ async function getTrustFaces() {
   }
 }
 
-function HeroHeading() {
-  const copy = HERO_COPY[ACTIVE_HERO];
-  const accentAt = copy.accent ? copy.h1.indexOf(copy.accent) : -1;
+async function HeroHeading() {
+  const { t } = await getRequestDictionary();
+  const accentAt = t.home.accent ? t.home.h1.indexOf(t.home.accent) : -1;
   return (
     <>
       <h1 className="text-[28px] font-heading font-black leading-[1.15] tracking-tight text-white sm:text-4xl lg:text-5xl">
         {accentAt >= 0 ? (
           <>
-            {copy.h1.slice(0, accentAt)}
-            <span className="text-neuro-orange-light">{copy.accent}</span>
-            {copy.h1.slice(accentAt + copy.accent.length)}
+            {t.home.h1.slice(0, accentAt)}
+            <span className="text-neuro-orange-light">{t.home.accent}</span>
+            {t.home.h1.slice(accentAt + t.home.accent.length)}
           </>
         ) : (
-          copy.h1
+          t.home.h1
         )}
       </h1>
-      <p className="mt-3 text-[15px] leading-snug text-gray-300 sm:text-base">{copy.sub}</p>
+      <p className="mt-3 text-[15px] leading-snug text-gray-300 sm:text-base">{t.home.sub}</p>
     </>
   );
 }
 
 export default async function HomePage() {
-  const [counts, faces] = await Promise.all([getPublicDirectoryCounts(), getTrustFaces()]);
+  const [{ t }, counts, faces] = await Promise.all([getRequestDictionary(), getPublicDirectoryCounts(), getTrustFaces()]);
+  const menuLabel = doctorJoinMenuLabel();
+  const joinText = menuLabel === "Apply to join" ? t.nav.applyToJoin : menuLabel === "Join NeuroChiro" ? t.nav.joinNeuroChiro : menuLabel;
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: homepageFaqs.map((item) => ({
+    mainEntity: t.home.faq.map((item) => ({
       "@type": "Question",
       name: item.question,
       acceptedAnswer: { "@type": "Answer", text: item.answer },
@@ -144,11 +147,11 @@ export default async function HomePage() {
             <HeroSearch counts={counts} faces={faces}>
               <HeroHeading />
             </HeroSearch>
-            <aside id="home-nearby-preview" className="hidden lg:block" aria-label="Doctors near you">
+            <aside id="home-nearby-preview" className="hidden lg:block" aria-label={t.home.nearbyLabel}>
               <div id="home-nearby-fallback" className="rounded-2xl border border-white/10 bg-white/5 p-6 text-white">
-                <p className="text-lg font-heading font-black text-white">Doctors near you</p>
+                <p className="text-lg font-heading font-black text-white">{t.home.nearbyTitle}</p>
                 <p className="mt-2 text-sm leading-relaxed text-gray-300">
-                  Search by city or ZIP and verified doctors near that place show up here.
+                  {t.home.nearbyBody}
                 </p>
                 <div className="mt-6 space-y-3" aria-hidden>
                   <div className="h-16 rounded-xl bg-white/10" />
@@ -162,9 +165,9 @@ export default async function HomePage() {
               href="/get-started?source=homepage_join"
               className="inline-flex min-h-11 max-w-full flex-wrap items-center justify-center gap-x-1 text-center text-sm leading-snug text-gray-300 hover:text-white lg:justify-start lg:text-left"
             >
-              Are you a nervous system chiropractor?{" "}
+              {t.home.doctorPrompt}{" "}
               <span className="ml-1 font-bold text-white underline decoration-white/50 underline-offset-4">
-                {doctorJoinMenuLabel()}
+                {joinText}
               </span>
             </Link>
           </p>

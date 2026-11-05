@@ -5,6 +5,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useRegion } from "@/context/RegionContext";
 import { REGIONS, RegionCode } from "@/lib/regions";
 import { countryMeta } from "@/lib/directory-countries";
+import { fill, localizePath, splitLocalePrefix } from "@/i18n/config";
+import { countryName } from "@/i18n/countries";
+import { useDictionary, useLocale } from "@/i18n/locale-context";
 
 export interface DirectoryDoctor {
   id: string;
@@ -65,6 +68,9 @@ export function useDirectorySearch(options: {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const locale = useLocale();
+  const t = useDictionary();
+  const barePath = splitLocalePrefix(pathname || "/").pathname;
   const { region, setRegion } = useRegion();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -113,7 +119,9 @@ export function useDirectorySearch(options: {
   const toastUndo = useRef<{ country: string; location: string } | null>(null);
 
   const distanceUnit: "mi" | "km" = country === "US" ? "mi" : "km";
-  const placeholder = (isRegionCode(country) ? REGIONS[country].searchPlaceholder : null) || "City, ZIP or postcode";
+  const placeholder = locale === "fr"
+    ? t.directory.placeholder
+    : ((isRegionCode(country) ? REGIONS[country].searchPlaceholder : null) || "City, ZIP or postcode");
   const countryInfo = countryMeta(country);
 
   const buildParams = useCallback((
@@ -177,7 +185,11 @@ export function useDirectorySearch(options: {
       }
       setDoctors(data.doctors || []);
       setNearest(data.nearest || []);
-      setLocationLabel(data.locationLabel || (nextLocation ? `Near ${nextLocation}` : ""));
+      const rawLabel = data.locationLabel || (nextLocation ? fill(t.directory.nearPrefix, { location: nextLocation }) : "");
+      const locationLabelText = locale === "fr" && rawLabel.startsWith("Near ")
+        ? fill(t.directory.nearPrefix, { location: rawLabel.slice(5) })
+        : rawLabel;
+      setLocationLabel(locationLabelText);
       setUnknownPlace(!!data.unknownPlace);
       setSearchCenter(data.center || null);
       setHasSearched(true);
@@ -191,7 +203,7 @@ export function useDirectorySearch(options: {
         setCountry(data.resolvedCountry);
         if (isRegionCode(data.resolvedCountry)) setRegion(data.resolvedCountry);
         const meta = countryMeta(data.resolvedCountry);
-        setToast(`Showing results in ${meta.flag} ${meta.label}`);
+        setToast(fill(t.directory.showingIn, { flag: meta.flag, label: countryName(data.resolvedCountry, locale, meta.label) }));
       }
     } catch {
       setError(true);
@@ -199,7 +211,7 @@ export function useDirectorySearch(options: {
     } finally {
       setLoading(false);
     }
-  }, [location, country, filters, locationSource, coords, gpsLabel, buildParams, setRegion]);
+  }, [location, country, filters, locationSource, coords, gpsLabel, buildParams, setRegion, locale, t]);
 
   useEffect(() => {
     const urlCountry = searchParams.get("country") || searchParams.get("region");
@@ -234,8 +246,8 @@ export function useDirectorySearch(options: {
     if (filters.name) params.set("q", filters.name);
     const next = params.toString();
     const current = searchParams.toString();
-    if (next !== current) router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
-  }, [location, country, filters, view, pathname, router, searchParams]);
+    if (next !== current) router.replace(localizePath(next ? `${barePath}?${next}` : barePath, locale), { scroll: false });
+  }, [location, country, filters, view, barePath, locale, router, searchParams]);
 
   useEffect(() => {
     let cancelled = false;
@@ -325,12 +337,12 @@ export function useDirectorySearch(options: {
     const params = new URLSearchParams(searchParams.toString());
     params.delete("near");
     const next = params.toString();
-    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+    router.replace(localizePath(next ? `${barePath}?${next}` : barePath, locale), { scroll: false });
   };
 
   const useMyLocation = () => {
     if (!navigator.geolocation) {
-      setGeoMessage("Location is off. Type your city or ZIP instead");
+      setGeoMessage(t.directory.geoOff);
       inputRef.current?.focus();
       dropNearParam();
       return;
@@ -341,10 +353,10 @@ export function useDirectorySearch(options: {
       async (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
-        let label = "Current location";
+        let label = t.directory.currentLocation;
         try {
-          const data = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`).then((r) => r.json());
-          const city = data.city || data.locality || "Current location";
+          const data = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=${locale === "fr" ? "fr" : "en"}`).then((r) => r.json());
+          const city = data.city || data.locality || t.directory.currentLocation;
           const state = String(data.principalSubdivisionCode || "").split("-").pop() || "";
           label = state ? `${city}, ${state}` : city;
         } catch { /* keep the generic label */ }
@@ -364,7 +376,7 @@ export function useDirectorySearch(options: {
       },
       () => {
         setLocating(false);
-        setGeoMessage("Location is off. Type your city or ZIP instead");
+        setGeoMessage(t.directory.geoOff);
         inputRef.current?.focus();
         dropNearParam();
       },

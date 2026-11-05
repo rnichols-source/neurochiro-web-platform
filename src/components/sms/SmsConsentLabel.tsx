@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import Link from 'next/link'
+import { LocaleLink as Link } from '@/i18n/LocaleLink'
+import { useDictionary, useLocale } from '@/i18n/locale-context'
 import { DOCTOR_SMS_CONSENT_V1, PATIENT_SMS_CONSENT_V1 } from '@/lib/sms/consent'
 
 const linkClass = 'underline underline-offset-2'
@@ -23,6 +24,18 @@ function linked(text: string, phrases: { label: string; href: string }[]) {
 }
 
 export function PatientSmsConsentLabel() {
+  const locale = useLocale()
+  const t = useDictionary()
+  if (locale === 'fr') {
+    return (
+      <>
+        {linked(t.profile.sms, [
+          { label: t.profile.smsTerms, href: '/sms-terms' },
+          { label: t.profile.smsPrivacy, href: '/privacy' },
+        ])}
+      </>
+    )
+  }
   return (
     <>
       {linked(PATIENT_SMS_CONSENT_V1, [

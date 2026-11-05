@@ -1,36 +1,30 @@
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Brain, Heart, Users, Play } from "lucide-react";
 import { doctorJoinMenuLabel } from "@/lib/applications/flag";
-import { homepageFaqs } from "@/lib/content/faq";
 import { patientSpotlightEpisodes } from "@/app/(public)/spotlight/spotlight-data";
 import type { PublicDirectoryCounts } from "@/lib/directory/public-counts";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill } from "@/i18n/config";
+import { getRequestDictionary } from "@/i18n/get-locale";
 
-export function WhatIsNSC() {
+function joinLabel(label: string, apply: string, join: string) {
+  if (label === "Apply to join") return apply;
+  if (label === "Join NeuroChiro") return join;
+  return label;
+}
+
+export async function WhatIsNSC() {
+  const { t } = await getRequestDictionary();
   const rows = [
-    {
-      icon: Brain,
-      title: "Looks at how your brain and body communicate.",
-      body: "Not just where it hurts, but how well your nervous system is adapting to stress.",
-    },
-    {
-      icon: Heart,
-      title: "Gentle, specific adjustments.",
-      body: "A care plan built around you, with progress checked along the way.",
-    },
-    {
-      icon: Users,
-      title: "Care for the whole family.",
-      body: "Many see newborns, kids, pregnant moms and grandparents.",
-    },
+    { icon: Brain, title: t.home.what1Title, body: t.home.what1Body },
+    { icon: Heart, title: t.home.what2Title, body: t.home.what2Body },
+    { icon: Users, title: t.home.what3Title, body: t.home.what3Body },
   ];
   return (
     <section className="bg-white px-4 py-14 sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <h2 className="text-2xl font-heading font-black text-neuro-navy">What is a nervous system chiropractor?</h2>
-        <p className="mt-3 text-[15px] leading-relaxed text-gray-700">
-          Patients often come in for kids, pregnancy, headaches, and stress. These doctors start with how the nervous system is working.
-        </p>
+        <h2 className="text-2xl font-heading font-black text-neuro-navy">{t.home.whatTitle}</h2>
+        <p className="mt-3 text-[15px] leading-relaxed text-gray-700">{t.home.whatBody}</p>
         <ul className="mt-8 space-y-6">
           {rows.map((row) => (
             <li key={row.title} className="flex gap-4">
@@ -46,10 +40,10 @@ export function WhatIsNSC() {
         </ul>
         <div className="mt-8 flex flex-col gap-1 sm:flex-row sm:gap-6">
           <Link href="/learn/foundations" className="inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink">
-            Learn the basics →
+            {t.home.learnBasics}
           </Link>
           <Link href="/learn/experience" className="inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink">
-            What happens on a first visit →
+            {t.home.firstVisitLink}
           </Link>
         </div>
       </div>
@@ -57,20 +51,17 @@ export function WhatIsNSC() {
   );
 }
 
-export function HowItWorks() {
+export async function HowItWorks() {
+  const { t } = await getRequestDictionary();
   const steps = [
-    { n: "1", title: "Search near you", body: "Enter your city or ZIP, or use your location." },
-    { n: "2", title: "Compare", body: "See each doctor's focus, cost, availability and what the first visit is like." },
-    {
-      n: "3",
-      title: "Request an appointment",
-      body: "Send a request in under a minute. The office usually replies within 1 business day, and we follow up if they don't.",
-    },
+    { n: "1", title: t.home.step1Title, body: t.home.step1Body },
+    { n: "2", title: t.home.step2Title, body: t.home.step2Body },
+    { n: "3", title: t.home.step3Title, body: t.home.step3Body },
   ];
   return (
     <section className="bg-neuro-cream px-4 py-14 sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <h2 className="text-2xl font-heading font-black text-neuro-navy">How it works</h2>
+        <h2 className="text-2xl font-heading font-black text-neuro-navy">{t.home.howTitle}</h2>
         <ol className="mt-8 space-y-6">
           {steps.map((step) => (
             <li key={step.n} className="flex gap-4">
@@ -88,39 +79,39 @@ export function HowItWorks() {
           href="#hero-location"
           className="mt-8 inline-flex h-[52px] items-center justify-center rounded-xl bg-neuro-orange-ink px-6 text-base font-bold text-white"
         >
-          Find a doctor near me
+          {t.home.findNear}
         </a>
       </div>
     </section>
   );
 }
 
-export function QuizCard() {
+export async function QuizCard() {
+  const { t } = await getRequestDictionary();
   return (
     <section className="bg-white px-4 py-14 sm:px-6">
       <div className="mx-auto max-w-3xl rounded-2xl border border-gray-100 bg-neuro-cream p-6 sm:p-8">
-        <h2 className="text-2xl font-heading font-black text-neuro-navy">Not sure who&apos;s right for you?</h2>
-        <p className="mt-3 text-[15px] leading-relaxed text-gray-700">
-          Answer 4 quick questions and we&apos;ll match you with verified doctors near you.
-        </p>
+        <h2 className="text-2xl font-heading font-black text-neuro-navy">{t.home.quizTitle}</h2>
+        <p className="mt-3 text-[15px] leading-relaxed text-gray-700">{t.home.quizBody}</p>
         <Link
           href="/quiz?source=homepage"
           className="mt-6 inline-flex h-[52px] items-center justify-center rounded-xl bg-neuro-orange-ink px-6 text-base font-bold text-white"
         >
-          Take the quiz
+          {t.home.quizButton}
         </Link>
       </div>
     </section>
   );
 }
 
-export function MeetTheDoctors() {
+export async function MeetTheDoctors() {
+  const { t } = await getRequestDictionary();
   const episodes = patientSpotlightEpisodes(3);
   return (
     <section className="bg-neuro-cream px-4 py-14 sm:px-6">
       <div className="mx-auto max-w-6xl">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-neuro-orange-ink">Meet the doctors</p>
-        <h2 className="mt-2 text-2xl font-heading font-black text-neuro-navy">Real doctors, real stories</h2>
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-neuro-orange-ink">{t.home.meetEyebrow}</p>
+        <h2 className="mt-2 text-2xl font-heading font-black text-neuro-navy">{t.home.meetTitle}</h2>
         <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
           {episodes.map((episode) => (
             <Link
@@ -153,20 +144,21 @@ export function MeetTheDoctors() {
           ))}
         </div>
         <Link href="/spotlight" className="mt-6 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-neuro-orange-ink">
-          See all episodes <ArrowRight className="h-4 w-4" aria-hidden />
+          {t.home.seeEpisodes} <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </div>
     </section>
   );
 }
 
-export function HomeFaq() {
+export async function HomeFaq() {
+  const { t } = await getRequestDictionary();
   return (
     <section className="bg-white px-4 py-14 sm:px-6">
       <div className="mx-auto max-w-3xl">
-        <h2 className="text-2xl font-heading font-black text-neuro-navy">Common questions</h2>
+        <h2 className="text-2xl font-heading font-black text-neuro-navy">{t.home.faqTitle}</h2>
         <div className="mt-6 border-t border-gray-200">
-          {homepageFaqs.map((item) => (
+          {t.home.faq.map((item) => (
             <details key={item.question} className="group border-b border-gray-200">
               <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 py-3 text-base font-bold text-neuro-navy [&::-webkit-details-marker]:hidden">
                 {item.question}
@@ -182,57 +174,58 @@ export function HomeFaq() {
   );
 }
 
-export function PatientListCard() {
+export async function PatientListCard() {
+  const { t } = await getRequestDictionary();
   return (
     <section className="bg-neuro-cream px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-md rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm">
-        <h2 className="text-lg font-heading font-black text-neuro-navy">No doctor near you yet?</h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-gray-700">
-          Join the patient list and we&apos;ll email you when a nervous system chiropractor joins your area.
-        </p>
+        <h2 className="text-lg font-heading font-black text-neuro-navy">{t.home.listTitle}</h2>
+        <p className="mt-2 text-[15px] leading-relaxed text-gray-700">{t.home.listBody}</p>
         <Link
           href="/list?source=homepage"
           className="mt-5 inline-flex min-h-12 items-center justify-center rounded-xl bg-neuro-orange-ink px-6 text-base font-bold text-white"
         >
-          Join the patient list
+          {t.home.listButton}
         </Link>
       </div>
     </section>
   );
 }
 
-export function DoctorStrip({ counts }: { counts: PublicDirectoryCounts }) {
+export async function DoctorStrip({ counts }: { counts: PublicDirectoryCounts }) {
+  const { t } = await getRequestDictionary();
   return (
     <section data-section="for-chiropractors" className="bg-neuro-navy px-4 py-8 text-white sm:px-6">
       <div className="mx-auto flex max-w-3xl flex-col items-start gap-3">
-        <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-300">For chiropractors</p>
-        <h2 className="text-2xl font-heading font-black text-white">Are you a nervous system chiropractor?</h2>
-        <p className="text-[15px] leading-relaxed text-gray-300">
-          Get listed and receive appointment requests from patients near you.
-        </p>
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-gray-300">{t.home.forDoctors}</p>
+        <h2 className="text-2xl font-heading font-black text-white">{t.home.forDoctorsTitle}</h2>
+        <p className="text-[15px] leading-relaxed text-gray-300">{t.home.forDoctorsBody}</p>
         {counts.total > 0 && (
           <p className="text-sm text-gray-300">
-            {counts.total} verified doctors in {counts.countries} {counts.countries === 1 ? "country" : "countries"}.
+            {fill(counts.countries === 1 ? t.home.verifiedOne : t.home.verifiedMany, {
+              total: counts.total,
+              countries: counts.countries,
+            })}
           </p>
         )}
         <Link
           href="/get-started?source=homepage_join"
           className="inline-flex min-h-11 items-center text-sm font-bold text-white underline decoration-white/40 underline-offset-4 hover:text-neuro-orange-light"
         >
-          {doctorJoinMenuLabel()}
+          {joinLabel(doctorJoinMenuLabel(), t.nav.applyToJoin, t.nav.joinNeuroChiro)}
         </Link>
         <Link
           href="/pro?source=homepage_cta"
           className="inline-flex h-[52px] items-center justify-center rounded-xl bg-neuro-orange-ink px-6 text-base font-bold text-white"
         >
-          See membership
+          {t.home.seeMembership}
         </Link>
         <div className="flex flex-wrap gap-2">
           <Link href="/seminars" className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-white">
-            Seminars
+            {t.nav.seminars}
           </Link>
           <Link href="/login" className="inline-flex min-h-11 items-center px-2 text-sm font-bold text-white">
-            Log in
+            {t.nav.logIn}
           </Link>
         </div>
       </div>

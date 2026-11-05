@@ -1,8 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { MapPin, Phone, ShieldCheck, Calendar, Navigation, ArrowRight, CheckCircle } from "lucide-react";
 import { formatDistance } from "@/lib/geo";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill } from "@/i18n/config";
+import { useDictionary, useLocale } from "@/i18n/locale-context";
 
 interface CityDoctor {
   id: string;
@@ -25,11 +27,14 @@ interface CityDoctor {
 }
 
 export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; searchCity: string }) {
+  const t = useDictionary();
+  const locale = useLocale();
+  const unit = locale === "fr" ? "km" : "mi";
   const name = `Dr. ${doc.first_name} ${doc.last_name}`;
   const isInCity = doc.city.toLowerCase() === searchCity.toLowerCase();
   const distLabel = isInCity
-    ? formatDistance(doc.distance_miles)
-    : `${formatDistance(doc.distance_miles)} from ${searchCity}`;
+    ? formatDistance(doc.distance_miles, unit)
+    : fill(t.city.milesFrom, { distance: formatDistance(doc.distance_miles, unit), city: searchCity });
 
   const dirParts = [doc.city, doc.state].filter(Boolean);
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dirParts.join(', '))}`;
@@ -41,7 +46,7 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
     .slice(0, 3);
 
   return (
-    <Link href={profileUrl} className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange focus-visible:ring-offset-2" aria-label={`View profile for ${name}`}>
+    <Link href={profileUrl} className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-neuro-orange focus-visible:ring-offset-2" aria-label={fill(t.city.viewFor, { name })}>
       <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-all">
         <div className="flex gap-5 items-start">
           <div className="w-16 h-16 rounded-2xl bg-neuro-navy flex-shrink-0 overflow-hidden flex items-center justify-center">
@@ -55,7 +60,7 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <h2 className="font-heading font-black text-neuro-navy text-lg">{name}</h2>
               <span className="flex items-center gap-1 px-1.5 py-0.5 bg-blue-50 text-blue-600 text-[9px] font-bold rounded-md border border-blue-200">
-                <ShieldCheck className="w-3 h-3" /> Verified
+                <ShieldCheck className="w-3 h-3" /> {t.city.verified}
               </span>
             </div>
             {doc.clinic_name && <p className="text-sm text-gray-500 font-medium">{doc.clinic_name}</p>}
@@ -66,7 +71,7 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
               <span className="text-xs text-neuro-orange font-bold">{distLabel}</span>
               {doc.accepting_new_patients && (
                 <span className="flex items-center gap-1 text-[10px] font-bold text-green-600">
-                  <CheckCircle className="w-3 h-3" /> Accepting patients
+                  <CheckCircle className="w-3 h-3" /> {t.city.accepting}
                 </span>
               )}
             </div>
@@ -84,38 +89,38 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
         )}
 
         <div className="flex flex-wrap gap-3 mt-3 text-xs text-gray-400">
-          {doc.offers_telehealth && <span>Telehealth available</span>}
-          {doc.accepts_walkins && <span>Walk-ins welcome</span>}
-          {doc.accepted_payment?.includes('HSA/FSA') && <span>HSA/FSA accepted</span>}
+          {doc.offers_telehealth && <span>{t.city.telehealth}</span>}
+          {doc.accepts_walkins && <span>{t.city.walkins}</span>}
+          {doc.accepted_payment?.includes('HSA/FSA') && <span>{t.city.hsa}</span>}
         </div>
 
         <div className="flex gap-2 mt-4" onClick={(e) => e.preventDefault()}>
           {doc.booking_url ? (
             <a href={doc.booking_url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
               className="flex-1 py-3 bg-neuro-orange text-white rounded-xl hover:bg-neuro-orange/90 transition-colors flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]"
-              aria-label={`Book online with ${name}`}>
-              <Calendar className="w-3.5 h-3.5" /> Book Online
+              aria-label={fill(t.city.bookWith, { name })}>
+              <Calendar className="w-3.5 h-3.5" /> {t.city.book}
             </a>
           ) : (
             <span className="flex-1 py-3 bg-neuro-navy text-white rounded-xl flex items-center justify-center gap-2 text-xs font-bold min-h-[44px]">
-              View Profile <ArrowRight className="w-3.5 h-3.5" />
+              {t.city.viewProfile} <ArrowRight className="w-3.5 h-3.5" />
             </span>
           )}
           {doc.phone && (
             <a href={`tel:${doc.phone}`} onClick={(e) => e.stopPropagation()}
               className="py-3 px-4 bg-neuro-navy/10 text-neuro-navy rounded-xl hover:bg-neuro-navy/20 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
-              aria-label={`Call ${name}`}>
-              <Phone className="w-3.5 h-3.5" /> Call
+              aria-label={fill(t.city.callName, { name })}>
+              <Phone className="w-3.5 h-3.5" /> {t.city.call}
             </a>
           )}
           <a href={directionsUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
             className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]"
-            aria-label={`Get directions to ${name}`}>
-            <Navigation className="w-3.5 h-3.5" /> Map
+            aria-label={fill(t.city.directions, { name })}>
+            <Navigation className="w-3.5 h-3.5" /> {t.city.map}
           </a>
           {doc.booking_url && (
             <span className="py-3 px-4 bg-gray-100 text-gray-500 rounded-xl flex items-center justify-center gap-1.5 text-xs font-bold min-h-[44px]">
-              Profile <ArrowRight className="w-3.5 h-3.5" />
+              {t.city.profile} <ArrowRight className="w-3.5 h-3.5" />
             </span>
           )}
         </div>

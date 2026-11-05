@@ -68,12 +68,15 @@ import { RegionProvider } from "@/context/RegionContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import LazyOverlays from "@/components/layout/LazyOverlays";
 import RecoveryRedirect from "@/components/auth/RecoveryRedirect";
+import { LocaleProvider } from "@/i18n/locale-context";
+import { getLocale } from "@/i18n/get-locale";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -88,7 +91,9 @@ export default function RootLayout({
           "https://twitter.com/neurochiro",
           "https://www.linkedin.com/company/neurochiro"
         ],
-        "description": "Free directory of verified nervous system chiropractors."
+        "description": locale === "fr"
+          ? "Annuaire gratuit de chiropraticiens du système nerveux, vérifiés."
+          : "Free directory of verified nervous system chiropractors."
       },
       {
         "@type": "WebSite",
@@ -96,7 +101,9 @@ export default function RootLayout({
         "url": "https://www.neurochiro.co",
         "potentialAction": {
           "@type": "SearchAction",
-          "target": "https://www.neurochiro.co/directory?location={search_term_string}",
+          "target": locale === "fr"
+            ? "https://www.neurochiro.co/fr/directory?location={search_term_string}"
+            : "https://www.neurochiro.co/directory?location={search_term_string}",
           "query-input": "required name=search_term_string"
         }
       }
@@ -104,7 +111,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <link rel="preconnect" href="https://gddapefwrmucimpdhjrz.supabase.co" />
         <link rel="preconnect" href="https://api.mapbox.com" />
@@ -117,13 +124,15 @@ export default function RootLayout({
       <body
         className={`${lato.variable} ${montserrat.variable} antialiased font-body bg-neuro-cream text-neuro-black`}
       >
-        <RegionProvider>
-          <UserPreferencesProvider>
-            <RecoveryRedirect />
-            {children}
-            <LazyOverlays />
-          </UserPreferencesProvider>
-        </RegionProvider>
+        <LocaleProvider locale={locale}>
+          <RegionProvider>
+            <UserPreferencesProvider>
+              <RecoveryRedirect />
+              {children}
+              <LazyOverlays />
+            </UserPreferencesProvider>
+          </RegionProvider>
+        </LocaleProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`
