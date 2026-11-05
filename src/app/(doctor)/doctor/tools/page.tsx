@@ -6,7 +6,7 @@ import { redirect } from 'next/navigation';
 const TOOLS = [
   { href: '/doctor/care-plan', title: 'Care plan', detail: 'A visit-by-visit plan you can edit for your office.' },
   { href: '/doctor/scan-report', title: 'Scan reports', detail: 'Turn scan numbers into a report patients can read.' },
-  { href: '/doctor/kpi', title: 'KPI tracker', detail: 'Log your weekly numbers and see the trend.' },
+  { href: '/doctor/kpi', title: 'KPI tracker', detail: 'Log today’s numbers, set goals, and choose what you track.' },
   { href: '/doctor/pl-analyzer', title: 'P&L analyzer', detail: 'See where the practice makes and spends money.' },
   { href: '/doctor/ce-tracker', title: 'CE tracker', detail: 'Certificates from seminars you attended.' },
   { href: '/doctor/billing-guide', title: 'Billing guide', detail: 'Coding notes included with practice tools.' },
