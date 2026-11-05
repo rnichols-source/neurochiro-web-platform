@@ -2,11 +2,11 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
-import { currencyForAnswers, validateAnswers } from '@/lib/applications/answers'
+import { currencyForAnswers, validateAnswers, validateStep1, validateStep2 } from '@/lib/applications/answers'
 import { createSetupCheckout, readPriceAmount } from '@/lib/applications/billing'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { currencyForCountry, planLabel, priceIdFor, type BillingCycle, type DoctorCurrency } from '@/lib/applications/prices'
-import { ensureDraftApplication, loadApplicationByDoctor, saveAnswers, savePlan } from '@/lib/applications/store'
+import { ensureDraftApplication, loadApplicationByDoctor, saveAnswers, saveDraftStep, savePlan } from '@/lib/applications/store'
 
 export type PlanChoice = {
   cycle: BillingCycle
@@ -44,6 +44,68 @@ export async function plansForCountry(country: string): Promise<{ currency: Doct
     }
   }))
   return { currency, plans }
+}
+
+export async function saveApplyStep(step: 1 | 2, input: {
+  answers: unknown
+  referralCode?: string
+}): Promise<{ error?: string }> {
+  if (!isApplicationFlowEnabled()) return { error: 'Applications are not open yet.' }
+  const session = await requireDoctor()
+  if ('error' in session) return { error: session.error }
+  const ready = await ensureDraftApplication({
+    doctorId: session.doctor.id,
+    userId: session.user.id,
+    email: session.email,
+    referralCode: input.referralCode,
+  })
+  if (!ready) return { error: 'We could not save the application. The database step may still need to be run.' }
+
+  const referralCode = (input.referralCode || '').slice(0, 32)
+  if (step === 1) {
+    const parsed = validateStep1(input.answers)
+    if (!parsed.ok) return { error: parsed.error }
+    const saved = await saveDraftStep({
+      doctorId: session.doctor.id,
+      userId: session.user.id,
+      stepReached: 2,
+      referralCode,
+      fields: {
+        practice_approach: parsed.value.practiceApproach,
+        heard_about: parsed.value.heardAbout,
+        why_join: parsed.value.whyJoin || null,
+      },
+    })
+    if (!saved) return { error: 'We could not save your answers. Please try again.' }
+    return {}
+  }
+
+  const parsed = validateStep2(input.answers)
+  if (!parsed.ok) return { error: parsed.error }
+  const saved = await saveDraftStep({
+    doctorId: session.doctor.id,
+    userId: session.user.id,
+    stepReached: 3,
+    referralCode,
+    fields: {
+      techniques: parsed.value.techniques,
+      uses_nervous_system_scans: parsed.value.usesNervousSystemScans,
+      scan_types: parsed.value.scanTypes || null,
+      years_in_practice: parsed.value.yearsInPractice,
+      office_address: parsed.value.officeAddress,
+      city: parsed.value.city,
+      state: parsed.value.state || null,
+      country: parsed.value.country,
+      website: parsed.value.website || null,
+      instagram: parsed.value.instagram || null,
+    },
+    contact: {
+      mobileE164: parsed.value.mobileE164,
+      smsConsent: parsed.value.smsConsent,
+    },
+  })
+  if (!saved) return { error: 'We could not save your answers. Please try again.' }
+  return {}
 }
 
 export async function submitApplication(input: {

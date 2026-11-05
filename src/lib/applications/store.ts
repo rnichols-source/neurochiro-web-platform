@@ -2,7 +2,7 @@ import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn } from '@/lib/leads/schema'
-import type { ApplicationAnswers } from './answers.ts'
+import { applicationStopLabel, type ApplicationAnswers } from './answers.ts'
 import type { AdminApplicationRow } from './admin-row.ts'
 import { doctorProfileUrl } from './approval-sms.ts'
 import {
@@ -263,6 +263,100 @@ export async function saveAnswers(doctorId: string, userId: string, answers: App
   return true
 }
 
+const CONTACT_COLUMNS = ['mobile_e164', 'sms_consent', 'sms_consent_at', 'sms_consent_text']
+
+function missingColumnName(error: { message?: string } | null | undefined): string | null {
+  const message = error?.message || ''
+  const named = message.match(/column "([a-z0-9_]+)"/i)
+    || message.match(/'([a-z0-9_]+)' column/i)
+    || message.match(/find the '([a-z0-9_]+)' column/i)
+  return named?.[1] || null
+}
+
+async function updateDroppingMissing(
+  doctorId: string,
+  userId: string,
+  patch: Record<string, unknown>,
+): Promise<{ ok: boolean; missing: string[] }> {
+  const client = db()
+  const current = { ...patch }
+  const missing: string[] = []
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const result = await client.from('doctor_applications').update(current).eq('doctor_id', doctorId).eq('user_id', userId)
+    if (!result.error) return { ok: true, missing }
+    if (!isMissingColumn(result.error)) {
+      console.error('[application] draft save failed', result.error.code || 'error')
+      return { ok: false, missing }
+    }
+    const named = missingColumnName(result.error)
+    if (named && named in current) {
+      missing.push(named)
+      delete current[named]
+      if (CONTACT_COLUMNS.includes(named)) {
+        for (const column of CONTACT_COLUMNS) {
+          if (column in current) {
+            missing.push(column)
+            delete current[column]
+          }
+        }
+      }
+      continue
+    }
+    if ('step_reached' in current) {
+      missing.push('step_reached')
+      delete current.step_reached
+      console.error('[application] step column is missing. Apply supabase/migrations/proposed/20261105150000_application_steps_reminders.sql')
+      continue
+    }
+    console.error('[application] draft save failed', result.error.code || 'error')
+    return { ok: false, missing }
+  }
+  return { ok: false, missing }
+}
+
+export async function saveDraftStep(input: {
+  doctorId: string
+  userId: string
+  stepReached: number
+  referralCode: string
+  fields: Record<string, unknown>
+  contact?: { mobileE164: string; smsConsent: boolean } | null
+}): Promise<boolean> {
+  const now = new Date().toISOString()
+  const client = db()
+  let reached = input.stepReached
+  const currentStep = await client.from('doctor_applications').select('step_reached').eq('doctor_id', input.doctorId).eq('user_id', input.userId).maybeSingle()
+  if (!currentStep.error) {
+    const existing = Number(one(currentStep)?.step_reached)
+    if (existing === 1 || existing === 2 || existing === 3) reached = Math.max(existing, input.stepReached)
+  }
+  const patch: Record<string, unknown> = {
+    ...input.fields,
+    referral_code: input.referralCode || null,
+    updated_at: now,
+    step_reached: reached,
+  }
+  if (input.contact) Object.assign(patch, applicationContactPatch({ ...input.contact, now }))
+  const saved = await updateDroppingMissing(input.doctorId, input.userId, patch)
+  if (!saved.ok) return false
+  if (input.contact && saved.missing.includes('mobile_e164')) {
+    console.error(`[application] mobile columns are missing. Apply ${MOBILE_SQL}`)
+    const current = await client.from('doctor_applications').select('admin_notes').eq('doctor_id', input.doctorId).eq('user_id', input.userId).maybeSingle()
+    const packed = packAdminNotes(text(one(current)?.admin_notes), {
+      mobileE164: input.contact.mobileE164,
+      smsConsent: input.contact.smsConsent,
+      smsConsentAt: input.contact.smsConsent ? now : null,
+    })
+    const legacy = await client.from('doctor_applications').update({ admin_notes: packed }).eq('doctor_id', input.doctorId).eq('user_id', input.userId)
+    if (legacy.error) {
+      console.error('[application] draft contact save failed', legacy.error.code || 'error')
+      return false
+    }
+  }
+  if (input.contact) await saveDoctorAlertPhone(input.doctorId, input.contact.mobileE164, input.contact.smsConsent, now)
+  return true
+}
+
 export async function savePlan(doctorId: string, input: {
   plan: 'monthly' | 'annual'
   currency: string
@@ -424,6 +518,27 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
         notes: humanAdminNotes(text(row.admin_notes)),
         mobile: mapped.mobileE164 || '',
         smsConsent: mapped.smsConsent ? consentStatusLabel(true, contactFromApplicationRow(row).smsConsentAt) : 'No',
+        stoppedAt: applicationStopLabel({
+          status: mapped.status,
+          cardOnFile: mapped.cardOnFile,
+          answers: {
+            practiceApproach: mapped.answers.practiceApproach,
+            heardAbout: mapped.answers.heardAbout,
+            whyJoin: mapped.answers.whyJoin,
+            techniques: mapped.answers.techniques,
+            usesNervousSystemScans: mapped.answers.usesNervousSystemScans,
+            scanTypes: mapped.answers.scanTypes,
+            yearsInPractice: mapped.answers.yearsInPractice,
+            officeAddress: mapped.answers.officeAddress,
+            city: mapped.answers.city,
+            state: mapped.answers.state,
+            country: mapped.answers.country,
+            website: mapped.answers.website,
+            instagram: mapped.answers.instagram,
+            mobile: mapped.mobileE164 || '',
+            smsConsent: mapped.smsConsent,
+          },
+        }),
         createdAt: text(row.created_at),
       }
     }),

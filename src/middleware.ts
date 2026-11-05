@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
 import { SUPABASE_PUBLIC_KEY, SUPABASE_URL } from '@/lib/supabase-env';
 
 export async function middleware(req: NextRequest) {
@@ -36,7 +37,9 @@ export async function middleware(req: NextRequest) {
     path.startsWith('/student') ||
     path.startsWith('/admin')
   )) {
-    return NextResponse.redirect(new URL('/login', req.url));
+    const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
+    const dest = applying ? loginPathWithReturn(`${path}${req.nextUrl.search}`) : '/login';
+    return NextResponse.redirect(new URL(dest, req.url));
   }
 
   // Role-based access control: only enforce authentication in middleware.

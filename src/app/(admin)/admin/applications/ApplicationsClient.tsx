@@ -66,6 +66,7 @@ export function ApplicationsClient({
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div><dt className="font-bold">Plan</dt><dd>{row.plan} · {row.priceLabel}</dd></div>
             <div><dt className="font-bold">Card on file</dt><dd>{row.cardOnFile ? 'Yes' : 'No'}</dd></div>
+            <div><dt className="font-bold">Where they stopped</dt><dd>{row.stoppedAt}</dd></div>
             <div><dt className="font-bold">Mobile</dt><dd>{row.mobile || 'Not given'}</dd></div>
             <div><dt className="font-bold">Text consent</dt><dd>{row.smsConsent}</dd></div>
             <div><dt className="font-bold">Years in practice</dt><dd>{row.years ?? '—'}</dd></div>

@@ -1,5 +1,7 @@
 import { Inter } from 'next/font/google';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
 import { after } from 'next/server';
 import { AuthProvider } from '@/context/AuthContext';
 import PortalShell from '@/components/portal/PortalShell';
@@ -18,7 +20,11 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
   const ctx = await getPortalContext();
-  if (!ctx) redirect('/login');
+  if (!ctx) {
+    const path = (await headers()).get('x-pathname') || '';
+    if (path === '/doctor/apply' || path.startsWith('/doctor/apply/')) redirect(loginPathWithReturn(path));
+    redirect('/login');
+  }
 
   after(() => {
     void recordPortalLogin({

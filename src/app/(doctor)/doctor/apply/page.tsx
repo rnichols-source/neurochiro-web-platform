@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { firstUnfinishedStep } from '@/lib/applications/answers'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { loadApplyState } from './actions'
 import { ApplyForm } from './ApplyForm'
@@ -17,6 +18,23 @@ export default async function ApplyPage({
 
   const params = await searchParams
   const answers = state.application?.answers
+  const restored = {
+    practiceApproach: answers?.practiceApproach || '',
+    techniques: answers?.techniques || '',
+    usesNervousSystemScans: answers?.usesNervousSystemScans === true ? 'yes' : answers?.usesNervousSystemScans === false ? 'no' : '',
+    scanTypes: answers?.scanTypes || '',
+    yearsInPractice: answers?.yearsInPractice == null ? '' : String(answers.yearsInPractice),
+    officeAddress: answers?.officeAddress || '',
+    city: answers?.city || '',
+    state: answers?.state || '',
+    country: state.country,
+    website: answers?.website || '',
+    instagram: answers?.instagram || '',
+    heardAbout: answers?.heardAbout || '',
+    whyJoin: answers?.whyJoin || '',
+    mobile: state.application?.mobileE164 || '',
+    smsConsent: state.application?.smsConsent === true,
+  }
   return (
     <ApplyForm
       doctorName={state.doctorName}
@@ -25,23 +43,13 @@ export default async function ApplyPage({
       initialCountry={state.country}
       plans={state.plans.plans}
       currency={state.plans.currency}
-      initial={{
-        practiceApproach: answers?.practiceApproach || '',
-        techniques: answers?.techniques || '',
-        usesNervousSystemScans: answers?.usesNervousSystemScans === true ? 'yes' : answers?.usesNervousSystemScans === false ? 'no' : '',
-        scanTypes: answers?.scanTypes || '',
-        yearsInPractice: answers?.yearsInPractice == null ? '' : String(answers.yearsInPractice),
-        officeAddress: answers?.officeAddress || '',
-        city: answers?.city || '',
-        state: answers?.state || '',
-        country: state.country,
-        website: answers?.website || '',
-        instagram: answers?.instagram || '',
-        heardAbout: answers?.heardAbout || '',
-        whyJoin: answers?.whyJoin || '',
-        mobile: state.application?.mobileE164 || '',
-        smsConsent: state.application?.smsConsent === true,
-      }}
+      initialStep={firstUnfinishedStep({
+        ...restored,
+        yearsInPractice: answers?.yearsInPractice,
+        usesNervousSystemScans: answers?.usesNervousSystemScans,
+        mobile: restored.mobile,
+      })}
+      initial={restored}
     />
   )
 }

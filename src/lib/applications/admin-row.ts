@@ -22,5 +22,6 @@ export type AdminApplicationRow = {
   notes: string
   mobile: string
   smsConsent: string
+  stoppedAt: string
   createdAt: string
 }
