@@ -5,7 +5,8 @@ import StatusPill from '@/components/portal/StatusPill';
 import { getPortalContext } from '@/lib/portal/context';
 import { getReferral, listAttachments, markViewed } from '@/lib/referrals/data';
 import { ensureReferralThread, referralThreadId } from '@/lib/messaging/referral-thread';
-import { canSeePatientContact, patientLabel, statusLabel } from '@/lib/referrals/pure';
+import { canSeePatientContact, formatReferralWhen, patientLabel, statusLabel } from '@/lib/referrals/pure';
+import { getDoctorTimezone } from '@/lib/doctor-timezone';
 import ReferralActions from './ReferralActions';
 
 export default async function ReferralDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +25,7 @@ export default async function ReferralDetail({ params }: { params: Promise<{ id:
     status: row.status,
   });
   const files = await listAttachments(id);
+  const timeZone = getDoctorTimezone(ctx.doctor.state, ctx.doctor.country, 'UTC');
   const threadEvent = row.status === 'declined' ? 'declined' : row.status === 'scheduled' ? 'booked' : row.status === 'accepted' || row.status === 'patient_contacted' ? 'accepted' : 'sent';
   const threadId = await referralThreadId(id) || await ensureReferralThread(id, threadEvent);
   const steps = [
@@ -55,17 +57,11 @@ export default async function ReferralDetail({ params }: { params: Promise<{ id:
         {steps.map((step) => (
           <li key={step.label} className="flex justify-between gap-3 text-sm">
             <span className="font-bold text-portal-ink">{step.label}</span>
-            <span className="text-portal-muted">{step.at ? new Date(step.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Not yet'}</span>
+            <span className="text-portal-muted">{formatReferralWhen(step.at, timeZone)}</span>
           </li>
         ))}
       </ol>
-      {files.length > 0 ? (
-        <ul className="text-sm">
-          {files.map((file) => (
-            <li key={file.id}><a className="text-portal-accent font-bold" href={`/doctor/referrals/${id}?file=${file.id}`}>{file.fileName}</a></li>
-          ))}
-        </ul>
-      ) : null}
+      {files.length > 0 ? <p className="text-sm font-bold text-portal-ink">Files</p> : null}
       {threadId ? (
         <Link href={`/doctor/messages?c=${threadId}`} className="inline-flex min-h-11 items-center text-sm font-bold text-portal-accent">
           Message {row.other_name || 'the doctor'}
@@ -77,6 +73,7 @@ export default async function ReferralDetail({ params }: { params: Promise<{ id:
         mine={mine}
         v2={v2}
         otherName={row.other_name || 'the doctor'}
+        files={files}
       />
       {row.decline_reason ? <p className="text-sm">Reason: {row.decline_reason}</p> : null}
       {row.thank_you_note ? <p className="text-sm">Note: {row.thank_you_note}</p> : null}

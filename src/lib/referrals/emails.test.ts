@@ -14,7 +14,8 @@ test('the receiver email names the patient and does not include a phone', () => 
   });
   assert.match(mail.subject, /sent you a patient/);
   assert.match(mail.html, /Sam Q\./);
-  assert.match(mail.html, /\/doctor\/referrals\/ref-1/);
+  assert.match(mail.html, /https:\/\/neurochiro\.co\/doctor\/referrals\/ref-1/);
+  assert.equal(mail.html.includes('neurochirodirectory.com/'), false);
   assert.equal(mail.html.includes(phone), false);
 });
 

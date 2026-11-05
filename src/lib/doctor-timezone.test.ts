@@ -28,6 +28,11 @@ test('unknown state falls back instead of returning null when a fallback is give
   assert.equal(explained.usedFallback, true)
 })
 
+test('India uses Kolkata time', () => {
+  assert.equal(getDoctorTimezone('KA', 'IN'), 'Asia/Kolkata')
+  assert.equal(getDoctorTimezone('Karnataka', 'India'), 'Asia/Kolkata')
+})
+
 test('a known state is not marked as a fallback', () => {
   const explained = explainDoctorTimezone('South Carolina', 'United States', 'America/Chicago')
   assert.equal(explained.timezone, 'America/New_York')

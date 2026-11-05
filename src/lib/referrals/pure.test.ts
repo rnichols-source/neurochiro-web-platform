@@ -2,12 +2,22 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { haversineDistance } from '../geo.ts';
 import {
+  canReceiverSet,
+  canReferrerCancel,
   canSeePatientContact,
+  formatReferralWhen,
   interpretLocation,
+  isOpenDuplicate,
+  looksLikePostal,
+  nameNeedles,
+  searchCountryForQuery,
   planReminders,
   referralDistance,
+  referralSaveMessage,
   shouldResolvePlace,
   shouldSendPatientIntro,
+  validPhone,
+  validateReferralDraft,
 } from './pure.ts';
 
 test('Austin, TX stays in Texas and a bare Austin is a choice', () => {
@@ -96,6 +106,78 @@ test('reminders fire once', () => {
     planReminders({ ...accepted, receiver_reminder_2_at: '2026-11-04T12:00:00.000Z' }, new Date('2026-11-05T12:00:00.000Z')),
     [],
   );
+});
+
+test('an India PIN is a place in India and not a US ZIP', () => {
+  assert.equal(looksLikePostal('110001', 'IN'), true);
+  assert.equal(shouldResolvePlace('110001', 'IN'), true);
+  assert.equal(looksLikePostal('110001', 'US'), true);
+  assert.equal(shouldResolvePlace('110001', 'US'), true);
+  assert.equal(searchCountryForQuery('US', '110001'), 'IN');
+  assert.equal(searchCountryForQuery('US', '78701'), 'US');
+  assert.equal(looksLikePostal('110001', 'ALL'), true);
+  assert.equal(looksLikePostal('560001', 'IN'), true);
+  assert.equal(looksLikePostal('78701'), true);
+  assert.equal(looksLikePostal('SW1A 1AA', 'GB'), true);
+  assert.equal(looksLikePostal('K1A 0B1', 'CA'), true);
+});
+
+test('an approximate place is still a place the search can use', () => {
+  const pin = interpretLocation({
+    resolved: { city: 'New Delhi', state: 'DL', lat: 28.61, lng: 77.21 },
+    ambiguous: null,
+    confidence: 'approximate',
+  });
+  assert.equal(pin.kind, 'resolved');
+  if (pin.kind === 'resolved') assert.equal(pin.place.city, 'New Delhi');
+});
+
+test('phones keep international formatting and reject junk', () => {
+  assert.equal(validPhone('+91 98765 43210'), '+91 98765 43210');
+  assert.equal(validPhone('(864) 555-0100'), '(864) 555-0100');
+  assert.equal(validPhone('call me'), null);
+  assert.equal(validPhone('123'), null);
+});
+
+test('a referral to yourself, a duplicate, or a huge note is rejected', () => {
+  const base = {
+    receivingDoctorId: 'other',
+    selfDoctorId: 'me',
+    patientFirstName: 'Priya',
+    patientLastInitial: 'S',
+    patientPhone: '+91 98765 43210',
+    reason: 'Closer to home',
+    urgency: 'routine',
+    consentConfirmed: true,
+  };
+  assert.equal(validateReferralDraft({ ...base, receivingDoctorId: 'me' }).ok, false);
+  assert.equal(validateReferralDraft({ ...base, consentConfirmed: false }).ok, false);
+  assert.equal(validateReferralDraft({ ...base, reason: 'x'.repeat(2001) }).ok, false);
+  assert.equal(validateReferralDraft({ ...base, patientEmail: 'not-an-email' }).ok, false);
+  const saved = validateReferralDraft(base);
+  assert.equal(saved.ok, true);
+  if (saved.ok) assert.equal(saved.value.phone, '+91 98765 43210');
+  assert.equal(isOpenDuplicate([{ status: 'sent', phone: '+91-98765-43210' }], '+91 98765 43210'), true);
+  assert.equal(isOpenDuplicate([{ status: 'declined', phone: '+91 98765 43210' }], '+91 98765 43210'), false);
+  assert.equal(nameNeedles('Dr Jane Smith').last, 'Smith');
+});
+
+test('status moves only forward, and a save message needs a real save', () => {
+  assert.equal(canReceiverSet('sent', 'accepted'), true);
+  assert.equal(canReceiverSet('declined', 'accepted'), false);
+  assert.equal(canReceiverSet('accepted', 'patient_contacted'), true);
+  assert.equal(canReceiverSet('sent', 'scheduled'), false);
+  assert.equal(canReferrerCancel('viewed'), true);
+  assert.equal(canReferrerCancel('accepted'), false);
+  assert.match(referralSaveMessage({ receiverName: 'Dr. Bea', emailed: false, inPortal: true }), /no email on file/);
+  assert.match(referralSaveMessage({ receiverName: 'Dr. Bea', emailed: true, inPortal: true }), /got an email/);
+});
+
+test('evening referrals stay on the doctor local date, and a booked date does not shift', () => {
+  assert.match(formatReferralWhen('2026-11-05T03:30:00.000Z', 'America/New_York'), /Nov 4, 2026/);
+  assert.match(formatReferralWhen('2026-11-05T03:30:00.000Z', 'Asia/Kolkata'), /Nov 5, 2026/);
+  assert.match(formatReferralWhen('2026-11-05', 'Asia/Kolkata'), /Nov 5, 2026/);
+  assert.equal(formatReferralWhen(null, 'UTC'), 'Not yet');
 });
 
 test('the patient intro never sends without consent and an email', () => {
