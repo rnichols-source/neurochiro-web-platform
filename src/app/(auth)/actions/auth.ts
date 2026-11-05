@@ -10,6 +10,8 @@ import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { ensureDraftApplication } from '@/lib/applications/store'
 import { safeReturnPath } from '@/lib/auth/safe-return-path'
+import { shouldAttemptDoctorClaim } from '@/lib/doctors/claim-existing'
+import { claimUnclaimedDoctor } from '@/lib/doctors/claim-existing-run'
 
 /**
  * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
@@ -69,6 +71,21 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
 
   const storedRole = ((profile as { role?: string | null } | null)?.role ?? '') as string
   let role = storedRole || 'doctor'
+  let linkedExistingDoctor = false
+
+  // An admin-built profile with this email and no login gets linked on the first sign-in.
+  if (shouldAttemptDoctorClaim(storedRole) && !isFounderEmail(email)) {
+    const claim = await claimUnclaimedDoctor({
+      userId: data.user.id,
+      email: data.user.email || email,
+      source: 'login',
+      displayName: (profile as { full_name?: string | null } | null)?.full_name || '',
+    })
+    if (claim.status === 'claimed') {
+      role = 'doctor'
+      linkedExistingDoctor = true
+    }
+  }
 
   // Patient or a blank role becomes doctor only when this user already has a doctors row.
   if (storedRole === 'patient' || storedRole === '') {
@@ -98,8 +115,8 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   // Same-site return path only. An unfinished application comes back to /doctor/apply.
   if (next) return redirect(next);
 
-  // Check if first-time user (name not set)
-  if (!(profile as any)?.full_name && ['doctor', 'student'].includes(role)) {
+  // Check if first-time user (name not set). A linked existing member already has a profile.
+  if (!linkedExistingDoctor && !(profile as any)?.full_name && ['doctor', 'student'].includes(role)) {
     return redirect(`/onboarding?role=${role}`);
   }
 
@@ -201,10 +218,23 @@ export async function createAccountAction(formData: FormData, role: string, _tie
   }
 
   if (data?.user) {
-    Automations.onSignup(data.user.id, email, name, role, phone);
+    let claimedExisting = false
+    if (role === 'doctor') {
+      const claim = await claimUnclaimedDoctor({
+        userId: data.user.id,
+        email: data.user.email || email,
+        source: 'signup',
+        displayName: name,
+      })
+      if (claim.status === 'claimed' || claim.status === 'already-linked') claimedExisting = true
+    }
+
+    if (!claimedExisting) {
+      Automations.onSignup(data.user.id, email, name, role, phone);
+    }
 
     // Create doctors row with is_approved = false (approval gate)
-    if (role === 'doctor') {
+    if (role === 'doctor' && !claimedExisting) {
       const { createAdminClient } = await import('@/lib/supabase-admin');
       const adminDb = createAdminClient();
       const { firstName, lastName, cleaned: cleanedName } = cleanDoctorName(name);
@@ -246,35 +276,37 @@ export async function createAccountAction(formData: FormData, role: string, _tie
     // Day 0 welcome email REMOVED — automations.ts handles the welcome email
     // and queues the follow-up sequence. Having both caused double welcome emails.
 
-    // Discord notification for new signups
-    try {
-      const discordUrl = process.env.DISCORD_WEBHOOK_URL;
-      if (discordUrl) {
-        const roleLabel = role === 'doctor' ? 'DOCTOR' : role === 'student' ? 'STUDENT' : 'PATIENT';
-        const approachLabels: Record<string, string> = {
-          nervous_system: '🧠 Nervous System Focused',
-          structural: '🦴 Structural / Manual',
-          upper_cervical: '🔝 Upper Cervical',
-          functional_neuro: '⚡ Functional Neurology',
-          wellness: '🌿 Wellness / Vitalistic',
-          other: '❓ Other',
-        };
-        const approachLine = chiropracticApproach ? `\n**Approach:** ${approachLabels[chiropracticApproach] || chiropracticApproach}` : '';
-        await fetch(discordUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            content: `🆕 **NEW ${roleLabel} SIGNUP${flow ? ' — APPLICATION' : ' — PENDING APPROVAL'}**\n\n**Name:** ${cleanDoctorName(name).firstName || 'New doctor'}${approachLine}\n\n${flow ? 'Review at: https://neurochiro.co/admin/applications' : '⏳ Approve at: https://neurochiro.co/admin/moderation'}`,
-          }),
-        }).catch(() => {});
-      }
-    } catch {}
+    // Discord notification for new signups. A linked existing member already got their own alert.
+    if (!claimedExisting) {
+      try {
+        const discordUrl = process.env.DISCORD_WEBHOOK_URL;
+        if (discordUrl) {
+          const roleLabel = role === 'doctor' ? 'DOCTOR' : role === 'student' ? 'STUDENT' : 'PATIENT';
+          const approachLabels: Record<string, string> = {
+            nervous_system: '🧠 Nervous System Focused',
+            structural: '🦴 Structural / Manual',
+            upper_cervical: '🔝 Upper Cervical',
+            functional_neuro: '⚡ Functional Neurology',
+            wellness: '🌿 Wellness / Vitalistic',
+            other: '❓ Other',
+          };
+          const approachLine = chiropracticApproach ? `\n**Approach:** ${approachLabels[chiropracticApproach] || chiropracticApproach}` : '';
+          await fetch(discordUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              content: `🆕 **NEW ${roleLabel} SIGNUP${flow ? ' — APPLICATION' : ' — PENDING APPROVAL'}**\n\n**Name:** ${cleanDoctorName(name).firstName || 'New doctor'}${approachLine}\n\n${flow ? 'Review at: https://neurochiro.co/admin/applications' : '⏳ Approve at: https://neurochiro.co/admin/moderation'}`,
+            }),
+          }).catch(() => {});
+        }
+      } catch {}
+    }
 
     return {
       success: true,
       user: data.user,
       sessionActive: !!data.session,
-      nextPath: flow ? '/doctor/apply' : null,
+      nextPath: claimedExisting ? '/doctor/dashboard' : (flow ? '/doctor/apply' : null),
     };
   }
 
