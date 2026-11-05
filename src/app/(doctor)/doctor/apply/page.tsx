@@ -39,6 +39,8 @@ export default async function ApplyPage({
         instagram: answers?.instagram || '',
         heardAbout: answers?.heardAbout || '',
         whyJoin: answers?.whyJoin || '',
+        mobile: state.application?.mobileE164 || '',
+        smsConsent: state.application?.smsConsent === true,
       }}
     />
   )
