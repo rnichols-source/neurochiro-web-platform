@@ -54,7 +54,7 @@ export function ActivateProButtons() {
         {loading ? 'Redirecting…' : `Activate Pro — ${PRO_PRICE_LABEL}`}
       </button>
       <button type="button" disabled={loading} onClick={() => start('annual')} className="min-h-11 px-4 rounded-lg border border-portal-border text-sm font-bold">
-        Annual — $490/yr
+        Annual — $990/yr
       </button>
     </div>
   );

@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, type FormEvent } from 'react'
+import { APPLICATION_SMS_CONSENT } from '@/lib/applications/consent'
 import { APPLICATION_COUNTRIES } from '@/lib/applications/countries'
+import { toApplicationE164 } from '@/lib/applications/phone'
 import type { BillingCycle, DoctorCurrency } from '@/lib/applications/prices'
 import { plansForCountry, submitApplication, type PlanChoice } from './actions'
 
@@ -19,6 +21,8 @@ type Initial = {
   instagram: string
   heardAbout: string
   whyJoin: string
+  mobile: string
+  smsConsent: boolean
 }
 
 const fieldClass = 'mt-1 w-full min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm'
@@ -40,7 +44,12 @@ export function ApplyForm({
   currency: DoctorCurrency
   initial: Initial
 }) {
-  const [values, setValues] = useState<Initial>({ ...initial, country: initial.country || initialCountry })
+  const [values, setValues] = useState<Initial>({
+    ...initial,
+    country: initial.country || initialCountry,
+    mobile: initial.mobile || '',
+    smsConsent: initial.smsConsent === true,
+  })
   const [plan, setPlan] = useState<BillingCycle>('monthly')
   const [plans, setPlans] = useState(startingPlans)
   const [currency, setCurrency] = useState(startingCurrency)
@@ -62,11 +71,26 @@ export function ApplyForm({
     event.preventDefault()
     setLoading(true)
     setError('')
+    const mobile = toApplicationE164(values.mobile, values.country)
+    if (!mobile) {
+      setError(values.country === 'OTHER'
+        ? 'Enter a mobile number with + and the country code.'
+        : 'Enter a mobile number for the country you selected.')
+      setLoading(false)
+      return
+    }
+    if (!values.smsConsent) {
+      setError('Check the box so we can text you about your application and patient requests.')
+      setLoading(false)
+      return
+    }
     const result = await submitApplication({
       plan,
       referralCode,
       answers: {
         ...values,
+        mobile,
+        smsConsent: true,
         yearsInPractice: values.yearsInPractice === '' ? '' : Number(values.yearsInPractice),
         usesNervousSystemScans: values.usesNervousSystemScans === 'yes' ? true : values.usesNervousSystemScans === 'no' ? false : '',
       },
@@ -145,6 +169,34 @@ export function ApplyForm({
             <option key={country.code} value={country.code}>{country.name}</option>
           ))}
         </select>
+      </label>
+      <label className="block text-sm font-bold">
+        Mobile number
+        <input
+          required
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={values.mobile}
+          onChange={(event) => set('mobile', event.target.value)}
+          className={fieldClass}
+          placeholder={values.country === 'OTHER' ? '+ country code' : ''}
+        />
+        <span className="mt-1 block text-xs font-normal text-neuro-navy/70">
+          {values.country === 'OTHER'
+            ? 'Start with + and the country code.'
+            : 'Use a mobile number in the country you selected. Patient request texts go here.'}
+        </span>
+      </label>
+      <label className="flex items-start gap-3 text-sm">
+        <input
+          required
+          type="checkbox"
+          className="mt-1 h-4 w-4"
+          checked={values.smsConsent}
+          onChange={(event) => set('smsConsent', event.target.checked)}
+        />
+        <span>{APPLICATION_SMS_CONSENT}</span>
       </label>
       <label className="block text-sm font-bold">
         Website

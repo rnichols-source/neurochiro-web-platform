@@ -165,8 +165,9 @@ export async function submitFindRequest(formData: FormData): Promise<{ ok: boole
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false, error: 'Please enter a valid email address.' };
   }
-  if (!/^\d{5}$/.test(zip)) {
-    return { ok: false, error: 'Please enter a valid 5-digit ZIP code.' };
+  const { acceptPostalCode } = await import('@/lib/detect-postal');
+  if (!acceptPostalCode(zip)) {
+    return { ok: false, error: 'Please enter a valid postal code. US ZIP codes are 5 digits. India PIN codes are 6 digits.' };
   }
 
   const supabase = createAdminClient();

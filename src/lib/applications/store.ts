@@ -1,8 +1,19 @@
 import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { isMissingColumn } from '@/lib/leads/schema'
 import type { ApplicationAnswers } from './answers.ts'
 import type { AdminApplicationRow } from './admin-row.ts'
+import { doctorProfileUrl } from './approval-sms.ts'
+import {
+  applicationContactPatch,
+  consentStatusLabel,
+  contactFromAdminNotes,
+  contactFromApplicationRow,
+  doctorAlertPatch,
+  humanAdminNotes,
+  packAdminNotes,
+} from './contact.ts'
 import type { ApplicationRecord, ApplicationStatus, ApplicationWrite, DoctorWrite } from './decide.ts'
 import type { DiscordApplication } from './discord.ts'
 
@@ -58,6 +69,7 @@ export function mapApplication(row: Row, doctor?: Row | null, profile?: Row | nu
   const firstName = text(doctor?.first_name) || text(profile?.full_name).split(' ')[0] || 'there'
   const lastName = text(doctor?.last_name)
   const email = text(profile?.email) || text(doctor?.email)
+  const contact = contactFromApplicationRow(row)
   return {
     id: text(row.id),
     doctorId: text(row.doctor_id),
@@ -72,6 +84,10 @@ export function mapApplication(row: Row, doctor?: Row | null, profile?: Row | nu
     chargeAttempt: typeof row.charge_attempt === 'number' ? row.charge_attempt : 0,
     email,
     firstName,
+    lastName,
+    profileUrl: doctorProfileUrl(text(doctor?.slug)),
+    mobileE164: contact.mobileE164 || null,
+    smsConsent: contact.smsConsent,
     priceLabel: text(row.price_label) || null,
     currency: text(row.currency) || null,
     answers: {
@@ -103,7 +119,7 @@ async function doctorAndProfile(row: Row): Promise<StoredApplication> {
   const doctorId = text(row.doctor_id)
   const userId = text(row.user_id)
   const [doctorResult, profileResult] = await Promise.all([
-    doctorId ? client.from('doctors').select('first_name, last_name, email').eq('id', doctorId).maybeSingle() : Promise.resolve({ data: null }),
+    doctorId ? client.from('doctors').select('first_name, last_name, email, slug').eq('id', doctorId).maybeSingle() : Promise.resolve({ data: null }),
     userId ? client.from('profiles').select('full_name, email').eq('id', userId).maybeSingle() : Promise.resolve({ data: null }),
   ])
   return mapApplication(row, one(doctorResult), one(profileResult))
@@ -150,8 +166,10 @@ export async function loadApplicationById(id: string): Promise<StoredApplication
   return doctorAndProfile(row)
 }
 
-export async function saveAnswers(doctorId: string, userId: string, answers: ApplicationAnswers, referralCode: string): Promise<boolean> {
-  const result = await db().from('doctor_applications').update({
+const MOBILE_SQL = 'supabase/migrations/proposed/20261109120000_application_mobile_consent.sql'
+
+function answerPatch(answers: ApplicationAnswers, referralCode: string, now: string): Record<string, unknown> {
+  return {
     practice_approach: answers.practiceApproach,
     techniques: answers.techniques,
     uses_nervous_system_scans: answers.usesNervousSystemScans,
@@ -166,9 +184,83 @@ export async function saveAnswers(doctorId: string, userId: string, answers: App
     heard_about: answers.heardAbout,
     why_join: answers.whyJoin,
     referral_code: referralCode || null,
-    updated_at: new Date().toISOString(),
+    updated_at: now,
+  }
+}
+
+export async function saveDoctorAlertPhone(doctorId: string, phone: string, consent: boolean, now: string): Promise<void> {
+  const patch = doctorAlertPatch({ existingPhones: [], phone, consent, now })
+  if (!patch || !doctorId) return
+  const client = db()
+  const current = await client.from('doctors').select('lead_alert_phones').eq('id', doctorId).maybeSingle()
+  if (current.error) {
+    if (isMissingColumn(current.error)) {
+      console.error('[application] doctor text columns are not ready. Apply supabase/migrations/proposed/20261108000000_instant_lead_texts.sql')
+      return
+    }
+    console.error('[application] could not read alert phones', current.error.code || 'error')
+    return
+  }
+  const next = doctorAlertPatch({
+    existingPhones: one(current)?.lead_alert_phones,
+    phone,
+    consent,
+    now,
+  })
+  if (!next) return
+  const updated = await client.from('doctors').update(next).eq('id', doctorId)
+  if (updated.error) {
+    if (isMissingColumn(updated.error)) {
+      console.error('[application] doctor text columns are not ready. Apply supabase/migrations/proposed/20261108000000_instant_lead_texts.sql')
+      return
+    }
+    console.error('[application] could not save alert phone', updated.error.code || 'error')
+  }
+}
+
+export async function saveAnswers(doctorId: string, userId: string, answers: ApplicationAnswers, referralCode: string): Promise<boolean> {
+  const now = new Date().toISOString()
+  const client = db()
+  const base = answerPatch(answers, referralCode, now)
+  const contact = applicationContactPatch({
+    mobileE164: answers.mobileE164,
+    smsConsent: answers.smsConsent,
+    now,
+  })
+  const withColumns = await client.from('doctor_applications').update({
+    ...base,
+    ...contact,
   }).eq('doctor_id', doctorId).eq('user_id', userId)
-  return !result.error
+  if (withColumns.error && isMissingColumn(withColumns.error)) {
+    console.error(`[application] mobile columns are missing. Apply ${MOBILE_SQL}`)
+    const current = await client.from('doctor_applications').select('admin_notes').eq('doctor_id', doctorId).eq('user_id', userId).maybeSingle()
+    const packed = packAdminNotes(text(one(current)?.admin_notes), {
+      mobileE164: answers.mobileE164,
+      smsConsent: answers.smsConsent,
+      smsConsentAt: answers.smsConsent ? now : null,
+    })
+    const legacy = await client.from('doctor_applications').update({
+      ...base,
+      admin_notes: packed,
+    }).eq('doctor_id', doctorId).eq('user_id', userId)
+    if (legacy.error) {
+      console.error('[application] answer save failed', legacy.error.code || 'error')
+      return false
+    }
+  } else if (withColumns.error) {
+    console.error('[application] answer save failed', withColumns.error.code || 'error')
+    return false
+  } else {
+    const current = await client.from('doctor_applications').select('admin_notes').eq('doctor_id', doctorId).eq('user_id', userId).maybeSingle()
+    const notes = text(one(current)?.admin_notes)
+    if (contactFromAdminNotes(notes)) {
+      await client.from('doctor_applications').update({
+        admin_notes: humanAdminNotes(notes) || null,
+      }).eq('doctor_id', doctorId).eq('user_id', userId)
+    }
+  }
+  await saveDoctorAlertPhone(doctorId, answers.mobileE164, answers.smsConsent, now)
+  return true
 }
 
 export async function savePlan(doctorId: string, input: {
@@ -249,15 +341,37 @@ export async function persistDecision(input: {
 }): Promise<void> {
   const client = db()
   if (input.application) {
-    await client.from('doctor_applications').update({
+    const patch: Record<string, unknown> = {
       ...input.application,
       reviewed_by: input.reviewerId,
       updated_at: new Date().toISOString(),
-    }).eq('id', input.applicationId)
+    }
+    if ('admin_notes' in input.application) {
+      patch.admin_notes = await notesKeepingContact(input.applicationId, input.application.admin_notes)
+    }
+    await client.from('doctor_applications').update(patch).eq('id', input.applicationId)
   }
   if (input.doctor) {
     await client.from('doctors').update(input.doctor).eq('id', input.doctorId)
   }
+}
+
+async function notesKeepingContact(applicationId: string, nextNotes: string | null | undefined): Promise<string | null> {
+  const client = db()
+  const withPhone = await client.from('doctor_applications').select('admin_notes, mobile_e164').eq('id', applicationId).maybeSingle()
+  if (withPhone.error && isMissingColumn(withPhone.error)) {
+    const current = await client.from('doctor_applications').select('admin_notes').eq('id', applicationId).maybeSingle()
+    return packAdminNotes(
+      typeof nextNotes === 'string' ? nextNotes : '',
+      contactFromAdminNotes(text(one(current)?.admin_notes)),
+    )
+  }
+  const row = one(withPhone)
+  if (text(row?.mobile_e164)) return humanAdminNotes(typeof nextNotes === 'string' ? nextNotes : '') || null
+  return packAdminNotes(
+    typeof nextNotes === 'string' ? nextNotes : '',
+    contactFromAdminNotes(text(row?.admin_notes)),
+  )
 }
 
 export type { AdminApplicationRow } from './admin-row.ts'
@@ -275,7 +389,7 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
   const doctorIds = rows.map((row) => text(row.doctor_id)).filter(Boolean)
   const userIds = rows.map((row) => text(row.user_id)).filter(Boolean)
   const [doctors, profiles] = await Promise.all([
-    doctorIds.length ? db().from('doctors').select('id, first_name, last_name, email').in('id', doctorIds) : Promise.resolve({ data: [] }),
+    doctorIds.length ? db().from('doctors').select('id, first_name, last_name, email, slug').in('id', doctorIds) : Promise.resolve({ data: [] }),
     userIds.length ? db().from('profiles').select('id, full_name, email').in('id', userIds) : Promise.resolve({ data: [] }),
   ])
   const doctorMap = new Map<string, Row>(many(doctors).map((row) => [text(row.id), row]))
@@ -307,7 +421,9 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
         instagram: mapped.answers.instagram,
         heardAbout: mapped.answers.heardAbout,
         whyJoin: mapped.answers.whyJoin,
-        notes: text(row.admin_notes),
+        notes: humanAdminNotes(text(row.admin_notes)),
+        mobile: mapped.mobileE164 || '',
+        smsConsent: mapped.smsConsent ? consentStatusLabel(true, contactFromApplicationRow(row).smsConsentAt) : 'No',
         createdAt: text(row.created_at),
       }
     }),

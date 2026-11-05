@@ -13,6 +13,7 @@ import {
   referralBlockReason,
   referralCountry,
   referralDistance,
+  searchCountryForQuery,
   shouldResolvePlace,
   type Place,
 } from '@/lib/referrals/pure';
@@ -168,7 +169,7 @@ export async function searchReferableDoctors(input: {
   const started = Date.now();
   const admin = createAdminClient() as any;
   const query = input.query.trim();
-  const country = referralCountry(input.country || 'US');
+  const country = searchCountryForQuery(input.country || 'US', query);
   const acceptingOnly = input.acceptingOnly === true;
   let choices: Place[] | null = null;
   let origin: Place | null = input.place || null;

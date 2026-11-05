@@ -10,6 +10,7 @@ import {
   isOpenDuplicate,
   looksLikePostal,
   nameNeedles,
+  searchCountryForQuery,
   planReminders,
   referralDistance,
   referralSaveMessage,
@@ -110,8 +111,10 @@ test('reminders fire once', () => {
 test('an India PIN is a place in India and not a US ZIP', () => {
   assert.equal(looksLikePostal('110001', 'IN'), true);
   assert.equal(shouldResolvePlace('110001', 'IN'), true);
-  assert.equal(looksLikePostal('110001', 'US'), false);
-  assert.equal(shouldResolvePlace('110001', 'US'), false);
+  assert.equal(looksLikePostal('110001', 'US'), true);
+  assert.equal(shouldResolvePlace('110001', 'US'), true);
+  assert.equal(searchCountryForQuery('US', '110001'), 'IN');
+  assert.equal(searchCountryForQuery('US', '78701'), 'US');
   assert.equal(looksLikePostal('110001', 'ALL'), true);
   assert.equal(looksLikePostal('560001', 'IN'), true);
   assert.equal(looksLikePostal('78701'), true);

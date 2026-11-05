@@ -66,7 +66,10 @@ export function validateState(state: string, country: string = 'US'): { valid: b
   }
   if (c === 'GB') return { valid: false, error: `"${trimmed}" is not a valid UK region.` }
   if (c === 'NZ') return { valid: false, error: `"${trimmed}" is not a valid NZ region.` }
-  return { valid: false, error: `Unsupported country "${country}".` }
+  if (trimmed.length < 2 || trimmed.length > 60) {
+    return { valid: false, error: 'Enter a state, province, or region.' }
+  }
+  return { valid: true, normalized: trimmed }
 }
 
 export function validateCity(city: string): { valid: boolean; error?: string } {

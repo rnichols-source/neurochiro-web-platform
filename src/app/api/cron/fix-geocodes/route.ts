@@ -66,8 +66,11 @@ export async function GET(req: NextRequest) {
       await new Promise((r) => setTimeout(r, 1100));
 
       try {
+        const doctorCountry = String(doc.country || '').trim().toLowerCase()
+        const countryCodes = ['us', 'au', 'ca', 'gb', 'nz', 'ie', 'in', 'ae']
+        if (/^[a-z]{2}$/.test(doctorCountry) && !countryCodes.includes(doctorCountry)) countryCodes.push(doctorCountry)
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=us,au,ca,gb,nz`,
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=${countryCodes.join(',')}`,
           { headers: { "User-Agent": "NeuroChiro/1.0 (support@neurochirodirectory.com)" } }
         );
         const data = await response.json();

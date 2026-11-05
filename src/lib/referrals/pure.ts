@@ -56,8 +56,18 @@ export function looksLikePostal(query: string, country = 'US'): boolean {
   }
   if (matchesCountryPostal(query, iso)) return true;
   if (iso === 'US' && /^\d{5}(?:-\d{4})?$/.test(compact)) return true;
+  // A 6-digit code is an India PIN even when the doctor is browsing from the US.
+  if (iso === 'US' && /^\d{6}$/.test(compact)) return true;
   if (iso === 'GB' && /^[A-Za-z]{1,2}\d[A-Za-z\d]?\s?\d[A-Za-z]{2}$/.test(query.trim())) return true;
   return false;
+}
+
+/** Search India when a US doctor types a 6-digit PIN. Other searches stay on the chosen country. */
+export function searchCountryForQuery(country: string, query: string): string {
+  const iso = referralCountry(country);
+  const compact = query.trim().replace(/\s+/g, '');
+  if (iso === 'US' && /^\d{6}$/.test(compact)) return 'IN';
+  return iso;
 }
 
 /** A city, "City, ST", or a postal code. A long sentence is a name or clinic. */

@@ -29,9 +29,16 @@ function stripSuiteInfo(addr: string): string {
     .trim()
 }
 
-async function nominatimSearch(query: string): Promise<{ lat: number; lng: number } | null> {
+function nominatimCountry(country: string): string {
+  const code = (country || 'US').trim().toUpperCase()
+  if (code === 'UK') return 'gb'
+  if (/^[A-Z]{2}$/.test(code)) return code.toLowerCase()
+  return 'us'
+}
+
+async function nominatimSearch(query: string, country = 'US'): Promise<{ lat: number; lng: number } | null> {
   const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=us&addressdetails=1`,
+    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=${nominatimCountry(country)}&addressdetails=1`,
     { headers: { 'User-Agent': 'NeuroChiro/1.0 (support@neurochirodirectory.com)' } }
   )
   const data = await response.json()
@@ -39,10 +46,10 @@ async function nominatimSearch(query: string): Promise<{ lat: number; lng: numbe
   return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) }
 }
 
-async function nominatimStructured(street: string, city: string, state: string): Promise<{ lat: number; lng: number } | null> {
+async function nominatimStructured(street: string, city: string, state: string, country = 'US'): Promise<{ lat: number; lng: number } | null> {
   const params = new URLSearchParams({
     format: 'json', street, city, state,
-    country: 'United States', limit: '1', addressdetails: '1',
+    countrycodes: nominatimCountry(country), limit: '1', addressdetails: '1',
   })
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?${params}`,
@@ -73,29 +80,33 @@ export async function geocodeDoctorAddress(
   address: string,
   city: string,
   state: string,
+  country = 'US',
 ): Promise<{ lat: number; lng: number } | null> {
   if (!address || !address.trim()) return null
 
-  const expandedState = STATE_EXPAND[state?.toUpperCase()] || state
+  const countryCode = (country || 'US').trim().toUpperCase() === 'UK' ? 'GB' : (country || 'US').trim().toUpperCase()
+  const expandedState = countryCode === 'US' ? (STATE_EXPAND[state?.toUpperCase()] || state) : state
 
   // Attempt 1: full address as-is
-  const hasCityInAddr = address.toLowerCase().includes(city.toLowerCase())
-  const query = hasCityInAddr ? address : `${address}, ${city}, ${expandedState}`
-  let result = await nominatimSearch(query)
+  const hasCityInAddr = city ? address.toLowerCase().includes(city.toLowerCase()) : false
+  const query = hasCityInAddr ? address : [address, city, expandedState].filter(Boolean).join(', ')
+  let result = await nominatimSearch(query, countryCode)
   if (result) return result
 
   // Attempt 2: strip suite/unit numbers
   const stripped = stripSuiteInfo(address)
   if (stripped !== address) {
-    const query2 = hasCityInAddr ? stripped : `${stripped}, ${city}, ${expandedState}`
-    result = await nominatimSearch(query2)
+    const query2 = hasCityInAddr ? stripped : [stripped, city, expandedState].filter(Boolean).join(', ')
+    result = await nominatimSearch(query2, countryCode)
     if (result) return result
   }
 
   // Attempt 3: structured search
   const streetOnly = stripSuiteInfo(address.split(',')[0])
-  result = await nominatimStructured(streetOnly, city, expandedState)
+  result = await nominatimStructured(streetOnly, city, expandedState, countryCode)
   if (result) return result
+
+  if (countryCode !== 'US') return null
 
   // Attempt 4: US Census Bureau Geocoding API (better at commercial addresses)
   result = await censusBureauGeocode(address)
