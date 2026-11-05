@@ -62,3 +62,11 @@ export function doctorNewLead(input: {
   parts.push(`Please reach out within 24 hrs. Details: ${siteUrl()}/doctor/leads Reply STOP to opt out.`)
   return parts.join(' ')
 }
+
+/** Waitlist alert when a doctor joins nearby. The link is always neurochiro.co. */
+export function waitlistDoctorJoinedText(doctorName: string, city: string, profileUrl: string): string {
+  const name = ascii(doctorName).slice(0, 40) || 'A NeuroChiro doctor'
+  const place = ascii(city).slice(0, 32) || 'your area'
+  const link = profileUrl.startsWith('https://neurochiro.co/') ? profileUrl : 'https://neurochiro.co'
+  return `NeuroChiro: Good news! A nervous system chiropractor just joined near you: ${name}, ${place}. See their profile: ${link}. Reply STOP to opt out.`
+}

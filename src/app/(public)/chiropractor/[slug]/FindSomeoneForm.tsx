@@ -60,14 +60,13 @@ export default function FindSomeoneForm({ city, state }: { city: string; state: 
         </div>
       </div>
       <div>
-        <label className="block text-xs font-bold text-neuro-navy mb-1">ZIP Code</label>
+        <label className="block text-xs font-bold text-neuro-navy mb-1">ZIP or postal code</label>
         <input
           type="text"
           name="zip"
           required
-          maxLength={5}
-          inputMode="numeric"
-          placeholder="12345"
+          maxLength={16}
+          placeholder="12345 or 110001"
           className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange min-h-[44px]"
         />
       </div>

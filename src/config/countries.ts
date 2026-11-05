@@ -14,6 +14,8 @@ export interface CountryConfig {
   regionLabel: string // "State", "Province", "County", etc.
   postalLabel: string // "ZIP Code", "Postal Code", "Postcode", etc.
   postalPattern?: string // regex pattern for validation, undefined = accept any
+  /** No widely used postal code. The form asks for a city or area and may leave it blank. */
+  postalOptional?: boolean
   hasDemand: boolean
   demandCount: number
   mapView?: { center: [number, number]; zoom: number }
@@ -26,7 +28,7 @@ const DEMAND_COUNTRIES: CountryConfig[] = [
   { name: 'Canada', iso2: 'CA', flag: '🇨🇦', regionLabel: 'Province', postalLabel: 'Postal Code', postalPattern: '^[A-Z]\\d[A-Z]\\s?\\d[A-Z]\\d$', hasDemand: true, demandCount: 90, mapView: { center: [-96, 56], zoom: 3.2 } },
   { name: 'Australia', iso2: 'AU', flag: '🇦🇺', regionLabel: 'State', postalLabel: 'Postcode', postalPattern: '^\\d{4}$', hasDemand: true, demandCount: 40, mapView: { center: [134, -25], zoom: 3.5 } },
   { name: 'South Africa', iso2: 'ZA', flag: '🇿🇦', regionLabel: 'Province', postalLabel: 'Postal Code', postalPattern: '^\\d{4}$', hasDemand: true, demandCount: 15 },
-  { name: 'United Arab Emirates', iso2: 'AE', flag: '🇦🇪', regionLabel: 'Emirate', postalLabel: 'Postal Code', hasDemand: true, demandCount: 11 },
+  { name: 'United Arab Emirates', iso2: 'AE', flag: '🇦🇪', regionLabel: 'Emirate', postalLabel: 'City or area', postalOptional: true, hasDemand: true, demandCount: 11 },
   { name: 'Nigeria', iso2: 'NG', flag: '🇳🇬', regionLabel: 'State', postalLabel: 'Postal Code', hasDemand: true, demandCount: 9 },
   { name: 'India', iso2: 'IN', flag: '🇮🇳', regionLabel: 'State', postalLabel: 'PIN Code', postalPattern: '^\\d{6}$', hasDemand: true, demandCount: 5 },
   { name: 'Germany', iso2: 'DE', flag: '🇩🇪', regionLabel: 'State', postalLabel: 'Postal Code', postalPattern: '^\\d{5}$', hasDemand: true, demandCount: 4 },
@@ -59,6 +61,8 @@ const OTHER_COUNTRIES: CountryConfig[] = [
   { name: 'Argentina', iso2: 'AR', flag: '🇦🇷', regionLabel: 'Province', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Austria', iso2: 'AT', flag: '🇦🇹', regionLabel: 'State', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Belgium', iso2: 'BE', flag: '🇧🇪', regionLabel: 'Province', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
+  { name: 'Bolivia', iso2: 'BO', flag: '🇧🇴', regionLabel: 'Department', postalLabel: 'City or area', postalOptional: true, hasDemand: false, demandCount: 0 },
+  { name: 'Botswana', iso2: 'BW', flag: '🇧🇼', regionLabel: 'District', postalLabel: 'City or area', postalOptional: true, hasDemand: false, demandCount: 0 },
   { name: 'Brazil', iso2: 'BR', flag: '🇧🇷', regionLabel: 'State', postalLabel: 'CEP', hasDemand: false, demandCount: 0 },
   { name: 'China', iso2: 'CN', flag: '🇨🇳', regionLabel: 'Province', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Colombia', iso2: 'CO', flag: '🇨🇴', regionLabel: 'Department', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
@@ -71,12 +75,15 @@ const OTHER_COUNTRIES: CountryConfig[] = [
   { name: 'Ireland', iso2: 'IE', flag: '🇮🇪', regionLabel: 'County', postalLabel: 'Eircode', hasDemand: false, demandCount: 0 },
   { name: 'Israel', iso2: 'IL', flag: '🇮🇱', regionLabel: 'District', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Italy', iso2: 'IT', flag: '🇮🇹', regionLabel: 'Region', postalLabel: 'CAP', hasDemand: false, demandCount: 0 },
+  { name: 'Jamaica', iso2: 'JM', flag: '🇯🇲', regionLabel: 'Parish', postalLabel: 'City or area', postalOptional: true, hasDemand: false, demandCount: 0 },
+  { name: 'Lebanon', iso2: 'LB', flag: '🇱🇧', regionLabel: 'Governorate', postalLabel: 'City or area', postalOptional: true, hasDemand: false, demandCount: 0 },
   { name: 'Malaysia', iso2: 'MY', flag: '🇲🇾', regionLabel: 'State', postalLabel: 'Postcode', hasDemand: false, demandCount: 0 },
   { name: 'Netherlands', iso2: 'NL', flag: '🇳🇱', regionLabel: 'Province', postalLabel: 'Postcode', hasDemand: false, demandCount: 0 },
   { name: 'Norway', iso2: 'NO', flag: '🇳🇴', regionLabel: 'County', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Peru', iso2: 'PE', flag: '🇵🇪', regionLabel: 'Region', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Poland', iso2: 'PL', flag: '🇵🇱', regionLabel: 'Voivodeship', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Romania', iso2: 'RO', flag: '🇷🇴', regionLabel: 'County', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
+  { name: 'Serbia', iso2: 'RS', flag: '🇷🇸', regionLabel: 'District', postalLabel: 'Postal Code', postalPattern: '^\\d{5}$', hasDemand: false, demandCount: 0 },
   { name: 'South Korea', iso2: 'KR', flag: '🇰🇷', regionLabel: 'Province', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Spain', iso2: 'ES', flag: '🇪🇸', regionLabel: 'Province', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },
   { name: 'Taiwan', iso2: 'TW', flag: '🇹🇼', regionLabel: 'County', postalLabel: 'Postal Code', hasDemand: false, demandCount: 0 },

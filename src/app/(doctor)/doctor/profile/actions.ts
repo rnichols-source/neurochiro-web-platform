@@ -75,17 +75,13 @@ export async function updateDoctorProfile(formData: FormData) {
     const state = formData.get('state') as string
     const rawCountry = formData.get('country') as string || 'US'
     // Normalize to ISO 3166-1 alpha-2
-    const COUNTRY_NORMALIZE: Record<string, string> = {
-      'united states': 'US', 'usa': 'US', 'us': 'US',
-      'canada': 'CA', 'ca': 'CA',
-      'united kingdom': 'GB', 'uk': 'GB', 'gb': 'GB',
-      'new zealand': 'NZ', 'nz': 'NZ',
-      'australia': 'AU', 'au': 'AU',
-    }
-    const VALID_COUNTRY_CODES = new Set(['US', 'CA', 'GB', 'NZ', 'AU'])
-    const country = COUNTRY_NORMALIZE[rawCountry.toLowerCase()] || rawCountry.toUpperCase()
-    if (!VALID_COUNTRY_CODES.has(country)) {
-      return { error: `Invalid country code "${rawCountry}". Use US, CA, GB, NZ, or AU.` }
+    const { getCountryByIso2, ALL_COUNTRIES } = await import('@/config/countries')
+    const typed = rawCountry.trim()
+    const named = ALL_COUNTRIES.find((item) => item.name.toLowerCase() === typed.toLowerCase())
+    const aliases: Record<string, string> = { usa: 'US', uk: 'GB', uae: 'AE', dubai: 'AE' }
+    const country = named?.iso2 || aliases[typed.toLowerCase()] || (getCountryByIso2(typed.toUpperCase()) ? typed.toUpperCase() : typed.toUpperCase())
+    if (!/^[A-Z]{2}$/.test(country)) {
+      return { error: 'Enter a 2-letter country code, such as US, IN, or AE.' }
     }
 
     // Validate clinic name — no emails, phones, or URLs
@@ -268,7 +264,7 @@ export async function updateDoctorProfile(formData: FormData) {
     if (addressChanged && address) {
       try {
         const { geocodeDoctorAddress } = await import('@/lib/geocode')
-        const result = await geocodeDoctorAddress(address, city, normalizedState)
+        const result = await geocodeDoctorAddress(address, city, normalizedState, country)
         if (result) {
           newLat = result.lat
           newLng = result.lng

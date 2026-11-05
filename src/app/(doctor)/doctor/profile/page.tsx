@@ -533,7 +533,7 @@ function ProfileEditor() {
                     <input name="state" defaultValue={profile?.state || ""} placeholder="State or province" className={INPUT} />
                   </Label>
                   <Label label="Country">
-                    <input name="country" defaultValue={profile?.country || ""} placeholder="US, CA, GB, NZ, or AU" className={INPUT} />
+                    <input name="country" defaultValue={profile?.country || ""} placeholder="US, IN, AE, GB" className={INPUT} />
                   </Label>
                 </div>
               </Section>
