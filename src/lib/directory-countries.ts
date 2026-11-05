@@ -43,6 +43,7 @@ export function countryHint(input: string): string | null {
   const raw = input.trim();
   if (!raw) return null;
   const compact = raw.replace(/\s+/g, "").toUpperCase();
+  if (/^\d{6}$/.test(compact)) return "IN";
   if (/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(compact) || /^[A-Z]\d[A-Z]$/.test(compact)) return "CA";
   if (/^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(compact)) return "GB";
   const tokens = raw.split(/[,\s]+/).filter(Boolean);

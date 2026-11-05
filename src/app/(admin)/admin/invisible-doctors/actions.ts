@@ -169,7 +169,7 @@ export async function geocodeDoctorFromAdmin(doctorId: string) {
 
   const { data: doc } = await supabase
     .from('doctors')
-    .select('address, city, state')
+    .select('address, city, state, country')
     .eq('id', doctorId)
     .single()
 
@@ -178,7 +178,7 @@ export async function geocodeDoctorFromAdmin(doctorId: string) {
   }
 
   const { geocodeDoctorAddress } = await import('@/lib/geocode')
-  const result = await geocodeDoctorAddress(doc.address, doc.city || '', doc.state || '')
+  const result = await geocodeDoctorAddress(doc.address, doc.city || '', doc.state || '', doc.country || 'US')
 
   if (!result) {
     // Try Census Bureau as fallback

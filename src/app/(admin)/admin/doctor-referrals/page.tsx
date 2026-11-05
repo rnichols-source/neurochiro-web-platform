@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Send, AlertTriangle, CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react";
-import { createClient } from "@/lib/supabase";
-
+import { Send, AlertTriangle, RefreshCw } from "lucide-react";
 interface ReferralRow {
   id: string;
   patient_first_name: string;
@@ -47,20 +45,27 @@ export default function AdminDoctorReferralsPage() {
     load();
   }, []);
 
+  const waiting = referrals.filter((r) => r.status === "pending" || r.status === "sent" || r.status === "viewed").length;
   const counts = {
     total: referrals.length,
-    pending: referrals.filter((r) => r.status === "pending").length,
+    waiting,
     accepted: referrals.filter((r) => r.status === "accepted").length,
+    called: referrals.filter((r) => r.status === "patient_contacted").length,
+    booked: referrals.filter((r) => r.status === "scheduled").length,
     declined: referrals.filter((r) => r.status === "declined").length,
     expired: referrals.filter((r) => r.status === "expired").length,
+    cancelled: referrals.filter((r) => r.status === "cancelled").length,
   };
 
   const statCards = [
     { label: "Total", value: counts.total, color: "#fff" },
-    { label: "Pending", value: counts.pending, color: "#f59e0b" },
+    { label: "Waiting", value: counts.waiting, color: "#f59e0b" },
     { label: "Accepted", value: counts.accepted, color: "#10b981" },
+    { label: "Called", value: counts.called, color: "#38bdf8" },
+    { label: "Booked", value: counts.booked, color: "#34d399" },
     { label: "Declined", value: counts.declined, color: "#ef4444" },
     { label: "Expired", value: counts.expired, color: "#6b7280" },
+    { label: "Cancelled", value: counts.cancelled, color: "#9ca3af" },
   ];
 
   return (
@@ -130,9 +135,14 @@ export default function AdminDoctorReferralsPage() {
               {referrals.map((r) => {
                 const statusColors: Record<string, string> = {
                   pending: "#f59e0b",
+                  sent: "#f59e0b",
+                  viewed: "#38bdf8",
                   accepted: "#10b981",
+                  patient_contacted: "#38bdf8",
+                  scheduled: "#34d399",
                   declined: "#ef4444",
                   expired: "#6b7280",
+                  cancelled: "#9ca3af",
                 };
                 return (
                   <tr key={r.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>

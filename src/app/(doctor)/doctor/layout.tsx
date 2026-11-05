@@ -13,6 +13,8 @@ import { recordPortalLogin } from '@/lib/portal/login-ping';
 import { firstName } from '@/lib/portal/greeting';
 import { isApplicationFlowEnabled } from '@/lib/applications/flag';
 import { loadApplicationGate } from '@/lib/applications/gate';
+import { lookupStaffOffice } from './kpi/actions';
+import StaffScorecardFrame from './StaffScorecardFrame';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -32,6 +34,17 @@ export default async function DoctorLayout({ children }: { children: React.React
       clinic: ctx.doctor?.clinic_name || null,
     });
   });
+
+  const staffOnly = !ctx.doctor && await lookupStaffOffice(ctx.userId);
+  if (staffOnly) {
+    return (
+      <AuthProvider>
+        <div className={`${inter.variable} portal min-h-dvh`}>
+          <StaffScorecardFrame>{children}</StaffScorecardFrame>
+        </div>
+      </AuthProvider>
+    );
+  }
 
   const callStatus = ctx.doctor?.onboarding_call_status || 'not_booked';
   const applicationGate = isApplicationFlowEnabled() && ctx.doctor?.id

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePortal } from '@/components/portal/PortalProvider';
+import { getCountryByIso2, getCountryDropdownOptions } from '@/config/countries';
 import {
   referralDoctor,
   referralDoctorForUser,
@@ -10,6 +11,7 @@ import {
   sendPatientReferral,
   starReferralDoctor,
 } from '@/app/(doctor)/doctor/referrals/actions';
+import { formatDistance, referralCountry } from '@/lib/referrals/pure';
 import type { ReferableDoctor } from '@/lib/referrals/search';
 
 type Choice = { city: string; state: string; lat: number; lng: number };
@@ -28,8 +30,9 @@ export default function ReferPatientDrawer({
   onClose: () => void;
 }) {
   const portal = usePortal();
-  const country = portal.doctor?.country || 'US';
+  const homeCountry = referralCountry(portal.doctor?.country || 'US');
   const homeState = portal.doctor?.state || '';
+  const [country, setCountry] = useState(homeCountry);
   const [step, setStep] = useState<1 | 2>(initialDoctorId || initialUserId ? 2 : 1);
   const [query, setQuery] = useState('');
   const [choices, setChoices] = useState<Choice[] | null>(null);
@@ -37,7 +40,9 @@ export default function ReferPatientDrawer({
   const [recent, setRecent] = useState<ReferableDoctor[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [selected, setSelected] = useState<ReferableDoctor | null>(null);
-  const [acceptingOnly, setAcceptingOnly] = useState(true);
+  const [acceptingOnly, setAcceptingOnly] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [note, setNote] = useState('');
   const [specialty, setSpecialty] = useState('');
   const [hints, setHints] = useState<{ city: string; state: string; count: number }[]>([]);
   const [busy, setBusy] = useState(false);
@@ -74,12 +79,10 @@ export default function ReferPatientDrawer({
   }, [initialDoctorId, initialUserId]);
 
   useEffect(() => {
-    if (query.trim().length < 2) {
-      setHints([]);
-      return;
-    }
+    const trimmed = query.trim();
+    if (trimmed.length < 2) return;
     const handle = setTimeout(() => {
-      fetch(`/api/directory/autocomplete?q=${encodeURIComponent(query.trim())}&type=all&country=${encodeURIComponent(country)}`)
+      fetch(`/api/directory/autocomplete?q=${encodeURIComponent(trimmed)}&type=all&country=${encodeURIComponent(country)}`)
         .then((res) => res.json())
         .then((data) => {
           const cities = Array.isArray(data?.cities) ? data.cities : [];
@@ -95,22 +98,29 @@ export default function ReferPatientDrawer({
     return () => clearTimeout(handle);
   }, [query, country, homeState]);
 
+  const visibleHints = query.trim().length < 2 ? [] : hints;
+
   async function runSearch(nextQuery: string, place?: Choice | null) {
     setBusy(true);
     setError('');
     const result = await searchReferralDoctors({
       query: nextQuery,
+      country,
       specialty: specialty.trim() || null,
       acceptingOnly,
       place: place || null,
     });
     setBusy(false);
+    setSearched(true);
     if (!result) {
       setError('Sign in to search.');
+      setNote('');
       return;
     }
     setChoices(result.choices);
     setDoctors(result.doctors);
+    setNote(result.note || '');
+    if (!result.doctors.length && !result.choices?.length && result.label) setNote(result.note || result.label);
   }
 
   async function star(id: string) {
@@ -141,11 +151,12 @@ export default function ReferPatientDrawer({
       consentConfirmed: form.consent,
     });
     setBusy(false);
-    if (!result.success) {
+    if (!result.success || !result.referralId) {
       setError(result.error || 'Could not send.');
+      setSentName('');
       return;
     }
-    setSentName(result.receiverName || doctorTitle(selected));
+    setSentName(result.message || `Sent to ${result.receiverName || doctorTitle(selected)}.`);
   }
 
   const receiver = selected ? doctorTitle(selected) : 'the doctor';
@@ -161,7 +172,7 @@ export default function ReferPatientDrawer({
         </div>
         {sentName ? (
           <div className="bg-white border border-portal-border rounded-xl p-4">
-            <p className="text-[15px] leading-6 text-portal-ink">Sent to {sentName}. We will keep you posted.</p>
+            <p className="text-[15px] leading-6 text-portal-ink">{sentName}</p>
             <button
               type="button"
               className="mt-4 min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold"
@@ -177,17 +188,29 @@ export default function ReferPatientDrawer({
           </div>
         ) : step === 1 ? (
           <div className="space-y-4">
-            <label className="block text-sm font-bold text-portal-ink" htmlFor="referral-search">Search by city or doctor</label>
+            <label className="block text-sm font-bold text-portal-ink" htmlFor="referral-country">Country</label>
+            <select
+              id="referral-country"
+              value={country}
+              onChange={(event) => setCountry(referralCountry(event.target.value))}
+              className="w-full min-h-11 px-3 rounded-lg border border-portal-border text-base bg-white"
+            >
+              <option value="ALL">All countries</option>
+              {getCountryDropdownOptions().map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+            <label className="block text-sm font-bold text-portal-ink" htmlFor="referral-search">Name, city, or postal code</label>
             <input
               id="referral-search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               className="w-full min-h-11 px-3 rounded-lg border border-portal-border text-base bg-white"
-              placeholder="Austin, or a doctor's name"
+              placeholder={country === 'IN' ? 'Mumbai, 110001, or a doctor\'s name' : 'City, postal code, or a doctor\'s name'}
             />
-            {hints.length > 0 ? (
+            {visibleHints.length > 0 ? (
               <ul className="bg-white border border-portal-border rounded-lg">
-                {hints.map((hint) => (
+                {visibleHints.map((hint) => (
                   <li key={`${hint.city}-${hint.state}`}>
                     <button
                       type="button"
@@ -241,6 +264,9 @@ export default function ReferPatientDrawer({
               <ChipRow title="Recent" doctors={recent} onPick={pick} />
             ) : null}
             {error ? <p className="text-sm text-portal-danger">{error}</p> : null}
+            {searched && !busy && doctors.length === 0 && !choices?.length ? (
+              <p className="text-sm text-portal-ink-2">{note || 'No active member matches. Inactive and unapproved doctors are hidden.'}</p>
+            ) : null}
             <ul className="space-y-2">
               {doctors.map((doctor) => (
                 <li key={doctor.id} className="bg-white border border-portal-border rounded-xl p-3">
@@ -248,8 +274,8 @@ export default function ReferPatientDrawer({
                     <div>
                       <p className="text-sm font-bold text-portal-ink">{doctorTitle(doctor)}</p>
                       <p className="text-xs text-portal-muted">
-                        {[doctor.clinicName, doctor.city, doctor.state].filter(Boolean).join(' · ')}
-                        {doctor.distanceMiles != null ? ` · ${doctor.distanceMiles.toFixed(1)} mi` : ''}
+                        {[doctor.clinicName, doctor.city, doctor.state, extraCountry(doctor.country, country)].filter(Boolean).join(' · ')}
+                        {doctor.distanceMiles != null ? ` · ${formatDistance(doctor.distanceMiles, country)}` : ''}
                       </p>
                     </div>
                     <button type="button" className="min-h-11 min-w-11 text-sm font-bold" aria-label={favoriteIds.includes(doctor.id) ? 'Remove favorite' : 'Save favorite'} title="Favorite" onClick={() => star(doctor.id)}>
@@ -266,6 +292,7 @@ export default function ReferPatientDrawer({
         ) : (
           <form onSubmit={submit} className="space-y-3">
             <p className="text-sm text-portal-ink-2">{selected ? `Sending to ${doctorTitle(selected)}` : 'Choose a doctor'}</p>
+            {selected?.unavailableReason ? <p className="text-sm text-portal-danger">{selected.unavailableReason}</p> : null}
             {!selected ? (
               <button type="button" className="min-h-11 text-sm font-bold" onClick={() => setStep(1)}>Pick a doctor</button>
             ) : (
@@ -275,13 +302,14 @@ export default function ReferPatientDrawer({
             <Field label="Last initial" value={form.initial} onChange={(initial) => setForm({ ...form, initial: initial.slice(0, 1) })} required />
             <Field label="Phone" value={form.phone} onChange={(phone) => setForm({ ...form, phone })} required />
             <Field label="Email (optional)" value={form.email} onChange={(email) => setForm({ ...form, email })} />
-            <Field label="ZIP (optional)" value={form.zip} onChange={(zip) => setForm({ ...form, zip })} />
+            <Field label={`${postalLabel(country)} (optional)`} value={form.zip} onChange={(zip) => setForm({ ...form, zip })} />
             <label className="block text-sm font-bold text-portal-ink">
               Why you are referring
               <textarea
                 required
                 value={form.reason}
                 onChange={(event) => setForm({ ...form, reason: event.target.value })}
+                maxLength={2000}
                 className="mt-1 w-full min-h-24 p-3 rounded-lg border border-portal-border text-base"
               />
             </label>
@@ -305,7 +333,7 @@ export default function ReferPatientDrawer({
               {receiver} gets an email right away. You will get an update when they accept, and again when {patient} is scheduled. {patient}&apos;s phone is shared only after {receiver} accepts.
             </p>
             {error ? <p className="text-sm text-portal-danger">{error}</p> : null}
-            <button type="submit" disabled={busy || !selected} className="min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold disabled:opacity-50">
+            <button type="submit" disabled={busy || !selected || Boolean(selected?.unavailableReason)} className="min-h-11 w-full px-4 rounded-lg bg-portal-accent text-white text-sm font-bold disabled:opacity-50">
               {busy ? 'Sending' : 'Send referral'}
             </button>
           </form>
@@ -330,6 +358,16 @@ function ChipRow({ title, doctors, onPick }: { title: string; doctors: Referable
   );
 }
 
+function extraCountry(code: string | null, searchCountry: string): string {
+  if (!code) return '';
+  if (referralCountry(searchCountry) !== 'ALL' && referralCountry(code) === referralCountry(searchCountry)) return '';
+  return getCountryByIso2(referralCountry(code))?.name || '';
+}
+
+function postalLabel(country: string): string {
+  return getCountryByIso2(referralCountry(country))?.postalLabel || 'Postal code';
+}
+
 function Field({ label, value, onChange, required }: { label: string; value: string; onChange: (value: string) => void; required?: boolean }) {
   return (
     <label className="block text-sm font-bold text-portal-ink">
@@ -338,6 +376,8 @@ function Field({ label, value, onChange, required }: { label: string; value: str
         required={required}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        inputMode={label === 'Phone' ? 'tel' : undefined}
+        autoComplete={label === 'Phone' ? 'tel' : label.startsWith('Email') ? 'email' : undefined}
         className="mt-1 w-full min-h-11 px-3 rounded-lg border border-portal-border text-base bg-white"
       />
     </label>

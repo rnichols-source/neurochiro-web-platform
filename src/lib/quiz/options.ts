@@ -1,5 +1,7 @@
 /** Quiz copy, option ids, and legacy maps. Safe to import from unit tests. */
 
+import { postalFieldFor } from '../detect-postal.ts'
+
 export const CONCERN_IDS = ['pain', 'wellness', 'pediatric', 'prenatal', 'stress', 'sports'] as const
 export type ConcernId = (typeof CONCERN_IDS)[number]
 
@@ -9,7 +11,7 @@ export type ExperienceId = (typeof EXPERIENCE_IDS)[number]
 export const PRIORITY_IDS = ['closest', 'specialty', 'new_patients', 'walk_in'] as const
 export type PriorityId = (typeof PRIORITY_IDS)[number]
 
-export const QUIZ_COUNTRIES = ['US', 'CA', 'UK', 'AU', 'NZ'] as const
+export const QUIZ_COUNTRIES = ['US', 'CA', 'UK', 'AU', 'NZ', 'IE', 'IN', 'AE'] as const
 export type QuizCountry = (typeof QUIZ_COUNTRIES)[number]
 
 export const ENTRY_SOURCES = [
@@ -94,6 +96,9 @@ export const COUNTRY_NAMES: Record<QuizCountry, string> = {
   UK: 'the United Kingdom',
   AU: 'Australia',
   NZ: 'New Zealand',
+  IE: 'Ireland',
+  IN: 'India',
+  AE: 'the United Arab Emirates',
 }
 
 export const QUIZ_REQUEST_CONSENT_V1 =
@@ -163,12 +168,10 @@ export function quizCountryFromRegion(code: string | null | undefined): QuizCoun
 }
 
 export function postalField(country: QuizCountry): { label: string; placeholder: string } {
-  switch (country) {
-    case 'US': return { label: 'ZIP code', placeholder: 'e.g. 29601' }
-    case 'CA': return { label: 'Postal code', placeholder: 'e.g. M5V 2T6' }
-    case 'UK': return { label: 'Postcode', placeholder: 'e.g. SW1A 1AA' }
-    case 'AU': return { label: 'Postcode', placeholder: 'e.g. 2000' }
-    case 'NZ': return { label: 'Postcode', placeholder: 'e.g. 6011' }
+  const field = postalFieldFor(country === 'UK' ? 'GB' : country)
+  return {
+    label: field.label.replace(' (optional)', ''),
+    placeholder: field.placeholder.startsWith('e.g.') ? field.placeholder : `e.g. ${field.placeholder}`,
   }
 }
 

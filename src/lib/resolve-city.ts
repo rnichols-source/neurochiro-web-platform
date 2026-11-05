@@ -10,7 +10,9 @@
  */
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { matchesCountryPostal } from '@/lib/referrals/pure'
 import { resolveStateCode } from '@/lib/resolve-state'
+import { detectPostalCode } from '@/lib/detect-postal'
 
 export interface CityResolution {
   city: string
@@ -52,14 +54,18 @@ export async function resolveLocation(
 
   const supabase = createAdminClient()
 
-  // ── ZIP code detection ──
-  const zipMatch = raw.replace(/\s+/g, '').match(/^(\d{5})(?:-\d{4})?$/)
-  if (zipMatch) {
+  // ── Postal code detection (country-aware, including India PIN codes) ──
+  const hint = country === 'UK' ? 'GB' : country
+  let postal = detectPostalCode(raw, hint)
+  if (!postal && /^\d{6}$/.test(raw.replace(/\s+/g, ''))) {
+    postal = detectPostalCode(raw, 'IN')
+  }
+  if (postal) {
     const { data } = await (supabase as any)
       .from('zip_codes')
       .select('city, state, lat, lng')
-      .eq('zip', zipMatch[1])
-      .eq('country', country)
+      .eq('zip', postal.code)
+      .eq('country', postal.country)
       .maybeSingle()
 
     if (data) {
@@ -69,7 +75,47 @@ export async function resolveLocation(
         label: `Showing doctors near ${data.city}, ${data.state}`,
       }
     }
-    return { resolved: null, ambiguous: null, label: `We couldn't find postal code ${zipMatch[1]}.` }
+    if (postal.country !== 'US') {
+      const geo = await nominatimGeocode(raw, postal.country)
+      if (geo) {
+        return {
+          resolved: { city: geo.city || raw, state: geo.state || '', lat: geo.lat, lng: geo.lng },
+          ambiguous: null, confidence: 'approximate' as const,
+          label: `Showing doctors near ${geo.city || raw}${geo.state ? ', ' + geo.state : ''}`,
+        }
+      }
+    }
+    return { resolved: null, ambiguous: null, label: `We couldn't find postal code ${postal.code}.` }
+  }
+
+  // Country postal codes, including India's 6-digit PIN. US ZIP is handled above.
+  const foreignPostal = matchesCountryPostal(raw, country)
+  if (foreignPostal) {
+    const iso = country.toUpperCase() === 'UK' ? 'GB' : country.toUpperCase()
+    const { data } = await (supabase as any)
+      .from('zip_codes')
+      .select('city, state, lat, lng')
+      .eq('zip', foreignPostal)
+      .eq('country', iso)
+      .limit(1)
+    const row = Array.isArray(data) ? data[0] : null
+    if (row && row.lat != null && row.lng != null) {
+      return {
+        resolved: { city: row.city, state: row.state, lat: Number(row.lat), lng: Number(row.lng) },
+        ambiguous: null, confidence: 'exact' as const,
+        label: `Showing doctors near ${row.city}${row.state ? ', ' + row.state : ''}`,
+      }
+    }
+    const geo = await nominatimGeocode(foreignPostal, iso)
+    if (geo && Number.isFinite(geo.lat) && Number.isFinite(geo.lng)) {
+      const displayCity = geo.city || foreignPostal
+      return {
+        resolved: { city: displayCity, state: geo.state || '', lat: geo.lat, lng: geo.lng },
+        ambiguous: null, confidence: 'approximate' as const,
+        label: `Showing doctors near ${displayCity}${geo.state ? ', ' + geo.state : ''}`,
+      }
+    }
+    return { resolved: null, ambiguous: null, label: `We couldn't find postal code ${foreignPostal}.` }
   }
 
   // ── Parse city and state ──
@@ -398,6 +444,7 @@ async function setCachedGeocode(supabase: any, key: string, result: NominatimRes
 
 const ISO_TO_NOMINATIM: Record<string, string> = {
   'US': 'us', 'CA': 'ca', 'GB': 'gb', 'UK': 'gb', 'NZ': 'nz', 'AU': 'au', 'EU': 'de',
+  'RS': 'rs', 'BW': 'bw', 'BO': 'bo', 'LB': 'lb', 'JM': 'jm',
 }
 
 function nominatimCountry(country: string): string {
@@ -411,6 +458,11 @@ function nominatimCountry(country: string): string {
 // Tracks whether Nominatim failed recently to avoid hammering a down service
 let nominatimCircuitOpen = false
 let nominatimCircuitResetAt = 0
+
+/** Geocode a postal code or city when it is not in the zip_codes table. */
+export async function geocodePostalFallback(query: string, country: string): Promise<NominatimResult | null> {
+  return nominatimGeocode(query, country)
+}
 
 async function nominatimGeocode(query: string, country: string = 'US'): Promise<NominatimResult | null> {
   const cc = nominatimCountry(country)

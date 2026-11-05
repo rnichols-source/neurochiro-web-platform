@@ -69,7 +69,7 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
 
   // If locked, show the content with an overlay
   const tierLabel = "Pro";
-  const tierPrice = "$49";
+  const tierPrice = "$99";
 
   return (
     <>
@@ -88,14 +88,15 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
             <h3 className="text-xl font-heading font-black text-neuro-navy mb-2">
               {feature}
             </h3>
-            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            <p className="text-gray-500 text-sm mb-4 leading-relaxed">
               {description || `This tool is available on the ${tierLabel} plan. Upgrade to unlock all practice tools and grow your patient base.`}
             </p>
+            <p className="text-sm font-bold text-neuro-navy mb-4">{tierPrice}/month or $990/year</p>
             <button
               onClick={() => setShowModal(true)}
               className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2"
             >
-              <Zap className="w-4 h-4" /> Unlock for {tierPrice}/mo
+              <Zap className="w-4 h-4" /> Unlock Pro — {tierPrice}/mo
             </button>
             <button
               onClick={() => setShowModal(true)}

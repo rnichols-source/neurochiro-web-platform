@@ -12,13 +12,22 @@ import {
   sentToReceiverEmail,
 } from '@/lib/referrals/emails';
 import {
+  canReceiverSet,
+  canReferrerCancel,
   canSeePatientContact,
+  DECLINE_MAX,
+  isOpenDuplicate,
+  limitText,
+  NOTE_MAX,
   patientLabel,
   planReminders,
+  referralCountry,
+  referralSaveMessage,
   shouldSendPatientIntro,
+  validateReferralDraft,
   type ReminderKind,
 } from '@/lib/referrals/pure';
-import { searchReferableDoctors, type ReferableDoctor, type ReferralSearchResult } from '@/lib/referrals/search';
+import { receiverBlockReason, searchReferableDoctors, type ReferableDoctor, type ReferralSearchResult } from '@/lib/referrals/search';
 
 const BASE_COLUMNS = 'id, referring_doctor_id, receiving_doctor_id, patient_first_name, patient_last_initial, patient_phone, patient_email, patient_city, patient_zip, reason, urgency, consent_confirmed, status, decline_reason, created_at, responded_at, expires_at';
 const V2_COLUMNS = `${BASE_COLUMNS}, viewed_at, contacted_at, scheduled_at, scheduled_for, cancelled_at, thank_you_note, patient_intro_sent_at, receiver_reminder_1_at, receiver_reminder_2_at, referrer_nudge_at`;
@@ -117,6 +126,27 @@ async function emailForUser(admin: any, userId: string | null): Promise<string |
   return data?.email || null;
 }
 
+async function notifyDoctor(admin: any, userId: string | null, title: string, body: string, link: string, priority: 'info' | 'urgent' = 'info'): Promise<boolean> {
+  if (!userId) return false;
+  const inserted = await admin.from('notifications').insert({
+    user_id: userId,
+    title,
+    body,
+    type: 'referral',
+    link,
+    priority,
+  });
+  if (inserted.error) {
+    console.error('[referrals] notification failed', inserted.error.code || 'unknown');
+    return false;
+  }
+  return true;
+}
+
+function wroteRow(result: { error?: { code?: string } | null; data?: { id?: string } | null }): boolean {
+  return !result.error && Boolean(result.data?.id);
+}
+
 async function sendOnce(admin: any, referralId: string, kind: string, v2: boolean, to: string | null, build: () => { subject: string; html: string }) {
   if (!to || !process.env.RESEND_API_KEY) return false;
   let claimed = false;
@@ -168,9 +198,15 @@ export async function listMyReferrals(): Promise<{ sent: ReferralRow[]; received
   const v2 = await referralsV2(admin);
   const supabase = createServerSupabase() as any;
   const columns = v2 ? V2_COLUMNS : BASE_COLUMNS;
+  const loadSide = async (doctorColumn: 'referring_doctor_id' | 'receiving_doctor_id') => {
+    const firstTry = await supabase.from('doctor_referrals_safe').select(columns).eq(doctorColumn, me.doctorId).order('created_at', { ascending: false }).limit(100);
+    if (!firstTry.error) return firstTry;
+    if (columns === BASE_COLUMNS) return firstTry;
+    return supabase.from('doctor_referrals_safe').select(BASE_COLUMNS).eq(doctorColumn, me.doctorId).order('created_at', { ascending: false }).limit(100);
+  };
   const [sentRes, receivedRes] = await Promise.all([
-    supabase.from('doctor_referrals_safe').select(columns).eq('referring_doctor_id', me.doctorId).order('created_at', { ascending: false }).limit(100),
-    supabase.from('doctor_referrals_safe').select(columns).eq('receiving_doctor_id', me.doctorId).order('created_at', { ascending: false }).limit(100),
+    loadSide('referring_doctor_id'),
+    loadSide('receiving_doctor_id'),
   ]);
   if (sentRes.error || receivedRes.error) {
     console.error('[referrals] list failed');
@@ -192,7 +228,13 @@ export async function getReferral(id: string): Promise<{ row: ReferralRow; v2: b
   const admin = createAdminClient() as any;
   const v2 = await referralsV2(admin);
   const supabase = createServerSupabase() as any;
-  const { data, error } = await supabase.from('doctor_referrals_safe').select(v2 ? V2_COLUMNS : BASE_COLUMNS).eq('id', id).maybeSingle();
+  const columns = v2 ? V2_COLUMNS : BASE_COLUMNS;
+  let { data, error } = await supabase.from('doctor_referrals_safe').select(columns).eq('id', id).maybeSingle();
+  if (error && columns !== BASE_COLUMNS) {
+    const again = await supabase.from('doctor_referrals_safe').select(BASE_COLUMNS).eq('id', id).maybeSingle();
+    data = again.data;
+    error = again.error;
+  }
   if (error || !data) return null;
   const names = await namesFor(admin, [data.referring_doctor_id, data.receiving_doctor_id]);
   return { row: decorate(data as ReferralRow, me, names), v2, viewerDoctorId: me.doctorId };
@@ -214,6 +256,7 @@ export async function markViewed(id: string): Promise<void> {
 
 export async function searchForCurrentDoctor(input: {
   query: string;
+  country?: string;
   specialty?: string | null;
   acceptingOnly?: boolean;
   place?: { city: string; state: string; lat: number; lng: number } | null;
@@ -222,7 +265,7 @@ export async function searchForCurrentDoctor(input: {
   if (!me) return null;
   return searchReferableDoctors({
     query: input.query,
-    country: me.country || 'US',
+    country: referralCountry(input.country || me.country || 'US'),
     selfDoctorId: me.doctorId,
     specialty: input.specialty,
     acceptingOnly: input.acceptingOnly,
@@ -236,6 +279,7 @@ export async function loadDoctorCard(doctorId: string): Promise<ReferableDoctor 
   const admin = createAdminClient() as any;
   const { data } = await admin.from('doctors').select('id, user_id, first_name, last_name, clinic_name, city, state, country, slug, photo_url, specialties, accepting_new_patients').eq('id', doctorId).maybeSingle();
   if (!data) return null;
+  const blocked = await receiverBlockReason(admin, doctorId, me.doctorId);
   return {
     id: data.id,
     userId: data.user_id,
@@ -250,6 +294,7 @@ export async function loadDoctorCard(doctorId: string): Promise<ReferableDoctor 
     specialties: data.specialties || [],
     distanceMiles: null,
     acceptingNewPatients: Boolean(data.accepting_new_patients),
+    unavailableReason: blocked,
   };
 }
 
@@ -362,20 +407,27 @@ export async function submitReferral(input: {
   reason: string;
   urgency: 'routine' | 'urgent';
   consentConfirmed: boolean;
-}): Promise<{ success: boolean; error?: string; referralId?: string; receiverName?: string }> {
+}): Promise<{ success: boolean; error?: string; referralId?: string; receiverName?: string; message?: string }> {
   const me = await currentDoctor();
   if (!me) return { success: false, error: 'Sign in to refer.' };
-  if (!input.consentConfirmed) return { success: false, error: 'Patient consent is required.' };
-  const first = input.patientFirstName.trim();
-  const initial = input.patientLastInitial.trim().charAt(0).toUpperCase();
-  const phone = input.patientPhone.trim();
-  const reason = input.reason.trim();
-  if (!first || !initial || !phone || !reason) return { success: false, error: 'Add the first name, last initial, phone, and why you are referring.' };
-  if (input.receivingDoctorId === me.doctorId) return { success: false, error: 'Pick another doctor.' };
+  const draft = validateReferralDraft({ ...input, selfDoctorId: me.doctorId });
+  if (!draft.ok) return { success: false, error: draft.error };
+  const { first, initial, phone, email, zip, reason, urgency } = draft.value;
 
   const admin = createAdminClient() as any;
+  const blocked = await receiverBlockReason(admin, input.receivingDoctorId, me.doctorId);
+  if (blocked) return { success: false, error: blocked };
   const receiver = await loadParty(admin, input.receivingDoctorId);
-  if (!receiver) return { success: false, error: 'That doctor was not found.' };
+  if (!receiver?.user_id) return { success: false, error: 'That doctor cannot receive referrals yet.' };
+  const open = await admin.from('doctor_referrals')
+    .select('patient_phone, status')
+    .eq('referring_doctor_id', me.doctorId)
+    .eq('receiving_doctor_id', input.receivingDoctorId)
+    .in('status', ['pending', 'sent', 'viewed'])
+    .limit(20);
+  if (!open.error && isOpenDuplicate(open.data || [], phone)) {
+    return { success: false, error: 'You already sent this patient to that doctor. Wait until they reply, or cancel the open referral.' };
+  }
   const v2 = await referralsV2(admin);
   const supabase = createServerSupabase() as any;
   const now = new Date();
@@ -385,41 +437,52 @@ export async function submitReferral(input: {
     patient_first_name: first,
     patient_last_initial: initial,
     patient_phone: phone,
-    patient_email: input.patientEmail?.trim() || null,
-    patient_zip: input.patientZip?.trim() || null,
+    patient_email: email,
+    patient_zip: zip,
     reason,
-    urgency: input.urgency === 'urgent' ? 'urgent' : 'routine',
+    urgency,
     consent_confirmed: true,
     status: v2 ? 'sent' : 'pending',
     created_at: now.toISOString(),
   };
   if (v2) row.expires_at = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
   const inserted = await supabase.from('doctor_referrals').insert(row).select('id').single();
-  if (inserted.error || !inserted.data) return { success: false, error: 'Could not send that referral.' };
+  if (inserted.error?.code === '23505') {
+    return { success: false, error: 'You already sent this patient to that doctor. Wait until they reply, or cancel the open referral.' };
+  }
+  if (inserted.error || !inserted.data?.id) return { success: false, error: 'Could not send that referral.' };
 
   const id = inserted.data.id as string;
   const threadId = await noteReferralThread(id, 'sent');
   const to = await emailForUser(admin, receiver.user_id);
   const referrerName = `Dr. ${me.firstName} ${me.lastName}`.trim();
-  await sendOnce(admin, id, 'sent', v2, to, () => sentToReceiverEmail({
+  const receiverName = doctorName(receiver);
+  const emailed = await sendOnce(admin, id, 'sent', v2, to, () => sentToReceiverEmail({
     id,
     referrerName,
     patientFirst: first,
     patientInitial: initial,
     reason,
-    urgency: input.urgency,
+    urgency,
     messageUrl: threadId ? `https://neurochiro.co/doctor/messages?c=${threadId}` : null,
   }));
-  if (receiver.user_id) {
-    await admin.from('notifications').insert({
-      user_id: receiver.user_id,
-      title: 'New referral',
-      body: `${patientLabel(first, initial)} was referred to you.`,
-      type: 'referral',
-      link: `/doctor/referrals/${id}`,
-    }).then(() => {}).catch(() => {});
+  const inPortal = await notifyDoctor(
+    admin,
+    receiver.user_id,
+    'New referral',
+    `${patientLabel(first, initial)} was referred to you.`,
+    `/doctor/referrals/${id}`,
+    urgency === 'urgent' ? 'urgent' : 'info',
+  );
+  if (emailed || inPortal) {
+    await admin.from('doctor_referrals').update({ notified_at: new Date().toISOString() }).eq('id', id);
   }
-  return { success: true, referralId: id, receiverName: doctorName(receiver) };
+  return {
+    success: true,
+    referralId: id,
+    receiverName,
+    message: referralSaveMessage({ receiverName, emailed, inPortal }),
+  };
 }
 
 async function ownReferral(id: string): Promise<{ me: Me; row: ReferralRow; v2: boolean; admin: any } | null> {
@@ -433,12 +496,13 @@ export async function acceptReferral(id: string): Promise<{ success: boolean; er
   const ctx = await ownReferral(id);
   if (!ctx) return { success: false, error: 'Referral not found.' };
   if (ctx.row.receiving_doctor_id !== ctx.me.doctorId) return { success: false, error: 'Only the receiving doctor can accept.' };
+  if (!canReceiverSet(ctx.row.status, 'accepted')) return { success: false, error: 'This referral was already updated.' };
   const supabase = createServerSupabase() as any;
   const updated = await supabase.from('doctor_referrals').update({
     status: 'accepted',
     responded_at: new Date().toISOString(),
-  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId).select('id').maybeSingle();
-  if (updated.error) return { success: false, error: 'Could not accept this referral.' };
+  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId).in('status', ['pending', 'sent', 'viewed']).select('id').maybeSingle();
+  if (!wroteRow(updated)) return { success: false, error: 'Could not accept this referral.' };
 
   const referrer = await loadParty(ctx.admin, ctx.row.referring_doctor_id);
   const receiver = await loadParty(ctx.admin, ctx.me.doctorId);
@@ -470,6 +534,13 @@ export async function acceptReferral(id: string): Promise<{ success: boolean; er
     }
   }
   await noteReferralThread(id, 'accepted');
+  await notifyDoctor(
+    ctx.admin,
+    referrer?.user_id || null,
+    'Referral accepted',
+    `${doctorName(receiver)} accepted ${patientLabel(ctx.row.patient_first_name, ctx.row.patient_last_initial)}.`,
+    `/doctor/referrals/${id}`,
+  );
   return { success: true };
 }
 
@@ -477,13 +548,16 @@ export async function declineReferral(id: string, reason: string): Promise<{ suc
   const ctx = await ownReferral(id);
   if (!ctx) return { success: false, error: 'Referral not found.' };
   if (ctx.row.receiving_doctor_id !== ctx.me.doctorId) return { success: false, error: 'Only the receiving doctor can decline.' };
+  if (!canReceiverSet(ctx.row.status, 'declined')) return { success: false, error: 'This referral was already updated.' };
+  const limited = limitText(reason, DECLINE_MAX);
+  if (!limited.ok) return { success: false, error: limited.error };
   const supabase = createServerSupabase() as any;
   const updated = await supabase.from('doctor_referrals').update({
     status: 'declined',
-    decline_reason: reason.trim() || null,
+    decline_reason: limited.value || null,
     responded_at: new Date().toISOString(),
-  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId);
-  if (updated.error) return { success: false, error: 'Could not decline this referral.' };
+  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId).in('status', ['pending', 'sent', 'viewed']).select('id').maybeSingle();
+  if (!wroteRow(updated)) return { success: false, error: 'Could not decline this referral.' };
   const referrer = await loadParty(ctx.admin, ctx.row.referring_doctor_id);
   const to = await emailForUser(ctx.admin, referrer?.user_id || null);
   await sendOnce(ctx.admin, id, 'declined', ctx.v2, to, () => declinedToReferrerEmail({
@@ -491,9 +565,16 @@ export async function declineReferral(id: string, reason: string): Promise<{ suc
     receiverName: `Dr. ${ctx.me.firstName} ${ctx.me.lastName}`.trim(),
     patientFirst: ctx.row.patient_first_name,
     patientInitial: ctx.row.patient_last_initial,
-    reason: reason.trim(),
+    reason: limited.value,
   }));
   await noteReferralThread(id, 'declined');
+  await notifyDoctor(
+    ctx.admin,
+    referrer?.user_id || null,
+    'Referral declined',
+    `${`Dr. ${ctx.me.firstName} ${ctx.me.lastName}`.trim()} declined ${patientLabel(ctx.row.patient_first_name, ctx.row.patient_last_initial)}.`,
+    `/doctor/referrals/${id}`,
+  );
   return { success: true };
 }
 
@@ -502,12 +583,21 @@ export async function markContacted(id: string): Promise<{ success: boolean; err
   if (!ctx) return { success: false, error: 'Referral not found.' };
   if (!ctx.v2) return { success: false, error: 'This step opens after the referrals update.' };
   if (ctx.row.receiving_doctor_id !== ctx.me.doctorId) return { success: false, error: 'Only the receiving doctor can update this.' };
+  if (!canReceiverSet(ctx.row.status, 'patient_contacted')) return { success: false, error: 'Accept the referral before you mark it called.' };
   const supabase = createServerSupabase() as any;
   const updated = await supabase.from('doctor_referrals').update({
     status: 'patient_contacted',
     contacted_at: new Date().toISOString(),
-  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId);
-  if (updated.error) return { success: false, error: 'Could not update this referral.' };
+  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId).eq('status', 'accepted').select('id').maybeSingle();
+  if (!wroteRow(updated)) return { success: false, error: 'Could not update this referral.' };
+  const referrer = await loadParty(ctx.admin, ctx.row.referring_doctor_id);
+  await notifyDoctor(
+    ctx.admin,
+    referrer?.user_id || null,
+    'Patient called',
+    `${`Dr. ${ctx.me.firstName} ${ctx.me.lastName}`.trim()} called ${patientLabel(ctx.row.patient_first_name, ctx.row.patient_last_initial)}.`,
+    `/doctor/referrals/${id}`,
+  );
   return { success: true };
 }
 
@@ -516,23 +606,33 @@ export async function markScheduled(id: string, scheduledFor: string | null, not
   if (!ctx) return { success: false, error: 'Referral not found.' };
   if (!ctx.v2) return { success: false, error: 'This step opens after the referrals update.' };
   if (ctx.row.receiving_doctor_id !== ctx.me.doctorId) return { success: false, error: 'Only the receiving doctor can update this.' };
+  if (!canReceiverSet(ctx.row.status, 'scheduled')) return { success: false, error: 'Accept the referral before you mark it booked.' };
+  const limited = limitText(note, NOTE_MAX);
+  if (!limited.ok) return { success: false, error: limited.error };
   const supabase = createServerSupabase() as any;
   const updated = await supabase.from('doctor_referrals').update({
     status: 'scheduled',
     scheduled_at: new Date().toISOString(),
     scheduled_for: scheduledFor || null,
-    thank_you_note: note.trim() || null,
-  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId);
-  if (updated.error) return { success: false, error: 'Could not update this referral.' };
+    thank_you_note: limited.value || null,
+  }).eq('id', id).eq('receiving_doctor_id', ctx.me.doctorId).in('status', ['accepted', 'patient_contacted']).select('id').maybeSingle();
+  if (!wroteRow(updated)) return { success: false, error: 'Could not update this referral.' };
   const referrer = await loadParty(ctx.admin, ctx.row.referring_doctor_id);
   const to = await emailForUser(ctx.admin, referrer?.user_id || null);
   await sendOnce(ctx.admin, id, 'booked', ctx.v2, to, () => bookedThankYouEmail({
     receiverName: `Dr. ${ctx.me.firstName} ${ctx.me.lastName}`.trim(),
     patientFirst: ctx.row.patient_first_name,
     patientInitial: ctx.row.patient_last_initial,
-    note: note.trim() || null,
+    note: limited.value || null,
   }));
   await noteReferralThread(id, 'booked');
+  await notifyDoctor(
+    ctx.admin,
+    referrer?.user_id || null,
+    'Visit booked',
+    `${patientLabel(ctx.row.patient_first_name, ctx.row.patient_last_initial)} is booked.`,
+    `/doctor/referrals/${id}`,
+  );
   return { success: true };
 }
 
@@ -541,12 +641,21 @@ export async function cancelReferral(id: string): Promise<{ success: boolean; er
   if (!ctx) return { success: false, error: 'Referral not found.' };
   if (!ctx.v2) return { success: false, error: 'Cancel opens after the referrals update.' };
   if (ctx.row.referring_doctor_id !== ctx.me.doctorId) return { success: false, error: 'Only the referring doctor can cancel.' };
+  if (!canReferrerCancel(ctx.row.status)) return { success: false, error: 'This referral can no longer be cancelled.' };
   const supabase = createServerSupabase() as any;
   const updated = await supabase.from('doctor_referrals').update({
     status: 'cancelled',
     cancelled_at: new Date().toISOString(),
-  }).eq('id', id).eq('referring_doctor_id', ctx.me.doctorId);
-  if (updated.error) return { success: false, error: 'Could not cancel this referral.' };
+  }).eq('id', id).eq('referring_doctor_id', ctx.me.doctorId).in('status', ['pending', 'sent', 'viewed']).select('id').maybeSingle();
+  if (!wroteRow(updated)) return { success: false, error: 'Could not cancel this referral.' };
+  const receiver = await loadParty(ctx.admin, ctx.row.receiving_doctor_id);
+  await notifyDoctor(
+    ctx.admin,
+    receiver?.user_id || null,
+    'Referral cancelled',
+    `${`Dr. ${ctx.me.firstName} ${ctx.me.lastName}`.trim()} cancelled a referral.`,
+    `/doctor/referrals/${id}`,
+  );
   return { success: true };
 }
 

@@ -39,7 +39,7 @@ const sourceSchema = z.preprocess(mapSource, z.enum(ENTRY_SOURCES))
 export const matchInputSchema = z.object({
   concern: z.enum(CONCERN_IDS),
   country: z.enum(QUIZ_COUNTRIES),
-  postal: z.string().trim().max(10).optional().default(''),
+  postal: z.string().trim().max(16).optional().default(''),
   city: z.string().trim().max(80).optional().default(''),
   region: z.string().trim().max(40).optional().default(''),
   experience: experienceSchema,
@@ -89,7 +89,7 @@ export const requestInputSchema = z.object({
 export const emailResultsInputSchema = z.object({
   email: z.string().trim().max(120),
   country: z.enum(QUIZ_COUNTRIES),
-  postal: z.string().trim().max(10),
+  postal: z.string().trim().max(16),
   doctorIds: z.array(z.string().uuid()).max(6),
   consent: z.literal(true),
   alerts: z.boolean(),
