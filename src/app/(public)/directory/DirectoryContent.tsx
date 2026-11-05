@@ -12,6 +12,8 @@ import FiltersSheet from "@/components/directory/FiltersSheet";
 import ResultsList from "@/components/directory/ResultsList";
 import ViewTogglePill from "@/components/directory/ViewTogglePill";
 import MapPeekCard, { type PeekDoctor } from "@/components/directory/MapPeekCard";
+import { fill } from "@/i18n/config";
+import { useDictionary } from "@/i18n/locale-context";
 
 const GlobalNetworkMap = dynamic(() => import("@/components/map/GlobalNetworkMap"), { ssr: false });
 
@@ -22,6 +24,7 @@ export default function DirectoryContent({
   initialData: { doctors: DirectoryDoctor[]; total: number };
   forcedRegion?: RegionCode;
 }) {
+  const t = useDictionary();
   const search = useDirectorySearch({ initialDoctors: initialData.doctors, forcedRegion });
   const [countryOpen, setCountryOpen] = useState(false);
 
@@ -37,7 +40,7 @@ export default function DirectoryContent({
   const [searchArea, setSearchArea] = useState<[number, number, number, number] | null>(null);
   const [showArea, setShowArea] = useState(false);
 
-  const summary = `📍 ${search.location || search.countryInfo.label} · ${search.doctors.length} doctors · Filters`;
+  const summary = `📍 ${fill(t.directory.summary, { place: search.location || search.countryInfo.label, count: search.doctors.length })}`;
 
   const header = (
     <SearchHeader
@@ -80,9 +83,9 @@ export default function DirectoryContent({
     >
       {search.showHero ? (
         <div className="rounded-3xl bg-[#1c1c1e] p-5 text-white">
-          <h1 className="text-2xl font-bold">Find a nervous-system chiropractor near you</h1>
+          <h1 className="text-2xl font-bold">{t.directory.heroTitle}</h1>
           <button type="button" onClick={search.useMyLocation} className="mt-4 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-neuro-orange text-base font-bold">
-            📍 {search.locating ? "Finding you..." : "Use my location"}
+            📍 {search.locating ? t.directory.finding : t.directory.useLocation}
           </button>
           {search.geoMessage && <p className="mt-3 text-sm text-white/80">{search.geoMessage}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
@@ -123,7 +126,7 @@ export default function DirectoryContent({
         listDoctors={search.doctors}
         highlightedDoctorId={hoveredId}
         userLocation={search.locationSource === "gps" ? search.coords : null}
-        emptyLabel={search.hasSearched && search.doctors.length === 0 ? "No doctors in this area yet" : ""}
+        emptyLabel={search.hasSearched && search.doctors.length === 0 ? t.directory.mapEmpty : ""}
         onMarkerClick={(doctor) => {
           setPeek({
             name: typeof doctor.name === "string" ? doctor.name : undefined,
@@ -148,7 +151,7 @@ export default function DirectoryContent({
           onClick={() => { search.searchThisArea(searchArea); setShowArea(false); }}
           className="absolute left-1/2 top-4 z-20 min-h-11 -translate-x-1/2 rounded-full bg-white px-4 text-sm font-bold text-neuro-navy"
         >
-          Search this area
+          {t.directory.searchArea}
         </button>
       )}
       {peek && <MapPeekCard doctor={peek} unit={search.distanceUnit} onClose={() => setPeek(null)} />}
@@ -185,7 +188,7 @@ export default function DirectoryContent({
       {search.toast && (
         <div className="fixed bottom-24 left-1/2 z-[230] flex -translate-x-1/2 items-center gap-3 rounded-full bg-white px-4 py-3 text-sm font-bold text-neuro-navy shadow-lg" role="status">
           <span>{search.toast} · </span>
-          <button type="button" onClick={search.undoToast} className="min-h-11 text-neuro-orange">Undo</button>
+          <button type="button" onClick={search.undoToast} className="min-h-11 text-neuro-orange">{t.directory.undo}</button>
         </div>
       )}
     </>

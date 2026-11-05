@@ -50,6 +50,11 @@ const nextConfig: NextConfig = {
         destination: '/chiropractor/:path*',
         permanent: true,
       },
+      {
+        source: '/fr/directory/city/:path*',
+        destination: '/fr/chiropractor/:path*',
+        permanent: true,
+      },
       { source: '/student/career-pipeline', destination: '/student/dashboard', permanent: false },
       { source: '/student/mentors', destination: '/student/doctors', permanent: false },
       {

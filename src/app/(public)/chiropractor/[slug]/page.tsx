@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { MapPin, ArrowRight, CheckCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -6,6 +5,10 @@ import { slugToCity, STATE_NAMES, getCityCoords } from "@/lib/city-data";
 import { getDoctorsNearCity, getNearestDoctors, getNearbyCityPages, type CityDoctor } from "../actions";
 import { formatDistance } from "@/lib/geo";
 import Footer from "@/components/landing/Footer";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill } from "@/i18n/config";
+import { languageAlternates, publicUrl } from "@/i18n/alternates";
+import { getRequestDictionary } from "@/i18n/get-locale";
 import FindSomeoneForm from "./FindSomeoneForm";
 import CityDoctorCard from "./CityDoctorCard";
 
@@ -19,18 +22,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { city, state } = parsed;
   const stateName = STATE_NAMES[state] || state;
   const location = `${city}, ${stateName}`;
+  const { locale, t } = await getRequestDictionary();
+  const title = fill(t.city.title, { location });
+  const description = fill(t.city.description, { location });
+  const alternates = languageAlternates(`/chiropractor/${slug}`, locale);
 
   return {
-    title: `Nervous System Chiropractor in ${location} | NeuroChiro`,
-    description: `Find a nervous system chiropractor near ${location}. Browse verified doctors who focus on your nervous system, not just pain. Book online or call today.`,
+    title,
+    description,
     openGraph: {
-      title: `Nervous System Chiropractor in ${location}`,
-      description: `Find a nervous system chiropractor near ${location}. Verified doctors, real profiles, book directly.`,
-      url: `https://www.neurochiro.co/chiropractor/${slug}`,
+      title: fill(t.city.ogTitle, { location }),
+      description: fill(t.city.ogDescription, { location }),
+      url: String(alternates.canonical),
     },
-    alternates: {
-      canonical: `https://www.neurochiro.co/chiropractor/${slug}`,
-    },
+    alternates,
   };
 }
 
@@ -41,6 +46,8 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
   const { city, state } = parsed;
   const stateName = STATE_NAMES[state] || state;
   const location = `${city}, ${stateName}`;
+  const { locale, t } = await getRequestDictionary();
+  const distanceUnit = locale === "fr" ? "km" as const : "mi" as const;
 
   // Get city center from static lookup (geocoded city centers, not doctor addresses)
   const coords = getCityCoords(slug);
@@ -80,9 +87,9 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
   const pageJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'MedicalWebPage',
-    name: `Nervous System Chiropractor in ${location}`,
-    url: `https://neurochiro.co/chiropractor/${slug}`,
-    description: `Find a nervous system chiropractor near ${location}.`,
+    name: fill(t.city.jsonName, { location }),
+    url: locale === "fr" ? publicUrl(`/chiropractor/${slug}`, "fr") : `https://neurochiro.co/chiropractor/${slug}`,
+    description: fill(t.city.jsonDescription, { location }),
     about: { '@type': 'MedicalSpecialty', name: 'Chiropractic' },
   };
 
@@ -91,7 +98,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
       '@context': 'https://schema.org',
       '@type': ['LocalBusiness', 'Physician'],
       name: doc.clinic_name || `Dr. ${doc.first_name} ${doc.last_name}`,
-      url: `https://neurochiro.co/directory/${doc.slug}`,
+      url: locale === "fr" ? publicUrl(`/directory/${doc.slug}`, "fr") : `https://neurochiro.co/directory/${doc.slug}`,
       ...(doc.phone && { telephone: doc.phone }),
       ...(doc.website_url && { url: doc.website_url }),
       address: {
@@ -141,15 +148,16 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
             <span className="text-neuro-orange text-sm font-bold uppercase tracking-widest">{location}</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-heading font-black text-white leading-tight mb-4">
-            {hasLocalDoctors
-              ? <>Find a Nervous System Chiropractor in <span className="text-neuro-orange">{city}</span></>
-              : <>No Nervous System Chiropractor in <span className="text-neuro-orange">{city}</span> Yet</>
-            }
+            <CityHeading template={hasLocalDoctors ? t.city.h1 : t.city.h1Empty} city={city} />
           </h1>
           <p className="text-white/50 max-w-xl mx-auto">
             {hasLocalDoctors
-              ? `${nearbyDoctors.length} verified ${nearbyDoctors.length === 1 ? 'doctor' : 'doctors'} within 30 miles of ${city}. Every doctor on NeuroChiro focuses on your nervous system, not just pain.`
-              : `We're growing the network in ${stateName}. Here's what you can do right now.`
+              ? fill(t.city.withDoctors, {
+                  count: nearbyDoctors.length,
+                  doctors: nearbyDoctors.length === 1 ? t.city.doctor : t.city.doctors,
+                  city,
+                })
+              : fill(t.city.growing, { state: stateName })
             }
           </p>
         </div>
@@ -172,8 +180,8 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
             {/* 1. Nearest doctors with real distances */}
             {nearestDoctors.length > 0 && (
               <div className="mb-10">
-                <h2 className="text-xl font-heading font-black text-neuro-navy mb-2">Nearest Doctors to {city}</h2>
-                <p className="text-gray-500 text-sm mb-4">These are the closest nervous system chiropractors we have right now.</p>
+                <h2 className="text-xl font-heading font-black text-neuro-navy mb-2">{fill(t.city.nearestTitle, { city })}</h2>
+                <p className="text-gray-500 text-sm mb-4">{t.city.nearestBody}</p>
                 <div className="space-y-3">
                   {nearestDoctors.map((doc) => (
                     <Link key={doc.id} href={`/directory/${doc.slug}`} className="block">
@@ -190,8 +198,8 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                           <p className="text-xs text-gray-500">{doc.clinic_name} &middot; {doc.city}, {doc.state}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <span className="text-neuro-orange font-bold text-sm">{formatDistance(doc.distance_miles)}</span>
-                          <p className="text-[10px] text-gray-400">from {city}</p>
+                          <span className="text-neuro-orange font-bold text-sm">{formatDistance(doc.distance_miles, distanceUnit)}</span>
+                          <p className="text-[10px] text-gray-400">{fill(t.city.fromCity, { city })}</p>
                         </div>
                       </div>
                     </Link>
@@ -202,23 +210,23 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
 
             {/* 2. Patient waitlist signup */}
             <div className="bg-neuro-navy rounded-2xl p-8 mb-10">
-              <h2 className="text-lg font-heading font-black text-white mb-2">Get notified when a doctor joins {city}</h2>
+              <h2 className="text-lg font-heading font-black text-white mb-2">{fill(t.city.notifyTitle, { city })}</h2>
               <p className="text-white/50 text-sm mb-4">
-                Join the patient list. We'll email you the moment a nervous system chiropractor joins near your area.
+                {t.city.notifyBody}
               </p>
               <Link
                 href={`/list?source=city_page&zip=`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors text-sm min-h-[44px]"
               >
-                Join the Waitlist <ArrowRight className="w-4 h-4" />
+                {t.city.waitlist} <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
             {/* 3. Help me find someone */}
             <div className="bg-white rounded-2xl border border-gray-100 p-8 mb-10">
-              <h2 className="text-lg font-heading font-black text-neuro-navy mb-2">Let me help you find someone</h2>
+              <h2 className="text-lg font-heading font-black text-neuro-navy mb-2">{t.city.helpTitle}</h2>
               <p className="text-gray-500 text-sm mb-4">
-                I know chiropractors who aren't on the directory yet. Tell me where you are and I'll personally look into whether I can make an introduction.
+                {t.city.helpBody}
               </p>
               <FindSomeoneForm city={city} state={state} />
             </div>
@@ -228,25 +236,25 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
         {/* What is nervous system chiropractic */}
         <div className="bg-white rounded-2xl border border-gray-100 p-8 mb-8">
           <h2 className="text-xl font-heading font-black text-neuro-navy mb-4">
-            What Is Nervous System Chiropractic?
+            {t.city.whatTitle}
           </h2>
           <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
-            <p>Your brain and spinal cord control every function in your body. A nervous system chiropractor focuses on how well that system is communicating, not just whether something hurts.</p>
-            <p>Doctors in the NeuroChiro directory use specific adjustments to reduce interference in your nervous system. The goal is better function across everything your body does: sleep, digestion, immune response, stress recovery, and yes, pain.</p>
-            <p>This is different from a chiropractor who only addresses the spot that hurts. It's a whole-body approach, and the results patients report go well beyond pain relief.</p>
+            <p>{t.city.what1}</p>
+            <p>{t.city.what2}</p>
+            <p>{t.city.what3}</p>
           </div>
         </div>
 
         {/* What to expect */}
         <div className="bg-white rounded-2xl border border-gray-100 p-8 mb-8">
           <h2 className="text-xl font-heading font-black text-neuro-navy mb-4">
-            What to Expect at Your First Visit
+            {t.city.expectTitle}
           </h2>
           <div className="grid md:grid-cols-3 gap-4">
             {[
-              { n: '1', title: 'Consultation', desc: 'Your doctor listens to your health history, your concerns, and what you want to achieve. No rushing.' },
-              { n: '2', title: 'Examination', desc: 'A thorough check of your spine and nervous system. Many doctors use scanning technology to show you exactly where your body is stressed.' },
-              { n: '3', title: 'Your plan', desc: 'Based on the findings, your doctor explains what they found and recommends a care plan specific to you.' },
+              { n: '1', title: t.city.expect1Title, desc: t.city.expect1 },
+              { n: '2', title: t.city.expect2Title, desc: t.city.expect2 },
+              { n: '3', title: t.city.expect3Title, desc: t.city.expect3 },
             ].map((step) => (
               <div key={step.n} className="bg-neuro-cream rounded-xl p-5">
                 <div className="text-2xl font-black text-neuro-orange mb-2">{step.n}</div>
@@ -260,14 +268,14 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
         {/* FAQ */}
         <div className="bg-white rounded-2xl border border-gray-100 p-8 mb-8">
           <h2 className="text-xl font-heading font-black text-neuro-navy mb-4">
-            Questions People Ask
+            {t.city.questions}
           </h2>
           <div className="space-y-4">
             {[
-              { q: `How do I find a nervous system chiropractor near ${city}?`, a: `Browse the doctors listed on this page, or search the full NeuroChiro directory. Every doctor listed has been reviewed and focuses on nervous system care.` },
-              { q: 'Do I need a referral?', a: 'No. You can contact any doctor on this page directly. Most accept new patients without a referral.' },
-              { q: 'Does insurance cover this?', a: 'Many insurance plans cover chiropractic. Coverage varies by plan and provider. Contact the office directly to verify your benefits before your first visit.' },
-              { q: 'Is this different from regular chiropractic?', a: 'Yes. Nervous system chiropractors focus on how your brain communicates with your body through the spine. The goal is better overall function, not just pain relief.' },
+              { q: fill(t.city.q1, { city }), a: t.city.a1 },
+              { q: t.city.q2, a: t.city.a2 },
+              { q: t.city.q3, a: t.city.a3 },
+              { q: t.city.q4, a: t.city.a4 },
             ].map((faq, i) => (
               <div key={i}>
                 <h3 className="font-bold text-neuro-navy text-sm">{faq.q}</h3>
@@ -279,10 +287,10 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
 
         {/* Doctor CTA */}
         <div className="bg-neuro-navy rounded-2xl p-8 text-center">
-          <h2 className="text-xl font-heading font-black text-white mb-3">Are You a Chiropractor in {city}?</h2>
-          <p className="text-white/50 text-sm mb-6">Join NeuroChiro and get found by patients searching for nervous system care in your area.</p>
+          <h2 className="text-xl font-heading font-black text-white mb-3">{fill(t.city.doctorCta, { city })}</h2>
+          <p className="text-white/50 text-sm mb-6">{t.city.doctorCtaBody}</p>
           <Link href={`/pro?source=city_page_${slug}`} className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
-            Learn More <ArrowRight className="w-4 h-4" />
+            {t.city.learnMore} <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       </div>
@@ -291,7 +299,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
       {nearbyCities.length > 0 && (
         <section className="bg-neuro-cream border-t border-gray-200 py-10 px-6">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">Also Serving Nearby</h2>
+            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{t.city.alsoServing}</h2>
             <div className="flex flex-wrap gap-2">
               {nearbyCities.map((c) => (
                 <Link
@@ -309,6 +317,17 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
 
       <Footer />
     </div>
+  );
+}
+
+function CityHeading({ template, city }: { template: string; city: string }) {
+  const [before, after] = template.split("{city}");
+  return (
+    <>
+      {before}
+      <span className="text-neuro-orange">{city}</span>
+      {after}
+    </>
   );
 }
 

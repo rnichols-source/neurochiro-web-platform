@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
 import DoctorCard from "@/components/directory/DoctorCard";
 import type { DirectoryDoctor } from "@/components/directory/useDirectorySearch";
 import { formatDistance } from "@/lib/geo";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill } from "@/i18n/config";
+import { useDictionary } from "@/i18n/locale-context";
 
 type NearbyPayload = {
   city: string | null;
@@ -62,6 +64,7 @@ function placeOf(doctor: DirectoryDoctor) {
 }
 
 function PreviewCard({ doctor, unit }: { doctor: DirectoryDoctor; unit: "mi" | "km" }) {
+  const t = useDictionary();
   const name = doctorName(doctor);
   return (
     <article className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3">
@@ -80,7 +83,7 @@ function PreviewCard({ doctor, unit }: { doctor: DirectoryDoctor; unit: "mi" | "
           {placeOf(doctor)}
         </p>
         <Link href={`/directory/${doctor.slug || doctor.id}#appointment-form`} className="mt-1 inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink">
-          Request appointment
+          {t.home.requestAppointment}
         </Link>
       </div>
     </article>
@@ -88,6 +91,7 @@ function PreviewCard({ doctor, unit }: { doctor: DirectoryDoctor; unit: "mi" | "
 }
 
 export default function NearbyDoctors() {
+  const t = useDictionary();
   const [data, setData] = useState<NearbyPayload | null>(null);
   const [failed, setFailed] = useState(false);
   const slot = useSyncExternalStore(
@@ -128,7 +132,7 @@ export default function NearbyDoctors() {
   const preview = slot && city && doctors.length > 0
     ? createPortal(
         <div className="rounded-2xl bg-white p-4 text-neuro-navy shadow-xl">
-          <h2 className="mb-3 text-lg font-heading font-black text-neuro-navy">Doctors near {city}</h2>
+          <h2 className="mb-3 text-lg font-heading font-black text-neuro-navy">{fill(t.home.doctorsNearCity, { city })}</h2>
           <div className="space-y-3">
             {doctors.slice(0, 2).map((doctor) => (
               <PreviewCard key={doctor.id} doctor={doctor} unit={unit} />
@@ -145,10 +149,10 @@ export default function NearbyDoctors() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <h2 className="text-2xl font-heading font-black text-neuro-navy">
-            {city ? `Doctors near ${city}` : "Featured doctors"}
+            {city ? fill(t.home.doctorsNearCity, { city }) : t.home.featured}
           </h2>
           <a href="#hero-location" className="inline-flex min-h-11 items-center text-sm font-bold text-neuro-orange-ink">
-            {city ? "Change" : "Set your location"}
+            {city ? t.home.change : t.home.setLocation}
           </a>
         </div>
 
@@ -174,16 +178,19 @@ export default function NearbyDoctors() {
           <div className="rounded-2xl border border-gray-100 bg-white p-6">
             <p className="text-[15px] leading-relaxed text-neuro-navy">
               {nearest
-                ? `No NeuroChiro doctor near ${city} yet. The closest is ${doctorName(nearest)} in ${placeOf(nearest)}${
-                    nearest.distance_miles != null ? ` (${formatDistance(nearest.distance_miles, unit)})` : ""
-                  }.`
-                : `No NeuroChiro doctor near ${city} yet.`}
+                ? fill(nearest.distance_miles != null ? t.home.noneNearWith : t.home.noneNearWithNoDistance, {
+                    city: city || "",
+                    name: doctorName(nearest),
+                    place: placeOf(nearest),
+                    distance: nearest.distance_miles != null ? formatDistance(nearest.distance_miles, unit) : "",
+                  })
+                : fill(t.home.noneNear, { city: city || "" })}
             </p>
             <Link
               href={`/list?source=homepage_nearby&city=${encodeURIComponent(city || "")}`}
               className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-neuro-orange-ink px-5 text-sm font-bold text-white"
             >
-              Join the patient list
+              {t.home.listButton}
             </Link>
           </div>
         )}
@@ -198,15 +205,15 @@ export default function NearbyDoctors() {
               ))}
             </div>
             <Link href={directoryHref} className="mt-6 inline-flex min-h-11 items-center text-base font-bold text-neuro-orange-ink">
-              {city ? `See all doctors near ${city} →` : "See all doctors →"}
+              {city ? fill(t.home.seeAllNear, { city }) : t.home.seeAll}
             </Link>
           </>
         )}
 
         {failed && (
           <p className="text-[15px] text-neuro-navy">
-            Set your location to see doctors near you.{" "}
-            <a href="#hero-location" className="font-bold text-neuro-orange-ink">Search by city or ZIP</a>
+            {t.home.nearbyFailed}{" "}
+            <a href="#hero-location" className="font-bold text-neuro-orange-ink">{t.home.searchCity}</a>
           </p>
         )}
       </div>

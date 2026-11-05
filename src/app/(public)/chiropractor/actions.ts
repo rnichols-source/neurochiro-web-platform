@@ -159,15 +159,18 @@ export async function submitFindRequest(formData: FormData): Promise<{ ok: boole
   const citySearched = formData.get('city_searched') as string || null;
   const stateSearched = formData.get('state_searched') as string || null;
 
+  const french = formData.get('locale') === 'fr';
+  const say = (english: string, translated: string) => (french ? translated : english);
+
   if (!name || !email || !zip) {
-    return { ok: false, error: 'Name, email, and ZIP are required.' };
+    return { ok: false, error: say('Name, email, and ZIP are required.', 'Le nom, l\'e-mail et le code postal sont nécessaires.') };
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, error: 'Please enter a valid email address.' };
+    return { ok: false, error: say('Please enter a valid email address.', 'Indiquez une adresse e-mail valide.') };
   }
   const { acceptPostalCode } = await import('@/lib/detect-postal');
   if (!acceptPostalCode(zip)) {
-    return { ok: false, error: 'Please enter a valid postal code. US ZIP codes are 5 digits. India PIN codes are 6 digits.' };
+    return { ok: false, error: say('Please enter a valid postal code. US ZIP codes are 5 digits. India PIN codes are 6 digits.', 'Indiquez un code postal valide. Aux États-Unis, le ZIP compte 5 chiffres. En Inde, le code PIN en compte 6.') };
   }
 
   const supabase = createAdminClient();
@@ -178,7 +181,7 @@ export async function submitFindRequest(formData: FormData): Promise<{ ok: boole
 
   if (error) {
     console.error('[FIND REQUEST]', error);
-    return { ok: false, error: 'Something went wrong. Please try again.' };
+    return { ok: false, error: formData.get('locale') === 'fr' ? 'Un souci est survenu. Réessayez.' : 'Something went wrong. Please try again.' };
   }
 
   // Send email notification to Dr. Ray

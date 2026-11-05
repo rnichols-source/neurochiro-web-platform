@@ -1,8 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
 import type { DirectoryDoctor } from "./useDirectorySearch";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill } from "@/i18n/config";
+import { useDictionary } from "@/i18n/locale-context";
 
 export default function EmptyState({
   location,
@@ -27,11 +29,12 @@ export default function EmptyState({
   error: boolean;
   onRetry: () => void;
 }) {
+  const t = useDictionary();
   if (error) {
     return (
       <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-        <p className="text-white font-bold mb-3">Something went wrong</p>
-        <button type="button" onClick={onRetry} className="min-h-11 rounded-xl bg-neuro-orange px-5 font-bold text-white">Retry</button>
+        <p className="text-white font-bold mb-3">{t.directory.somethingWrong}</p>
+        <button type="button" onClick={onRetry} className="min-h-11 rounded-xl bg-neuro-orange px-5 font-bold text-white">{t.directory.retry}</button>
       </div>
     );
   }
@@ -39,20 +42,21 @@ export default function EmptyState({
   if (unknownPlace) {
     return (
       <div className="rounded-2xl border border-white/10 bg-[#1c1c1e] p-6 text-white">
-        <p className="font-bold">We couldn&apos;t find &apos;{location}&apos;.</p>
+        <p className="font-bold">{fill(t.directory.notFound, { location })}</p>
         {suggestion && (
           <button type="button" onClick={() => onSuggest(suggestion)} className="mt-3 min-h-11 text-left font-semibold text-neuro-orange">
-            Did you mean {suggestion}?
+            {fill(t.directory.didYouMean, { suggestion })}
           </button>
         )}
       </div>
     );
   }
 
-  const distance = radius > 0 ? (unit === "km" ? `${Math.round(radius * 1.60934)} km` : `${radius} mi`) : "this area";
+  const distance = radius > 0 ? (unit === "km" ? `${Math.round(radius * 1.60934)} km` : `${radius} mi`) : t.directory.thisArea;
+  const widen = unit === "km" ? "160 km" : "100 mi";
   return (
     <div className="rounded-2xl border border-white/10 bg-[#1c1c1e] p-5 text-white">
-      <h2 className="text-lg font-bold">No NeuroChiro doctor within {distance} of {location || "this search"} yet.</h2>
+      <h2 className="text-lg font-bold">{fill(t.directory.noneWithin, { distance, location: location || t.directory.thisSearch })}</h2>
       {nearest.length > 0 && (
         <ul className="mt-4 space-y-2">
           {nearest.map((doc) => (
@@ -66,9 +70,9 @@ export default function EmptyState({
         </ul>
       )}
       <div className="mt-4 flex flex-col gap-2">
-        <button type="button" onClick={onWiden} className="min-h-11 rounded-xl bg-white/10 font-bold">Widen to {unit === "km" ? "160 km" : "100 mi"}</button>
+        <button type="button" onClick={onWiden} className="min-h-11 rounded-xl bg-white/10 font-bold">{fill(t.directory.widen, { distance: widen })}</button>
         <Link href={`/list?source=directory_empty${location ? `&zip=${encodeURIComponent(location)}` : ""}`} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-neuro-orange font-bold text-white">
-          Get notified when one joins
+          {t.directory.notify}
         </Link>
       </div>
     </div>

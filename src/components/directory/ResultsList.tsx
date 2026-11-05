@@ -4,6 +4,8 @@ import DoctorCard from "./DoctorCard";
 import EmptyState from "./EmptyState";
 import { DoctorCardSkeleton } from "./DirectorySkeleton";
 import type { DirectoryDoctor } from "./useDirectorySearch";
+import { fill } from "@/i18n/config";
+import { useDictionary } from "@/i18n/locale-context";
 
 export default function ResultsList({
   doctors,
@@ -38,10 +40,14 @@ export default function ResultsList({
   onHover: (id: string | null) => void;
   onNavigate: () => void;
 }) {
-  const summary = locationLabel || (location ? `${doctors.length} doctors near ${location}` : `${doctors.length} doctors`);
+  const t = useDictionary();
+  const countLabel = location
+    ? fill(t.directory.countNear, { count: doctors.length, location })
+    : fill(t.directory.count, { count: doctors.length });
+  const summary = locationLabel || countLabel;
   return (
     <div className="space-y-3">
-      <p className="text-sm font-bold text-white" aria-live="polite">{doctors.length} doctors{location ? ` near ${location}` : ""}{locationLabel ? `. ${summary}` : ""}</p>
+      <p className="text-sm font-bold text-white" aria-live="polite">{countLabel}{locationLabel ? `. ${summary}` : ""}</p>
       {loading && doctors.length === 0 && [1, 2, 3].map((item) => <DoctorCardSkeleton key={item} />)}
       {!loading && (error || doctors.length === 0) && (
         <EmptyState

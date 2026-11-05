@@ -1,5 +1,6 @@
 import { User, Eye, Users, Calendar, Briefcase, Award, Shuffle, Trophy, Star, Gift } from "lucide-react";
 import { BADGE_DEFINITIONS } from "@/lib/badges";
+import { useDictionary } from "@/i18n/locale-context";
 
 const ICON_MAP: Record<string, any> = { User, Eye, Users, Calendar, Briefcase, Award, Shuffle, Trophy, Star, Gift };
 
@@ -14,12 +15,13 @@ const COLOR_MAP: Record<string, string> = {
 export default function PublicBadges({ badgeIds }: { badgeIds: string[] }) {
   if (!badgeIds.length) return null;
 
+  const t = useDictionary();
   const earnedBadges = BADGE_DEFINITIONS.filter((badge) => badgeIds.includes(badge.id));
   if (!earnedBadges.length) return null;
 
   return (
     <div className="mt-4">
-      <p className="text-xs font-bold text-gray-500 mb-2">Achievements</p>
+      <p className="text-xs font-bold text-gray-500 mb-2">{t.profile.achievements}</p>
       <div className="flex flex-wrap gap-2">
         {earnedBadges.map((badge) => {
           const Icon = ICON_MAP[badge.icon] || Award;

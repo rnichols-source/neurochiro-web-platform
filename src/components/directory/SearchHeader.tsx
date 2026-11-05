@@ -1,11 +1,13 @@
 "use client";
 
 import type { Ref } from "react";
-import Link from "next/link";
 import { Target, X } from "lucide-react";
 import type { SearchFilters } from "./useDirectorySearch";
+import LanguageSwitcher from "@/components/i18n/LanguageSwitcher";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { useDictionary } from "@/i18n/locale-context";
 
-const PILLS = ["Accepting new patients", "Pediatric", "Prenatal", "Migraines", "Sciatica", "Upper Cervical", "Torque Release"];
+const PILL_KEYS = ["Accepting new patients", "Pediatric", "Prenatal", "Migraines", "Sciatica", "Upper Cervical", "Torque Release"] as const;
 
 export default function SearchHeader({
   collapsed,
@@ -54,6 +56,16 @@ export default function SearchHeader({
   onSearchAll: () => void;
   inputRef: Ref<HTMLInputElement>;
 }) {
+  const t = useDictionary();
+  const pillLabel: Record<(typeof PILL_KEYS)[number], string> = {
+    "Accepting new patients": t.directory.pills.accepting,
+    Pediatric: t.directory.pills.pediatric,
+    Prenatal: t.directory.pills.prenatal,
+    Migraines: t.directory.pills.migraines,
+    Sciatica: t.directory.pills.sciatica,
+    "Upper Cervical": t.directory.pills.upper,
+    "Torque Release": t.directory.pills.torque,
+  };
   if (collapsed) {
     return (
       <button type="button" onClick={onExpand} className="min-h-11 w-full truncate rounded-xl bg-white/10 px-3 text-left text-sm font-semibold text-white">
@@ -66,8 +78,11 @@ export default function SearchHeader({
 
   return (
     <div>
+      <div className="mb-2 flex justify-end lg:hidden">
+        <LanguageSwitcher />
+      </div>
       <div className="flex items-center gap-2">
-        <Link href="/" className="flex h-11 w-11 shrink-0 items-center justify-center" aria-label="NeuroChiro home">
+        <Link href="/" className="flex h-11 w-11 shrink-0 items-center justify-center" aria-label={t.nav.home}>
           <img src="/logo-white.png" alt="" className="h-5 w-5" />
         </Link>
         <div className="relative min-w-0 flex-1">
@@ -79,7 +94,7 @@ export default function SearchHeader({
               if (event.key === "Enter") onSubmit(event.currentTarget.value);
             }}
             placeholder={placeholder}
-            aria-label="Location"
+            aria-label={t.directory.location}
             data-testid="location-input"
             enterKeyHint="search"
             autoComplete="address-level2"
@@ -87,16 +102,16 @@ export default function SearchHeader({
             className="h-12 w-full rounded-xl border border-neuro-orange/40 bg-white/10 pl-3 pr-12 text-base font-semibold text-white placeholder:text-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-neuro-orange"
           />
           {location ? (
-            <button type="button" onClick={onClear} className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center text-white" aria-label="Clear location">
+            <button type="button" onClick={onClear} className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center text-white" aria-label={t.directory.clear}>
               <X className="h-5 w-5" />
             </button>
           ) : (
-            <button type="button" onClick={onNearMe} className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center text-neuro-orange" aria-label="Near me" disabled={locating}>
+            <button type="button" onClick={onNearMe} className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center text-neuro-orange" aria-label={t.directory.nearMe} disabled={locating}>
               <Target className="h-5 w-5" />
             </button>
           )}
         </div>
-        <button type="button" onClick={onCountry} data-testid="country-chip" className="flex h-12 min-w-11 shrink-0 items-center gap-1 rounded-xl bg-white/10 px-3 text-sm font-bold text-white" aria-label={`Country ${countryCode}`}>
+        <button type="button" onClick={onCountry} data-testid="country-chip" className="flex h-12 min-w-11 shrink-0 items-center gap-1 rounded-xl bg-white/10 px-3 text-sm font-bold text-white" aria-label={t.directory.country.replace("{code}", countryCode)}>
           <span aria-hidden>{countryFlag}</span> {countryCode} ▾
         </button>
       </div>
@@ -119,19 +134,19 @@ export default function SearchHeader({
               <span>{doctor.name}</span>
             </Link>
           ))}
-          <button type="button" onClick={onSearchAll} className="min-h-11 w-full rounded-lg px-2 text-left text-sm font-semibold text-neuro-orange">Search all countries</button>
+          <button type="button" onClick={onSearchAll} className="min-h-11 w-full rounded-lg px-2 text-left text-sm font-semibold text-neuro-orange">{t.directory.searchAll}</button>
         </div>
       )}
       <div className="mt-2 -mx-1 overflow-x-auto">
         <div className="flex gap-2 px-1">
           <button type="button" onClick={onFilters} className="min-h-11 shrink-0 rounded-full bg-white/10 px-3 text-sm font-bold text-white">
-            Filters{filterCount > 0 ? ` (${filterCount})` : ""}
+            {t.directory.filters}{filterCount > 0 ? ` (${filterCount})` : ""}
           </button>
-          {PILLS.map((pill) => {
+          {PILL_KEYS.map((pill) => {
             const active = pill === "Accepting new patients" ? filters.newPatients : filters.specialties.includes(pill);
             return (
               <button key={pill} type="button" onClick={() => onSpecialty(pill)} className={`min-h-11 shrink-0 rounded-full px-3 text-sm font-semibold ${active ? "bg-neuro-orange text-white" : "bg-white/10 text-white"}`}>
-                {pill}{active ? " ✕" : ""}
+                {pillLabel[pill]}{active ? " ✕" : ""}
               </button>
             );
           })}

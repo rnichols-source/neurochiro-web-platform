@@ -5,6 +5,9 @@ import { useRegion } from "@/context/RegionContext";
 import { REGIONS, RegionCode } from "@/lib/regions";
 import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { fill } from "@/i18n/config";
+import { countryName } from "@/i18n/countries";
+import { useDictionary, useLocale } from "@/i18n/locale-context";
 
 export default function RegionSwitcher({
   labeled = false,
@@ -17,6 +20,9 @@ export default function RegionSwitcher({
   compact?: boolean;
 }) {
   const { region, setRegion } = useRegion();
+  const locale = useLocale();
+  const t = useDictionary();
+  const labelFor = (code: string, fallback: string) => countryName(code, locale, fallback);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,13 +58,13 @@ export default function RegionSwitcher({
         type="button"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        aria-label={labeled ? undefined : `Country: ${region.label}`}
+        aria-label={labeled ? undefined : fill(t.regionSwitcher.country, { label: labelFor(region.code, region.label) })}
         onClick={() => setIsOpen(!isOpen)}
         className={triggerClass}
       >
         <span className="text-lg leading-none">{region.flag}</span>
         {labeled ? (
-          <span className="text-sm font-bold">{region.label}</span>
+          <span className="text-sm font-bold">{labelFor(region.code, region.label)}</span>
         ) : compact ? null : (
           <span className="hidden sm:inline uppercase tracking-widest text-[10px]">{region.code}</span>
         )}
@@ -72,13 +78,13 @@ export default function RegionSwitcher({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             role="listbox"
-            aria-label="Select region"
+            aria-label={t.regionSwitcher.select}
             className={`absolute right-0 z-[200] mt-2 max-h-[70vh] w-56 overflow-y-auto rounded-2xl border border-white/10 bg-neuro-navy p-2 shadow-2xl ${
               compact ? "" : "max-lg:bottom-full max-lg:top-auto max-lg:mb-2 max-lg:mt-0"
             }`}
           >
             <div className="px-3 py-2 mb-1">
-              <p className="text-xs font-black text-gray-300 uppercase tracking-widest">Select Region</p>
+              <p className="text-xs font-black text-gray-300 uppercase tracking-widest">{t.regionSwitcher.heading}</p>
             </div>
             {Object.values(REGIONS).map((r) => (
               <button
@@ -98,7 +104,7 @@ export default function RegionSwitcher({
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xl leading-none">{r.flag}</span>
-                  <span className="text-xs font-bold">{r.label}</span>
+                  <span className="text-xs font-bold">{labelFor(r.code, r.label)}</span>
                 </div>
                 {region.code === r.code && (
                   <div className="w-1.5 h-1.5 bg-white rounded-full" />
@@ -108,7 +114,7 @@ export default function RegionSwitcher({
 
             <div className="mt-2 pt-2 border-t border-white/5 px-3 py-2">
               <p className="text-xs text-gray-300 font-medium leading-tight">
-                Data, pricing, and currency will update automatically.
+                {t.regionSwitcher.note}
               </p>
             </div>
           </motion.div>

@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { submitFindRequest } from "../actions";
+import { useDictionary, useLocale } from "@/i18n/locale-context";
 
 export default function FindSomeoneForm({ city, state }: { city: string; state: string }) {
+  const t = useDictionary();
+  const locale = useLocale();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState("");
 
@@ -16,12 +19,13 @@ export default function FindSomeoneForm({ city, state }: { city: string; state: 
     const formData = new FormData(e.currentTarget);
     formData.set("city_searched", city);
     formData.set("state_searched", state);
+    formData.set("locale", locale);
 
     const result = await submitFindRequest(formData);
     if (result.ok) {
       setStatus("success");
     } else {
-      setError(result.error || "Something went wrong.");
+      setError(result.error || t.find.fallback);
       setStatus("error");
     }
   };
@@ -30,7 +34,7 @@ export default function FindSomeoneForm({ city, state }: { city: string; state: 
     return (
       <div className="flex items-center gap-3 py-4">
         <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-        <p className="text-sm text-green-700 font-bold">Got it. I'll look into this and get back to you personally.</p>
+        <p className="text-sm text-green-700 font-bold">{t.find.success}</p>
       </div>
     );
   }
@@ -39,47 +43,47 @@ export default function FindSomeoneForm({ city, state }: { city: string; state: 
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-bold text-neuro-navy mb-1">Name</label>
+          <label className="block text-xs font-bold text-neuro-navy mb-1">{t.find.name}</label>
           <input
             type="text"
             name="name"
             required
-            placeholder="Your name"
+            placeholder={t.find.yourName}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange min-h-[44px]"
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-neuro-navy mb-1">Email</label>
+          <label className="block text-xs font-bold text-neuro-navy mb-1">{t.find.email}</label>
           <input
             type="email"
             name="email"
             required
-            placeholder="you@email.com"
+            placeholder={t.find.emailPlaceholder}
             className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange min-h-[44px]"
           />
         </div>
       </div>
       <div>
-        <label className="block text-xs font-bold text-neuro-navy mb-1">ZIP or postal code</label>
+        <label className="block text-xs font-bold text-neuro-navy mb-1">{t.find.postal}</label>
         <input
           type="text"
           name="zip"
           required
           maxLength={16}
-          placeholder="12345 or 110001"
+          placeholder={t.find.postalPlaceholder}
           className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange min-h-[44px]"
         />
       </div>
       <div>
-        <label className="block text-xs font-bold text-neuro-navy mb-1">Anything I should know? <span className="text-gray-400 font-normal">(optional)</span></label>
+        <label className="block text-xs font-bold text-neuro-navy mb-1">{t.find.note} <span className="text-gray-400 font-normal">{t.find.optional}</span></label>
         <textarea
           name="note"
           rows={2}
-          placeholder="e.g. looking for a doctor who works with kids"
+          placeholder={t.find.notePlaceholder}
           className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange resize-y"
         />
         <p className="text-[10px] text-gray-400 mt-1">
-          Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.
+          {t.find.health}
         </p>
       </div>
 
@@ -94,7 +98,7 @@ export default function FindSomeoneForm({ city, state }: { city: string; state: 
         disabled={status === "submitting"}
         className="px-6 py-3 bg-neuro-navy text-white font-bold rounded-xl text-sm hover:bg-neuro-navy/90 transition-colors flex items-center gap-2 min-h-[44px] disabled:opacity-50"
       >
-        {status === "submitting" ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</> : "Help Me Find Someone"}
+        {status === "submitting" ? <><Loader2 className="w-4 h-4 animate-spin" /> {t.find.sending}</> : t.find.submit}
       </button>
     </form>
   );

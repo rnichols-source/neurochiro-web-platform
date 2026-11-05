@@ -8,7 +8,11 @@ import {
   Copy, Instagram, Facebook, Award, Clock, Stethoscope, GraduationCap,
   ArrowLeft, Play, TrendingUp, DollarSign,
 } from "lucide-react";
-import Link from "next/link";
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { fill, localizePath } from "@/i18n/config";
+import { useDictionary, useLocale } from "@/i18n/locale-context";
+import { translateAppointmentError } from "@/i18n/appointment-errors";
+import { formatDistance } from "@/lib/geo";
 import { priceLabel } from "@/lib/seminars/format";
 import { createClient } from "@/lib/supabase";
 import { useUserPreferences } from "@/context/UserPreferencesContext";
@@ -68,6 +72,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const supabase = createClient();
   const [photoError, setPhotoError] = useState(false);
+  const locale = useLocale();
+  const p = useDictionary().profile;
 
   const gated = isProfileGated(doctor);
   const saved = isSaved('doctors', doctor.id?.toString());
@@ -214,7 +220,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       setAppointmentSubmitted(true);
       trackConversion('inquiry');
     } catch (err) {
-      const message = err instanceof Error && err.message ? err.message : 'Something went wrong. Please try again or call the office directly.';
+      const message = err instanceof Error && err.message ? translateAppointmentError(err.message, locale) : p.failed;
       alert(message);
     }
     setSubmittingAppointment(false);
@@ -222,24 +228,24 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
   const requestFields = (idPrefix: string) => (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <input type="text" placeholder="Your name *" autoComplete="name" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({ ...f, name: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
-      <input type="text" placeholder="Phone or email *" autoComplete="tel" value={appointmentForm.contact} onChange={e => setAppointmentForm(f => ({ ...f, contact: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
-      <input type="text" placeholder="Best time to reach you" value={appointmentForm.bestTime} onChange={e => setAppointmentForm(f => ({ ...f, bestTime: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
-      <textarea placeholder="Message (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({ ...f, message: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, height: 72, resize: "none", outline: "none", width: "100%" }} />
-      <p style={{ fontSize: 11, color: "#b0b8c4", margin: 0 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
-      {containsHealthWords(appointmentForm.message) ? <p style={{ fontSize: 12, color: "#b45309", margin: 0 }}>Please don&apos;t include medical details.</p> : null}
+      <input type="text" placeholder={p.namePh} autoComplete="name" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({ ...f, name: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      <input type="text" placeholder={p.contactPh} autoComplete="tel" value={appointmentForm.contact} onChange={e => setAppointmentForm(f => ({ ...f, contact: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      <input type="text" placeholder={p.timePh} value={appointmentForm.bestTime} onChange={e => setAppointmentForm(f => ({ ...f, bestTime: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      <textarea placeholder={p.messagePh} value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({ ...f, message: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, height: 72, resize: "none", outline: "none", width: "100%" }} />
+      <p style={{ fontSize: 11, color: "#b0b8c4", margin: 0 }}>{p.health}</p>
+      {containsHealthWords(appointmentForm.message) ? <p style={{ fontSize: 12, color: "#b45309", margin: 0 }}>{p.healthWarn}</p> : null}
       <label htmlFor={`${idPrefix}-sms`} style={{ display: "flex", gap: 10, alignItems: "flex-start", fontSize: 12, color: "#4b5563", lineHeight: 1.45 }}>
         <input id={`${idPrefix}-sms`} type="checkbox" checked={appointmentForm.smsConsent} onChange={e => setAppointmentForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: 2, width: 18, height: 18, flexShrink: 0 }} />
         <span><PatientSmsConsentLabel /></span>
       </label>
       {appointmentForm.smsConsent && parsedContact.email ? (
         <label htmlFor={`${idPrefix}-sms-phone`} style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "#4b5563" }}>
-          Mobile number for text updates
-          <input id={`${idPrefix}-sms-phone`} type="tel" inputMode="tel" autoComplete="tel" placeholder="Mobile number for text updates" value={appointmentForm.smsPhone} onChange={e => setAppointmentForm(f => ({ ...f, smsPhone: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, width: "100%" }} />
+          {p.smsPhone}
+          <input id={`${idPrefix}-sms-phone`} type="tel" inputMode="tel" autoComplete="tel" placeholder={p.smsPhone} value={appointmentForm.smsPhone} onChange={e => setAppointmentForm(f => ({ ...f, smsPhone: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, width: "100%" }} />
         </label>
       ) : null}
       <button type="button" disabled={submittingAppointment || !canSendRequest} onClick={sendAppointmentRequest} style={{ padding: "14px 18px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !canSendRequest ? 0.5 : 1 }}>
-        {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send request</>}
+        {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> {p.sending}</> : <><Send style={{ width: 16, height: 16 }} /> {p.send}</>}
       </button>
     </div>
   );
@@ -247,8 +253,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const requestSuccess = () => (
     <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 16, padding: 20, textAlign: "center" }}>
       <CheckCircle2 style={{ width: 28, height: 28, color: "#22c55e", margin: "0 auto 8px" }} />
-      <p style={{ fontWeight: 800, color: "#15803d", fontSize: 15, margin: 0 }}>Request sent</p>
-      <p style={{ color: "#16a34a", fontSize: 13, marginTop: 4 }}>The office typically replies within 1 business day.</p>
+      <p style={{ fontWeight: 800, color: "#15803d", fontSize: 15, margin: 0 }}>{p.sent}</p>
+      <p style={{ color: "#16a34a", fontSize: 13, marginTop: 4 }}>{p.replies}</p>
     </div>
   );
 
@@ -275,7 +281,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 10 }}>
           {/* Back link */}
           <Link href="/directory" style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 40, textDecoration: "none" }}>
-            <ArrowLeft style={{ width: 14, height: 14 }} /> Back to Directory
+            <ArrowLeft style={{ width: 14, height: 14 }} /> {p.back}
           </Link>
 
           {/* Centered content */}
@@ -297,11 +303,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
             {/* Name */}
             <h1 style={{ fontSize: 42, fontWeight: 900, color: "white", fontFamily: "Lato, sans-serif", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 8 }}>{name}</h1>
-            {seminars.length > 0 && <p style={{ display: "inline-block", marginBottom: 10, background: "rgba(214,104,41,0.15)", color: "#D66829", borderRadius: 999, padding: "6px 12px", fontSize: 12, fontWeight: 800 }}>Hosting</p>}
+            {seminars.length > 0 && <p style={{ display: "inline-block", marginBottom: 10, background: "rgba(214,104,41,0.15)", color: "#D66829", borderRadius: 999, padding: "6px 12px", fontSize: 12, fontWeight: 800 }}>{p.hosting}</p>}
 
             {/* Clinic */}
             <p style={{ fontSize: 14, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>
-              {isPracticeProfile ? `Led by ${doctorName}` : (doctor.clinic_name || 'Private Practice')}
+              {isPracticeProfile ? fill(p.ledBy, { name: doctorName }) : (doctor.clinic_name || p.privatePractice)}
             </p>
 
             {/* Location */}
@@ -314,32 +320,32 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             {/* Badges row */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: 24 }}>
               <span style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 20, background: "rgba(59,130,246,0.12)", border: "1px solid rgba(59,130,246,0.25)", fontSize: 11, fontWeight: 800, color: "#60a5fa" }}>
-                <ShieldCheck style={{ width: 13, height: 13 }} /> Verified
+                <ShieldCheck style={{ width: 13, height: 13 }} /> {p.verified}
               </span>
               {doctor.is_founding_member && (
                 <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, background: "rgba(214,104,41,0.12)", border: "1px solid rgba(214,104,41,0.25)", fontSize: 11, fontWeight: 800, color: "#D66829" }}>
-                  <Star style={{ width: 12, height: 12 }} /> Founding Member
+                  <Star style={{ width: 12, height: 12 }} /> {p.founding}
                 </span>
               )}
               {acceptingNewPatients && (
                 <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.25)", fontSize: 11, fontWeight: 800, color: "#4ade80" }}>
-                  <Heart style={{ width: 12, height: 12 }} /> Accepting Patients
+                  <Heart style={{ width: 12, height: 12 }} /> {p.accepting}
                 </span>
               )}
               {offersTelehealth && (
-                <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", fontSize: 11, fontWeight: 800, color: "#60a5fa" }}>Telehealth</span>
+                <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", fontSize: 11, fontWeight: 800, color: "#60a5fa" }}>{p.telehealth}</span>
               )}
               {acceptsWalkins && (
-                <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", fontSize: 11, fontWeight: 800, color: "#c084fc" }}>Walk-Ins</span>
+                <span style={{ padding: "5px 14px", borderRadius: 20, background: "rgba(168,85,247,0.08)", border: "1px solid rgba(168,85,247,0.2)", fontSize: 11, fontWeight: 800, color: "#c084fc" }}>{p.walkins}</span>
               )}
               {d.accepts_student_messages && (
                 <span style={{ display: "flex", alignItems: "center", gap: 4, padding: "5px 14px", borderRadius: 20, background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)", fontSize: 11, fontWeight: 800, color: "#34d399" }}>
-                  <GraduationCap style={{ width: 12, height: 12 }} /> Open to Students
+                  <GraduationCap style={{ width: 12, height: 12 }} /> {p.students}
                 </span>
               )}
               {spotlightEpisode && (
                 <Link href="#spotlight" style={{ display: "flex", alignItems: "center", gap: 5, padding: "5px 14px", borderRadius: 20, background: "rgba(214,104,41,0.16)", border: "1px solid rgba(214,104,41,0.4)", fontSize: 11, fontWeight: 800, color: "#fdba74", textDecoration: "none" }}>
-                  <Play style={{ width: 12, height: 12 }} /> Featured on NeuroChiro Spotlight
+                  <Play style={{ width: 12, height: 12 }} /> {p.spotlightBadge}
                 </Link>
               )}
             </div>
@@ -366,7 +372,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   <Globe style={{ width: 16, height: 16 }} />
                 </a>
               )}
-              <button onClick={handleShare} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)", cursor: "pointer" }}>
+              <button onClick={handleShare} aria-label={copied ? p.copied : p.share} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)", cursor: "pointer" }}>
                 {copied ? <CheckCircle2 style={{ width: 16, height: 16, color: "#4ade80" }} /> : <Share2 style={{ width: 16, height: 16 }} />}
               </button>
               <button onClick={() => toggleSave('doctors', doctor.id?.toString())} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: saved ? "#f87171" : "rgba(255,255,255,0.6)" }}>
@@ -381,21 +387,21 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               ) : (
                 <>
                   <a href="#appointment-form" onClick={() => trackConversion('inquiry')} style={{ padding: "14px 28px", background: "#B4501A", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", minHeight: 44 }}>
-                    <Calendar style={{ width: 16, height: 16 }} /> Request appointment
+                    <Calendar style={{ width: 16, height: 16 }} /> {p.request}
                   </a>
                   {bookingUrl ? (
                     <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ padding: "14px 28px", background: "transparent", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.35)", minHeight: 44 }}>
-                      <Calendar style={{ width: 16, height: 16 }} /> Book on their website
+                      <Calendar style={{ width: 16, height: 16 }} /> {p.bookSite}
                     </a>
                   ) : null}
                   {doctor.phone && (
                     <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.1)", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.15)" }}>
-                      <Phone style={{ width: 16, height: 16 }} /> Call
+                      <Phone style={{ width: 16, height: 16 }} /> {p.call}
                     </a>
                   )}
                   {doctor.email && (
                     <a href={`mailto:${doctor.email}`} onClick={() => trackEvent('contact_click')} style={{ padding: "14px 28px", background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)", borderRadius: 14, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <Mail style={{ width: 16, height: 16 }} /> Email
+                      <Mail style={{ width: 16, height: 16 }} /> {p.email}
                     </a>
                   )}
                 </>
@@ -433,39 +439,39 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div id="appointment-form" style={{ background: "white", borderRadius: 20, padding: 20, border: "1px solid rgba(30,45,59,0.08)", boxShadow: "0 16px 40px rgba(30,45,59,0.08)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
               <Calendar style={{ width: 18, height: 18, color: "#D66829" }} />
-              <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", margin: 0 }}>Request an appointment</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", margin: 0 }}>{p.requestTitle}</h2>
             </div>
             <p style={{ fontSize: 13, color: "#718096", margin: "0 0 14px" }}>
-              Send a note to {doctor.clinic_name || name}. The office gets it by email and in their NeuroChiro portal.
+              {fill(p.requestNote, { who: doctor.clinic_name || name })}
             </p>
             {gated ? (
               <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
             ) : appointmentSubmitted ? requestSuccess() : (
               <>
                 {acceptingNewPatients !== false && (
-                  <p style={{ fontSize: 13, fontWeight: 800, color: "#15803d", margin: "0 0 4px" }}>New patients welcome</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: "#15803d", margin: "0 0 4px" }}>{p.welcome}</p>
                 )}
-                <p style={{ fontSize: 13, color: "#4a5568", margin: "0 0 12px" }}>The office typically replies within 1 business day.</p>
+                <p style={{ fontSize: 13, color: "#4a5568", margin: "0 0 12px" }}>{p.replies}</p>
                 {requestFields("appt-side")}
                 {bookingUrl && (
                   <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 12, fontSize: 13, fontWeight: 800, color: "#1E2D3B", textDecoration: "none" }}>
-                    <ExternalLink style={{ width: 14, height: 14 }} /> Or book on their website
+                    <ExternalLink style={{ width: 14, height: 14 }} /> {p.orBook}
                   </a>
                 )}
                 {doctor.phone && (
                   <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 10, padding: "12px 16px", borderRadius: 12, background: "#1E2D3B", color: "white", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>
-                    <Phone style={{ width: 16, height: 16 }} /> Call {doctor.phone}
+                    <Phone style={{ width: 16, height: 16 }} /> {fill(p.callPhone, { phone: doctor.phone })}
                   </a>
                 )}
               </>
             )}
           </div>
           <div style={{ marginTop: 16, background: "#fff", borderRadius: 20, padding: 20, border: "1px solid rgba(30,45,59,0.08)" }}>
-            <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Your first visit</p>
+            <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>{p.firstVisit}</p>
             {firstVisitInfo && (
               <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.6, whiteSpace: "pre-line", margin: "0 0 10px" }}>{firstVisitInfo}</p>
             )}
-            <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", margin: 0 }}>{d.first_visit_price || "Contact the office for pricing"}</p>
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#1E2D3B", margin: 0 }}>{d.first_visit_price || p.askPrice}</p>
           </div>
         </aside>
         <div className="nc-profile-main">
@@ -478,17 +484,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {!doctor.user_id && !doctor.is_approved && !doctor.bio && (
         <Section bg="cream" style={{ paddingTop: 24, paddingBottom: 0 }}>
           <div style={{ background: "#f0f4f8", border: "1px solid #d1dce6", borderRadius: 16, padding: "20px 24px", fontSize: 13, color: "#5a6b7d", lineHeight: 1.6 }}>
-            <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#1E2D3B", fontSize: 14 }}>This listing was created from public information</p>
+            <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#1E2D3B", fontSize: 14 }}>{p.unclaimedTitle}</p>
             <p style={{ margin: 0 }}>
-              This profile was built from publicly available practice details and has not been claimed or verified by the doctor.
-              Some information may be incomplete or outdated.
+              {p.unclaimedBody}
             </p>
             <div style={{ marginTop: 12, display: "flex", gap: 12, flexWrap: "wrap" }}>
               <a href={`/register?claim_id=${doctor.id}&role=doctor`} style={{ fontSize: 13, fontWeight: 700, color: "#D66829", textDecoration: "none" }}>
-                Are you this doctor? Claim this profile &rarr;
+                {p.claim}
               </a>
               <a href="mailto:support@neurochirodirectory.com?subject=Listing%20removal%20request" style={{ fontSize: 13, fontWeight: 700, color: "#5a6b7d", textDecoration: "none" }}>
-                Request removal
+                {p.removal}
               </a>
             </div>
           </div>
@@ -499,20 +504,20 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 0 }}>
           <div style={{ background: "linear-gradient(135deg, rgba(214,104,41,0.08) 0%, rgba(214,104,41,0.03) 100%)", border: "1px solid rgba(214,104,41,0.15)", borderRadius: 20, padding: "24px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
             <div>
-              <p style={{ fontWeight: 900, fontSize: 14, color: "#1E2D3B" }}>This is how patients see your profile</p>
-              <p style={{ fontSize: 12, color: "#718096", marginTop: 4 }}>Your phone, website, and booking link are hidden. Upgrade to Pro so patients can reach you.</p>
+              <p style={{ fontWeight: 900, fontSize: 14, color: "#1E2D3B" }}>{p.ownerTitle}</p>
+              <p style={{ fontSize: 12, color: "#718096", marginTop: 4 }}>{p.ownerBody}</p>
             </div>
-            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — $99/mo</Link>
+            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>{p.upgrade}</Link>
           </div>
         </Section>
       )}
 
       <Section bg="cream" style={{ paddingTop: 28, paddingBottom: 8 }}>
         <div style={{ background: "white", borderRadius: 20, padding: "22px 24px", border: "1px solid rgba(30,45,59,0.06)" }}>
-          <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 8px" }}>What is nervous-system chiropractic?</p>
+          <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 8px" }}>{p.whatEyebrow}</p>
           <p style={{ fontSize: 15, lineHeight: 1.7, color: "#374151", margin: 0 }}>
-            This kind of care looks at how well your body is communicating, not only where it hurts. A visit usually includes a checkup of how your spine and nerves are working, then a gentle adjustment meant to help that communication.{" "}
-            <Link href="/nervous-system" style={{ color: "#D66829", fontWeight: 800, textDecoration: "none" }}>Read the short explanation</Link>.
+            {p.whatBody}{" "}
+            <Link href="/nervous-system" style={{ color: "#D66829", fontWeight: 800, textDecoration: "none" }}>{p.whatLink}</Link>.
           </p>
         </div>
       </Section>
@@ -527,7 +532,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, justifyContent: "center", marginBottom: 12 }}>
                   <span style={{ fontSize: 18 }}>🎬</span>
-                  <h2 style={{ fontSize: 18, fontWeight: 900, color: "white" }}>Featured on NeuroChiro Spotlight</h2>
+                  <h2 style={{ fontSize: 18, fontWeight: 900, color: "white" }}>{p.spotlight}</h2>
                   <span style={{ background: "rgba(214,104,41,0.15)", color: "#D66829", fontSize: 11, fontWeight: 800, padding: "3px 10px", borderRadius: 20 }}>EP {String(spotlightEpisode.episodeNumber).padStart(2, "0")}</span>
                 </div>
                 <p style={{ textAlign: "center", color: "rgba(255,255,255,0.5)", fontSize: 15, fontStyle: "italic", marginBottom: 28, maxWidth: 600, margin: "0 auto 28px" }}>&ldquo;{spotlightEpisode.quote}&rdquo;</p>
@@ -536,13 +541,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 </div>
                 <div style={{ textAlign: "center", marginTop: 20 }}>
                   <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginBottom: 8 }}>{spotlightEpisode.description}</p>
-                  <Link href="/spotlight" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>Watch all Spotlight episodes →</Link>
+                  <Link href="/spotlight" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>{p.watchAll}</Link>
                 </div>
               </>
             ) : doctor.video_url && (
               <>
                 <h2 style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <Play style={{ width: 14, height: 14 }} /> Meet {isPracticeProfile ? 'the Team' : doctor.first_name}
+                  <Play style={{ width: 14, height: 14 }} /> {fill(p.meet, { name: isPracticeProfile ? p.theTeam : doctor.first_name })}
                 </h2>
                 <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
                   <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
@@ -555,15 +560,15 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
       {(stories.length > 0 || d.google_reviews_url) && (
         <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 28 }}>What patients say</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 28 }}>{p.patientsSay}</h2>
           {stories.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 800, margin: "0 auto" }}>
               {stories.map((story) => (
                 <blockquote key={story.id} style={{ margin: 0, background: "#F5F3EF", borderRadius: 16, padding: "20px 22px" }}>
                   {story.story_text && <p style={{ fontSize: 16, lineHeight: 1.7, color: "#1E2D3B", margin: 0 }}>&ldquo;{story.story_text}&rdquo;</p>}
                   {story.patient_first_name && <p style={{ fontSize: 13, fontWeight: 800, color: "#D66829", margin: "12px 0 0" }}>{story.patient_first_name}</p>}
-                  {story.condition_before && <p style={{ fontSize: 13, color: "#4a5568", margin: "8px 0 0" }}><strong>Before:</strong> {story.condition_before}</p>}
-                  {story.outcome_after && <p style={{ fontSize: 13, color: "#4a5568", margin: "4px 0 0" }}><strong>After:</strong> {story.outcome_after}</p>}
+                  {story.condition_before && <p style={{ fontSize: 13, color: "#4a5568", margin: "8px 0 0" }}><strong>{p.before}</strong> {story.condition_before}</p>}
+                  {story.outcome_after && <p style={{ fontSize: 13, color: "#4a5568", margin: "4px 0 0" }}><strong>{p.after}</strong> {story.outcome_after}</p>}
                 </blockquote>
               ))}
             </div>
@@ -572,7 +577,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: stories.length > 0 ? 24 : 0 }}>
               <Star style={{ width: 16, height: 16, color: "#facc15", fill: "#facc15" }} />
               <a href={d.google_reviews_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 15, fontWeight: 700, color: "#1E2D3B", textDecoration: "none" }}>
-                Read patient reviews on Google &rarr;
+                {p.googleReviews}
               </a>
             </div>
           )}
@@ -585,7 +590,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {(d.short_intro || doctor.bio) && (
         <Section bg="white" style={{ paddingTop: 64, paddingBottom: 64 }}>
           <div style={{ maxWidth: 800, margin: "0 auto" }}>
-            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>About {isPracticeProfile ? (doctor.clinic_name || doctor.first_name) : doctor.first_name}</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>{fill(p.about, { name: isPracticeProfile ? (doctor.clinic_name || doctor.first_name) : doctor.first_name })}</h2>
 
             {/* Structured short_intro (preferred) or pull quote from bio (fallback) */}
             {d.short_intro ? (
@@ -611,7 +616,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       ═══════════════════════════════════════════ */}
       {(specialties.length > 0 || (conditionsTreated && conditionsTreated.length > 0)) && (
         <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Patients We Help</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>{p.patientsHelp}</h2>
           {conditionsTreated && conditionsTreated.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: specialties.length > 0 ? 24 : 0 }}>
               {conditionsTreated.map((c: string, i: number) => (
@@ -635,7 +640,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {!hasCostData && !hasAvailData ? (
         <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
           <div style={{ padding: "20px 24px", background: "#f8f6f2", borderRadius: 12, textAlign: "center" }}>
-            <p style={{ fontSize: 14, color: "#718096", margin: 0 }}>Contact the office for pricing, insurance, and availability.</p>
+            <p style={{ fontSize: 14, color: "#718096", margin: 0 }}>{p.askAll}</p>
             {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B", fontSize: 16 }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
           </div>
         </Section>
@@ -646,19 +651,19 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <DollarSign style={{ width: 18, height: 18, color: "#D66829" }} />
-              <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Cost</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>{p.cost}</h3>
             </div>
             {(d.first_visit_price || d.payment_model || d.insurance_networks?.length > 0 || d.files_insurance || d.payment_plans || d.free_consultation) ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 {d.first_visit_price && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: "#718096" }}>First visit</span>
+                    <span style={{ color: "#718096" }}>{p.firstVisitPrice}</span>
                     <span style={{ fontWeight: 700, color: "#1E2D3B" }}>{d.first_visit_price}</span>
                   </div>
                 )}
                 {d.payment_model && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: "#718096" }}>Payment</span>
+                    <span style={{ color: "#718096" }}>{p.payment}</span>
                     <span style={{ fontWeight: 700, color: "#1E2D3B" }}>
                       {d.payment_model === 'cash' ? 'Cash-based' : d.payment_model === 'insurance' ? 'Insurance accepted' : 'Cash & Insurance'}
                     </span>
@@ -666,38 +671,38 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 )}
                 {d.insurance_networks && d.insurance_networks.length > 0 && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, alignItems: "flex-start" }}>
-                    <span style={{ color: "#718096", flexShrink: 0 }}>Carriers</span>
+                    <span style={{ color: "#718096", flexShrink: 0 }}>{p.carriers}</span>
                     <span style={{ fontWeight: 600, color: "#1E2D3B", textAlign: "right" }}>{d.insurance_networks.join(", ")}</span>
                   </div>
                 )}
                 {d.files_insurance && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: "#718096" }}>Files for you</span>
-                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Yes</span>
+                    <span style={{ color: "#718096" }}>{p.files}</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>{p.yes}</span>
                   </div>
                 )}
                 {d.accepted_payment && d.accepted_payment.includes("HSA/FSA") && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: "#718096" }}>HSA/FSA</span>
-                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Accepted</span>
+                    <span style={{ color: "#718096" }}>{p.hsa}</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>{p.accepted}</span>
                   </div>
                 )}
                 {d.payment_plans && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: "#718096" }}>Payment plans</span>
-                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Available</span>
+                    <span style={{ color: "#718096" }}>{p.plans}</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>{p.available}</span>
                   </div>
                 )}
                 {d.free_consultation && (
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                    <span style={{ color: "#718096" }}>Free consultation</span>
-                    <span style={{ fontWeight: 700, color: "#22c55e" }}>Yes</span>
+                    <span style={{ color: "#718096" }}>{p.freeConsult}</span>
+                    <span style={{ fontWeight: 700, color: "#22c55e" }}>{p.yes}</span>
                   </div>
                 )}
               </div>
             ) : (
               <div style={{ padding: "16px 20px", background: "#f8f6f2", borderRadius: 12, fontSize: 14, color: "#718096" }}>
-                <p style={{ margin: 0 }}>Contact the office for pricing and insurance information.</p>
+                <p style={{ margin: 0 }}>{p.askPricing}</p>
                 {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
               </div>
             )}
@@ -707,7 +712,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <Clock style={{ width: 18, height: 18, color: "#D66829" }} />
-              <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Availability</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>{p.availability}</h3>
             </div>
             {(hours || d.accepts_walkins || d.offers_telehealth || d.has_evening_hours || d.has_weekend_hours) ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -715,16 +720,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   <p style={{ fontSize: 13, color: "#4a5568", whiteSpace: "pre-line", lineHeight: 1.7, margin: 0 }}>{hours}</p>
                 )}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: hours ? 8 : 0 }}>
-                  {d.has_evening_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Evening hours</span>}
-                  {d.has_weekend_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Weekend hours</span>}
-                  {d.accepts_walkins && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Walk-ins welcome</span>}
-                  {d.offers_telehealth && <span style={{ padding: "4px 12px", background: "#eff6ff", color: "#2563eb", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Telehealth available</span>}
-                  {acceptingNewPatients && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Accepting new patients</span>}
+                  {d.has_evening_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>{p.evening}</span>}
+                  {d.has_weekend_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>{p.weekend}</span>}
+                  {d.accepts_walkins && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>{p.walkinsWelcome}</span>}
+                  {d.offers_telehealth && <span style={{ padding: "4px 12px", background: "#eff6ff", color: "#2563eb", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>{p.telehealthAvailable}</span>}
+                  {acceptingNewPatients && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>{p.acceptingNew}</span>}
                 </div>
               </div>
             ) : (
               <div style={{ padding: "16px 20px", background: "#f8f6f2", borderRadius: 12, fontSize: 14, color: "#718096" }}>
-                <p style={{ margin: 0 }}>Contact the office for hours and availability.</p>
+                <p style={{ margin: 0 }}>{p.askHours}</p>
                 {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
               </div>
             )}
@@ -743,7 +748,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                   <Award style={{ width: 18, height: 18, color: "#D66829" }} />
-                  <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Certifications</h3>
+                  <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>{p.certifications}</h3>
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {certificationsList.map((c: string, i: number) => (
@@ -756,19 +761,19 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
                   <GraduationCap style={{ width: 18, height: 18, color: "#D66829" }} />
-                  <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>Education</h3>
+                  <h3 style={{ fontSize: 16, fontWeight: 900, color: "#1E2D3B" }}>{p.education}</h3>
                 </div>
                 {/* Structured education (preferred) */}
                 {d.chiropractic_school && (
                   <div style={{ marginBottom: 8 }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: "#1E2D3B" }}>{d.degree || 'Doctor of Chiropractic (DC)'}</p>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "#1E2D3B" }}>{d.degree || p.degree}</p>
                     <p style={{ fontSize: 13, color: "#718096" }}>{d.chiropractic_school}{d.graduation_year ? `, ${d.graduation_year}` : ''}</p>
                   </div>
                 )}
                 {/* Post-doctoral training */}
                 {d.post_doctoral_training && d.post_doctoral_training.length > 0 && (
                   <div style={{ marginTop: 8 }}>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Post-Doctoral Training</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{p.postDoc}</p>
                     {d.post_doctoral_training.map((t: string, i: number) => (
                       <p key={i} style={{ fontSize: 13, color: "#4a5568", marginBottom: 2 }}>{t}</p>
                     ))}
@@ -794,12 +799,12 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       ═══════════════════════════════════════════ */}
       {(mapQuery || hours || parkingInfo || languages?.length || acceptedPayment?.length || insuranceNetworks?.length || firstVisitInfo || amenitiesList?.length) && (
         <Section bg="white" style={{ paddingTop: 80, paddingBottom: 80 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 40 }}>Visit the Practice</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 40 }}>{p.visit}</h2>
 
           {/* First Visit Info — rendered BEFORE map/hours/parking */}
           {firstVisitInfo && (
             <div style={{ maxWidth: 800, margin: "0 auto 40px", padding: "24px 28px", background: "#f8f6f2", borderRadius: 16, border: "1px solid rgba(30,45,59,0.06)" }}>
-              <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>Your First Visit</p>
+              <p style={{ fontSize: 12, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 10 }}>{p.firstVisitLabel}</p>
               <p style={{ fontSize: 14, color: "#4a5568", lineHeight: 1.7, whiteSpace: "pre-line", margin: 0 }}>{firstVisitInfo}</p>
             </div>
           )}
@@ -824,13 +829,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               )}
               {parkingInfo && (
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Parking & Access</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{p.parking}</p>
                   <p style={{ fontSize: 14, color: "#4a5568" }}>{parkingInfo}</p>
                 </div>
               )}
               {languages && languages.length > 0 && (
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Languages</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{p.languages}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {languages.map((l: string, i: number) => (
                       <span key={i} style={{ padding: "5px 12px", background: "#f3f4f6", borderRadius: 8, fontSize: 13, color: "#4a5568" }}>{l}</span>
@@ -840,7 +845,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               )}
               {acceptedPayment && acceptedPayment.length > 0 && (
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Accepted Payment</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{p.paymentAccepted}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {acceptedPayment.map((p: string, i: number) => (
                       <span key={i} style={{ padding: "5px 12px", background: "#f0fdf4", color: "#15803d", fontSize: 12, fontWeight: 700, borderRadius: 8, border: "1px solid #bbf7d0" }}>{p}</span>
@@ -850,7 +855,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               )}
               {insuranceNetworks && insuranceNetworks.length > 0 && (
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Insurance Accepted</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{p.insurance}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {insuranceNetworks.map((ins: string, i: number) => (
                       <span key={i} style={{ padding: "5px 12px", background: "#eff6ff", color: "#1d4ed8", fontSize: 12, borderRadius: 8, border: "1px solid #bfdbfe" }}>{ins}</span>
@@ -860,7 +865,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               )}
               {amenitiesList && amenitiesList.length > 0 && (
                 <div>
-                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>Amenities</p>
+                  <p style={{ fontSize: 12, fontWeight: 800, color: "#9ca3af", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>{p.amenities}</p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {amenitiesList.map((a: string, i: number) => (
                       <span key={i} style={{ padding: "5px 12px", background: "#f3f4f6", borderRadius: 8, fontSize: 13, color: "#4a5568" }}>{a}</span>
@@ -878,7 +883,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       ═══════════════════════════════════════════ */}
       {faq && faq.length > 0 && (
         <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", textAlign: "center", marginBottom: 32 }}>Frequently Asked Questions</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", textAlign: "center", marginBottom: 32 }}>{p.faq}</h2>
           <div style={{ maxWidth: 800, margin: "0 auto", display: "flex", flexDirection: "column", gap: 8 }}>
             {faq.map((item, i) => (
               <details key={i} style={{ border: "1px solid rgba(30,45,59,0.08)", borderRadius: 16, overflow: "hidden", background: "white" }}>
@@ -897,7 +902,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 8 }}>
             <Calendar style={{ width: 20, height: 20, color: "#D66829" }} />
-            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1E2D3B" }}>Request a Consultation</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#1E2D3B" }}>{p.consult}</h2>
           </div>
           {gated ? (
             <div style={{ textAlign: "center", paddingTop: 24 }}>
@@ -905,15 +910,15 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             </div>
           ) : (
             <>
-              <p style={{ textAlign: "center", color: "#718096", fontSize: 14, marginBottom: 8 }}>Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
+              <p style={{ textAlign: "center", color: "#718096", fontSize: 14, marginBottom: 8 }}>{fill(p.consultNote, { who: doctor.clinic_name || name })}</p>
               {acceptingNewPatients !== false && (
-                <p style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#15803d", marginBottom: 4 }}>New patients welcome</p>
+                <p style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#15803d", marginBottom: 4 }}>{p.welcome}</p>
               )}
-              <p style={{ textAlign: "center", fontSize: 13, color: "#4a5568", marginBottom: 20 }}>The office typically replies within 1 business day.</p>
+              <p style={{ textAlign: "center", fontSize: 13, color: "#4a5568", marginBottom: 20 }}>{p.replies}</p>
               {appointmentSubmitted ? requestSuccess() : (
                 <>
                   {requestFields("appt")}
-                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", marginTop: 12 }}>Your request goes to the doctor&apos;s office. NeuroChiro stores it to make sure it gets there, and we never sell or share it with third parties.</p>
+                  <p style={{ fontSize: 12, color: "#9ca3af", textAlign: "center", marginTop: 12 }}>{p.privacyNote}</p>
                 </>
               )}
             </>
@@ -926,7 +931,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       ═══════════════════════════════════════════ */}
       {nearbyDoctors.length > 0 && (
         <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>Other Nervous System Chiropractors Near You</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>{p.nearby}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
             {nearbyDoctors.map((doc: any) => (
               <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`} style={{ background: "white", borderRadius: 20, padding: 24, textDecoration: "none", border: "1px solid rgba(30,45,59,0.04)", display: "block" }}>
@@ -939,7 +944,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                     <p style={{ fontSize: 15, fontWeight: 800, color: "#1E2D3B" }}>Dr. {doc.first_name} {doc.last_name}</p>
                     <p style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}>
                       <MapPin style={{ width: 12, height: 12 }} /> {doc.city}{doc.state ? `, ${doc.state}` : ''}
-                      {doc.distance_miles != null && <span style={{ color: "#D66829", fontWeight: 700, marginLeft: 4 }}>{doc.distance_miles < 1 ? '< 1 mi' : `${Math.round(doc.distance_miles)} mi`}</span>}
+                      {doc.distance_miles != null && <span style={{ color: "#D66829", fontWeight: 700, marginLeft: 4 }}>{locale === "fr" ? formatDistance(doc.distance_miles, "km") : (doc.distance_miles < 1 ? "< 1 mi" : `${Math.round(doc.distance_miles)} mi`)}</span>}
                     </p>
                   </div>
                 </div>
@@ -963,7 +968,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 32 }}>
             <Users style={{ width: 18, height: 18, color: "#D66829" }} />
-            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>Our Team</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>{p.team}</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 20 }}>
             {teamMembersList.map((m, i) => (
@@ -982,10 +987,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
       {galleryImages && galleryImages.length > 0 && (
         <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>Photos</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 32 }}>{p.photos}</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12 }}>
             {galleryImages.map((img: string, i: number) => (
-              <img key={i} src={img} alt={`${doctor.clinic_name || name} office photo ${i + 1}`} style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
+              <img key={i} src={img} alt={fill(p.photoAlt, { name: doctor.clinic_name || name, n: i + 1 })} style={{ width: "100%", aspectRatio: "4 / 3", objectFit: "cover", borderRadius: 16 }} />
             ))}
           </div>
         </Section>
@@ -999,7 +1004,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div style={{ display: "grid", gridTemplateColumns: seminars.length > 0 && jobs.length > 0 ? "1fr 1fr" : "1fr", gap: 32 }}>
             {seminars.length > 0 && (
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Seminars & Events</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>{p.seminars}</h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {seminars.map((sem: any) => (
                     <Link key={sem.id} href={`/seminars/${sem.slug || sem.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
@@ -1020,7 +1025,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             )}
             {jobs.length > 0 && (
               <div>
-                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>Open Positions</h2>
+                <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B", marginBottom: 16 }}>{p.jobs}</h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {jobs.map((job: any) => (
                     <Link key={job.id} href={`/careers/${job.id}`} style={{ background: "white", borderRadius: 16, padding: "16px 20px", textDecoration: "none", border: "1px solid rgba(30,45,59,0.06)", display: "block" }}>
@@ -1032,7 +1037,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                             {(job.salary_min || job.salary_max) && <span style={{ fontSize: 12, color: "#718096" }}>{job.salary_min && job.salary_max ? `$${(job.salary_min/1000).toFixed(0)}k–$${(job.salary_max/1000).toFixed(0)}k` : job.salary_min ? `From $${(job.salary_min/1000).toFixed(0)}k` : `Up to $${(job.salary_max/1000).toFixed(0)}k`}</span>}
                           </div>
                         </div>
-                        <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", background: "#f0fdf4", padding: "3px 10px", borderRadius: 20 }}>Hiring</span>
+                        <span style={{ fontSize: 10, fontWeight: 800, color: "#16a34a", background: "#f0fdf4", padding: "3px 10px", borderRadius: 20 }}>{p.hiring}</span>
                       </div>
                     </Link>
                   ))}
@@ -1051,11 +1056,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           <div style={{ textAlign: "center" }}>
             {session && userRole === 'doctor' ? (
               <Link href={`/doctor/referrals?to=${doctor.id}`} style={{ padding: "14px 32px", background: "#D66829", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8, minHeight: 44 }}>
-                <Users style={{ width: 16, height: 16 }} /> Refer a patient to {name}
+                <Users style={{ width: 16, height: 16 }} /> {fill(p.refer, { name })}
               </Link>
             ) : (
-              <Link href={`/login?next=/directory/${slug}`} style={{ padding: "14px 32px", background: "#1E2D3B", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }}>
-                Sign in to refer
+              <Link href={`/login?next=${encodeURIComponent(localizePath(`/directory/${slug}`, locale))}`} style={{ padding: "14px 32px", background: "#1E2D3B", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 16, textDecoration: "none", display: "inline-flex", alignItems: "center", minHeight: 44 }}>
+                {p.signInRefer}
               </Link>
             )}
           </div>
@@ -1068,11 +1073,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <Section bg="cream" style={{ paddingTop: 32, paddingBottom: 48 }}>
         <div style={{ textAlign: "center" }}>
           {reportSubmitted ? (
-            <p style={{ fontSize: 14, fontWeight: 800, color: "#16a34a" }}>Thank you. Our team will review this.</p>
+            <p style={{ fontSize: 14, fontWeight: 800, color: "#16a34a" }}>{p.reportThanks}</p>
           ) : showReportForm ? (
             <div style={{ background: "white", borderRadius: 20, border: "1px solid rgba(30,45,59,0.08)", padding: 28, textAlign: "left", maxWidth: 500, margin: "0 auto" }}>
-              <h4 style={{ fontWeight: 800, color: "#1E2D3B", marginBottom: 4, fontSize: 14 }}>Report a Concern</h4>
-              <p style={{ color: "#9ca3af", fontSize: 12, marginBottom: 16 }}>All reports are reviewed by our team.</p>
+              <h4 style={{ fontWeight: 800, color: "#1E2D3B", marginBottom: 4, fontSize: 14 }}>{p.reportTitle}</h4>
+              <p style={{ color: "#9ca3af", fontSize: 12, marginBottom: 16 }}>{p.reportBody}</p>
               <form onSubmit={async (e) => {
                 e.preventDefault();
                 const form = e.target as HTMLFormElement;
@@ -1081,39 +1086,39 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   body: JSON.stringify({ email: data.get('email'), first_name: data.get('name'), source: 'report_concern', role: 'report', doctor_id: doctor.id, metadata: { concern: data.get('concern') } }) });
                 setReportSubmitted(true);
               }} style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <input type="text" name="name" required placeholder="Your name" style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14 }} />
-                <input type="email" name="email" required placeholder="Your email" style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14 }} />
-                <textarea name="concern" required placeholder="Describe your concern..." rows={3} style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14, resize: "none" }} />
+                <input type="text" name="name" required placeholder={p.yourName} style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14 }} />
+                <input type="email" name="email" required placeholder={p.yourEmail} style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14 }} />
+                <textarea name="concern" required placeholder={p.concern} rows={3} style={{ padding: "10px 14px", border: "1px solid #e5e7eb", borderRadius: 10, fontSize: 14, resize: "none" }} />
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button type="button" onClick={() => setShowReportForm(false)} style={{ padding: "8px 16px", color: "#718096", fontSize: 13, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
-                  <button type="submit" style={{ padding: "8px 16px", background: "#ef4444", color: "white", fontSize: 13, fontWeight: 800, borderRadius: 8, border: "none", cursor: "pointer" }}>Submit Report</button>
+                  <button type="button" onClick={() => setShowReportForm(false)} style={{ padding: "8px 16px", color: "#718096", fontSize: 13, fontWeight: 700, background: "none", border: "none", cursor: "pointer" }}>{p.cancel}</button>
+                  <button type="submit" style={{ padding: "8px 16px", background: "#ef4444", color: "white", fontSize: 13, fontWeight: 800, borderRadius: 8, border: "none", cursor: "pointer" }}>{p.submitReport}</button>
                 </div>
               </form>
             </div>
           ) : (
-            <button onClick={() => setShowReportForm(true)} style={{ fontSize: 12, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>Report a concern</button>
+            <button onClick={() => setShowReportForm(true)} style={{ fontSize: 12, color: "#9ca3af", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>{p.reportLink}</button>
           )}
           <p style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.6, maxWidth: 500, margin: "16px auto 0" }}>
-            NeuroChiro is a directory service. The &ldquo;Verified&rdquo; badge indicates identity review, not a guarantee of clinical outcomes.{" "}
-            <a href="/terms" style={{ textDecoration: "underline", color: "#9ca3af" }}>Terms</a> · <a href="/privacy" style={{ textDecoration: "underline", color: "#9ca3af" }}>Privacy</a>
+            {p.disclaimer}{" "}
+            <a href="/terms" style={{ textDecoration: "underline", color: "#9ca3af" }}>{p.terms}</a> · <a href="/privacy" style={{ textDecoration: "underline", color: "#9ca3af" }}>{p.privacy}</a>
           </p>
         </div>
       </Section>
 
       <div style={{ background: "#F5F3EF", padding: "8px 24px 28px", textAlign: "center" }}>
         <p style={{ fontSize: 13, color: "#718096", margin: 0 }}>
-          Are you a nervous system chiropractor?{" "}
-          <Link href="/pro" style={{ color: "#D66829", fontWeight: 800, textDecoration: "none" }}>Get a profile like this →</Link>
+          {p.areYou}{" "}
+          <Link href="/pro" style={{ color: "#D66829", fontWeight: 800, textDecoration: "none" }}>{p.likeThis}</Link>
         </p>
       </div>
 
       {/* Patient list CTA */}
       <div style={{ background: "#f5f3ef", padding: "32px 24px", textAlign: "center" }}>
         <p style={{ fontSize: 14, color: "#718096", marginBottom: 8 }}>
-          Can't find a nervous system chiropractor near you?
+          {p.cantFind}
         </p>
         <a href="/list?source=profile_footer" style={{ color: "#D66829", fontWeight: 800, fontSize: 14, textDecoration: "none" }}>
-          Join the patient list and get notified when one joins your area →
+          {p.joinList}
         </a>
       </div>
         </div>
@@ -1125,22 +1130,22 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden" style={{ background: 'rgba(30,45,59,0.95)', backdropFilter: 'blur(20px)', padding: '12px 16px', paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="flex gap-3 max-w-lg mx-auto">
           {gated ? (
-            <button onClick={() => document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' })} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
-              <Calendar className="w-4 h-4" /> Request Appointment
+            <button onClick={() => document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' })} className="flex-1 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={p.request}>
+              <Calendar className="w-4 h-4" /> {p.requestSticky}
             </button>
           ) : (
             <>
-              <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange-ink text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label="Request appointment">
-                <Calendar className="w-4 h-4" /> Request
+              <button onClick={() => { trackConversion('inquiry'); document.getElementById('appointment-form')?.scrollIntoView({ behavior: 'smooth' }); }} className="flex-1 py-3 bg-neuro-orange-ink text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={p.request}>
+                <Calendar className="w-4 h-4" /> {p.requestShort}
               </button>
               {doctor.phone && (
-                <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
-                  <Phone className="w-4 h-4" /> Call
+                <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={fill(p.callName, { name })}>
+                  <Phone className="w-4 h-4" /> {p.call}
                 </a>
               )}
               {bookingUrl ? (
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 border border-white/30 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book on the website for ${name}`}>
-                  Book
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 border border-white/30 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={fill(p.bookFor, { name })}>
+                  {p.bookSticky}
                 </a>
               ) : null}
             </>

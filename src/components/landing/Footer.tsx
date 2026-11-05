@@ -1,34 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Instagram, Linkedin } from "lucide-react";
-
-const PATIENT_LINKS = [
-  { name: "Find a doctor", href: "/directory" },
-  { name: "Take the quiz", href: "/quiz?source=footer" },
-  { name: "Learn", href: "/learn" },
-  { name: "FAQ", href: "/learn/faq" },
-  { name: "Patient list", href: "/list?source=site_footer" },
-];
-
-const CHIRO_LINKS = [
-  { name: "Membership", href: "/pro?source=site_footer" },
-  { name: "Seminars", href: "/seminars" },
-  { name: "Marketplace", href: "/marketplace" },
-  { name: "Careers", href: "/jobs" },
-  { name: "Store", href: "/store" },
-  { name: "Students", href: "/students" },
-  { name: "Log in", href: "/login" },
-];
-
-const COMPANY_LINKS = [
-  { name: "About", href: "/about" },
-  { name: "Contact", href: "/contact" },
-  { name: "Privacy", href: "/privacy" },
-  { name: "Terms", href: "/terms" },
-];
+import { LocaleLink as Link } from "@/i18n/LocaleLink";
+import { useDictionary } from "@/i18n/locale-context";
 
 function XIcon() {
   return (
@@ -57,6 +33,30 @@ function Column({ title, links }: { title: string; links: { name: string; href: 
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const t = useDictionary();
+  const patientLinks = [
+    { name: t.nav.findDoctor, href: "/directory" },
+    { name: t.nav.quiz, href: "/quiz?source=footer" },
+    { name: t.nav.learn, href: "/learn" },
+    { name: t.nav.faq, href: "/learn/faq" },
+    { name: t.footer.patientList, href: "/list?source=site_footer" },
+  ];
+  const chiroLinks = [
+    { name: t.nav.membership, href: "/pro?source=site_footer" },
+    { name: t.nav.seminars, href: "/seminars" },
+    { name: t.nav.marketplace, href: "/marketplace" },
+    { name: t.nav.careers, href: "/jobs" },
+    { name: t.nav.store, href: "/store" },
+    { name: t.nav.students, href: "/students" },
+    { name: t.nav.logIn, href: "/login" },
+  ];
+  const companyLinks = [
+    { name: t.nav.about, href: "/about" },
+    { name: t.nav.contact, href: "/contact" },
+    { name: t.nav.privacy, href: "/privacy" },
+    { name: t.nav.terms, href: "/terms" },
+  ];
+
   return (
     <footer className="border-t border-white/10 bg-neuro-black px-4 py-12 text-white sm:px-6">
       <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -68,26 +68,26 @@ export default function Footer() {
             </span>
           </Link>
           <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-gray-400">
-            A free directory of verified nervous system chiropractors.
+            {t.footer.tagline}
           </p>
           <div className="mt-4 flex gap-2">
-            <Link href="https://twitter.com/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label="Follow NeuroChiro on X">
+            <Link href="https://twitter.com/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label={t.footer.x}>
               <XIcon />
             </Link>
-            <Link href="https://instagram.com/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label="Follow NeuroChiro on Instagram">
+            <Link href="https://instagram.com/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label={t.footer.instagram}>
               <Instagram className="h-5 w-5" aria-hidden />
             </Link>
-            <Link href="https://linkedin.com/company/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label="Follow NeuroChiro on LinkedIn">
+            <Link href="https://linkedin.com/company/neurochiro" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5" aria-label={t.footer.linkedin}>
               <Linkedin className="h-5 w-5" aria-hidden />
             </Link>
           </div>
         </div>
-        <Column title="For patients" links={PATIENT_LINKS} />
-        <Column title="For chiropractors" links={CHIRO_LINKS} />
+        <Column title={t.nav.forPatients} links={patientLinks} />
+        <Column title={t.nav.forChiropractors} links={chiroLinks} />
         <div>
-          <h2 className="text-base font-bold text-gray-200">Company</h2>
+          <h2 className="text-base font-bold text-gray-200">{t.footer.company}</h2>
           <ul className="mt-2">
-            {COMPANY_LINKS.map((link) => (
+            {companyLinks.map((link) => (
               <li key={link.href}>
                 <Link href={link.href} className="inline-flex min-h-11 items-center py-2 text-sm text-gray-400 hover:text-white">
                   {link.name}
@@ -96,34 +96,35 @@ export default function Footer() {
             ))}
             <li>
               <a href="mailto:support@neurochirodirectory.com" className="inline-flex min-h-11 items-center py-2 text-sm text-gray-400 hover:text-white">
-                Feedback
+                {t.footer.feedback}
               </a>
             </li>
           </ul>
-          <h2 className="mt-6 text-base font-bold text-gray-200">Stay updated</h2>
-          <p className="mt-2 text-sm leading-relaxed text-gray-400">Get updates when new doctors join near you.</p>
+          <h2 className="mt-6 text-base font-bold text-gray-200">{t.footer.stayUpdated}</h2>
+          <p className="mt-2 text-sm leading-relaxed text-gray-400">{t.footer.stayBody}</p>
           <NewsletterForm />
         </div>
       </div>
       <div className="mx-auto mt-10 flex max-w-6xl flex-col gap-3 border-t border-white/10 pt-6 text-sm text-gray-400 sm:flex-row sm:items-center sm:justify-between">
         <p>© {year} NeuroChiro</p>
         <div className="flex gap-4">
-          <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-white">Privacy</Link>
-          <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-white">Terms</Link>
+          <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-white">{t.footer.privacy}</Link>
+          <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-white">{t.footer.terms}</Link>
         </div>
       </div>
       <p className="mx-auto mt-2 max-w-6xl text-xs text-gray-300">
-        Postal code data from{" "}
+        {t.footer.geonames.split("GeoNames")[0]}
         <a href="https://www.geonames.org" className="underline hover:text-white" target="_blank" rel="noopener noreferrer">
           GeoNames
-        </a>{" "}
-        (geonames.org), CC BY 4.0.
+        </a>
+        {t.footer.geonames.includes("(geonames.org)") ? " (geonames.org), CC BY 4.0." : ""}
       </p>
     </footer>
   );
 }
 
 function NewsletterForm() {
+  const t = useDictionary();
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const [email, setEmail] = useState("");
 
@@ -144,19 +145,19 @@ function NewsletterForm() {
   };
 
   if (status === "success") {
-    return <p className="mt-3 text-sm font-bold text-emerald-300">You&apos;re on the list.</p>;
+    return <p className="mt-3 text-sm font-bold text-emerald-300">{t.footer.joined}</p>;
   }
 
   return (
     <form className="mt-3 flex gap-2" onSubmit={handleSubmit}>
-      <label htmlFor="footer-email" className="sr-only">Email</label>
+      <label htmlFor="footer-email" className="sr-only">{t.footer.email}</label>
       <input
         id="footer-email"
         type="email"
         required
         value={email}
         onChange={(event) => setEmail(event.target.value)}
-        placeholder="Email address"
+        placeholder={t.footer.emailPlaceholder}
         className="min-h-11 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-base text-white placeholder:text-gray-500 focus:border-neuro-orange-light focus:outline-none"
       />
       <button
@@ -164,7 +165,7 @@ function NewsletterForm() {
         disabled={status === "loading"}
         className="min-h-11 shrink-0 rounded-lg bg-neuro-orange-ink px-4 text-sm font-bold text-white disabled:opacity-50"
       >
-        {status === "loading" ? "..." : "Join"}
+        {status === "loading" ? "..." : t.footer.join}
       </button>
     </form>
   );
