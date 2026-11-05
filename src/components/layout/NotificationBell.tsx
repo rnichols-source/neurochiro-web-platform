@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Bell, X, Check, ExternalLink, Settings, Info, AlertTriangle, Zap, Megaphone, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase";
@@ -47,18 +47,22 @@ export default function NotificationBell({
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [unreadCount, setUnreadCount] = useState(unreadOverride || 0);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+  const getSupabase = useCallback(() => {
+    if (!supabaseRef.current) supabaseRef.current = createClient();
+    return supabaseRef.current;
+  }, []);
 
   useEffect(() => {
     if (typeof unreadOverride === 'number') setUnreadCount(unreadOverride);
   }, [unreadOverride]);
 
   const fetchNotifications = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) return;
 
     // Fetch individual notifications
-    const { data: notifs, error } = await supabase
+    const { data: notifs, error } = await getSupabase()
       .from('notifications')
       .select('*')
       .eq('user_id', user.id)
@@ -80,10 +84,10 @@ export default function NotificationBell({
     }
 
     // Fetch global announcements not dismissed
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const { data: profile } = await getSupabase().from('profiles').select('role').eq('id', user.id).single();
     const role = profile?.role || 'patient';
 
-    const anncsResult = await supabase
+    const anncsResult = await getSupabase()
       .from('announcements')
       .select('*')
       .or(`audience_type.eq.all,audience_type.eq.${role}`)
@@ -98,7 +102,7 @@ export default function NotificationBell({
     }
 
     // Filter out dismissed announcements
-    const dismissalsResult = await supabase
+    const dismissalsResult = await getSupabase()
       .from('announcement_dismissals')
       .select('announcement_id')
       .eq('user_id', user.id);
@@ -117,11 +121,11 @@ export default function NotificationBell({
       setUnreadCount(prev => prev + activeAnncs.length);
     }
     setLoading(false);
-  }, [supabase, includeAnnouncements, unreadOverride]);
+  }, [getSupabase, includeAnnouncements, unreadOverride]);
 
   useEffect(() => {
     let cancelled = false;
-    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let channel: ReturnType<ReturnType<typeof createClient>["channel"]> | null = null;
     let poll: ReturnType<typeof setInterval> | null = null;
 
     const stopPoll = () => {
@@ -131,7 +135,7 @@ export default function NotificationBell({
     };
 
     async function start() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await getSupabase().auth.getUser();
       if (cancelled || !user) {
         setLoading(false);
         return;
@@ -139,7 +143,7 @@ export default function NotificationBell({
       await fetchNotifications();
       if (cancelled) return;
 
-      channel = supabase
+      channel = getSupabase()
         .channel(`realtime_notifications_${user.id}`)
         .on('postgres_changes', {
           event: 'INSERT',
@@ -164,15 +168,15 @@ export default function NotificationBell({
     return () => {
       cancelled = true;
       stopPoll();
-      if (channel) supabase.removeChannel(channel);
+      if (channel) getSupabase().removeChannel(channel);
     };
-  }, [fetchNotifications, supabase]);
+  }, [fetchNotifications, getSupabase]);
 
   const markAsRead = async (id: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) return;
 
-    await supabase
+    await getSupabase()
       .from('notifications')
       .update({ read_at: new Date().toISOString() })
       .eq('id', id);
@@ -182,10 +186,10 @@ export default function NotificationBell({
   };
 
   const markAllAsRead = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) return;
 
-    await supabase
+    await getSupabase()
       .from('notifications')
       .update({ read_at: new Date().toISOString() })
       .eq('user_id', user.id)
@@ -196,10 +200,10 @@ export default function NotificationBell({
   };
 
   const dismissAnnouncement = async (id: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await getSupabase().auth.getUser();
     if (!user) return;
 
-    await supabase
+    await getSupabase()
       .from('announcement_dismissals')
       .insert({ announcement_id: id, user_id: user.id });
     
