@@ -18,6 +18,7 @@ import {
   type Place,
 } from '@/lib/referrals/pure';
 import { hiddenTestUserIds } from '@/lib/profiles/test-users';
+import { REFERRAL_DOCTOR_SELECT } from '@/lib/referrals/columns';
 
 export type ReferableDoctor = {
   id: string;
@@ -63,11 +64,10 @@ type DoctorRow = {
   is_founding_member: boolean | null;
   neuros_tier: string | null;
   created_at: string | null;
-  subscription_status: string | null;
   verification_status: string | null;
 };
 
-const SELECT = 'id, user_id, first_name, last_name, clinic_name, city, state, country, slug, photo_url, specialties, latitude, longitude, accepting_new_patients, membership_tier, is_founding_member, neuros_tier, created_at, subscription_status, verification_status';
+const SELECT = REFERRAL_DOCTOR_SELECT;
 
 function membershipOf(row: DoctorRow, stripeIds: Set<string>) {
   const hasStripe = Boolean(row.user_id && stripeIds.has(row.user_id));
@@ -77,9 +77,8 @@ function membershipOf(row: DoctorRow, stripeIds: Set<string>) {
     neurosTier: row.neuros_tier,
     createdAt: row.created_at,
     hasStripeCustomer: hasStripe,
-    stripeStatus: hasStripe
-      ? ((row.subscription_status as 'active' | 'trialing' | 'past_due' | 'canceled' | 'none' | null) || 'active')
-      : null,
+    // No subscription_status column exists. A Stripe customer stays active, which is the old null-status fallback.
+    stripeStatus: hasStripe ? 'active' : null,
   });
 }
 
@@ -130,7 +129,10 @@ async function stripeSet(admin: any, userIds: string[]): Promise<Set<string>> {
 
 async function runQuery(build: () => any): Promise<DoctorRow[]> {
   const { data, error } = await build();
-  if (error) return [];
+  if (error) {
+    console.error('[referrals] doctor query failed', error.code || '', error.message || '');
+    return [];
+  }
   return (data || []) as DoctorRow[];
 }
 
