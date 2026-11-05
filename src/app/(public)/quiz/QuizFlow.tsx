@@ -324,7 +324,7 @@ export default function QuizFlow() {
                 <label htmlFor="quiz-country" className="text-sm font-semibold text-neuro-navy">Country</label>
                 <select id="quiz-country" autoComplete="country" value={answers.country} onChange={(event) => save({ ...answers, country: event.target.value as QuizCountry, region: '' })} className={field}>
                   {QUIZ_COUNTRIES.map((code) => (
-                    <option key={code} value={code}>{code === 'US' ? 'United States' : code === 'CA' ? 'Canada' : code === 'UK' ? 'United Kingdom' : code === 'AU' ? 'Australia' : 'New Zealand'}</option>
+                    <option key={code} value={code}>{code === 'US' ? 'United States' : code === 'CA' ? 'Canada' : code === 'UK' ? 'United Kingdom' : code === 'AU' ? 'Australia' : code === 'NZ' ? 'New Zealand' : code === 'IE' ? 'Ireland' : code === 'IN' ? 'India' : 'United Arab Emirates'}</option>
                   ))}
                 </select>
               </div>

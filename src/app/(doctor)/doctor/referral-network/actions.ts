@@ -42,8 +42,10 @@ async function geocodeQuery(query: string, country: string): Promise<{ lat: numb
   const admin = createAdminClient()
   const trimmed = query.trim()
 
-  // Try postal code detection first
-  const postal = detectPostalCode(trimmed, country)
+  // Try postal code detection first. A 6-digit code is an India PIN even if the
+  // doctor is browsing from the US.
+  let postal = detectPostalCode(trimmed, country)
+  if (!postal && /^\d{6}$/.test(trimmed.replace(/\s+/g, ''))) postal = detectPostalCode(trimmed, 'IN')
   if (postal) {
     const { data } = await (admin as any)
       .from('zip_codes')
@@ -55,6 +57,12 @@ async function geocodeQuery(query: string, country: string): Promise<{ lat: numb
     if (data) {
       return { lat: Number(data.lat), lng: Number(data.lng), city: data.city, state: data.state }
     }
+    const { resolveLocation } = await import('@/lib/resolve-city')
+    const geo = await resolveLocation(trimmed, postal.country)
+    if (geo.resolved) {
+      return { lat: geo.resolved.lat, lng: geo.resolved.lng, city: geo.resolved.city, state: geo.resolved.state }
+    }
+    return null
   }
 
   // Try city name lookup in zip_codes

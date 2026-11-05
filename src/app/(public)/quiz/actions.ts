@@ -132,7 +132,7 @@ export async function requestAppointment(raw: unknown) {
   }
 }
 
-function emailDoctors(doctors: RankDoctor[], ids: string[], country: 'US' | 'CA' | 'UK' | 'AU' | 'NZ') {
+function emailDoctors(doctors: RankDoctor[], ids: string[], country: 'US' | 'CA' | 'UK' | 'AU' | 'NZ' | 'IE' | 'IN' | 'AE') {
   const byId = new Map(doctors.filter((doctor) => doctor.id).map((doctor) => [doctor.id, doctor]))
   return ids.flatMap((id) => {
     const doctor = byId.get(id)

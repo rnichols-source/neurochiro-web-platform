@@ -1,5 +1,6 @@
 import { currencyForCountry, type DoctorCurrency } from './prices.ts'
 import { APPLICATION_COUNTRIES } from './countries.ts'
+import { toApplicationE164 } from './phone.ts'
 
 export { APPLICATION_COUNTRIES }
 
@@ -17,6 +18,8 @@ export type ApplicationAnswers = {
   instagram: string
   heardAbout: string
   whyJoin: string
+  mobileE164: string
+  smsConsent: boolean
 }
 
 const COUNTRY_CODES = new Set(APPLICATION_COUNTRIES.map((item) => item.code))
@@ -78,6 +81,18 @@ export function validateAnswers(input: unknown): { ok: true; value: ApplicationA
   if (heardAbout.length < 2) return { ok: false, error: 'Tell us how you heard about NeuroChiro.' }
   if (whyJoin.length < 20) return { ok: false, error: 'Tell us a little more about why you want to join.' }
   if (whyJoin.length > 2000) return { ok: false, error: 'The “why join” answer is too long.' }
+  const mobileE164 = toApplicationE164(text(source.mobile), country)
+  if (!mobileE164) {
+    return {
+      ok: false,
+      error: country === 'OTHER'
+        ? 'Enter a mobile number with + and the country code.'
+        : 'Enter a mobile number for the country you selected.',
+    }
+  }
+  if (source.smsConsent !== true) {
+    return { ok: false, error: 'Check the box so we can text you about your application and patient requests.' }
+  }
 
   return {
     ok: true,
@@ -95,6 +110,8 @@ export function validateAnswers(input: unknown): { ok: true; value: ApplicationA
       instagram,
       heardAbout,
       whyJoin,
+      mobileE164,
+      smsConsent: true,
     },
   }
 }

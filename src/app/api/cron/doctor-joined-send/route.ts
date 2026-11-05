@@ -6,6 +6,7 @@ import {
   type MatchedSubscriber,
 } from '@/lib/doctor-joined-notify'
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email'
+import { sendWaitlistDoctorJoinedText, waitlistDoctorJoinedText } from '@/lib/sms/waitlist-alert'
 
 /**
  * Cron: Process pending doctor-joined notification queue.
@@ -22,6 +23,28 @@ import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/
  *
  * Schedule: 0 11,23 * * * (11am and 11pm UTC — 1hr after scan)
  */
+async function textJoinedSubscriber(
+  supabase: ReturnType<typeof createAdminClient>,
+  subscriberId: string,
+  doctorName: string,
+  city: string | null,
+  profileUrl: string,
+) {
+  try {
+    const { data, error } = await (supabase as any)
+      .from('subscribers')
+      .select('sms_phone, sms_consent, sms_opted_out_at')
+      .eq('id', subscriberId)
+      .maybeSingle()
+    if (error || !data?.sms_consent || !data.sms_phone || data.sms_opted_out_at) return
+    const body = waitlistDoctorJoinedText(doctorName, city || '', profileUrl)
+    if (!body.includes('https://neurochiro.co/')) return
+    await sendWaitlistDoctorJoinedText(data.sms_phone, body)
+  } catch (err) {
+    console.warn('[DOCTOR-JOINED-SEND] Text skipped:', err instanceof Error ? err.message : 'failed')
+  }
+}
+
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
@@ -186,6 +209,7 @@ export async function GET(req: NextRequest) {
           resend_id: (result as any)?.data?.id || undefined,
         })
         email1Sent++
+        await textJoinedSubscriber(supabase, sub.id, doctorName, doctor.city, profileUrl)
       } catch (err) {
         console.error(`[DOCTOR-JOINED-SEND] Email 1 failed for ${sub.email}:`, err)
         // Roll back dedupe on failure

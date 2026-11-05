@@ -13,7 +13,11 @@ export type LocationShape = {
 };
 
 export function looksLikePostal(query: string): boolean {
-  return /^\d{5}(?:-\d{4})?$/.test(query.trim().replace(/\s+/g, ''));
+  const compact = query.trim().replace(/\s+/g, '');
+  if (/^\d{4,6}(?:-\d{4})?$/.test(compact)) return true;
+  if (/^[A-Za-z]\d[A-Za-z]\d[A-Za-z]\d$/.test(compact)) return true;
+  if (/^[A-Za-z]{1,2}\d[A-Za-z\d]?\d[A-Za-z]{2}$/.test(compact)) return true;
+  return false;
 }
 
 /** A city, "City, ST", or a postal code. A long sentence is a name or clinic. */

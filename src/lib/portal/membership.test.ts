@@ -25,7 +25,7 @@ test('comped pro', () => {
   });
   assert.equal(membership.tier, 'pro');
   assert.equal(membership.source, 'comped');
-  assert.equal(membership.priceLabel, '$49/mo');
+  assert.equal(membership.priceLabel, '$99/mo');
   assert.equal(membership.hasPracticeTools, false);
 });
 
@@ -40,7 +40,7 @@ test('stripe active', () => {
   assert.equal(membership.source, 'stripe');
   assert.equal(membership.status, 'active');
   assert.equal(membership.tier, 'pro');
-  assert.equal(membership.priceLabel, '$49/mo');
+  assert.equal(membership.priceLabel, '$99/mo');
   assert.equal(membership.renewsAt, '2026-12-01');
   assert.equal(membership.hasPracticeTools, true);
 });
@@ -125,7 +125,7 @@ test('derive past_due stays pro', () => {
   });
   assert.equal(membership.tier, 'pro');
   assert.equal(membership.status, 'past_due');
-  assert.equal(membership.priceLabel, '$49/mo');
+  assert.equal(membership.priceLabel, '$99/mo');
 });
 
 test('derive trialing stays pro', () => {

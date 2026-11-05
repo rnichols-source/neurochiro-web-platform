@@ -12,7 +12,7 @@ export default function SMSTermsPage() {
       <section className="bg-neuro-navy text-white pt-32 pb-12 px-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-heading font-black text-white mb-4">SMS Terms &amp; Conditions</h1>
-          <p className="text-gray-400">Last updated: November 3, 2026</p>
+          <p className="text-gray-400">Last updated: November 4, 2026</p>
         </div>
       </section>
 
@@ -30,6 +30,7 @@ export default function SMSTermsPage() {
             <h2 className="text-xl font-heading font-black text-neuro-navy mb-3">What we send</h2>
             <ul className="list-disc pl-6 text-gray-600 space-y-2">
               <li>Patients: a confirmation that an appointment request reached the office.</li>
+              <li>Patients who join the patient list and check the text box: a short alert when a NeuroChiro doctor joins near them, with a link on neurochiro.co.</li>
               <li>Doctors and their staff: an alert when a new patient request arrives.</li>
             </ul>
             <p className="text-gray-600 leading-relaxed mt-3">
@@ -40,7 +41,7 @@ export default function SMSTermsPage() {
           <div>
             <h2 className="text-xl font-heading font-black text-neuro-navy mb-3">How you opt in</h2>
             <ul className="list-disc pl-6 text-gray-600 space-y-2">
-              <li>Patients: check the optional text box on a request form on neurochiro.co.</li>
+              <li>Patients: check the optional text box on a request form, or on the patient list, on neurochiro.co.</li>
               <li>Doctors: add a mobile number and check the box in NeuroChiro settings, or ask us in writing.</li>
             </ul>
             <p className="text-gray-600 leading-relaxed mt-3 font-bold">
