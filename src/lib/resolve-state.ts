@@ -201,6 +201,9 @@ export function detectPostalCountry(input: string): string | null {
   if (/^[A-Za-z]{1,2}\d[A-Za-z\d]?\s?\d[A-Za-z]{2}$/.test(trimmed)) return 'GB'
   if (/^[A-Za-z]{1,2}\d[A-Za-z\d]?$/.test(trimmed)) return 'GB'
 
+  // India PIN, or Singapore when the caller already knows the country.
+  if (/^\d{6}$/.test(trimmed.replace(/\s+/g, ''))) return 'IN'
+
   // NZ: 4 digits (ambiguous with US partial, but handled with region context by caller)
   if (/^\d{4}$/.test(trimmed)) return 'NZ'  // caller should cross-check with region
 

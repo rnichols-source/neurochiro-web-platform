@@ -7,6 +7,7 @@ import { EUROPEAN_ISO, countryHint, toDirectoryCountry } from '@/lib/directory-c
 import { excludeDemo } from '@/lib/directory/exclude-demo';
 import { applyPublicListing, isDoctorPubliclyVisible } from '@/lib/directory/visibility';
 import { hiddenTestUserIds } from '@/lib/profiles/test-users';
+import { detectPostalCode } from '@/lib/detect-postal';
 // city-data import removed — using resolve-city.ts shared resolver
 
 const STATE_MAP: Record<string, string> = {
@@ -100,36 +101,10 @@ function splitCityState(input: string, country: string = 'US'): { city: string; 
  * Returns { code, country } or null.
  */
 function extractPostalCode(input: string, regionHint: string = 'US'): { code: string; country: string } | null {
-  const cleaned = input.replace(/\s+/g, '').trim()
-  if (!cleaned) return null
-
-  // US: 5-digit ZIP, optionally +4
-  const usMatch = cleaned.match(/^(\d{5})(?:-\d{4})?$/)
-  if (usMatch) return { code: usMatch[1], country: 'US' }
-
-  // CA: full postal code A1A1A1 or FSA A1A
-  const caFull = cleaned.toUpperCase().match(/^([A-Z]\d[A-Z])\d[A-Z]\d$/)
-  if (caFull) return { code: caFull[1], country: 'CA' } // use FSA for lookup
-  const caFsa = cleaned.toUpperCase().match(/^([A-Z]\d[A-Z])$/)
-  if (caFsa) return { code: caFsa[1], country: 'CA' }
-
-  // UK: outward code (1-2 letters + digit + optional letter/digit), optionally with inward
-  const withSpace = input.trim().toUpperCase()
-  const ukFull = withSpace.match(/^([A-Z]{1,2}\d[A-Z\d]?)\s?\d[A-Z]{2}$/)
-  if (ukFull) return { code: ukFull[1], country: 'GB' }
-  const ukOutward = withSpace.match(/^([A-Z]{1,2}\d[A-Z\d]?)$/)
-  if (ukOutward) return { code: ukOutward[1], country: 'GB' }
-
-  // NZ: 4-digit (only if region hint is NZ, since 4 digits could be a partial US ZIP)
-  if (/^\d{4}$/.test(cleaned) && regionHint === 'NZ') {
-    return { code: cleaned, country: 'NZ' }
-  }
-
-  // AU: 4-digit (only if region hint is AU)
-  if (/^\d{4}$/.test(cleaned) && regionHint === 'AU') {
-    return { code: cleaned, country: 'AU' }
-  }
-
+  const hint = regionHint === 'UK' ? 'GB' : regionHint === 'EU' || regionHint === 'ALL' ? 'US' : regionHint
+  const detected = detectPostalCode(input, hint)
+  if (detected) return detected
+  if (/^\d{6}$/.test(input.replace(/\s+/g, ''))) return detectPostalCode(input, 'IN')
   return null
 }
 
@@ -280,6 +255,14 @@ export async function searchDirectory(request: NextRequest) {
 
     if (postalMatch) {
       zipResolved = await lookupPostalCode(supabase, postalMatch.code, postalMatch.country);
+      if (!zipResolved && postalMatch.country !== 'US') {
+        const { resolveLocation } = await import('@/lib/resolve-city');
+        const geo = await resolveLocation(locationInput || rawQuery, postalMatch.country);
+        if (geo.resolved) {
+          zipResolved = geo.resolved;
+          locationLabel = geo.label;
+        }
+      }
       if (!zipResolved) {
         return NextResponse.json({
           doctors: [],
@@ -289,7 +272,7 @@ export async function searchDirectory(request: NextRequest) {
           locationLabel: `We couldn't find postal code ${postalMatch.code}. Try a city name or check the code.`,
         });
       }
-      locationLabel = `Showing doctors near ${zipResolved.city}, ${zipResolved.state}`;
+      if (!locationLabel) locationLabel = `Showing doctors near ${zipResolved.city}, ${zipResolved.state}`;
     }
 
     // Text search — state is always queried as 2-letter code via resolveStateCode

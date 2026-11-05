@@ -67,6 +67,16 @@ test('UK postcodes keep the outward code', () => {
   assert.equal(isNearbyPlace(full), true)
 })
 
+test('an India PIN stays 6 digits and is not a US ZIP', () => {
+  const pin = parsed('110001', 'IN')
+  assert.equal(pin.postal?.code, '110001')
+  assert.equal(pin.postal?.country, 'IN')
+  assert.equal(pin.postal?.prefix, false)
+  const bare = parsed('110001')
+  assert.equal(bare.postal?.country, 'IN')
+  assert.equal(bare.postal?.code, '110001')
+})
+
 test('four digits are ambiguous unless the country hint is AU or NZ', () => {
   const open = parsed('2000')
   assert.equal(open.postal?.prefix, true)

@@ -7,13 +7,16 @@ import { approveDoctorApplication, declineDoctorApplication } from './actions'
 export function ApplicationsClient({
   rows,
   loadError,
+  initialNotice = '',
 }: {
   rows: AdminApplicationRow[]
   loadError: string | null
+  initialNotice?: string
 }) {
   const [filter, setFilter] = useState<'open' | 'all'>('open')
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [message, setMessage] = useState('')
+  const [warning, setWarning] = useState(initialNotice)
   const [busy, setBusy] = useState('')
 
   const visible = rows.filter((row) => filter === 'all' || row.status === 'draft' || row.status === 'under_review' || row.status === 'needs_action')
@@ -21,10 +24,16 @@ export function ApplicationsClient({
   async function run(id: string, kind: 'approve' | 'decline') {
     setBusy(`${kind}:${id}`)
     setMessage('')
+    setWarning('')
     const action = kind === 'approve' ? approveDoctorApplication : declineDoctorApplication
     const result = await action(id, notes[id] || '')
     setMessage(result.message)
+    setWarning(result.warning || '')
     setBusy('')
+    if (result.ok && result.warning) {
+      window.location.href = `/admin/applications?notice=${encodeURIComponent(result.warning)}`
+      return
+    }
     if (result.ok) window.location.reload()
   }
 
@@ -37,6 +46,7 @@ export function ApplicationsClient({
         </p>
       </div>
       {loadError ? <p className="rounded-xl bg-white p-4 text-sm">{loadError}</p> : null}
+      {warning ? <p role="status" className="rounded-xl border border-neuro-orange/40 bg-white p-4 text-sm">{warning}</p> : null}
       {message ? <p className="rounded-xl bg-white p-4 text-sm">{message}</p> : null}
       <div className="flex gap-2">
         <button type="button" onClick={() => setFilter('open')} className={`min-h-11 rounded-xl px-4 text-sm font-bold ${filter === 'open' ? 'bg-neuro-orange text-white' : 'bg-white'}`}>Needs a decision</button>
@@ -56,6 +66,8 @@ export function ApplicationsClient({
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div><dt className="font-bold">Plan</dt><dd>{row.plan} · {row.priceLabel}</dd></div>
             <div><dt className="font-bold">Card on file</dt><dd>{row.cardOnFile ? 'Yes' : 'No'}</dd></div>
+            <div><dt className="font-bold">Mobile</dt><dd>{row.mobile || 'Not given'}</dd></div>
+            <div><dt className="font-bold">Text consent</dt><dd>{row.smsConsent}</dd></div>
             <div><dt className="font-bold">Years in practice</dt><dd>{row.years ?? '—'}</dd></div>
             <div><dt className="font-bold">Scans</dt><dd>{row.scans}</dd></div>
             <div className="sm:col-span-2"><dt className="font-bold">Approach</dt><dd>{row.approach || '—'}</dd></div>

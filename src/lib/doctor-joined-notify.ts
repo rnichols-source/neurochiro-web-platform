@@ -12,6 +12,7 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { haversineDistance } from '@/lib/geo'
+import { postalLookupKey } from '@/lib/detect-postal'
 
 // ── Types ──
 
@@ -149,26 +150,36 @@ export async function findMatchingSubscribers(
   const doctorLat = Number(doctor.latitude)
   const doctorLng = Number(doctor.longitude)
 
-  // Load confirmed subscribers with coords, country-isolated
-  let subQuery = (supabase as any)
-    .from('subscribers')
-    .select('id, email, zip, country')
-    .eq('status', 'confirmed')
-    .is('unsubscribed_at', null)
+  // Load confirmed subscribers with coords, country-isolated.
+  // Newer columns (coordinates, SMS consent) are optional until the waitlist migration runs.
+  const subscriberColumns = 'id, email, zip, country, latitude, longitude, sms_phone, sms_consent, sms_opted_out_at'
+  const loadSubscribers = async (columns: string) => {
+    let subQuery = (supabase as any)
+      .from('subscribers')
+      .select(columns)
+      .eq('status', 'confirmed')
+      .is('unsubscribed_at', null)
 
-  if (doctorCountry === 'US') {
-    subQuery = subQuery.or('country.eq.US,country.is.null')
-  } else {
-    subQuery = subQuery.eq('country', doctorCountry)
+    if (doctorCountry === 'US') {
+      subQuery = subQuery.or('country.eq.US,country.is.null')
+    } else {
+      subQuery = subQuery.eq('country', doctorCountry)
+    }
+    return subQuery
   }
 
-  const { data: subscribers } = await subQuery
+  const firstLoad = await loadSubscribers(subscriberColumns)
+  let subscribers = firstLoad.data
+  if (firstLoad.error) {
+    const fallback = await loadSubscribers('id, email, zip, country')
+    subscribers = fallback.data
+  }
   if (!subscribers || subscribers.length === 0) return { doctor, matches: [] }
 
-  // Resolve subscriber ZIPs to coordinates
+  // Resolve subscriber postal codes to coordinates. US keeps 5 digits. Other countries keep the full code.
   const zips = new Set<string>()
   for (const s of subscribers) {
-    const z = (s.zip || '').trim().slice(0, 5)
+    const z = postalLookupKey(s.zip || '', s.country || doctorCountry)
     if (z) zips.add(z)
   }
 
@@ -202,8 +213,14 @@ export async function findMatchingSubscribers(
   const matches: MatchedSubscriber[] = []
   for (const sub of subscribers) {
     if (alreadySentSet.has(sub.id)) continue
-    const z = (sub.zip || '').trim().slice(0, 5)
-    const coord = zipMap.get(z)
+    const z = postalLookupKey(sub.zip || '', sub.country || doctorCountry)
+    const storedLat = Number(sub.latitude)
+    const storedLng = Number(sub.longitude)
+    const coord = zipMap.get(z) || (
+      Number.isFinite(storedLat) && Number.isFinite(storedLng) && !(storedLat === 0 && storedLng === 0)
+        ? { city: '', state: '', lat: storedLat, lng: storedLng }
+        : null
+    )
     if (!coord) continue
     const dist = haversineDistance(doctorLat, doctorLng, coord.lat, coord.lng)
     if (dist <= t.doctor_joined_radius) {

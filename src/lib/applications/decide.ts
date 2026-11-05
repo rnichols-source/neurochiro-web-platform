@@ -1,3 +1,4 @@
+import { approvalSmsFor, type ApprovalSms } from './approval-sms.ts'
 import { approvedEmail, declinedEmail, type Mail } from './emails.ts'
 
 export type ApplicationStatus = 'draft' | 'under_review' | 'approved' | 'declined' | 'needs_action'
@@ -17,6 +18,11 @@ export type ApplicationRecord = {
   chargeAttempt: number
   email: string
   firstName: string
+  lastName: string
+  profileUrl: string
+  mobileE164: string | null
+  smsConsent: boolean
+  priceLabel: string | null
 }
 
 export type ChargeResult = {
@@ -25,6 +31,8 @@ export type ChargeResult = {
   hostedInvoiceUrl: string | null
   paymentState: 'paid' | 'requires_action' | 'failed'
   errorMessage?: string
+  amountLabel?: string | null
+  receiptUrl?: string | null
 }
 
 export type BillingPort = {
@@ -63,6 +71,7 @@ export type Decision = {
   doctor: DoctorWrite | null
   application: ApplicationWrite | null
   email: Mail | null
+  sms: ApprovalSms | null
   charged: boolean
   detached: boolean
 }
@@ -92,6 +101,7 @@ export async function approveApplication(
       doctor: null,
       application: null,
       email: null,
+      sms: null,
       charged: false,
       detached: false,
     }
@@ -103,13 +113,14 @@ export async function approveApplication(
       doctor: null,
       application: null,
       email: null,
+      sms: null,
       charged: false,
       detached: false,
     }
   }
   const blocked = missingCard(app)
   if (blocked || !app.stripeCustomerId || !app.stripePaymentMethodId || !app.stripePriceId) {
-    return { ok: false, message: blocked || 'There is no card on file yet.', doctor: null, application: null, email: null, charged: false, detached: false }
+    return { ok: false, message: blocked || 'There is no card on file yet.', doctor: null, application: null, email: null, sms: null, charged: false, detached: false }
   }
 
   let charge: ChargeResult
@@ -135,6 +146,7 @@ export async function approveApplication(
       doctor: null,
       application: { status: app.status, charge_attempt: app.chargeAttempt + 1, admin_notes: notesOrNull(notes) },
       email: null,
+      sms: null,
       charged: false,
       detached: false,
     }
@@ -147,6 +159,7 @@ export async function approveApplication(
       doctor: null,
       application: { status: app.status, charge_attempt: app.chargeAttempt + 1, admin_notes: notesOrNull(notes) },
       email: null,
+      sms: null,
       charged: false,
       detached: false,
     }
@@ -176,7 +189,20 @@ export async function approveApplication(
       admin_notes: notesOrNull(notes),
       reviewed_at: now,
     },
-    email: approvedEmail(app.email, app.firstName, needsAction ? charge.hostedInvoiceUrl : null),
+    email: approvedEmail(
+      app.email,
+      app.firstName,
+      needsAction ? charge.hostedInvoiceUrl : null,
+      needsAction ? null : {
+        lastName: app.lastName || app.firstName,
+        profileUrl: app.profileUrl,
+        plan: app.plan,
+        priceLabel: app.priceLabel,
+        amountLabel: charge.amountLabel || null,
+        receiptUrl: charge.receiptUrl || null,
+      },
+    ),
+    sms: needsAction ? null : approvalSmsFor(app),
     charged: !needsAction,
     detached: false,
   }
@@ -195,6 +221,7 @@ export async function declineApplication(
       doctor: null,
       application: null,
       email: null,
+      sms: null,
       charged: false,
       detached: false,
     }
@@ -225,6 +252,7 @@ export async function declineApplication(
       reviewed_at: now,
     },
     email: app.email.includes('@') ? declinedEmail(app.email, app.firstName) : null,
+    sms: null,
     charged: false,
     detached,
   }
