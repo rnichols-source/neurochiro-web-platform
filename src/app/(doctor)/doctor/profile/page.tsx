@@ -8,6 +8,7 @@ import PageHeader from "@/components/portal/PageHeader";
 import StudentOptIn from "@/components/doctor/StudentOptIn";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
+import { ALL_COUNTRIES, getCountryByIso2 } from "@/config/countries";
 
 const INPUT = "w-full min-h-11 px-3 rounded-lg border border-portal-border bg-white text-base";
 const AREA = "w-full px-3 py-2 rounded-lg border border-portal-border bg-white text-base";
@@ -36,6 +37,7 @@ type DoctorProfile = {
   city?: string;
   state?: string;
   country?: string;
+  zip_code?: string | null;
   website_url?: string;
   bio?: string;
   seo_keywords?: string;
@@ -90,6 +92,16 @@ function isTab(value: string | null): value is TabId {
 
 function parseTab(value: string | null): TabId {
   return isTab(value) ? value : "basics";
+}
+
+function storedCountryCode(value?: string | null): string {
+  const typed = (value || "").trim();
+  if (!typed) return "US";
+  const named = ALL_COUNTRIES.find((item) => item.name.toLowerCase() === typed.toLowerCase());
+  if (named) return named.iso2;
+  const aliases: Record<string, string> = { UK: "GB", USA: "US", UAE: "AE" };
+  const code = aliases[typed.toUpperCase()] || typed.toUpperCase();
+  return getCountryByIso2(code)?.iso2 || "US";
 }
 
 function asLines(value: unknown): string {
@@ -193,6 +205,7 @@ function ProfileEditor() {
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [error, setError] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [countryCode, setCountryCode] = useState("US");
 
   function selectTab(next: TabId) {
     setTab(next);
@@ -252,6 +265,7 @@ function ProfileEditor() {
         }
         const loaded = data as DoctorProfile;
         setProfile(loaded);
+        setCountryCode(storedCountryCode(loaded.country));
         setFaqItems(Array.isArray(loaded.faq) ? loaded.faq : []);
         setTeamMembers(Array.isArray(loaded.team_members) ? loaded.team_members : []);
         setGalleryUrls(Array.isArray(loaded.gallery_images) ? loaded.gallery_images : []);
@@ -529,11 +543,18 @@ function ProfileEditor() {
                   <Label label="City">
                     <input name="city" defaultValue={profile?.city || ""} placeholder="City" className={INPUT} />
                   </Label>
-                  <Label label="State or province">
-                    <input name="state" defaultValue={profile?.state || ""} placeholder="State or province" className={INPUT} />
-                  </Label>
                   <Label label="Country">
-                    <input name="country" defaultValue={profile?.country || ""} placeholder="US, IN, AE, GB" className={INPUT} />
+                    <select name="country" value={countryCode} onChange={(event) => setCountryCode(event.target.value)} className={INPUT}>
+                      {ALL_COUNTRIES.map((item) => (
+                        <option key={item.iso2} value={item.iso2}>{item.name}</option>
+                      ))}
+                    </select>
+                  </Label>
+                  <Label label={getCountryByIso2(countryCode)?.regionLabel || "State or region"}>
+                    <input name="state" defaultValue={profile?.state || ""} placeholder={getCountryByIso2(countryCode)?.regionLabel || "State or region"} className={INPUT} />
+                  </Label>
+                  <Label label={getCountryByIso2(countryCode)?.postalLabel || "Postal code"}>
+                    <input name="zip_code" defaultValue={profile?.zip_code || ""} placeholder={getCountryByIso2(countryCode)?.postalLabel || "Postal code"} autoComplete="postal-code" className={INPUT} />
                   </Label>
                 </div>
               </Section>

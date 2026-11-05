@@ -18,7 +18,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('first_name, last_name, clinic_name, city, state, country, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
+        .select('first_name, last_name, clinic_name, city, state, country, zip_code, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -74,14 +74,24 @@ export async function updateDoctorProfile(formData: FormData) {
     const city = formData.get('city') as string
     const state = formData.get('state') as string
     const rawCountry = formData.get('country') as string || 'US'
-    // Normalize to ISO 3166-1 alpha-2
     const { getCountryByIso2, ALL_COUNTRIES } = await import('@/config/countries')
     const typed = rawCountry.trim()
     const named = ALL_COUNTRIES.find((item) => item.name.toLowerCase() === typed.toLowerCase())
-    const aliases: Record<string, string> = { usa: 'US', uk: 'GB', uae: 'AE', dubai: 'AE' }
-    const country = named?.iso2 || aliases[typed.toLowerCase()] || (getCountryByIso2(typed.toUpperCase()) ? typed.toUpperCase() : typed.toUpperCase())
-    if (!/^[A-Z]{2}$/.test(country)) {
-      return { error: 'Enter a 2-letter country code, such as US, IN, or AE.' }
+    const aliases: Record<string, string> = {
+      usa: 'US', uk: 'GB', uae: 'AE', dubai: 'AE',
+      'united states': 'US', 'united states of america': 'US',
+      'united kingdom': 'GB', 'great britain': 'GB',
+      'united arab emirates': 'AE',
+    }
+    const country = named?.iso2 || aliases[typed.toLowerCase()] || typed.toUpperCase()
+    const countryConfig = getCountryByIso2(country === 'UK' ? 'GB' : country)
+    if (!countryConfig) {
+      return { error: 'Choose a country from the list.' }
+    }
+    const countryCode = countryConfig.iso2
+    const postal = ((formData.get('zip_code') as string) || '').trim()
+    if (postal && countryConfig.postalPattern && !new RegExp(countryConfig.postalPattern, 'i').test(postal)) {
+      return { error: `Check the ${countryConfig.postalLabel.toLowerCase()}.` }
     }
 
     // Validate clinic name — no emails, phones, or URLs
@@ -103,7 +113,7 @@ export async function updateDoctorProfile(formData: FormData) {
     const { validateCity, validateState } = await import('@/lib/validate-location')
     let normalizedState = state
     if (state) {
-      const stateCheck = validateState(state, country)
+      const stateCheck = validateState(state, countryCode)
       if (!stateCheck.valid) return { error: stateCheck.error }
       normalizedState = stateCheck.normalized || state.trim()
     }
@@ -211,7 +221,7 @@ export async function updateDoctorProfile(formData: FormData) {
     // Load the current row before any write so validation can compare it.
     const { data: currentDocRow } = await adminSupabase
       .from('doctors')
-      .select('address, city, state, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated')
+      .select('address, city, state, country, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated')
       .eq('user_id', user.id)
       .maybeSingle()
     // Generated doctors types omit columns this form already saves.
@@ -258,13 +268,14 @@ export async function updateDoctorProfile(formData: FormData) {
     const addressChanged = currentDoc && (
       currentDoc.address !== (address || null) ||
       currentDoc.city !== (city || null) ||
-      currentDoc.state !== (normalizedState || null)
+      currentDoc.state !== (normalizedState || null) ||
+      currentDoc.country !== countryCode
     )
 
     if (addressChanged && address) {
       try {
         const { geocodeDoctorAddress } = await import('@/lib/geocode')
-        const result = await geocodeDoctorAddress(address, city, normalizedState, country)
+        const result = await geocodeDoctorAddress(address, city, normalizedState, countryCode)
         if (result) {
           newLat = result.lat
           newLng = result.lng
@@ -285,7 +296,8 @@ export async function updateDoctorProfile(formData: FormData) {
         clinic_name: clinicName,
         city: city,
         state: normalizedState,
-        country: country,
+        country: countryCode,
+        zip_code: postal || null,
         website_url: website,
         ...(newLat !== undefined && newLng !== undefined ? { latitude: newLat, longitude: newLng } : {}),
         bio: bio,
