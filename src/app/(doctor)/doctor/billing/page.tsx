@@ -4,6 +4,7 @@ import { getBillingData } from './actions';
 import { ActivateProButtons, ManageBillingButton } from './BillingButtons';
 import { getPortalContext } from '@/lib/portal/context';
 import { PRO_PRICE_LABEL } from '@/lib/portal/membership';
+import { activeUsdDoctorPlan } from '@/lib/pricing';
 import { billingView } from '@/lib/portal/billing-view';
 import { redirect } from 'next/navigation';
 import { portalTimer } from '@/lib/portal/timing';
@@ -26,6 +27,7 @@ export default async function BillingPage() {
           ? "We couldn't load your billing details right now."
           : 'Your plan: Free. Activate Pro when you want patients to reach you.';
   const showStripe = view === 'stripe' || view === 'included_with_stripe';
+  const newMember = activeUsdDoctorPlan();
 
   return (
     <div className="space-y-6">
@@ -64,7 +66,7 @@ export default async function BillingPage() {
       {view === 'free' ? (
         <section className="bg-white border border-portal-border rounded-xl p-6">
           <h2 className="text-lg font-bold text-portal-ink">Activate Pro</h2>
-          <p className="mt-1 text-sm text-portal-ink-2">{PRO_PRICE_LABEL} or $990/year. Cancel anytime.</p>
+          <p className="mt-1 text-sm text-portal-ink-2">{newMember.perMonth} or {newMember.perYearSlash}. Cancel anytime.</p>
           <div className="mt-4"><ActivateProButtons /></div>
         </section>
       ) : null}

@@ -52,7 +52,7 @@ function Section({ bg = "white", children, id, style: extra }: { bg?: "white" | 
   );
 }
 
-export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [], badgeIds = [] }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[]; badgeIds?: string[] }) {
+export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [], badgeIds = [], upgradePriceLabel }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[]; badgeIds?: string[]; upgradePriceLabel: string }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -502,7 +502,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <p style={{ fontWeight: 900, fontSize: 14, color: "#1E2D3B" }}>This is how patients see your profile</p>
               <p style={{ fontSize: 12, color: "#718096", marginTop: 4 }}>Your phone, website, and booking link are hidden. Upgrade to Pro so patients can reach you.</p>
             </div>
-            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — $99/mo</Link>
+            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — {upgradePriceLabel}</Link>
           </div>
         </Section>
       )}

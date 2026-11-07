@@ -10,6 +10,7 @@ import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { ensureDraftApplication } from '@/lib/applications/store'
 import { safeReturnPath } from '@/lib/auth/safe-return-path'
+import { activeUsdDoctorPlan } from '@/lib/pricing'
 
 /**
  * Strips leading titles (Dr., Dr, Doctor) and trailing credentials (DC, D.C.)
@@ -356,7 +357,7 @@ export async function claimDoctorProfileAction(userId: string, claimId: string) 
     await admin.from('notifications').insert({
       user_id: userId,
       title: 'Profile Claimed — Welcome to NeuroChiro!',
-      body: 'Welcome to NeuroChiro! Book your onboarding call with Dr. Ray to activate your account and get the most out of your membership ($99/mo).',
+      body: `Welcome to NeuroChiro! Book your onboarding call with Dr. Ray to activate your account and get the most out of your membership (${activeUsdDoctorPlan().perMonth}).`,
       type: 'system',
       link: '/doctor/profile',
       priority: 'important',

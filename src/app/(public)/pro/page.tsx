@@ -8,6 +8,7 @@ import ProDemandLookup from "./ProDemandLookup";
 import ProCTA from "./ProCTA";
 import ProFAQ from "./ProFAQ";
 import { HeroMathBlock, PriceRef } from "./ProPriceDisplay";
+import { activeUsdDoctorPlan, prospectStripeLinks } from "@/lib/pricing";
 
 export const revalidate = 300;
 
@@ -51,8 +52,9 @@ function ProJoinLink({ label }: { label: string }) {
   );
 }
 
-const faqs = [
-  { q: "Is $99 a month worth it if I'm already busy?", a: "If your schedule is full and you never want another new patient, probably not. Most doctors joining aren't short on patients in general, they're short on the right ones: people who understand nervous system care before they walk in. That's who searches this directory." },
+function proFaqs(monthlyDollars: string) {
+  return [
+  { q: `Is ${monthlyDollars} a month worth it if I'm already busy?`, a: "If your schedule is full and you never want another new patient, probably not. Most doctors joining aren't short on patients in general, they're short on the right ones: people who understand nervous system care before they walk in. That's who searches this directory." },
   { q: "How many patients will I get?", a: "I don't know, and anyone who gives you a number is guessing. It depends on how many people search your area and how fast you respond when one reaches out. What I'd judge it on: a year of content in your own folder, plus a listing in front of patients specifically looking for how you practice." },
   { q: "How much of my time does this take?", a: "One 30-minute onboarding call and two interviews. That's it. The editing, scheduling, and posting are on us." },
   { q: "What if I want out?", a: "Cancel anytime by email. You stay active through the period you already paid for, and the clips already in your folder stay yours." },
@@ -60,9 +62,13 @@ const faqs = [
   { q: "Who can join?", a: "Licensed chiropractors in good standing who practice with a nervous system focus. I review every application myself before anyone goes live. If you're not a fit, I'll tell you." },
   { q: "Do you have territories? What stops another doctor a mile from me from joining?", a: "No territories. Any chiropractor who practices with a nervous system focus and passes review can list, wherever they are. What protects you isn't exclusivity, it's proximity. Patients see distance on every result and the directory sorts nearest first. If you're the closest one to them, you're the first name they see." },
   { q: "How do I know this demand is real?", a: "Every number on this page is a live count. The demand signals come from two places: people who commented on my Instagram posts asking for a nervous system chiropractor in their city, and people who joined the patient waitlist with their ZIP code. Not traffic estimates, not impressions, not projections. The map updates as new requests come in. Where the count in a specific area is below three, I suppress the exact number to protect privacy." },
-];
+  ];
+}
 
 export default async function ProPage() {
+  const plan = activeUsdDoctorPlan();
+  const joinLinks = prospectStripeLinks();
+  const faqs = proFaqs(plan.monthlyDollars);
   const joinLabel = doctorJoinCtaLabel();
   const [stats, mapData] = await Promise.all([
     getProPageStats(),
@@ -91,20 +97,20 @@ export default async function ProPage() {
             </p>
             <ProJoinLink label={joinLabel} />
 
-            <HeroMathBlock />
+            <HeroMathBlock monthly={plan.monthly} yearAtMonthly={plan.yearAtMonthlyRate} />
             <p style={{ color: "#93A0AC", fontSize: 15, marginTop: 18 }}>
-              Run your own numbers. If one care plan in your office is worth more than <PriceRef amount={1188} />, the decision isn't really about the price.
+              Run your own numbers. If one care plan in your office is worth more than <PriceRef amount={plan.yearAtMonthlyRate} />, the decision isn't really about the price.
             </p>
 
             <Suspense fallback={<div style={{ height: 56, marginTop: 30 }} />}>
-              <ProCTA variant="hero" />
+              <ProCTA variant="hero" monthly={plan.monthly} annual={plan.annual} monthlyHref={joinLinks.monthly} annualHref={joinLinks.annual} />
             </Suspense>
           </div>
         </header>
 
         {/* ═══ 2. DEMAND LOOKUP — the primary action ═══ */}
         <Suspense fallback={<div style={{ height: 200 }} />}>
-          <ProDemandLookup />
+          <ProDemandLookup monthly={plan.monthly} monthlyHref={joinLinks.monthly} />
         </Suspense>
 
         {/* ═══ 3. THE DEMAND NUMBER ═══ */}
@@ -211,14 +217,14 @@ export default async function ProPage() {
                 <li style={{ marginBottom: 8 }}>What I can guarantee is the work: your profile goes up, your interviews get recorded, your clips get made and scheduled, and the files are yours.</li>
               </ul>
               <p style={{ marginTop: 14, fontSize: 16, color: "#A5B0BB" }}>
-                Price out 80 to 100 edited clips from a video team and you'll pass <PriceRef amount={1188} /> before anyone touches the directory. That's the floor. The patients are the upside.
+                Price out 80 to 100 edited clips from a video team and you'll pass <PriceRef amount={plan.yearAtMonthlyRate} /> before anyone touches the directory. That's the floor. The patients are the upside.
               </p>
             </div>
 
             {/* Mid-page CTA — catches the skeptical doctor who just finished reading the honest section */}
             <div style={{ marginTop: 28 }}>
               <Suspense fallback={<div style={{ height: 56 }} />}>
-                <ProCTA variant="mid" />
+                <ProCTA variant="mid" monthly={plan.monthly} annual={plan.annual} monthlyHref={joinLinks.monthly} annualHref={joinLinks.annual} />
               </Suspense>
             </div>
           </div>
@@ -258,7 +264,7 @@ export default async function ProPage() {
               <ProJoinLink label={joinLabel} />
             </div>
             <Suspense fallback={<div style={{ height: 56 }} />}>
-              <ProCTA variant="close" />
+              <ProCTA variant="close" monthly={plan.monthly} annual={plan.annual} monthlyHref={joinLinks.monthly} annualHref={joinLinks.annual} />
             </Suspense>
           </div>
         </section>

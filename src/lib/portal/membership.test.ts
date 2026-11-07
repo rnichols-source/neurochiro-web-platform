@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { accessForStripeStatus, deriveMembership } from './membership.ts';
+import { accessForStripeStatus, deriveMembership, PRO_PRICE_LABEL } from './membership.ts';
+import { NEW_PRICING_START, activeUsdDoctorPlan } from '../pricing.ts';
 
 test('founding member with no Stripe customer', () => {
   const membership = deriveMembership({
@@ -25,7 +26,7 @@ test('comped pro', () => {
   });
   assert.equal(membership.tier, 'pro');
   assert.equal(membership.source, 'comped');
-  assert.equal(membership.priceLabel, '$99/mo');
+  assert.equal(membership.priceLabel, PRO_PRICE_LABEL);
   assert.equal(membership.hasPracticeTools, false);
 });
 
@@ -40,7 +41,7 @@ test('stripe active', () => {
   assert.equal(membership.source, 'stripe');
   assert.equal(membership.status, 'active');
   assert.equal(membership.tier, 'pro');
-  assert.equal(membership.priceLabel, '$99/mo');
+  assert.equal(membership.priceLabel, PRO_PRICE_LABEL);
   assert.equal(membership.renewsAt, '2026-12-01');
   assert.equal(membership.hasPracticeTools, true);
 });
@@ -125,6 +126,18 @@ test('derive past_due stays pro', () => {
   });
   assert.equal(membership.tier, 'pro');
   assert.equal(membership.status, 'past_due');
+  assert.equal(membership.priceLabel, PRO_PRICE_LABEL);
+});
+
+test('an existing member keeps the legacy price label after new-member pricing starts', () => {
+  assert.equal(PRO_PRICE_LABEL, '$99/mo');
+  assert.notEqual(PRO_PRICE_LABEL, activeUsdDoctorPlan(NEW_PRICING_START).perMonth);
+  const membership = deriveMembership({
+    membershipTier: 'pro',
+    hasStripeCustomer: true,
+    stripeStatus: 'active',
+    createdAt: '2026-06-01T00:00:00Z',
+  });
   assert.equal(membership.priceLabel, '$99/mo');
 });
 

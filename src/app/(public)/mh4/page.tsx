@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
 import { DOCTOR_PRO_FEATURES_COMPACT, STUDENT_FEATURES_COMPACT } from "@/lib/membership-value";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 
 type Role = "doctor" | "student";
 
@@ -21,7 +22,7 @@ export default function MH4Page() {
   const [success, setSuccess] = useState(false);
 
   const perks = role === "doctor" ? DOCTOR_PRO_FEATURES_COMPACT.slice(0, 8) : STUDENT_FEATURES_COMPACT;
-  const price = role === "doctor" ? "$99" : "Free";
+  const plan = activeUsdDoctorPlan();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +72,7 @@ export default function MH4Page() {
             </p>
             <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6">
               <p className="text-green-400 font-bold text-sm">MH4 access granted</p>
-              <p className="text-white/30 text-xs mt-1">{role === "doctor" ? "Start with a free account. Activate Pro ($99/mo) after your onboarding call." : "Students join free. No subscription required."}</p>
+              <p className="text-white/30 text-xs mt-1">{role === "doctor" ? `Start with a free account. Activate Pro (${plan.perMonth}) after your onboarding call.` : "Students join free. No subscription required."}</p>
             </div>
             <Link
               href="/login"
@@ -172,7 +173,7 @@ export default function MH4Page() {
             </button>
 
             <p className="text-center text-[11px] text-white/25 mt-3">
-              Free account. Book your onboarding call. Activate {role === "doctor" ? "Pro ($99/mo)" : "your free student account"} when you're ready.
+              Free account. Book your onboarding call. Activate {role === "doctor" ? `Pro (${plan.perMonth})` : "your free student account"} when you're ready.
             </p>
           </form>
 
@@ -196,7 +197,7 @@ export default function MH4Page() {
               <p className="text-green-400 font-black text-base mb-1">Exclusive access for MH4 attendees</p>
               <p className="text-white/30 text-xs">
                 {role === "doctor"
-                  ? "Free account + personal onboarding. Pro is $99/mo or $990/yr when you're ready."
+                  ? `Free account + personal onboarding. Pro is ${plan.perMonth} or ${plan.perYear} when you're ready.`
                   : "Free account + personal onboarding. Students join free."}
               </p>
             </div>

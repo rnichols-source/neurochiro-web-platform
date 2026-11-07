@@ -2,6 +2,9 @@ import Link from "next/link";
 import { MapPin, Phone, Globe, Check, ArrowRight, Search, Users, Star, ShieldCheck } from "lucide-react";
 import { getDoctorsByLocation, getDoctorsByState } from "../actions";
 import type { Metadata } from "next";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
+
+export const revalidate = 3600;
 
 // State abbreviation mapping
 const STATE_NAMES: Record<string, string> = {
@@ -83,6 +86,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
   const doctors = city
     ? await getDoctorsByLocation(city, state)
     : await getDoctorsByState(state);
+  const newMemberPrice = activeUsdDoctorPlan().perMonth;
 
   return (
     <div className="min-h-dvh bg-neuro-cream">
@@ -243,7 +247,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
           <Link href="/get-started" className="inline-flex items-center gap-2 px-8 py-4 bg-neuro-orange text-white font-bold rounded-xl hover:bg-neuro-orange/90 transition-colors">
             Get Started <ArrowRight className="w-4 h-4" />
           </Link>
-          <p className="text-white/30 text-xs mt-3">$99/mo. Cancel anytime.</p>
+          <p className="text-white/30 text-xs mt-3">{newMemberPrice}. Cancel anytime.</p>
         </div>
       </div>
     </div>

@@ -1,4 +1,12 @@
+import { activeUsdDoctorPlan } from "./pricing.ts";
+
 export type RegionCode = "US" | "AU" | "CA" | "UK" | "NZ" | "EU" | "ALL";
+
+/** Live US membership rate. starter/pro on this object are old catalog tiers, not the current plan. */
+function usdGrowthTier() {
+  const rate = activeUsdDoctorPlan();
+  return { monthly: String(rate.monthly), annual: String(rate.annual) };
+}
 
 export interface RegionConfig {
   code: RegionCode;
@@ -43,7 +51,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
     pricing: {
       doctor: {
         starter: { monthly: "49", annual: "490" },
-        growth: { monthly: "99", annual: "990" },
+        get growth() { return usdGrowthTier(); },
         pro: { monthly: "199", annual: "1990" },
       },
       student: {
@@ -150,7 +158,7 @@ export const REGIONS: Record<RegionCode, RegionConfig> = {
     flag: "\u{1F30D}",
     currency: { code: "USD", symbol: "$" },
     pricing: {
-      doctor: { starter: { monthly: "49", annual: "490" }, growth: { monthly: "99", annual: "990" }, pro: { monthly: "199", annual: "1990" } },
+      doctor: { starter: { monthly: "49", annual: "490" }, get growth() { return usdGrowthTier(); }, pro: { monthly: "199", annual: "1990" } },
       student: { foundation: { monthly: "9", annual: "90" }, professional: { monthly: "35", annual: "350" }, accelerator: { monthly: "79", annual: "790" } },
     },
     terminology: { postalCode: "Postal Code", state: "Region" },

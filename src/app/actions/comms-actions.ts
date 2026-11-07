@@ -3,6 +3,7 @@
 import { createServerSupabase } from "@/lib/supabase-server";
 import { Resend } from "resend";
 import { Automations } from "@/lib/automations";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 
 export async function notifyNewMessage(recipientId: string, recipientRole: string) {
   const supabase = createServerSupabase();
@@ -153,7 +154,7 @@ export async function sendFoundingMemberEmail() {
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHAT'S CHANGING</h2>
     <p>We're opening NeuroChiro to more chiropractors across the country. More doctors in the directory means more patients using the platform to search — and more patients finding <strong>YOU</strong>.</p>
-    <p>New doctors will join at free. Pro is $99/mo to unlock everything.</p>
+    <p>New doctors will join at free. Pro is ${activeUsdDoctorPlan().perMonth} to unlock everything.</p>
 
     <h2 style="font-size: 20px; color: #D66829; margin-top: 30px;">WHAT THIS MEANS FOR YOU</h2>
     <p>You were here first. So here's what you get that nobody else ever will:</p>

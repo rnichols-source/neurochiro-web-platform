@@ -4,6 +4,7 @@ import { X, Check, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { DOCTOR_PRO_FEATURES_FULL } from "@/lib/membership-value";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 
 interface UpgradeModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface UpgradeModalProps {
 export default function UpgradeModal({ isOpen, onClose, currentTier = "free", userId, highlightFeature }: UpgradeModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const newMember = activeUsdDoctorPlan();
 
   const handleUpgrade = async () => {
     if (!userId) return;
@@ -72,10 +74,10 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
             {/* Price */}
             <div className="px-8 pb-4">
               <div className="flex items-baseline gap-1">
-                <span className="text-5xl font-bold text-white">$99</span>
+                <span className="text-5xl font-bold text-white">{newMember.monthlyDollars}</span>
                 <span className="text-gray-500 font-bold">/mo</span>
               </div>
-              <p className="text-gray-500 text-xs mt-1">$99/month or $990/year. Personal onboarding, weekly promotion, patient leads.</p>
+              <p className="text-gray-500 text-xs mt-1">{newMember.perMonthSlash} or {newMember.perYearSlash}. Personal onboarding, weekly promotion, patient leads.</p>
             </div>
 
             {/* Features */}
@@ -99,7 +101,7 @@ export default function UpgradeModal({ isOpen, onClose, currentTier = "free", us
                 disabled={loading}
                 className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange/90 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {loading ? "Redirecting..." : <><Zap className="w-4 h-4" /> Upgrade to Pro — $99/mo</>}
+                {loading ? "Redirecting..." : <><Zap className="w-4 h-4" /> Upgrade to Pro — {newMember.perMonth}</>}
               </button>
               {error && (
                 <p className="text-red-400 text-xs text-center mt-3">{error}</p>

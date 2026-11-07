@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createServerSupabase } from "@/lib/supabase-server";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 import { z } from "zod";
 
 const checkoutSchema = z.object({
   billing: z.enum(["monthly", "annual"]).default("monthly"),
   tier: z.string().default("pro"),
 });
-
-const PLANS: Record<string, { monthly: number; annual: number; name: string }> = {
-  pro: { monthly: 9900, annual: 99000, name: "NeuroChiro Pro" },
-};
 
 export async function POST(req: Request) {
   try {
@@ -28,7 +25,11 @@ export async function POST(req: Request) {
     }
 
     const { billing, tier } = result.data;
-    const plan = PLANS[tier];
+    const doctorPlan = activeUsdDoctorPlan();
+    const plans: Record<string, { monthly: number; annual: number; name: string }> = {
+      pro: { monthly: doctorPlan.monthlyCents, annual: doctorPlan.annualCents, name: "NeuroChiro Pro" },
+    };
+    const plan = plans[tier];
     if (!plan) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }

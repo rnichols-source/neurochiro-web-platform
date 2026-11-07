@@ -1,5 +1,11 @@
+import { USD_DOCTOR_PLANS } from '../pricing.ts';
+
 export const LEGACY_PRACTICE_TOOLS_CUTOFF = '2026-07-15T00:00:00Z';
-export const PRO_PRICE_LABEL = '$99/mo';
+/**
+ * Label for an existing member's own plan. Stays on the pre-Dec 1, 2026 rate.
+ * New-member prices come from src/lib/pricing.ts.
+ */
+export const PRO_PRICE_LABEL = USD_DOCTOR_PLANS.legacy.perMonth;
 
 export type MembershipTier = 'free' | 'pro' | 'neuros';
 export type MembershipSource = 'stripe' | 'founding' | 'comped' | 'none';
