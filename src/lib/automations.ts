@@ -1,5 +1,6 @@
 import 'server-only';
 import { Resend } from 'resend';
+import { activeUsdDoctorPlan } from '@/lib/pricing';
 import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { messageThreadUrl, settingsUrl, shouldSendUnreadEmail, unreadEmailHtml } from '@/lib/messaging/email';
@@ -596,9 +597,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                 subject: 'Ready to expand your clinical influence? 🚀',
                 title: 'Upgrade to Pro',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, level up your practice.</h1>
-                       <p>Your profile gets you on the map, but Pro ($99/mo) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
+                       <p>Your profile gets you on the map, but Pro (${activeUsdDoctorPlan().perMonth}) unlocks your full contact info, patient messaging, analytics, and the complete practice toolkit.</p>
                        <p>One new patient pays for a full year. Upgrade today.</p>`,
-                ctaText: 'Upgrade to Pro — $99/mo',
+                ctaText: `Upgrade to Pro — ${activeUsdDoctorPlan().perMonth}`,
                 ctaUrl: 'https://neurochiro.co/doctor/billing'
               });
            }

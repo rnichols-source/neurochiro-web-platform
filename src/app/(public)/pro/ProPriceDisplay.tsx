@@ -4,9 +4,6 @@ import { useProCountry } from "./ProCountryContext";
 import { COUNTRY_PAGES } from "@/lib/country-pages";
 import Link from "next/link";
 
-const USD_MONTHLY = 99;
-const ANNUAL_TOTAL = USD_MONTHLY * 12; // $1,188
-
 /**
  * Hero arithmetic block — prices react to country selector.
  *
@@ -15,7 +12,7 @@ const ANNUAL_TOTAL = USD_MONTHLY * 12; // $1,188
  *
  * If they are on /pro and we are charging USD, say "USD" plainly.
  */
-export function HeroMathBlock() {
+export function HeroMathBlock({ monthly, yearAtMonthly }: { monthly: number; yearAtMonthly: number }) {
   const { country } = useProCountry();
   const nativeConfig = COUNTRY_PAGES[country];
 
@@ -62,14 +59,14 @@ export function HeroMathBlock() {
       <div style={{ padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
           <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>
-            ${USD_MONTHLY} USD
+            ${monthly} USD
           </div>
           <span style={{ color: "#93A0AC", fontSize: 16 }}>per month, cancel anytime</span>
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 14, padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,.12)" }}>
         <div style={{ fontFamily: "Archivo, sans-serif", fontWeight: 800, fontSize: "clamp(28px, 5vw, 34px)", letterSpacing: "-0.03em", minWidth: "clamp(104px, 20vw, 132px)" }}>
-          ${ANNUAL_TOTAL.toLocaleString()} USD
+          ${yearAtMonthly.toLocaleString("en-US")} USD
         </div>
         <span style={{ color: "#93A0AC", fontSize: 16 }}>what a full year costs you</span>
       </div>

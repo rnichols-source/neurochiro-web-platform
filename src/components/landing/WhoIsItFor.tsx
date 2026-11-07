@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { Stethoscope, GraduationCap, Heart, ArrowRight } from "lucide-react";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 
 export default function WhoIsItFor() {
+  const doctorPrice = activeUsdDoctorPlan().perMonth;
   return (
     <section className="max-w-5xl mx-auto px-6 py-16">
       <h2 className="text-2xl font-heading font-black text-neuro-navy text-center mb-10">Who Is NeuroChiro For?</h2>
@@ -12,7 +14,7 @@ export default function WhoIsItFor() {
           <Stethoscope className="w-8 h-8 text-neuro-orange mx-auto mb-3" />
           <h3 className="font-bold text-neuro-navy mb-1">For Doctors</h3>
           <p className="text-gray-500 text-sm mb-3">Get found by patients in the global directory.</p>
-          <p className="text-neuro-orange font-bold text-sm">Get Started — $99/mo <ArrowRight className="w-3 h-3 inline" /></p>
+          <p className="text-neuro-orange font-bold text-sm">Get Started — {doctorPrice} <ArrowRight className="w-3 h-3 inline" /></p>
         </Link>
         <Link href="/get-started?role=student" className="bg-white rounded-2xl border border-gray-100 p-6 text-center hover:shadow-lg hover:border-gray-200 transition-all">
           <GraduationCap className="w-8 h-8 text-neuro-orange mx-auto mb-3" />

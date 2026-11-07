@@ -6,6 +6,7 @@ import { CheckCircle2, Loader2, Check, GraduationCap, Stethoscope } from "lucide
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
 import { DOCTOR_PRO_FEATURES_COMPACT, STUDENT_FEATURES_COMPACT } from "@/lib/membership-value";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 
 type Role = "doctor" | "student";
 
@@ -19,6 +20,7 @@ export default function EventPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const plan = activeUsdDoctorPlan();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,13 +149,13 @@ export default function EventPage() {
               boxShadow: "0 4px 14px rgba(214,104,41,0.4)",
             }}>
             {loading && <Loader2 style={{ width: 18, height: 18, animation: "spin 1s linear infinite" }} />}
-            {loading ? "Creating account..." : role === "student" ? "Join Free" : "Join — $99/mo"}
+            {loading ? "Creating account..." : role === "student" ? "Join Free" : `Join — ${plan.perMonth}`}
           </button>
 
           <p style={{ textAlign: "center", fontSize: 11, color: "#9ca3af", marginTop: 12 }}>
             {role === "student"
               ? "Free for students. Access the job board, contract lab, and interview prep."
-              : "$99/mo or $990/yr. Personal onboarding call included."}
+              : `${plan.perMonth} or ${plan.perYear}. Personal onboarding call included.`}
           </p>
         </form>
 

@@ -1,3 +1,5 @@
+import { activeUsdDoctorPlan } from '@/lib/pricing'
+
 // Exchange rates for approximate local currency display on /pro.
 // These are display-only approximations. Stripe charges in USD.
 // Last updated: 2026-09-29
@@ -16,9 +18,14 @@ export const CURRENCY_RATES: Record<string, CurrencyInfo> = {
   AU: { symbol: "A$",  rate: 1.55, label: "Australian dollars" },
 }
 
-// USD prices — single source of truth
-export const USD_MONTHLY = 99
-export const USD_ANNUAL = 990
+// US new-member price. Existing members are not repriced here.
+export function usdMonthly(now = Date.now()) {
+  return activeUsdDoctorPlan(now).monthly
+}
+
+export function usdAnnual(now = Date.now()) {
+  return activeUsdDoctorPlan(now).annual
+}
 
 export function convertToLocal(usd: number, country: string): string | null {
   const info = CURRENCY_RATES[country]
@@ -30,6 +37,6 @@ export function convertToLocal(usd: number, country: string): string | null {
 export function getConversionLine(country: string): string | null {
   const info = CURRENCY_RATES[country]
   if (!info) return null
-  const monthly = convertToLocal(USD_MONTHLY, country)
+  const monthly = convertToLocal(usdMonthly(), country)
   return `about ${monthly}/month, billed in US dollars`
 }

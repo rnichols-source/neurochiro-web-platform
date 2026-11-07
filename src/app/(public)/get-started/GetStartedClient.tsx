@@ -9,7 +9,15 @@ import { createClient } from "@/lib/supabase";
 
 type Role = "doctor" | "student";
 
-function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
+function GetStartedInner({
+  applicationFlow,
+  monthlyLabel,
+  annualLabel,
+}: {
+  applicationFlow: boolean;
+  monthlyLabel: string;
+  annualLabel: string;
+}) {
   const searchParams = useSearchParams();
   const paramRole = searchParams.get("role") as Role | null;
   const paramChiroscore = searchParams.get("chiroscore");
@@ -156,7 +164,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-3">
-            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "$33/month or $333/year. Cancel anytime."}
+            {role === "doctor" ? `${monthlyLabel} or ${annualLabel}. Cancel anytime.` : "$33/month or $333/year. Cancel anytime."}
           </p>
         </div>
 
@@ -200,7 +208,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
           <button type="submit" disabled={loading}
             className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-            {loading ? "Creating account..." : role === "doctor" ? (applicationFlow ? "Create account and apply" : "Join — $99/mo") : "Join Free"}
+            {loading ? "Creating account..." : role === "doctor" ? (applicationFlow ? "Create account and apply" : `Join — ${monthlyLabel}`) : "Join Free"}
           </button>
 
           <p className="text-center text-xs text-gray-400">
@@ -220,10 +228,18 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
   );
 }
 
-export default function GetStartedClient({ applicationFlow }: { applicationFlow: boolean }) {
+export default function GetStartedClient({
+  applicationFlow,
+  monthlyLabel,
+  annualLabel,
+}: {
+  applicationFlow: boolean;
+  monthlyLabel: string;
+  annualLabel: string;
+}) {
   return (
     <Suspense fallback={<div className="min-h-dvh bg-neuro-cream flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>}>
-      <GetStartedInner applicationFlow={applicationFlow} />
+      <GetStartedInner applicationFlow={applicationFlow} monthlyLabel={monthlyLabel} annualLabel={annualLabel} />
     </Suspense>
   );
 }

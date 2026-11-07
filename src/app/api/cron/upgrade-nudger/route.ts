@@ -1,4 +1,5 @@
 import { wrapEmail } from '@/lib/email-template';
+import { activeUsdDoctorPlan } from '@/lib/pricing';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseSecretKey } from '@/lib/supabase-secret';
@@ -110,7 +111,7 @@ export async function GET(req: Request) {
         body = `<p>Your NeuroChiro profile has been viewed <strong>100 times</strong>.</p>
           <p>That's 100 patients who searched for a nervous system chiropractor and found <strong>you</strong>.</p>
           ${cityDemandLine}
-          <p>Right now, they can see your profile but they can't message you or see your full analytics. Upgrade to Pro ($99/mo) and turn those views into actual patients walking through your door.</p>`;
+          <p>Right now, they can see your profile but they can't message you or see your full analytics. Upgrade to Pro (${activeUsdDoctorPlan().perMonth}) and turn those views into actual patients walking through your door.</p>`;
       } else if (views >= 50 && !sentNudges.has(`${doc.user_id}-views_50`)) {
         trigger = 'views_50';
         subject = `50 profile views — patients are finding you, Dr. ${name}`;

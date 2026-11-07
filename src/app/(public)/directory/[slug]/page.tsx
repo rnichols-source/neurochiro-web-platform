@@ -9,6 +9,7 @@ import { getApprovedStories } from "@/app/actions/patient-stories";
 import { isDemoSlug } from "@/lib/directory/exclude-demo";
 import { trackProfileView } from "@/lib/portal/track-view";
 import { loadEarnedBadgeIds } from "@/lib/badges/compute";
+import { activeUsdDoctorPlan } from "@/lib/pricing";
 
 export const revalidate = 60; // ISR: cache for 60 seconds
 
@@ -172,7 +173,7 @@ export default async function DoctorProfilePage({ params }: Props) {
     <>
       <SchemaMarkup data={jsonLd} />
       {faqLd && <SchemaMarkup data={faqLd} />}
-      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} stories={stories} badgeIds={badgeIds} />
+      <DoctorProfileClient doctor={doctor} slug={resolvedParams.slug} seminars={seminars} jobs={jobs} cityDoctorCount={cityDoctorCount} nearbyDoctors={nearbyDoctors} citySearchVolume={citySearchVolume} stories={stories} badgeIds={badgeIds} upgradePriceLabel={activeUsdDoctorPlan().perMonth} />
     </>
   );
 }

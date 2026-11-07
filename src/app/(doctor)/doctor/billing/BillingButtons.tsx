@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PRO_PRICE_LABEL } from '@/lib/portal/membership';
+import { activeUsdDoctorPlan } from '@/lib/pricing';
 
 export function ManageBillingButton() {
   const [loading, setLoading] = useState(false);
@@ -48,13 +48,14 @@ export function ActivateProButtons() {
       setLoading(false);
     }
   }
+  const newMember = activeUsdDoctorPlan();
   return (
     <div className="flex flex-col gap-3 max-w-xs">
       <button type="button" disabled={loading} onClick={() => start('monthly')} className="min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">
-        {loading ? 'Redirecting…' : `Activate Pro — ${PRO_PRICE_LABEL}`}
+        {loading ? 'Redirecting…' : `Activate Pro — ${newMember.perMonth}`}
       </button>
       <button type="button" disabled={loading} onClick={() => start('annual')} className="min-h-11 px-4 rounded-lg border border-portal-border text-sm font-bold">
-        Annual — $990/yr
+        Annual — {newMember.perYear}
       </button>
     </div>
   );

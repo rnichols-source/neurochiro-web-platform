@@ -8,7 +8,9 @@
  * No hardcoded follower counts. Say "our audience" not "185K."
  */
 
-// === DOCTOR PRO ($99/mo) ===
+import { activeUsdDoctorPlan } from './pricing.ts'
+
+// === DOCTOR PRO (US new-member price; see src/lib/pricing.ts) ===
 
 /** The 4 core deliverables — the pitch. Use for booth, first impression, one-liners. */
 export const DOCTOR_PRO_CORE = [
@@ -83,14 +85,18 @@ export const STUDENT_FEATURES_COMPACT = [
 // === PRICING ===
 
 export const PRICING = {
-  doctor: {
-    monthly: 99,
-    annual: 990,
-    annualSavings: 198,
-    label: "Pro",
+  /** US rate for a doctor who has not subscribed yet. Existing members are not repriced here. */
+  get doctor() {
+    const rate = activeUsdDoctorPlan()
+    return {
+      monthly: rate.monthly,
+      annual: rate.annual,
+      annualSavings: rate.annualSavings,
+      label: "Pro" as const,
+    }
   },
   student: {
     monthly: 33,
-    label: "Student",
+    label: "Student" as const,
   },
-} as const;
+};

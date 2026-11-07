@@ -2,10 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 import { useProCountry } from "./ProCountryContext";
-import { CURRENCY_RATES, USD_MONTHLY, USD_ANNUAL } from "./currency-config";
+import { CURRENCY_RATES } from "./currency-config";
 
-const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY || "";
-const STRIPE_ANNUAL = process.env.NEXT_PUBLIC_STRIPE_PRO_ANNUAL || "";
 const FIT_CALL_LINK = process.env.NEXT_PUBLIC_FIT_CALL_LINK || "";
 
 function buildLink(base: string, source: string) {
@@ -13,13 +11,25 @@ function buildLink(base: string, source: string) {
   return `${base}${base.includes("?") ? "&" : "?"}client_reference_id=pro_${source}`;
 }
 
-export default function ProCTA({ variant }: { variant: "hero" | "close" | "mid" }) {
+export default function ProCTA({
+  variant,
+  monthly,
+  annual,
+  monthlyHref,
+  annualHref,
+}: {
+  variant: "hero" | "close" | "mid";
+  monthly: number;
+  annual: number;
+  monthlyHref: string;
+  annualHref: string;
+}) {
   const searchParams = useSearchParams();
   const source = searchParams.get("source") || "direct";
   const { country } = useProCountry();
 
-  const monthlyLink = buildLink(STRIPE_MONTHLY, source);
-  const annualLink = buildLink(STRIPE_ANNUAL, source);
+  const monthlyLink = buildLink(monthlyHref, source);
+  const annualLink = buildLink(annualHref, source);
   const fitCallLink = FIT_CALL_LINK || "#";
 
   const isIntl = country !== "US" && country in CURRENCY_RATES;
@@ -47,7 +57,7 @@ export default function ProCTA({ variant }: { variant: "hero" | "close" | "mid" 
               minWidth: 180,
             }}
           >
-            Join for ${USD_MONTHLY}{usdSuffix}/month
+            Join for ${monthly}{usdSuffix}/month
           </a>
           <a
             href={fitCallLink}
@@ -96,7 +106,7 @@ export default function ProCTA({ variant }: { variant: "hero" | "close" | "mid" 
             textAlign: "center",
           }}
         >
-          Join for ${USD_MONTHLY}{usdSuffix}/month
+          Join for ${monthly}{usdSuffix}/month
         </a>
         <a
           href={fitCallLink}
@@ -143,7 +153,7 @@ export default function ProCTA({ variant }: { variant: "hero" | "close" | "mid" 
               textAlign: "center",
             }}
           >
-            Join for ${USD_MONTHLY}{usdSuffix}/month
+            Join for ${monthly}{usdSuffix}/month
           </a>
           <a
             href={annualLink}
@@ -158,7 +168,7 @@ export default function ProCTA({ variant }: { variant: "hero" | "close" | "mid" 
               marginTop: 8,
             }}
           >
-            or ${USD_ANNUAL.toLocaleString()}{usdSuffix}/year (two months free)
+            or ${annual.toLocaleString("en-US")}{usdSuffix}/year (two months free)
           </a>
         </div>
 

@@ -2,6 +2,7 @@
 
 import { stripe } from '@/lib/stripe'
 import { STUDENT_CONFIG } from '@/config/students'
+import { activeUsdDoctorPlan } from '@/lib/pricing'
 
 export async function createConferenceCheckout(data: {
   name: string;
@@ -12,8 +13,9 @@ export async function createConferenceCheckout(data: {
 }) {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co';
 
+  const doctorPlan = activeUsdDoctorPlan();
   const prices = {
-    doctor: { monthly: 9900, annual: 99000 },
+    doctor: { monthly: doctorPlan.monthlyCents, annual: doctorPlan.annualCents },
     student: {
       monthly: STUDENT_CONFIG.membership.monthly.expectCents,
       annual: STUDENT_CONFIG.membership.annual.expectCents,
@@ -21,7 +23,7 @@ export async function createConferenceCheckout(data: {
   };
 
   const priceLabels = {
-    doctor: { monthly: 'Doctor Pro ($99/mo)', annual: 'Doctor Pro Annual ($990/yr)' },
+    doctor: { monthly: `Doctor Pro (${doctorPlan.perMonth})`, annual: `Doctor Pro Annual (${doctorPlan.perYear})` },
     student: {
       monthly: `Student ($${STUDENT_CONFIG.membership.monthly.usd}/mo)`,
       annual: `Student ($${STUDENT_CONFIG.membership.annual.usd}/yr)`,

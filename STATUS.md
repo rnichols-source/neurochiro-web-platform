@@ -40,7 +40,12 @@ Last updated: 2026-09-24
 
 ### /pro Sales Page
 - Full sales page with math block, honest no-guarantee, source tracking
-- Monthly ($99) + Annual ($990) Stripe links + Calendly fit call
+- US new members: $99/month and $990/year until Dec 1, 2026 at 00:00 America/New_York, then $199/month and $1,990/year (saves $398). Existing members keep their current rate. The date lives in `src/lib/pricing.ts`. Do not change this back to a hard-coded $99.
+- Calendly fit call. The $199 and $1,990 Payment Links are built in and used only after Dec 1. Optional env vars can replace those links.
+
+### US membership price
+- New members only. Someone who already subscribed is not moved to the new price.
+- Annual savings is $198 before Dec 1 and $398 after (12 × 199 − 1,990).
 
 ### Data Privacy
 - Discord webhooks: no patient data in any webhook (first name only for all)

@@ -1,4 +1,5 @@
 import { EUROPEAN_ISO } from '../directory-countries.ts'
+import { activeUsdDoctorPlan } from '../pricing.ts'
 
 export type BillingCycle = 'monthly' | 'annual'
 
@@ -14,9 +15,8 @@ const ENV_KEY: Record<DoctorCurrency, Record<BillingCycle, string>> = {
   AED: { monthly: 'STRIPE_DOCTOR_PRICE_AED_MONTHLY', annual: 'STRIPE_DOCTOR_PRICE_AED_ANNUAL' },
 }
 
-/** Labels already printed on the live Payment Links and country pages. Stripe amounts win when we can read the Price. */
+/** Labels already printed on the live Payment Links and country pages. Stripe amounts win when we can read the Price. USD is date-aware in knownPlanLabel. */
 const KNOWN_LABELS: Partial<Record<DoctorCurrency, Record<BillingCycle, string>>> = {
-  USD: { monthly: '$99 per month', annual: '$990 per year' },
   CAD: { monthly: 'CA$139 per month', annual: 'CA$1,390 per year' },
   AUD: { monthly: 'A$129 per month', annual: 'A$1,290 per year' },
   GBP: { monthly: '£79 per month', annual: '£790 per year' },
@@ -49,7 +49,11 @@ export function priceIdFor(
   return value.startsWith('price_') ? value : ''
 }
 
-export function knownPlanLabel(currency: DoctorCurrency, cycle: BillingCycle): string {
+export function knownPlanLabel(currency: DoctorCurrency, cycle: BillingCycle, now: number = Date.now()): string {
+  if (currency === 'USD') {
+    const plan = activeUsdDoctorPlan(now)
+    return cycle === 'monthly' ? plan.perMonthLong : plan.perYearLong
+  }
   return KNOWN_LABELS[currency]?.[cycle] || `${cycle === 'monthly' ? 'Monthly' : 'Annual'} (${currency})`
 }
 
@@ -65,10 +69,10 @@ export function formatStripeAmount(unitAmount: number | null | undefined, curren
   }
 }
 
-export function planLabel(currency: DoctorCurrency, cycle: BillingCycle, unitAmount?: number | null): string {
+export function planLabel(currency: DoctorCurrency, cycle: BillingCycle, unitAmount?: number | null, now: number = Date.now()): string {
   const fromStripe = formatStripeAmount(unitAmount, currency)
   if (fromStripe) {
     return cycle === 'monthly' ? `${fromStripe} per month` : `${fromStripe} per year`
   }
-  return knownPlanLabel(currency, cycle)
+  return knownPlanLabel(currency, cycle, now)
 }

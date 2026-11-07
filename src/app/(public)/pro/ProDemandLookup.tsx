@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { checkDemandNearby, type DemandNearbyResult } from "./actions";
 import { useProCountry } from "./ProCountryContext";
-import { CURRENCY_RATES, USD_MONTHLY } from "./currency-config";
+import { CURRENCY_RATES } from "./currency-config";
 
 const PLACEHOLDERS: Record<string, string> = {
   US: "29651 or Greenville, SC",
@@ -14,7 +14,6 @@ const PLACEHOLDERS: Record<string, string> = {
   AU: "3000 or Melbourne, VIC",
 };
 
-const STRIPE_MONTHLY = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY || "";
 const FIT_CALL_LINK = process.env.NEXT_PUBLIC_FIT_CALL_LINK || "";
 
 function buildLink(base: string, source: string) {
@@ -22,7 +21,7 @@ function buildLink(base: string, source: string) {
   return `${base}${base.includes("?") ? "&" : "?"}client_reference_id=pro_${source}`;
 }
 
-export default function ProDemandLookup() {
+export default function ProDemandLookup({ monthly, monthlyHref }: { monthly: number; monthlyHref: string }) {
   const { country, setCountry } = useProCountry();
   const searchParams = useSearchParams();
   const source = searchParams.get("source") || "direct";
@@ -59,7 +58,7 @@ export default function ProDemandLookup() {
     setResult(null);
   };
 
-  const monthlyLink = buildLink(STRIPE_MONTHLY, source);
+  const monthlyLink = buildLink(monthlyHref, source);
   const fitCallLink = FIT_CALL_LINK || "#";
 
   const resultButtons = (
@@ -80,7 +79,7 @@ export default function ProDemandLookup() {
           textAlign: "center",
         }}
       >
-        Join for ${USD_MONTHLY}{usdSuffix}/month
+        Join for ${monthly}{usdSuffix}/month
       </a>
       <a
         href={fitCallLink}
