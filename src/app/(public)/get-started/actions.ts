@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { assertSelfServeRole } from '@/lib/auth/roles'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
+import { ACCOUNT_CONTINUE_PATH } from '@/lib/applications/resume-path'
 import { doctorSignupStatus } from '@/lib/applications/signup'
 import { ensureDraftApplication } from '@/lib/applications/store'
 
@@ -108,7 +109,7 @@ export async function createFreeAccount(data: {
       }
     } catch {}
 
-    return { success: true, userId, nextPath: isApplicationFlowEnabled() && data.role === 'doctor' ? '/doctor/apply' : null };
+    return { success: true, userId, nextPath: isApplicationFlowEnabled() && data.role === 'doctor' ? ACCOUNT_CONTINUE_PATH : null };
   } catch (err: any) {
     console.error('Free signup error:', err);
     return { error: 'Something went wrong. Please try again.' };

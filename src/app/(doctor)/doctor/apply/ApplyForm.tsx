@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { FlowProgress } from '@/components/applications/FlowProgress'
 import {
   composeHeardAbout,
   HEARD_ABOUT_CHOICES,
@@ -66,6 +67,11 @@ export function ApplyForm({
   const [currency, setCurrency] = useState(startingCurrency)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const flowStep: 2 | 3 = step === 3 ? 3 : 2
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [step])
 
   function set<K extends keyof Initial>(key: K, value: Initial[K]) {
     setValues((current) => ({ ...current, [key]: value }))
@@ -142,13 +148,14 @@ export function ApplyForm({
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-5 px-4 py-6">
       <div>
-        <p className="text-sm font-bold text-neuro-orange">Step {step} of 3 · about 5 minutes</p>
-        <h1 className="mt-1 text-2xl font-bold text-neuro-navy">Apply to join NeuroChiro</h1>
+        <p className="text-sm font-bold text-neuro-navy">NeuroChiro</p>
+        <FlowProgress step={flowStep} />
+        <h1 className="mt-1 text-2xl font-bold text-neuro-navy">{flowStep === 3 ? 'Plan and card' : 'Practice details'}</h1>
         <p className="mt-2 text-sm text-neuro-navy/80">
-          {doctorName ? `Thanks, Dr. ${doctorName}. ` : ''}
-          {step === 1 ? 'About you and how you practice.' : null}
-          {step === 2 ? 'Your office.' : null}
-          {step === 3 ? 'Choose a plan and save a card. You are not charged unless you are approved.' : null}
+          {doctorName && flowStep === 2 ? `Your account is saved, Dr. ${doctorName}. ` : ''}
+          {step === 1 ? 'How you practice. This is the next step, and it stays saved if you leave.' : null}
+          {step === 2 ? 'Your office. A mobile number is required. Text messages are optional.' : null}
+          {step === 3 ? 'Choose monthly or annual in your currency. The card is saved now and is not charged unless you are approved.' : null}
         </p>
       </div>
       {canceled ? <p className="rounded-xl bg-white p-3 text-sm">The card form was closed. You can try again when you are ready.</p> : null}

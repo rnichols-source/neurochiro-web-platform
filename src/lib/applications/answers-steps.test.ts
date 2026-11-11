@@ -1,13 +1,17 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import {
+  applicationResumePath,
+  applicationResumeUrl,
   applicationStopLabel,
   composeHeardAbout,
   firstUnfinishedStep,
+  formStepFromRequest,
   parseHeardAbout,
   validateAnswers,
   validateStep1,
 } from './answers.ts'
+import { ACCOUNT_CONTINUE_PATH } from './resume-path.ts'
 
 const office = {
   techniques: 'Toggle',
@@ -71,12 +75,36 @@ describe('application steps', () => {
       whyJoin: '',
       ...office,
     }), 3)
-    assert.equal(applicationStopLabel({ status: 'draft', cardOnFile: false, answers: {} }), 'Step 1 of 3')
+    assert.equal(applicationStopLabel({ status: 'draft', cardOnFile: false, answers: {} }), 'Step 2 of 3 · Practice details')
     assert.equal(applicationStopLabel({
       status: 'draft',
       cardOnFile: false,
       answers: { practiceApproach: practice, heardAbout: 'Event', whyJoin: '' },
-    }), 'Step 2 of 3')
+    }), 'Step 2 of 3 · Practice details')
+    assert.equal(applicationStopLabel({
+      status: 'draft',
+      cardOnFile: false,
+      answers: { practiceApproach: practice, heardAbout: 'Event', whyJoin: '', ...office },
+    }), 'Step 3 of 3 · Plan and card')
     assert.equal(applicationStopLabel({ status: 'under_review', cardOnFile: true, answers: {} }), 'Submitted')
+  })
+
+  it('sends a returning doctor to the screen they still owe, without skipping or rewinding', () => {
+    const practice = 'We focus on the nervous system and how the body adapts.'
+    const started = { practiceApproach: practice, heardAbout: 'Google', whyJoin: '' }
+    const ready = { ...started, ...office }
+    assert.equal(applicationResumePath({}), '/doctor/apply?step=2')
+    assert.equal(applicationResumePath({}), ACCOUNT_CONTINUE_PATH)
+    assert.equal(applicationResumePath(started), '/doctor/apply?step=2&part=2')
+    assert.equal(applicationResumePath(ready), '/doctor/apply?step=3')
+    assert.equal(applicationResumeUrl({}), 'https://neurochiro.co/doctor/apply?step=2')
+    assert.equal(applicationResumeUrl(ready).includes('neurochirodirectory.com'), false)
+    assert.equal(formStepFromRequest({}, { step: '2' }), 1)
+    assert.equal(formStepFromRequest({}, { step: '3' }), 1)
+    assert.equal(formStepFromRequest(started, { step: '2', part: '2' }), 2)
+    assert.equal(formStepFromRequest(started, { step: '2' }), 2)
+    assert.equal(formStepFromRequest(ready, { step: '2', part: '2' }), 3)
+    assert.equal(formStepFromRequest(ready, { step: '3' }), 3)
+    assert.equal(formStepFromRequest(ready, {}), 3)
   })
 })

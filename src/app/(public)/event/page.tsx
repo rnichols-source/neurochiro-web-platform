@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Loader2, Check, GraduationCap, Stethoscope } from "lucide-react";
+import { continueAfterAccount } from "@/lib/applications/resume-path";
 import { createFreeAccount } from "../get-started/actions";
 import { createClient } from "@/lib/supabase";
 import { DOCTOR_PRO_FEATURES_COMPACT, STUDENT_FEATURES_COMPACT } from "@/lib/membership-value";
@@ -33,6 +34,11 @@ export default function EventPage() {
     const supabase = createClient();
     const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
 
+    if (result.nextPath) {
+      window.location.href = continueAfterAccount(!loginErr, result.nextPath);
+      return;
+    }
+
     if (loginErr) {
       setSuccess(true);
       setLoading(false);
@@ -40,7 +46,7 @@ export default function EventPage() {
     }
 
     if (role === "doctor") {
-      window.location.href = result.nextPath || "/doctor/onboarding";
+      window.location.href = "/doctor/onboarding";
     } else {
       window.location.href = "/student/dashboard";
     }

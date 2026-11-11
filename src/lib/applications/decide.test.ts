@@ -184,6 +184,9 @@ describe('subscription status and the signup flag', () => {
     assert.equal(doctorSignupStatus({ APPLICATION_FLOW_ENABLED: 'true' } as unknown as NodeJS.ProcessEnv), 'hidden')
     assert.equal(doctorSignupStatus({} as unknown as NodeJS.ProcessEnv), 'pending')
     assert.equal(doctorSignupStatus({ APPLICATION_FLOW_ENABLED: 'false' } as unknown as NodeJS.ProcessEnv), 'pending')
+    assert.equal(doctorSignupStatus({ VERCEL_ENV: 'preview' } as unknown as NodeJS.ProcessEnv), 'hidden')
+    assert.equal(doctorSignupStatus({ VERCEL_ENV: 'preview', APPLICATION_FLOW_ENABLED: 'false' } as unknown as NodeJS.ProcessEnv), 'pending')
+    assert.equal(doctorSignupStatus({ VERCEL_ENV: 'production' } as unknown as NodeJS.ProcessEnv), 'pending')
   })
 
   it('switches the public join wording with the same flag', () => {

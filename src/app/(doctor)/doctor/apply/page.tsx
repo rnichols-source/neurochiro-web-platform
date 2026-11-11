@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
-import { firstUnfinishedStep } from '@/lib/applications/answers'
+import { formStepFromRequest } from '@/lib/applications/answers'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
+import { loginPathWithReturn } from '@/lib/auth/safe-return-path'
 import { loadApplyState } from './actions'
 import { ApplyForm } from './ApplyForm'
 
@@ -9,12 +10,15 @@ export const dynamic = 'force-dynamic'
 export default async function ApplyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ canceled?: string; ref?: string }>
+  searchParams: Promise<{ canceled?: string; ref?: string; step?: string; part?: string }>
 }) {
   if (!isApplicationFlowEnabled()) redirect('/doctor/dashboard')
   const state = await loadApplyState()
   if (!state.enabled) redirect('/doctor/dashboard')
-  if ('error' in state) redirect('/login?next=/doctor/apply')
+  if ('error' in state) redirect(loginPathWithReturn('/doctor/apply'))
+  if (state.application && (state.application.cardOnFile || state.application.status !== 'draft')) {
+    redirect('/doctor/dashboard')
+  }
 
   const params = await searchParams
   const answers = state.application?.answers
@@ -43,12 +47,12 @@ export default async function ApplyPage({
       initialCountry={state.country}
       plans={state.plans.plans}
       currency={state.plans.currency}
-      initialStep={firstUnfinishedStep({
+      initialStep={formStepFromRequest({
         ...restored,
         yearsInPractice: answers?.yearsInPractice,
         usesNervousSystemScans: answers?.usesNervousSystemScans,
         mobile: restored.mobile,
-      })}
+      }, { step: params.step, part: params.part })}
       initial={restored}
     />
   )

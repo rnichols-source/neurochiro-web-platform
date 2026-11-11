@@ -71,6 +71,12 @@ describe('application reminder timing', () => {
       assert.match(text, /Reply STOP to opt out/)
       assert.match(text, new RegExp(APPLY_URL.replace(/[.]/g, '\\.')))
     }
+    const resume = 'https://neurochiro.co/doctor/apply?step=2&part=2'
+    const linked = reminderMail('1h', 'Ada', resume)
+    assert.match(linked.html, /https:\/\/neurochiro\.co\/doctor\/apply\?step=2&amp;part=2/)
+    assert.equal(linked.html.includes('neurochirodirectory.com'), false)
+    assert.match(reminderText('24h', 'Ada', 'https://neurochiro.co/doctor/apply?step=3'), /step=3/)
+    assert.match(reminderText('1h', 'Ada', 'https://evil.example/phish'), new RegExp(APPLY_URL.replace(/[.]/g, '\\.')))
   })
 
   it('claims each reminder once and does not text when the flag is off', async () => {

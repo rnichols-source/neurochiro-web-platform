@@ -4,6 +4,8 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Loader2, Shield, Users, BarChart3, MessageSquare, Briefcase, Calendar, Star, Zap } from "lucide-react";
+import { FlowProgress } from "@/components/applications/FlowProgress";
+import { continueAfterAccount } from "@/lib/applications/resume-path";
 import { createFreeAccount } from "./actions";
 import { createClient } from "@/lib/supabase";
 
@@ -26,7 +28,9 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
   const [honeypot, setHoneypot] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [accountExists, setAccountExists] = useState(false);
   const [success, setSuccess] = useState(false);
+  const doctorFlow = applicationFlow && role === "doctor";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,12 +38,23 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
     if (password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true);
     setError("");
+    setAccountExists(false);
 
     const result = await createFreeAccount({ name, email, password, role, phone, referralCode });
-    if (result.error) { setError(result.error); setLoading(false); return; }
+    if (result.error) {
+      setError(result.error);
+      setAccountExists(result.error.includes("already exists"));
+      setLoading(false);
+      return;
+    }
 
     const supabase = createClient();
     const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (result.nextPath) {
+      window.location.href = continueAfterAccount(!loginErr, result.nextPath);
+      return;
+    }
 
     if (loginErr) {
       setSuccess(true);
@@ -47,9 +62,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
       return;
     }
 
-    if (result.nextPath) {
-      window.location.href = result.nextPath;
-    } else if (role === "doctor") {
+    if (role === "doctor") {
       window.location.href = "/doctor/onboarding";
     } else {
       window.location.href = `/student/subscribe?plan=${paramPlan}`;
@@ -66,13 +79,13 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
             <p className="text-gray-500 mb-4">
               {role === "doctor"
                 ? (applicationFlow
-                  ? "Your account is created. Log in to finish the application. You are not charged unless it is approved."
+                  ? "Your account is saved. Log in and you will continue at practice details. The card is not charged unless you are approved."
                   : "Your account is created. Log in to book your onboarding call with Dr. Ray and get started.")
                 : "Your account is created. Log in to choose $33/month or $333/year."}
             </p>
 
             <Link
-              href={role === "doctor" && applicationFlow ? "/login?next=%2Fdoctor%2Fapply" : "/login"}
+              href={role === "doctor" && applicationFlow ? continueAfterAccount(false) : "/login"}
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
             >
               Log In Now
@@ -130,35 +143,42 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
           </div>
         )}
 
+        {doctorFlow ? <FlowProgress step={1} /> : null}
+
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className={doctorFlow ? "mb-6" : "text-center mb-8"}>
           <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">
-            {role === "doctor" ? "Join NeuroChiro Pro" : "Join NeuroChiro Student"}
+            {doctorFlow ? "You and your account" : role === "doctor" ? "Join NeuroChiro Pro" : "Join NeuroChiro Student"}
           </h1>
           <p className="text-gray-500">
-            {role === "doctor"
+            {doctorFlow
+              ? "This is step 1 of 3. Next is your practice, then a plan and a card. The card is not charged unless you are approved."
+              : role === "doctor"
               ? "Full practice growth. Personal onboarding. Weekly promotion."
               : "Career tools, mentorship, and a monthly call with Dr. Ray."}
           </p>
         </div>
 
-        {/* What you get */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
-          <p className="text-xs font-bold text-neuro-orange uppercase tracking-widest mb-3">
-            {role === "doctor" ? "What You Get Every Month" : "What You Get Every Month"}
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {(role === "doctor" ? doctorFeatures : studentFeatures).map((f, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
-                <f.icon className="w-4 h-4 text-neuro-orange shrink-0" />
-                <span className="text-gray-600">{f.label}</span>
-              </div>
-            ))}
+        {doctorFlow ? (
+          <p className="text-sm text-neuro-navy/70 mb-6">$99 a month or $990 a year, per office.</p>
+        ) : null}
+
+        {doctorFlow ? null : (
+          <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-6">
+            <p className="text-xs font-bold text-neuro-orange uppercase tracking-widest mb-3">What You Get Every Month</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(role === "doctor" ? doctorFeatures : studentFeatures).map((f, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <f.icon className="w-4 h-4 text-neuro-orange shrink-0" />
+                  <span className="text-gray-600">{f.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-400 mt-3">
+              {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "$33/month or $333/year. Cancel anytime."}
+            </p>
           </div>
-          <p className="text-xs text-gray-400 mt-3">
-            {role === "doctor" ? "$99/mo or $990/yr. Cancel anytime." : "$33/month or $333/year. Cancel anytime."}
-          </p>
-        </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-neuro-orange p-8 shadow-lg space-y-4">
@@ -196,24 +216,30 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
           </div>
 
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
+          {accountExists && doctorFlow ? (
+            <Link href={continueAfterAccount(false)} className="block text-center text-sm font-bold text-neuro-orange hover:underline">
+              Log in and continue your application
+            </Link>
+          ) : null}
 
           <button type="submit" disabled={loading}
-            className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
+            className="w-full min-h-11 py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
-            {loading ? "Creating account..." : role === "doctor" ? (applicationFlow ? "Create account and apply" : "Join — $99/mo") : "Join Free"}
+            {loading ? "Saving…" : doctorFlow ? "Continue" : role === "doctor" ? "Join — $99/mo" : "Join Free"}
           </button>
 
           <p className="text-center text-xs text-gray-400">
-            {role === "doctor"
-              ? (applicationFlow ? "Next: a 5-minute application. You'll save a card, but you're not charged unless you're approved." : "Personal onboarding call with Dr. Ray included.")
+            {doctorFlow
+              ? "We'll save your account and open practice details."
+              : role === "doctor"
+              ? "Personal onboarding call with Dr. Ray included."
               : "Includes monthly group call with Dr. Ray."}
           </p>
         </form>
 
-        {/* Already a member */}
         <p className="text-center text-xs text-gray-400 mt-6">
           Already a member?{" "}
-          <Link href="/login" className="text-neuro-orange font-bold hover:underline">Log in</Link>
+          <Link href={doctorFlow ? continueAfterAccount(false) : "/login"} className="text-neuro-orange font-bold hover:underline">Log in</Link>
         </p>
       </div>
     </div>

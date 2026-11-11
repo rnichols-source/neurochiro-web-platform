@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, CheckCircle2, Phone, Image as ImageIcon, Video, Star, Zap, BarChart3, Mail } from 'lucide-react';
@@ -51,16 +52,13 @@ export default function OnboardingGate({
   const pathname = usePathname();
   const onApply = pathname === '/doctor/apply' || pathname.startsWith('/doctor/apply/');
 
+  useEffect(() => {
+    if (applicationGate !== 'finish' || onApply) return;
+    window.location.replace('/doctor/apply');
+  }, [applicationGate, onApply]);
+
   if (applicationGate === 'finish' && onApply) return children;
-  if (applicationGate === 'finish') {
-    return (
-      <ReviewScreen
-        title="Finish your application"
-        body="Answer a few questions and save a card. You are not charged unless the application is approved. Your listing stays off the directory until then."
-        action={{ href: '/doctor/apply', label: 'Continue application' }}
-      />
-    );
-  }
+  if (applicationGate === 'finish') return null;
   if (applicationGate === 'review') {
     return (
       <ReviewScreen

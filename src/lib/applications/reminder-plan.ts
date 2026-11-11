@@ -18,6 +18,7 @@ export type ReminderCandidate = {
   reminder24hSentAt: string | null
   smsConsent: boolean
   mobile: string | null
+  resumeUrl?: string
 }
 
 export function applicationReminderSmsEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -62,9 +63,10 @@ export function consentFromApplicationRow(row: Record<string, unknown>): { conse
   return { consent: contact.smsConsent === true, phone: contact.mobileE164 }
 }
 
-export function reminderMail(kind: ReminderKind, firstName: string): { subject: string; html: string } {
+export function reminderMail(kind: ReminderKind, firstName: string, resumeUrl = APPLY_URL): { subject: string; html: string } {
   const name = escapeHtml((firstName || '').trim() || 'there')
-  const link = `<p><a href="${APPLY_URL}">Finish your application</a></p>`
+  const href = escapeHtml(resumeUrl.startsWith('https://neurochiro.co/') ? resumeUrl : APPLY_URL)
+  const link = `<p><a href="${href}">Finish your application</a></p>`
   const close = `
     <p>It takes about 5 minutes. You'll save a card at the end, and your card isn't charged unless you're approved.</p>
     ${link}
@@ -82,12 +84,13 @@ export function reminderMail(kind: ReminderKind, firstName: string): { subject: 
   }
 }
 
-export function reminderText(kind: ReminderKind, firstName: string): string {
+export function reminderText(kind: ReminderKind, firstName: string, resumeUrl = APPLY_URL): string {
   const name = (firstName || 'there').replace(/\s+/g, ' ').trim() || 'there'
+  const link = resumeUrl.startsWith('https://neurochiro.co/') ? resumeUrl : APPLY_URL
   const lead = kind === '24h'
     ? `Hi Dr. ${name}, it's Dr. Ray. Your NeuroChiro application is still open.`
     : `Hi Dr. ${name}, it's Dr. Ray at NeuroChiro. Your application is still open.`
-  return `${lead} It takes about 5 minutes, and your card isn't charged unless you're approved. ${APPLY_URL} Reply STOP to opt out.`
+  return `${lead} It takes about 5 minutes, and your card isn't charged unless you're approved. ${link} Reply STOP to opt out.`
 }
 
 export async function deliverReminders(input: {
@@ -116,7 +119,8 @@ export async function deliverReminders(input: {
     }
     let sent = false
     try {
-      const mail = reminderMail(kind, row.firstName)
+      const resumeUrl = row.resumeUrl || APPLY_URL
+      const mail = reminderMail(kind, row.firstName, resumeUrl)
       sent = await input.sendEmail({ to: row.email, subject: mail.subject, html: mail.html })
     } catch {
       sent = false
@@ -130,7 +134,7 @@ export async function deliverReminders(input: {
     const to = reminderSmsTo({ enabled: input.smsEnabled, consent: row.smsConsent, phone: row.mobile })
     if (!to) continue
     try {
-      const ok = await input.sendSms({ to, content: reminderText(kind, row.firstName) })
+      const ok = await input.sendSms({ to, content: reminderText(kind, row.firstName, row.resumeUrl || APPLY_URL) })
       if (ok) texted += 1
     } catch {
       // The email already went out. A failed text does not undo it.

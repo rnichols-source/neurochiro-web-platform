@@ -1,6 +1,13 @@
-/** Exact string "true". Anything else, including unset, leaves today's signup in place. */
+/**
+ * Exact "true" turns the flow on. Exact "false" turns it off.
+ * A Vercel preview with the flag unset shows the flow, because the flag
+ * currently lives on Production only and a preview is how this gets reviewed.
+ * Anywhere else, unset leaves today's signup in place.
+ */
 export function isApplicationFlowEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
-  return env.APPLICATION_FLOW_ENABLED === 'true'
+  if (env.APPLICATION_FLOW_ENABLED === 'true') return true
+  if (env.APPLICATION_FLOW_ENABLED === 'false') return false
+  return env.VERCEL_ENV === 'preview'
 }
 
 /** Short button label next to Log in, in the mobile menu, and on /pro. */
