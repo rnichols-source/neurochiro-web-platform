@@ -17,19 +17,8 @@ import ContactGateCTA from "@/components/directory/ContactGateCTA";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
 import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-display";
-import { containsHealthWords } from "@/lib/leads/validate";
+import { containsHealthWords, isPlausibleEmail, requiredPhoneError } from "@/lib/leads/validate";
 import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
-
-function parseContact(value: string): { email: string; phone: string; valid: boolean } {
-  const trimmed = value.trim();
-  if (!trimmed) return { email: "", phone: "", valid: false };
-  if (trimmed.includes("@")) {
-    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
-    return { email: valid ? trimmed : "", phone: "", valid };
-  }
-  const digits = trimmed.replace(/\D/g, "");
-  return { email: "", phone: trimmed, valid: digits.length >= 7 };
-}
 
 function formatUrl(url: string | null | undefined): string | null {
   if (!url || !url.trim()) return null;
@@ -63,7 +52,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [submittingStory, setSubmittingStory] = useState(false);
   const [appointmentSubmitted, setAppointmentSubmitted] = useState(false);
   const [submittingAppointment, setSubmittingAppointment] = useState(false);
-  const [appointmentForm, setAppointmentForm] = useState({ name: '', contact: '', bestTime: '', message: '', smsConsent: false, smsPhone: '' });
+  const [appointmentForm, setAppointmentForm] = useState({ name: '', phone: '', email: '', bestTime: '', message: '', smsConsent: false });
+  const [appointmentErrors, setAppointmentErrors] = useState<{ name?: string; phone?: string; email?: string }>({});
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const supabase = createClient();
@@ -130,8 +120,6 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
     : doctor.city
       ? encodeURIComponent([doctor.city, doctor.state].filter(Boolean).join(", "))
       : null;
-  const parsedContact = parseContact(appointmentForm.contact);
-  const canSendRequest = Boolean(appointmentForm.name.trim()) && parsedContact.valid;
   const hasCostData = d.first_visit_price || d.payment_model || d.insurance_networks?.length > 0 || d.files_insurance || d.payment_plans || d.free_consultation;
   const hasAvailData = hours || d.accepts_walkins || d.offers_telehealth || d.has_evening_hours || d.has_weekend_hours;
 
@@ -190,7 +178,16 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   };
 
   const sendAppointmentRequest = async () => {
-    if (!canSendRequest || submittingAppointment) return;
+    if (submittingAppointment) return;
+    const emailTrimmed = appointmentForm.email.trim();
+    const nextErrors: { name?: string; phone?: string; email?: string } = {};
+    if (!appointmentForm.name.trim()) nextErrors.name = "Please enter your name.";
+    const phoneMessage = requiredPhoneError(appointmentForm.phone);
+    if (phoneMessage) nextErrors.phone = phoneMessage;
+    if (emailTrimmed && !isPlausibleEmail(emailTrimmed)) nextErrors.email = "Please enter a valid email address.";
+    setAppointmentErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     setSubmittingAppointment(true);
     try {
       const res = await fetch('/api/appointment', {
@@ -198,15 +195,13 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           patientName: appointmentForm.name.trim(),
-          patientEmail: parsedContact.email,
-          patientPhone: parsedContact.phone,
+          patientEmail: emailTrimmed,
+          patientPhone: appointmentForm.phone.trim(),
           preferredDate: appointmentForm.bestTime,
           message: appointmentForm.message,
           doctorId: doctor.id,
           smsConsent: appointmentForm.smsConsent === true,
-          smsPhone: appointmentForm.smsConsent
-            ? (parsedContact.phone || appointmentForm.smsPhone.trim() || null)
-            : null,
+          smsPhone: appointmentForm.smsConsent ? appointmentForm.phone.trim() : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -221,9 +216,46 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   };
 
   const requestFields = (idPrefix: string) => (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <input type="text" placeholder="Your name *" autoComplete="name" value={appointmentForm.name} onChange={e => setAppointmentForm(f => ({ ...f, name: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
-      <input type="text" placeholder="Phone or email *" autoComplete="tel" value={appointmentForm.contact} onChange={e => setAppointmentForm(f => ({ ...f, contact: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+    <form onSubmit={(e) => { e.preventDefault(); void sendAppointmentRequest(); }} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <label htmlFor={`${idPrefix}-name`} style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B" }}>
+        Your name <span style={{ color: "#dc2626" }} aria-hidden="true">*</span>
+      </label>
+      <input id={`${idPrefix}-name`} type="text" name="name" required aria-required="true" placeholder="First and last name" autoComplete="name" value={appointmentForm.name} aria-invalid={appointmentErrors.name ? true : undefined} onInvalid={() => setAppointmentErrors(prev => ({ ...prev, name: "Please enter your name." }))} onChange={e => { setAppointmentForm(f => ({ ...f, name: e.target.value })); setAppointmentErrors(prev => ({ ...prev, name: undefined })); }} style={{ padding: "14px 16px", border: `1px solid ${appointmentErrors.name ? "#f87171" : "#e5e7eb"}`, borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      {appointmentErrors.name ? <p role="alert" style={{ color: "#dc2626", fontSize: 12, margin: 0 }}>{appointmentErrors.name}</p> : null}
+      <label htmlFor={`${idPrefix}-phone`} style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B" }}>
+        Phone <span style={{ color: "#dc2626" }} aria-hidden="true">*</span>
+      </label>
+      <input
+        id={`${idPrefix}-phone`}
+        type="tel"
+        name="phone"
+        inputMode="tel"
+        required
+        aria-required="true"
+        autoComplete="tel"
+        placeholder="(555) 123-4567"
+        aria-invalid={appointmentErrors.phone ? true : undefined}
+        aria-describedby={`${idPrefix}-phone-hint`}
+        value={appointmentForm.phone}
+        ref={(node) => {
+          if (node) node.setCustomValidity(requiredPhoneError(appointmentForm.phone) ?? "");
+        }}
+        onInvalid={(e) => {
+          const input = e.currentTarget;
+          const message = requiredPhoneError(input.value) || "Please enter your phone number so the office can call you.";
+          setAppointmentErrors(prev => ({ ...prev, phone: message }));
+          requestAnimationFrame(() => input.scrollIntoView({ block: "center", inline: "nearest" }));
+        }}
+        onChange={e => { setAppointmentForm(f => ({ ...f, phone: e.target.value })); setAppointmentErrors(prev => ({ ...prev, phone: undefined })); }}
+        style={{ padding: "14px 16px", border: `1px solid ${appointmentErrors.phone ? "#f87171" : "#e5e7eb"}`, borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }}
+      />
+      <p id={`${idPrefix}-phone-hint`} style={{ fontSize: 11, color: "#9ca3af", margin: 0 }}>Required so the office can call you. US, Canada, and international numbers are fine.</p>
+      {appointmentErrors.phone ? <p id={`${idPrefix}-phone-error`} role="alert" style={{ color: "#dc2626", fontSize: 12, margin: 0 }}>{appointmentErrors.phone}</p> : null}
+      <label htmlFor={`${idPrefix}-email`} style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B" }}>
+        Email <span style={{ fontWeight: 500, color: "#9ca3af" }}>(optional)</span>
+      </label>
+      <input id={`${idPrefix}-email`} type="email" name="email" inputMode="email" autoComplete="email" placeholder="you@email.com" value={appointmentForm.email} aria-invalid={appointmentErrors.email ? true : undefined} onInvalid={(e) => { if (e.currentTarget.validity.typeMismatch) setAppointmentErrors(prev => ({ ...prev, email: "Please enter a valid email address." })); }} onChange={e => { setAppointmentForm(f => ({ ...f, email: e.target.value })); setAppointmentErrors(prev => ({ ...prev, email: undefined })); }} style={{ padding: "14px 16px", border: `1px solid ${appointmentErrors.email ? "#f87171" : "#e5e7eb"}`, borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
+      {appointmentErrors.email ? <p role="alert" style={{ color: "#dc2626", fontSize: 12, margin: 0 }}>{appointmentErrors.email}</p> : null}
       <input type="text" placeholder="Best time to reach you" value={appointmentForm.bestTime} onChange={e => setAppointmentForm(f => ({ ...f, bestTime: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, outline: "none", width: "100%" }} />
       <textarea placeholder="Message (optional)" value={appointmentForm.message} onChange={e => setAppointmentForm(f => ({ ...f, message: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, height: 72, resize: "none", outline: "none", width: "100%" }} />
       <p style={{ fontSize: 11, color: "#b0b8c4", margin: 0 }}>Please do not include symptoms, diagnoses, or medical details. This is not a clinical form.</p>
@@ -232,16 +264,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <input id={`${idPrefix}-sms`} type="checkbox" checked={appointmentForm.smsConsent} onChange={e => setAppointmentForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: 2, width: 18, height: 18, flexShrink: 0 }} />
         <span><PatientSmsConsentLabel /></span>
       </label>
-      {appointmentForm.smsConsent && parsedContact.email ? (
-        <label htmlFor={`${idPrefix}-sms-phone`} style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12, color: "#4b5563" }}>
-          Mobile number for text updates
-          <input id={`${idPrefix}-sms-phone`} type="tel" inputMode="tel" autoComplete="tel" placeholder="Mobile number for text updates" value={appointmentForm.smsPhone} onChange={e => setAppointmentForm(f => ({ ...f, smsPhone: e.target.value }))} style={{ padding: "14px 16px", border: "1px solid #e5e7eb", borderRadius: 12, fontSize: 14, width: "100%" }} />
-        </label>
-      ) : null}
-      <button type="button" disabled={submittingAppointment || !canSendRequest} onClick={sendAppointmentRequest} style={{ padding: "14px 18px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 15, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment || !canSendRequest ? 0.5 : 1 }}>
+      <button type="submit" disabled={submittingAppointment} style={{ padding: "14px 18px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 15, border: "none", cursor: submittingAppointment ? "not-allowed" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: submittingAppointment ? 0.5 : 1 }}>
         {submittingAppointment ? <><Loader2 style={{ width: 18, height: 18 }} className="animate-spin" /> Sending...</> : <><Send style={{ width: 16, height: 16 }} /> Send request</>}
       </button>
-    </div>
+    </form>
   );
 
   const requestSuccess = () => (

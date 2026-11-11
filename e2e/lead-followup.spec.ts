@@ -32,7 +32,21 @@ test('profile appointment and instagram contact form accept a lead', async ({ re
       doctorId,
     },
   })
-  expect(emailOnly.ok()).toBeTruthy()
+  expect(emailOnly.status()).toBe(400)
+  expect((await emailOnly.json()).error).toMatch(/phone/i)
+
+  const missingPhone = await request.post(`${base}/api/contact-request`, {
+    data: {
+      doctorId,
+      name: 'Preview Missing Phone',
+      email: 'preview-nophone@example.com',
+      consent: true,
+      consentText: 'I am asking the office to contact me.',
+      source: 'dm_outreach',
+    },
+  })
+  expect(missingPhone.status()).toBe(400)
+  expect((await missingPhone.json()).error).toMatch(/phone/i)
 
   const instagram = await request.post(`${base}/api/contact-request`, {
     data: {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { rateLimit, getIP } from '@/lib/rate-limit'
 import { createLead } from '@/lib/leads/create-lead'
+import { requiredPhoneError } from '@/lib/leads/validate'
 
 export const maxDuration = 30
 
@@ -18,6 +19,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { patientName, patientEmail, patientPhone, preferredDate, message, doctorId } = body
+    const phoneError = requiredPhoneError(patientPhone)
+    if (phoneError) return NextResponse.json({ error: phoneError }, { status: 400 })
     const smsConsent = body.smsConsent === true
     const result = await createLead({
       doctorId,
