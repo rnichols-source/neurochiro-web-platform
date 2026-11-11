@@ -26,6 +26,20 @@ export function isPlausiblePhone(value: string | null | undefined): boolean {
   return digits.length >= 7
 }
 
+export const PHONE_REQUIRED_MESSAGE = 'Please enter your phone number so the office can call you.'
+export const PHONE_INVALID_MESSAGE = 'Please enter a valid phone number.'
+
+/**
+ * Phone is required for patient callback requests.
+ * Empty values and numbers with fewer than 7 digits are rejected.
+ * Common US, Canada, and international formats are accepted, including a leading + and extensions.
+ */
+export function requiredPhoneError(value: unknown): string | null {
+  if (typeof value !== 'string' || !value.trim()) return PHONE_REQUIRED_MESSAGE
+  if (!isPlausiblePhone(value)) return PHONE_INVALID_MESSAGE
+  return null
+}
+
 export function containsHealthWords(value: string | null | undefined): boolean {
   if (!value) return false
   return HEALTH_WORD_RE.test(value)

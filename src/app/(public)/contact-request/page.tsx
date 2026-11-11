@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Phone, User, MessageSquare, CheckCircle2, AlertCircle, Loader2, ShieldCheck, Mail } from "lucide-react";
 import Link from "next/link";
 import Footer from "@/components/landing/Footer";
-import { containsHealthWords, isPlausibleEmail, isPlausiblePhone } from "@/lib/leads/validate";
+import { containsHealthWords, isPlausibleEmail, requiredPhoneError } from "@/lib/leads/validate";
 import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
 
 export default function ContactRequestPage() {
@@ -76,14 +76,9 @@ function ContactRequestContent() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!name.trim()) e.name = "Please enter your name.";
-    const phoneOk = isPlausiblePhone(phone);
-    const emailOk = isPlausibleEmail(email);
-    if (!phoneOk && !emailOk) {
-      e.phone = "Enter a phone number or an email so the office can reach you.";
-    } else if (phone.trim() && !phoneOk) {
-      e.phone = "Please enter a valid phone number.";
-    }
-    if (email.trim() && !emailOk) {
+    const phoneMessage = requiredPhoneError(phone);
+    if (phoneMessage) e.phone = phoneMessage;
+    if (email.trim() && !isPlausibleEmail(email)) {
       e.email = "Please enter a valid email address.";
     }
     if (!consent) e.consent = "You must agree to be contacted.";
@@ -276,20 +271,40 @@ function ContactRequestContent() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-bold text-neuro-navy mb-1.5">
-                Phone or email
+              <label htmlFor="contact-phone" className="block text-sm font-bold text-neuro-navy mb-1.5">
+                Phone <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
+                  id="contact-phone"
+                  name="phone"
+                  ref={(node) => {
+                    if (node) node.setCustomValidity(requiredPhoneError(phone) ?? "");
+                  }}
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  required
+                  aria-required="true"
+                  aria-invalid={errors.phone ? true : undefined}
+                  aria-describedby={errors.phone ? "contact-phone-error" : "contact-phone-hint"}
                   value={phone}
+                  onInvalid={(e) => {
+                    const input = e.currentTarget;
+                    const message = requiredPhoneError(input.value) || "Please enter your phone number so the office can call you.";
+                    setErrors((p) => ({ ...p, phone: message }));
+                    requestAnimationFrame(() => input.scrollIntoView({ block: "center", inline: "nearest" }));
+                  }}
                   onChange={(e) => { setPhone(e.target.value); setErrors((p) => ({ ...p, phone: "" })); }}
                   placeholder="(555) 123-4567"
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${errors.phone ? "border-red-400" : "border-gray-200"} text-neuro-navy text-sm focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange transition-colors`}
                 />
               </div>
-              {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              <p id="contact-phone-hint" className="text-xs text-gray-400 mt-1">
+                Required so the office can call you. US, Canada, and international numbers are fine.
+              </p>
+              {errors.phone && <p id="contact-phone-error" className="text-red-500 text-xs mt-1">{errors.phone}</p>}
             </div>
 
             {/* Email (optional) */}

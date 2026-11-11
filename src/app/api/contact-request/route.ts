@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { rateLimit, getIP } from '@/lib/rate-limit'
 import { createLead } from '@/lib/leads/create-lead'
+import { requiredPhoneError } from '@/lib/leads/validate'
 
 export const maxDuration = 30
 
@@ -30,6 +31,8 @@ export async function POST(req: NextRequest) {
   }
   if (!consent) return NextResponse.json({ error: 'You must agree to be contacted.' }, { status: 400 })
   if (!consentText) return NextResponse.json({ error: 'Missing consent text.' }, { status: 400 })
+  const phoneError = requiredPhoneError(phone)
+  if (phoneError) return NextResponse.json({ error: phoneError }, { status: 400 })
 
   const validSource = VALID_SOURCES.includes(source) ? source : 'doctor_joined'
   const smsConsent = body.smsConsent === true
