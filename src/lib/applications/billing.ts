@@ -146,7 +146,7 @@ export async function createSetupCheckout(input: {
     customer: customerId,
     currency: input.currency.toLowerCase(),
     success_url: `${siteUrl()}/doctor/apply/complete?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${siteUrl()}/doctor/apply?canceled=1`,
+    cancel_url: `${siteUrl()}/doctor/apply?canceled=1&step=3`,
     client_reference_id: input.applicationId,
     metadata: {
       type: 'doctor_application_setup',

@@ -183,16 +183,51 @@ export function validateAnswers(input: unknown): { ok: true; value: ApplicationA
   return { ok: true, value: { ...step1.value, ...step2.value } }
 }
 
-/** First step that is still missing answers. 3 means the card step. */
+/** First saved screen that is still missing answers. 1 and 2 are practice details. 3 is the card. */
 export function firstUnfinishedStep(input: unknown): 1 | 2 | 3 {
   if (!validateStep1(input).ok) return 1
   if (!validateStep2(input).ok) return 2
   return 3
 }
 
+/**
+ * The public flow is 3 steps: account, practice details, plan and card.
+ * Practice details is two saved screens. `step=2` is the first. `step=2&part=2` is the office.
+ * A link opens that screen only when it is the one still unfinished.
+ * A later link does not skip required answers. An earlier link does not rewind.
+ */
+export function formStepFromRequest(
+  input: unknown,
+  request: { step?: string | null; part?: string | null } = {},
+): 1 | 2 | 3 {
+  const current = firstUnfinishedStep(input)
+  const asked = requestedFormStep(request)
+  return asked === current ? asked : current
+}
+
+function requestedFormStep(request: { step?: string | null; part?: string | null }): 1 | 2 | 3 | null {
+  if (request.step === '3') return 3
+  if (request.step === '2' && request.part === '2') return 2
+  if (request.step === '2' || request.step === '1') return 1
+  return null
+}
+
+/** Path a reminder or a return visit should open. Account creation is already done. */
+export function applicationResumePath(input: unknown): string {
+  const current = firstUnfinishedStep(input)
+  if (current === 3) return '/doctor/apply?step=3'
+  if (current === 2) return '/doctor/apply?step=2&part=2'
+  return '/doctor/apply?step=2'
+}
+
+export function applicationResumeUrl(input: unknown): string {
+  return `https://neurochiro.co${applicationResumePath(input)}`
+}
+
 export function applicationStopLabel(input: { status: string; cardOnFile: boolean; answers: unknown }): string {
   if (input.cardOnFile || input.status !== 'draft') return 'Submitted'
-  return `Step ${firstUnfinishedStep(input.answers)} of 3`
+  if (firstUnfinishedStep(input.answers) === 3) return 'Step 3 of 3 · Plan and card'
+  return 'Step 2 of 3 · Practice details'
 }
 
 export function currencyForAnswers(country: string): DoctorCurrency {

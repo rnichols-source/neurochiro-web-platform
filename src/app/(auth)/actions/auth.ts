@@ -8,6 +8,7 @@ import { isFounderEmail } from '@/lib/founder'
 import { assertSelfServeRole } from '@/lib/auth/roles'
 import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
+import { ACCOUNT_CONTINUE_PATH } from '@/lib/applications/resume-path'
 import { ensureDraftApplication } from '@/lib/applications/store'
 import { safeReturnPath } from '@/lib/auth/safe-return-path'
 
@@ -95,8 +96,19 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     cookieStore.delete('nc_demo_role');
   }
 
-  // Same-site return path only. An unfinished application comes back to /doctor/apply.
+  // Same-site return path only. An unfinished application comes back to its current step.
   if (next) return redirect(next);
+
+  if (isApplicationFlowEnabled() && (role === 'doctor' || role.startsWith('doctor'))) {
+    const { createAdminClient } = await import('@/lib/supabase-admin')
+    const { loadApplicationGate } = await import('@/lib/applications/gate')
+    const admin = createAdminClient()
+    const { data: doctor } = await admin.from('doctors').select('id').eq('user_id', data.user.id).maybeSingle()
+    if (doctor?.id) {
+      const gate = await loadApplicationGate(doctor.id)
+      if (gate === 'finish') return redirect('/doctor/apply')
+    }
+  }
 
   // Check if first-time user (name not set)
   if (!(profile as any)?.full_name && ['doctor', 'student'].includes(role)) {
@@ -274,7 +286,7 @@ export async function createAccountAction(formData: FormData, role: string, _tie
       success: true,
       user: data.user,
       sessionActive: !!data.session,
-      nextPath: flow ? '/doctor/apply' : null,
+      nextPath: flow ? ACCOUNT_CONTINUE_PATH : null,
     };
   }
 

@@ -70,7 +70,11 @@ function LoginContent() {
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-neuro-navy rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4 shadow-xl">N</div>
           <h1 className="text-3xl font-heading font-black text-neuro-navy mb-2">Welcome Back</h1>
-          <p className="text-gray-500 text-sm">Log in to your NeuroChiro account.</p>
+          <p className="text-gray-500 text-sm">
+            {(redirectParam || "").startsWith("/doctor/apply")
+              ? "Log in to continue your application. You'll pick up on the step where you stopped."
+              : "Log in to your NeuroChiro account."}
+          </p>
         </div>
 
         {errorMsg && (

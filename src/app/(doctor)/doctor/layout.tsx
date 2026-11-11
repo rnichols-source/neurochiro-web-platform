@@ -19,10 +19,13 @@ import StaffScorecardFrame from './StaffScorecardFrame';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
+  const headerStore = await headers();
+  const path = headerStore.get('x-pathname') || '';
+  const search = headerStore.get('x-search') || '';
+  const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
   const ctx = await getPortalContext();
   if (!ctx) {
-    const path = (await headers()).get('x-pathname') || '';
-    if (path === '/doctor/apply' || path.startsWith('/doctor/apply/')) redirect(loginPathWithReturn(path));
+    if (applying) redirect(loginPathWithReturn(`${path}${search}`));
     redirect('/login');
   }
 
@@ -51,6 +54,23 @@ export default async function DoctorLayout({ children }: { children: React.React
     ? await loadApplicationGate(ctx.doctor.id)
     : null;
   const needsCall = !applicationGate && !ctx.doctor?.is_founding_member && ctx.doctor?.is_approved !== true && callStatus !== 'completed';
+
+  if (applicationGate === 'finish' && path && !applying) redirect('/doctor/apply');
+
+  if (applying) {
+    const terminal = applicationGate && applicationGate !== 'finish';
+    const completing = path === '/doctor/apply/complete' || path.startsWith('/doctor/apply/complete/');
+    if (terminal && !completing) redirect('/doctor/dashboard');
+    return (
+      <AuthProvider>
+        <div className={`${inter.variable} min-h-dvh bg-neuro-cream`}>
+          <PortalProvider value={ctx}>
+            {children}
+          </PortalProvider>
+        </div>
+      </AuthProvider>
+    );
+  }
 
   return (
     <AuthProvider>

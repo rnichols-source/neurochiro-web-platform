@@ -7,6 +7,7 @@ import { SUPABASE_PUBLIC_KEY, SUPABASE_URL } from '@/lib/supabase-env';
 export async function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set('x-pathname', req.nextUrl.pathname);
+  requestHeaders.set('x-search', req.nextUrl.search);
   const res = NextResponse.next({ request: { headers: requestHeaders } });
 
   const supabase = createServerClient(

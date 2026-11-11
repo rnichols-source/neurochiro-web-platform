@@ -2,6 +2,7 @@ import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn, isMissingTable } from '@/lib/leads/schema'
+import { applicationResumeUrl } from './answers.ts'
 import {
   consentFromApplicationRow,
   reminderWindows,
@@ -46,6 +47,26 @@ function columnFor(kind: ReminderKind): 'reminder_1h_sent_at' | 'reminder_24h_se
 
 function missingSchema(error: DbError): boolean {
   return isMissingColumn(error) || isMissingTable(error)
+}
+
+function answersForResume(row: Row, mobile: string): Record<string, unknown> {
+  return {
+    practiceApproach: text(row.practice_approach),
+    heardAbout: text(row.heard_about),
+    whyJoin: text(row.why_join),
+    techniques: text(row.techniques),
+    usesNervousSystemScans: row.uses_nervous_system_scans,
+    scanTypes: text(row.scan_types),
+    yearsInPractice: typeof row.years_in_practice === 'number' ? row.years_in_practice : text(row.years_in_practice),
+    officeAddress: text(row.office_address),
+    city: text(row.city),
+    state: text(row.state),
+    country: text(row.country),
+    website: text(row.website),
+    instagram: text(row.instagram),
+    mobile,
+    smsConsent: row.sms_consent === true,
+  }
 }
 
 export async function loadReminderCandidates(now: Date): Promise<{ rows: ReminderCandidate[]; unavailable: boolean }> {
@@ -102,6 +123,7 @@ export async function loadReminderCandidates(now: Date): Promise<{ rows: Reminde
         reminder24hSentAt: text(row.reminder_24h_sent_at) || null,
         smsConsent: contact.consent,
         mobile: contact.phone || null,
+        resumeUrl: applicationResumeUrl(answersForResume(row, contact.phone)),
       }
     }).filter((row) => row.id),
   }

@@ -6,6 +6,8 @@ describe('safe return paths', () => {
   it('keeps a same-site application path, including a query', () => {
     assert.equal(safeReturnPath('/doctor/apply'), '/doctor/apply')
     assert.equal(safeReturnPath('/doctor/apply?canceled=1'), '/doctor/apply?canceled=1')
+    assert.equal(safeReturnPath('/doctor/apply?step=2&part=2'), '/doctor/apply?step=2&part=2')
+    assert.equal(safeReturnPath('/doctor/apply?canceled=1&step=3'), '/doctor/apply?canceled=1&step=3')
     assert.equal(safeReturnPath('  /doctor/apply  '), '/doctor/apply')
   })
 
@@ -24,6 +26,7 @@ describe('safe return paths', () => {
 
   it('builds a login link that comes back to the application', () => {
     assert.equal(loginPathWithReturn('/doctor/apply'), '/login?next=%2Fdoctor%2Fapply')
+    assert.equal(loginPathWithReturn('/doctor/apply?step=2&part=2'), '/login?next=%2Fdoctor%2Fapply%3Fstep%3D2%26part%3D2')
     assert.equal(loginPathWithReturn('https://evil.com'), '/login?next=%2Fdoctor%2Fapply')
   })
 })
