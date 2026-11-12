@@ -183,7 +183,7 @@ function answerPatch(answers: ApplicationAnswers, referralCode: string, now: str
     instagram: answers.instagram || null,
     heard_about: answers.heardAbout,
     why_join: answers.whyJoin,
-    referral_code: referralCode || null,
+    ...(referralCode ? { referral_code: referralCode } : {}),
     updated_at: now,
   }
 }
@@ -332,7 +332,7 @@ export async function saveDraftStep(input: {
   }
   const patch: Record<string, unknown> = {
     ...input.fields,
-    referral_code: input.referralCode || null,
+    ...(input.referralCode ? { referral_code: input.referralCode } : {}),
     updated_at: now,
     step_reached: reached,
   }
@@ -480,7 +480,7 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
     return { rows: [], error: 'The applications table is not ready yet. Run the SQL file, then refresh this page.' }
   }
   const rows = many(result)
-  const doctorIds = rows.map((row) => text(row.doctor_id)).filter(Boolean)
+  const doctorIds = rows.flatMap((row) => [text(row.doctor_id), text(row.referred_by_doctor_id)]).filter(Boolean)
   const userIds = rows.map((row) => text(row.user_id)).filter(Boolean)
   const [doctors, profiles] = await Promise.all([
     doctorIds.length ? db().from('doctors').select('id, first_name, last_name, email, slug').in('id', doctorIds) : Promise.resolve({ data: [] }),
@@ -515,6 +515,11 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
         instagram: mapped.answers.instagram,
         heardAbout: mapped.answers.heardAbout,
         whyJoin: mapped.answers.whyJoin,
+        referredBy: (() => {
+          const referrer = doctorMap.get(text(row.referred_by_doctor_id))
+          if (referrer) return `Dr. ${text(referrer.first_name)} ${text(referrer.last_name)}`.replace(/\s+/g, ' ').trim()
+          return text(row.referrer_name) || text(row.referral_code)
+        })(),
         notes: humanAdminNotes(text(row.admin_notes)),
         mobile: mapped.mobileE164 || '',
         smsConsent: mapped.smsConsent ? consentStatusLabel(true, contactFromApplicationRow(row).smsConsentAt) : 'No',

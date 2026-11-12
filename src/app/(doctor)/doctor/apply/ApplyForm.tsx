@@ -29,6 +29,7 @@ type Initial = {
   whyJoin: string
   mobile: string
   smsConsent: boolean
+  referrerName: string
 }
 
 const fieldClass = 'mt-1 w-full min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm'
@@ -37,6 +38,7 @@ export function ApplyForm({
   doctorName,
   canceled,
   referralCode,
+  referredBy,
   initialCountry,
   plans: startingPlans,
   currency: startingCurrency,
@@ -46,6 +48,7 @@ export function ApplyForm({
   doctorName: string
   canceled: boolean
   referralCode: string
+  referredBy: string | null
   initialCountry: string
   plans: PlanChoice[]
   currency: DoctorCurrency
@@ -60,6 +63,7 @@ export function ApplyForm({
     mobile: initial.mobile || '',
     smsConsent: initial.smsConsent === true,
   })
+  const [referrerName, setReferrerName] = useState(initial.referrerName || '')
   const [heardChoice, setHeardChoice] = useState(heard.choice)
   const [heardOther, setHeardOther] = useState(heard.other)
   const [plan, setPlan] = useState<BillingCycle>('monthly')
@@ -113,7 +117,7 @@ export function ApplyForm({
           return
         }
       }
-      const saved = await saveApplyStep(step, { referralCode, answers: answers() })
+      const saved = await saveApplyStep(step, { referralCode, referrerName, answers: answers() })
       if (saved.error) {
         setError(saved.error)
         setLoading(false)
@@ -135,6 +139,7 @@ export function ApplyForm({
     const result = await submitApplication({
       plan,
       referralCode,
+      referrerName,
       answers: { ...answers(), mobile },
     })
     if (result.error || !result.url) {
@@ -158,6 +163,7 @@ export function ApplyForm({
           {step === 3 ? 'Choose monthly or annual in your currency. The card is saved now and is not charged unless you are approved.' : null}
         </p>
       </div>
+      {referredBy ? <p className="rounded-xl bg-white px-3 py-2 text-sm text-neuro-navy">Referred by {referredBy}</p> : null}
       {canceled ? <p className="rounded-xl bg-white p-3 text-sm">The card form was closed. You can try again when you are ready.</p> : null}
       {error ? <p role="alert" className="text-sm font-bold text-red-700">{error}</p> : null}
 
@@ -178,6 +184,12 @@ export function ApplyForm({
               <option value="Other">Other</option>
             </select>
           </label>
+          {referredBy ? null : (
+            <label className="block text-sm font-bold">
+              Who referred you? <span className="font-normal text-neuro-navy/70">Optional</span>
+              <input value={referrerName} onChange={(event) => setReferrerName(event.target.value)} className={fieldClass} autoComplete="off" />
+            </label>
+          )}
           {heardChoice === 'Other' ? (
             <label className="block text-sm font-bold">
               Tell us a little more

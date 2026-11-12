@@ -30,7 +30,7 @@ function NavIcon({ name }: { name: string }) {
   return <Cmp className="w-4 h-4 shrink-0" aria-hidden />;
 }
 
-export default function PortalShell({ children }: { children: React.ReactNode }) {
+export default function PortalShell({ children, banner }: { children: React.ReactNode; banner?: React.ReactNode }) {
   const ctx = usePortal();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -150,6 +150,7 @@ export default function PortalShell({ children }: { children: React.ReactNode })
             : 'flex-1 overflow-y-auto bg-portal-canvas pb-24 md:pb-0'}
           style={fullHeight ? { paddingBottom: `calc(${MOBILE_NAV_H}px + env(safe-area-inset-bottom, 0px))` } : undefined}
         >
+          {banner}
           {ctx.membership.tier === 'free' ? (
             <div className="shrink-0 bg-portal-accent-50 border-b border-portal-border px-4 py-3 flex items-center justify-between gap-3">
               <p className="text-sm text-portal-ink">Activate Pro to unlock patient requests and results.</p>

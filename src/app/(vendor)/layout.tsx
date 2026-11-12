@@ -2,6 +2,8 @@ import Link from "next/link";
 import { LayoutDashboard, Store, LogOut, ChevronRight } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase-server";
 
+export const dynamic = 'force-dynamic'
+
 export default async function VendorLayout({
   children,
 }: {

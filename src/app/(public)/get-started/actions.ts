@@ -6,6 +6,7 @@ import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { ACCOUNT_CONTINUE_PATH } from '@/lib/applications/resume-path'
 import { doctorSignupStatus } from '@/lib/applications/signup'
 import { ensureDraftApplication } from '@/lib/applications/store'
+import { rememberApplicantReferral } from '@/lib/member-referrals/db'
 
 export async function createFreeAccount(data: {
   name: string;
@@ -79,8 +80,14 @@ export async function createFreeAccount(data: {
           doctorId: doctorRow.id,
           userId,
           email: data.email,
-          referralCode: data.referralCode,
+          referralCode: (data.referralCode || '').slice(0, 80),
         });
+        if (data.referralCode) {
+          await rememberApplicantReferral({
+            applicantDoctorId: doctorRow.id,
+            requestedSlug: data.referralCode,
+          });
+        }
       }
     }
 

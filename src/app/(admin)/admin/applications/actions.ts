@@ -7,6 +7,7 @@ import { stripeBilling } from '@/lib/applications/billing'
 import { approveApplication, declineApplication } from '@/lib/applications/decide'
 import { sendApplicationEmail } from '@/lib/applications/notify'
 import { loadApplicationById, persistDecision, saveDoctorAlertPhone } from '@/lib/applications/store'
+import { settleMemberReferral } from '@/lib/member-referrals/settle'
 import { readSmsConfig } from '@/lib/sms/config'
 import { quoSend } from '@/lib/sms/quo'
 
@@ -49,6 +50,14 @@ async function review(id: string, notes: string, kind: 'approve' | 'decline') {
   } else if (decision.email) {
     const sent = await sendApplicationEmail(decision.email)
     if (!sent) emailNote = ' The email did not send. Tell them by hand that they were not charged.'
+  }
+
+  const paidApproval = kind === 'approve' && decision.ok && (
+    decision.application?.status === 'approved'
+    || (application.status === 'approved' && decision.charged === false)
+  )
+  if (paidApproval) {
+    await settleMemberReferral({ applicationId: application.id, invoicePaid: true })
   }
 
   revalidatePath('/admin/applications')

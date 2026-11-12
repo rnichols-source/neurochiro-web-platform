@@ -1,5 +1,8 @@
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { formStepFromRequest } from '@/lib/applications/answers'
+import { rememberApplicantReferral } from '@/lib/member-referrals/db'
+import { MEMBER_REF_COOKIE, persistedRef } from '@/lib/member-referrals/logic'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path'
 import { loadApplyState } from './actions'
@@ -21,6 +24,25 @@ export default async function ApplyPage({
   }
 
   const params = await searchParams
+  const jar = await cookies()
+  const requested = persistedRef({
+    query: params.ref,
+    cookie: jar.get(MEMBER_REF_COOKIE)?.value,
+  })
+  let referredBy: string | null = null
+  let referralCode = requested || ''
+  let referrerName = ''
+  try {
+    const saved = await rememberApplicantReferral({
+      applicantDoctorId: state.doctorId,
+      requestedSlug: requested,
+    })
+    referredBy = saved.displayName
+    referralCode = saved.slug || ''
+    referrerName = saved.referrerName || ''
+  } catch {
+    referredBy = null
+  }
   const answers = state.application?.answers
   const restored = {
     practiceApproach: answers?.practiceApproach || '',
@@ -38,12 +60,14 @@ export default async function ApplyPage({
     whyJoin: answers?.whyJoin || '',
     mobile: state.application?.mobileE164 || '',
     smsConsent: state.application?.smsConsent === true,
+    referrerName,
   }
   return (
     <ApplyForm
       doctorName={state.doctorName}
       canceled={params.canceled === '1'}
-      referralCode={params.ref || ''}
+      referralCode={referralCode}
+      referredBy={referredBy}
       initialCountry={state.country}
       plans={state.plans.plans}
       currency={state.plans.currency}

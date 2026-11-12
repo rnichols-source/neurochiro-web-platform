@@ -13,10 +13,13 @@ import { getFeature } from '@/lib/portal/features';
 import { redirect } from 'next/navigation';
 import SetupChecklist from './setup-checklist';
 import AttentionList from './attention-list';
-import InviteColleague from './invite-colleague';
+import { MemberInviteCard } from '@/components/portal/MemberReferralInvite';
+import { loadMemberInvite } from '@/lib/member-referrals/invite';
 import { ReferButton } from '@/components/portal/ReferralProvider';
 import { getAttention, getSetupFields, getSpotlight, getViewSeries } from './home-data';
 import StatusPill from '@/components/portal/StatusPill';
+
+export const dynamic = 'force-dynamic'
 
 function Card({ children }: { children: React.ReactNode }) {
   return <section className="bg-white border border-portal-border rounded-xl p-4">{children}</section>;
@@ -30,7 +33,7 @@ async function DashboardBody() {
   const hello = `${greeting(new Date(), timeZone)}, Dr. ${firstName(ctx.fullName)}`;
   const profilePath = doctor.slug ? `/directory/${doctor.slug}` : '/doctor/profile';
   const done = portalTimer('dashboard');
-  const [stats, fields, attention, points, spotlight] = await Promise.all([
+  const [stats, fields, attention, points, spotlight, invite] = await Promise.all([
     getDoctorPortalStats({
       doctorId: doctor.id,
       userId: ctx.userId,
@@ -43,6 +46,7 @@ async function DashboardBody() {
     getAttention(doctor.id, ctx.unreadMessages),
     getViewSeries(doctor.id),
     getSpotlight(doctor.id),
+    loadMemberInvite(doctor.id),
   ]);
   done();
   const monthViews = monthlyViewsDisplay({
@@ -107,7 +111,14 @@ async function DashboardBody() {
             </ul>
             <Link href="/doctor/billing" className="mt-3 min-h-11 inline-flex items-center text-sm font-bold text-portal-accent">Plan and billing</Link>
           </Card>
-          <InviteColleague initialCode={null} />
+          {invite ? (
+            <MemberInviteCard
+              url={invite.url}
+              message={invite.message}
+              explanation={invite.explanation}
+              countLabel={invite.countLabel}
+            />
+          ) : null}
         </div>
       </div>
       {stats.market ? (
