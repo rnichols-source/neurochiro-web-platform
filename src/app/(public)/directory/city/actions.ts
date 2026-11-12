@@ -11,7 +11,7 @@ export async function getDoctorsByLocation(city: string, state: string) {
 
   const { data: doctors } = await supabase
     .from("doctors")
-    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views")
+    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views, listing_format, co_owners")
     .eq("verification_status", "verified")
     .ilike("city", decodedCity)
     .eq("state", resolveStateCode(decodedState) || decodedState)
@@ -27,7 +27,7 @@ export async function getDoctorsByState(state: string) {
 
   const { data: doctors } = await supabase
     .from("doctors")
-    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views")
+    .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views, listing_format, co_owners")
     .eq("verification_status", "verified")
     .eq("state", resolveStateCode(decodedState) || decodedState)
     .order("profile_views", { ascending: false });

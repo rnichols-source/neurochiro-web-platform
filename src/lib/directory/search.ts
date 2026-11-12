@@ -8,6 +8,7 @@ import { excludeDemo } from '@/lib/directory/exclude-demo';
 import { applyPublicListing, isDoctorPubliclyVisible } from '@/lib/directory/visibility';
 import { hiddenTestUserIds } from '@/lib/profiles/test-users';
 import { detectPostalCode } from '@/lib/detect-postal';
+import { attachDisplayName, isPracticeListing, listingDisplayName } from '@/lib/listing-display';
 // city-data import removed — using resolve-city.ts shared resolver
 
 const STATE_MAP: Record<string, string> = {
@@ -123,7 +124,7 @@ async function lookupPostalCode(supabase: any, code: string, country: string): P
 }
 
 // Phone stays so DoctorCard can render a tel: link. Section E of the lockdown migration is the ask-first revoke. PUBLIC_DOCTOR_COLUMNS excludes phone.
-const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at';
+const SELECT_FIELDS = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, latitude, longitude, bio, specialties, region_code, address, photo_url, phone, accepting_new_patients, offers_telehealth, accepts_walkins, languages, hours, booking_url, created_at, listing_format, co_owners';
 
 /** Country-aware doctors query. `US` includes legacy null country. `EU` is the European set. `ALL` is worldwide. */
 function doctorsQuery(sb: any, regionOrCountry: string, hiddenUserIds: string[] = []) {
@@ -362,6 +363,7 @@ export async function searchDirectory(request: NextRequest) {
         `last_name.ilike.%${query}%`,
         `clinic_name.ilike.%${query}%`,
         `bio.ilike.%${query}%`,
+        `co_owner_search.ilike.%${query}%`,
       ];
       dbQuery = dbQuery.or(nameConditions.join(','));
       dbQuery = applyLocationFilter(dbQuery, splitFromLocation, locationInput);
@@ -406,6 +408,7 @@ export async function searchDirectory(request: NextRequest) {
             `city.ilike.%${query}%`,
             `address.ilike.%${query}%`,
             `bio.ilike.%${query}%`,
+            `co_owner_search.ilike.%${query}%`,
           ];
           dbQuery = dbQuery.or(allConditions.join(','));
         }
@@ -417,6 +420,7 @@ export async function searchDirectory(request: NextRequest) {
           `city.ilike.%${query}%`,
           `address.ilike.%${query}%`,
           `bio.ilike.%${query}%`,
+          `co_owner_search.ilike.%${query}%`,
         ];
         dbQuery = dbQuery.or(allConditions.join(','));
       }
@@ -499,7 +503,7 @@ export async function searchDirectory(request: NextRequest) {
       // Step 3: Only if NO location was specified — try specialty or nationwide
       if (!fallbackData.length && !rawLocation && rawQuery) {
         let specFallbackQuery = doctorsQuery(supabase, searchRegion, hiddenUserIds)
-          .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%`);
+          .or(`bio.ilike.%${rawQuery}%,clinic_name.ilike.%${rawQuery}%,co_owner_search.ilike.%${rawQuery}%`);
         if (newPatientsFilter) specFallbackQuery = specFallbackQuery.eq('accepting_new_patients', true);
         const { data: specFallback } = await specFallbackQuery.limit(20);
         if (specFallback?.length) { fallbackData = specFallback; fallbackHint = `Showing "${rawQuery}" doctors nationwide`; }
@@ -606,7 +610,7 @@ function enrichWithDistance(doctors: any[], userLat: number, userLng: number, ha
     if (hasCoords && isValidCoord(d.latitude, d.longitude)) {
       distance_miles = haversineDistance(userLat, userLng, d.latitude, d.longitude);
     }
-    return { ...d, distance_miles };
+    return attachDisplayName({ ...d, distance_miles });
   });
 }
 
@@ -622,9 +626,10 @@ function sortResults(doctors: any[], sort: string): any[] {
       return (tierPriority[a.membership_tier] || 4) - (tierPriority[b.membership_tier] || 4);
     }
     if (sort === 'name') {
-      const aName = `${a.last_name || ''} ${a.first_name || ''}`.trim().toLowerCase();
-      const bName = `${b.last_name || ''} ${b.first_name || ''}`.trim().toLowerCase();
-      return aName.localeCompare(bName);
+      const label = (row: { listing_format?: string | null; clinic_name?: string | null; first_name?: string | null; last_name?: string | null }) => (
+        isPracticeListing(row) ? listingDisplayName(row) : `${row.last_name || ''} ${row.first_name || ''}`
+      ).trim().toLowerCase();
+      return label(a).localeCompare(label(b));
     }
     // Default: tier priority (founding → pro → growth → free)
     const aFounder = a.is_founding_member ? 0 : 1;

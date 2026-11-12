@@ -17,6 +17,7 @@ import ContactGateCTA from "@/components/directory/ContactGateCTA";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
 import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-display";
+import { credentialedName, doctorFormalName, isPracticeListing, listingCardCopy, listingDisplayName, listingPhotos, parseCoOwners, sameListingPerson, type CoOwner } from "@/lib/listing-display";
 import { containsHealthWords, isPlausibleEmail, requiredPhoneError } from "@/lib/leads/validate";
 import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
 
@@ -41,6 +42,27 @@ function Section({ bg = "white", children, id, style: extra }: { bg?: "white" | 
   );
 }
 
+function CoOwnerRow({ owners }: { owners: CoOwner[] }) {
+  if (owners.length === 0) return null;
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: owners.length > 1 ? "repeat(auto-fit, minmax(180px, 1fr))" : "220px", gap: 28, width: "100%", maxWidth: 760, margin: "8px auto 28px", justifyContent: "center" }}>
+      {owners.map((owner) => (
+        <div key={owner.name} style={{ textAlign: "center" }}>
+          <div style={{ width: 132, height: 132, borderRadius: "50%", border: "4px solid rgba(214,104,41,0.45)", overflow: "hidden", background: "#1E2D3B", margin: "0 auto 12px", boxShadow: "0 18px 40px rgba(0,0,0,0.35)" }}>
+            {owner.photo_url ? (
+              <img src={owner.photo_url} alt={credentialedName(owner)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#D66829", fontWeight: 900, fontSize: 32 }}>{nameInitials(owner.name) || "N"}</div>
+            )}
+          </div>
+          <p style={{ margin: 0, color: "white", fontWeight: 800, fontSize: 18, fontFamily: "Lato, sans-serif" }}>{owner.name}</p>
+          {owner.credentials ? <p style={{ margin: "4px 0 0", color: "#D66829", fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>{owner.credentials}</p> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [], badgeIds = [] }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[]; badgeIds?: string[] }) {
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
@@ -62,8 +84,10 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const gated = isProfileGated(doctor);
   const saved = isSaved('doctors', doctor.id?.toString());
   const isPracticeProfile = (doctor as any).profile_style === 'practice';
-  const doctorName = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
-  const name = isPracticeProfile ? (doctor.clinic_name || doctorName) : doctorName;
+  const practiceFacing = isPracticeListing(doctor);
+  const coOwners = parseCoOwners((doctor as { co_owners?: unknown }).co_owners);
+  const doctorName = doctorFormalName(doctor);
+  const name = practiceFacing ? listingDisplayName(doctor) : (isPracticeProfile ? (doctor.clinic_name || doctorName) : doctorName);
   const spotlightEpisode = getEpisodeByDoctorSlug(slug);
   const location = [doctor.city, doctor.state].filter(Boolean).join(", ");
   // Filter specialties: split concatenated entries, drop free-text sentences
@@ -107,6 +131,9 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const yearsInPractice = d.years_in_practice as number | null;
   const insuranceNetworks = d.insurance_networks as string[] | null;
   const teamMembersList = d.team_members as { name: string; role: string; photo_url?: string }[] | null;
+  const visibleTeam = (teamMembersList || []).filter((member) => (
+    practiceFacing ? !coOwners.some((owner) => sameListingPerson(owner.name, member.name)) : true
+  ));
   // Certifications: dedupe and filter out marketing claims, awards, and sentences
   const certificationsList = d.certifications
     ? [...new Set(d.certifications as string[])].filter((c: string) =>
@@ -306,7 +333,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
           {/* Centered content */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-            {/* Photo */}
+            {!practiceFacing && (
             <div style={{
               width: isPracticeProfile ? 280 : 140,
               height: isPracticeProfile ? 180 : 140,
@@ -320,15 +347,17 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <span style={{ fontSize: 48, fontWeight: 900, color: "#D66829" }}>{(doctor.first_name?.[0] || 'N').toUpperCase()}</span>
               )}
             </div>
+            )}
 
             {/* Name */}
-            <h1 style={{ fontSize: 42, fontWeight: 900, color: "white", fontFamily: "Lato, sans-serif", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 8 }}>{name}</h1>
+            <h1 style={{ fontSize: practiceFacing ? 40 : 42, fontWeight: 900, color: "white", fontFamily: "Lato, sans-serif", lineHeight: 1.1, letterSpacing: "-0.02em", marginBottom: 8 }}>{name}</h1>
             {seminars.length > 0 && <p style={{ display: "inline-block", marginBottom: 10, background: "rgba(214,104,41,0.15)", color: "#D66829", borderRadius: 999, padding: "6px 12px", fontSize: 12, fontWeight: 800 }}>Hosting</p>}
 
-            {/* Clinic */}
+            {!practiceFacing && (
             <p style={{ fontSize: 14, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 6 }}>
               {isPracticeProfile ? `Led by ${doctorName}` : (doctor.clinic_name || 'Private Practice')}
             </p>
+            )}
 
             {/* Location */}
             {location && (
@@ -336,6 +365,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <MapPin style={{ width: 14, height: 14, color: "#D66829" }} /> {location}
               </p>
             )}
+            {practiceFacing && <CoOwnerRow owners={coOwners} />}
 
             {/* Badges row */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginBottom: 24 }}>
@@ -568,7 +598,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             ) : doctor.video_url && (
               <>
                 <h2 style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#D66829", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 24, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-                  <Play style={{ width: 14, height: 14 }} /> Meet {isPracticeProfile ? 'the Team' : doctor.first_name}
+                  <Play style={{ width: 14, height: 14 }} /> Meet {practiceFacing ? 'the doctors' : isPracticeProfile ? 'the Team' : doctor.first_name}
                 </h2>
                 <div style={{ borderRadius: 20, overflow: "hidden", boxShadow: "0 25px 60px rgba(0,0,0,0.3)", aspectRatio: "16 / 9" }}>
                   <iframe src={doctor.video_url.replace('watch?v=', 'embed/').replace('vimeo.com/', 'player.vimeo.com/video/')} style={{ width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
@@ -611,7 +641,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {(d.short_intro || doctor.bio) && (
         <Section bg="white" style={{ paddingTop: 64, paddingBottom: 64 }}>
           <div style={{ maxWidth: 800, margin: "0 auto" }}>
-            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>About {isPracticeProfile ? (doctor.clinic_name || doctor.first_name) : doctor.first_name}</h2>
+            <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 20 }}>About {practiceFacing || isPracticeProfile ? (doctor.clinic_name || name) : doctor.first_name}</h2>
 
             {/* Structured short_intro (preferred) or pull quote from bio (fallback) */}
             {d.short_intro ? (
@@ -628,6 +658,21 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             ) : restOfBio ? (
               <p style={{ fontSize: 15, lineHeight: 1.75, color: "#4a5568", marginTop: d.short_intro ? 16 : 0 }}>{restOfBio}</p>
             ) : null}
+          </div>
+        </Section>
+      )}
+
+      {practiceFacing && coOwners.some((owner) => owner.bio) && (
+        <Section bg="cream" style={{ paddingTop: 64, paddingBottom: 64 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 28 }}>The doctors</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24, maxWidth: 960, margin: "0 auto" }}>
+            {coOwners.map((owner) => (
+              <article key={owner.name} style={{ background: "white", borderRadius: 20, padding: 24, border: "1px solid rgba(30,45,59,0.06)" }}>
+                <h3 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>{owner.name}</h3>
+                {owner.credentials ? <p style={{ margin: "0 0 12px", color: "#D66829", fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>{owner.credentials}</p> : null}
+                {owner.bio ? <p style={{ margin: 0, fontSize: 15, lineHeight: 1.7, color: "#374151" }}>{owner.bio}</p> : null}
+              </article>
+            ))}
           </div>
         </Section>
       )}
@@ -954,15 +999,23 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <Section bg="cream" style={{ paddingTop: 72, paddingBottom: 72 }}>
           <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 36 }}>Other Nervous System Chiropractors Near You</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
-            {nearbyDoctors.map((doc: any) => (
+            {nearbyDoctors.map((doc: any) => {
+              const nearbyCopy = listingCardCopy(doc);
+              const nearbyPhotos = listingPhotos(doc);
+              return (
               <Link key={doc.id} href={`/directory/${doc.slug || doc.id}`} style={{ background: "white", borderRadius: 20, padding: 24, textDecoration: "none", border: "1px solid rgba(30,45,59,0.04)", display: "block" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
                   <div style={{ width: 52, height: 52, borderRadius: "50%", background: "#1E2D3B", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {doc.photo_url ? <img src={doc.photo_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
-                      <span style={{ color: "#D66829", fontWeight: 900, fontSize: 18 }}>{(doc.first_name?.[0] || "N").toUpperCase()}</span>}
+                    {nearbyPhotos.length > 1 ? (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", width: "100%", height: "100%" }}>
+                        {nearbyPhotos.map((photo) => <img key={photo.src} src={photo.src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />)}
+                      </div>
+                    ) : nearbyPhotos.length === 1 ? <img src={nearbyPhotos[0].src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :
+                      <span style={{ color: "#D66829", fontWeight: 900, fontSize: 18 }}>{nameInitials(nearbyCopy.title) || "N"}</span>}
                   </div>
                   <div>
-                    <p style={{ fontSize: 15, fontWeight: 800, color: "#1E2D3B" }}>Dr. {doc.first_name} {doc.last_name}</p>
+                    <p style={{ fontSize: 15, fontWeight: 800, color: "#1E2D3B" }}>{nearbyCopy.title}</p>
+                    {isPracticeListing(doc) && nearbyCopy.detail ? <p style={{ fontSize: 12, color: "#4a5568", margin: "2px 0 0" }}>{nearbyCopy.detail}</p> : null}
                     <p style={{ fontSize: 12, color: "#718096", display: "flex", alignItems: "center", gap: 4 }}>
                       <MapPin style={{ width: 12, height: 12 }} /> {doc.city}{doc.state ? `, ${doc.state}` : ''}
                       {doc.distance_miles != null && <span style={{ color: "#D66829", fontWeight: 700, marginLeft: 4 }}>{doc.distance_miles < 1 ? '< 1 mi' : `${Math.round(doc.distance_miles)} mi`}</span>}
@@ -977,7 +1030,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   </div>
                 )}
               </Link>
-            ))}
+              );
+            })}
           </div>
         </Section>
       )}
@@ -985,14 +1039,14 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       {/* ═══════════════════════════════════════════
           12. TEAM MEMBERS + GALLERY
       ═══════════════════════════════════════════ */}
-      {teamMembersList && teamMembersList.length > 0 && (
+      {visibleTeam.length > 0 && (
         <Section bg="white" style={{ paddingTop: 72, paddingBottom: 72 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", marginBottom: 32 }}>
             <Users style={{ width: 18, height: 18, color: "#D66829" }} />
             <h2 style={{ fontSize: 18, fontWeight: 900, color: "#1E2D3B" }}>Our Team</h2>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 20 }}>
-            {teamMembersList.map((m, i) => (
+            {visibleTeam.map((m, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <div style={{ width: 80, height: 80, borderRadius: 16, background: "#f3f4f6", overflow: "hidden", margin: "0 auto 10px" }}>
                   {m.photo_url ? <img src={m.photo_url} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> :

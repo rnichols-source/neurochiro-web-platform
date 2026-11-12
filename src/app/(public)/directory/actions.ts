@@ -122,7 +122,7 @@ export async function getDoctorBySlug(slug: string) {
   const supabase = createServerSupabase()
   
   // Full profile select — includes all extended fields for ultimate profile page
-  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, tiktok_url, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, created_at, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, profile_style';
+  const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, tiktok_url, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, created_at, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, profile_style, listing_format, co_owners';
   
   try {
     let { data, error } = await supabase
@@ -249,7 +249,7 @@ export async function getNearbyDoctors(doctorId: string, state: string, limit = 
   try {
     const { data } = await (supabase as any)
       .from('doctors')
-      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude, accepting_new_patients')
+      .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude, accepting_new_patients, listing_format, co_owners')
       .eq('verification_status', 'verified')
       .eq('state', resolveStateCode(state) || state)
       .neq('id', doctorId);

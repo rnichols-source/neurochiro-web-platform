@@ -5,6 +5,7 @@ import DoctorProfileClient from "./DoctorProfileClient";
 import { Metadata } from "next";
 import SchemaMarkup from "@/components/seo/SchemaMarkup";
 import { addressForSchema } from "@/lib/profile-display";
+import { coOwnerLine, isPracticeListing, listingDisplayName, listingMeta, parseCoOwners } from "@/lib/listing-display";
 import { getApprovedStories } from "@/app/actions/patient-stories";
 import { isDemoSlug } from "@/lib/directory/exclude-demo";
 import { trackProfileView } from "@/lib/portal/track-view";
@@ -30,13 +31,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const name = `Dr. ${doctor.first_name} ${doctor.last_name}`.replace(/\s+/g, " ").trim();
   const location = `${doctor.city}, ${doctor.state || doctor.country}`;
-  const specialtyList = (doctor.specialties || []).slice(0, 3).join(", ");
+  const meta = listingMeta(doctor, { location, specialties: doctor.specialties });
   const profileUrl = `https://www.neurochiro.co/directory/${doctor.slug || doctor.id}`;
-  
-  const title = `${name} | Nervous System Specialist at ${doctor.clinic_name}`;
-  const description = `Visit ${name} in ${location}. Specializing in ${specialtyList || 'Nervous System Chiropractic'}. Verified member of the NeuroChiro network of elite clinical practitioners.`;
+  const title = meta.title;
+  const description = meta.description;
+  const imageAlt = meta.imageAlt;
 
   const ogImage = `https://www.neurochiro.co/api/og/profile?slug=${doctor.slug || doctor.id}&format=landscape`;
 
@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           url: ogImage,
           width: 1200,
           height: 630,
-          alt: `${name} - ${doctor.clinic_name}`,
+          alt: imageAlt,
         },
       ],
     },
@@ -112,7 +112,9 @@ export default async function DoctorProfilePage({ params }: Props) {
 
   const profileUrl = `https://www.neurochiro.co/directory/${doctor.slug || doctor.id}`;
   const place = addressForSchema(doctor.address, doctor.city, doctor.state);
-  const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`.replace(/\s+/g, " ").trim();
+  const practiceFacing = isPracticeListing(doctor);
+  const owners = parseCoOwners((doctor as { co_owners?: unknown }).co_owners);
+  const doctorName = practiceFacing ? listingDisplayName(doctor) : `Dr. ${doctor.first_name} ${doctor.last_name}`.replace(/\s+/g, " ").trim();
   const faqItems = Array.isArray(record.faq)
     ? record.faq.filter((item) => item?.question && item?.answer)
     : [];
@@ -120,11 +122,11 @@ export default async function DoctorProfilePage({ params }: Props) {
   // 2. JSON-LD STRUCTURED DATA (Physician & LocalBusiness)
   const jsonLd: Record<string, any> = {
     "@context": "https://schema.org",
-    "@type": "Physician",
+    "@type": practiceFacing ? "MedicalClinic" : "Physician",
     "name": doctorName,
     "url": profileUrl,
-    "image": doctor.photo_url || "https://www.neurochiro.co/logo.png",
-    "description": doctor.bio,
+    "image": practiceFacing ? "https://www.neurochiro.co/logo.png" : (doctor.photo_url || "https://www.neurochiro.co/logo.png"),
+    "description": practiceFacing ? (doctor.bio || coOwnerLine(doctor)) : doctor.bio,
     "medicalSpecialty": doctor.specialties || ["Chiropractic"],
     "address": {
       "@type": "PostalAddress",
@@ -138,12 +140,22 @@ export default async function DoctorProfilePage({ params }: Props) {
       "@type": "Organization",
       "name": "NeuroChiro"
     },
-    "provider": {
+    "provider": practiceFacing ? undefined : {
       "@type": "LocalBusiness",
       "name": doctor.clinic_name,
       "url": doctor.website_url
-    }
+    },
+    ...(practiceFacing ? {
+      employee: owners.map((owner) => ({
+        "@type": "Physician",
+        name: owner.name,
+        description: owner.bio || undefined,
+        image: owner.photo_url || undefined,
+        jobTitle: owner.credentials || owner.role || undefined,
+      })),
+    } : {}),
   };
+  if (!jsonLd.provider) delete jsonLd.provider;
 
   if (record.phone) jsonLd.telephone = record.phone;
   if (record.hours) jsonLd.openingHours = record.hours;

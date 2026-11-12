@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { attachDisplayName } from '@/lib/listing-display'
+
+const DOCTOR_FIELDS = 'id, first_name, last_name, clinic_name, city, state, photo_url, slug, listing_format, co_owners'
 
 /**
  * GET /api/directory/doctor?slug=SLUG
@@ -15,7 +18,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('doctors')
-    .select('id, first_name, last_name, clinic_name, city, state, photo_url, slug')
+    .select(DOCTOR_FIELDS)
     .eq('verification_status', 'verified')
 
   if (isUuid) {
@@ -37,14 +40,14 @@ export async function GET(req: NextRequest) {
       // Re-fetch with the new slug
       const { data: redirected } = await supabase
         .from('doctors')
-        .select('id, first_name, last_name, clinic_name, city, state, photo_url, slug')
+        .select(DOCTOR_FIELDS)
         .eq('verification_status', 'verified')
         .eq('slug', redir.new_slug)
         .single()
-      if (redirected) return NextResponse.json(redirected)
+      if (redirected) return NextResponse.json(attachDisplayName(redirected))
     }
     return NextResponse.json({ error: 'Not found.' }, { status: 404 })
   }
 
-  return NextResponse.json(doctor)
+  return NextResponse.json(attachDisplayName(doctor))
 }

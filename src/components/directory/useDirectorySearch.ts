@@ -24,6 +24,9 @@ export interface DirectoryDoctor {
   verification_status?: "pending" | "verified" | "hidden";
   latitude?: number;
   longitude?: number;
+  listing_format?: string | null;
+  co_owners?: unknown;
+  display_name?: string;
 }
 
 export interface CountryOption {

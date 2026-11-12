@@ -43,6 +43,8 @@ export const PUBLIC_DOCTOR_COLUMNS = [
   'languages',
   'hours',
   'booking_url',
+  'listing_format',
+  'co_owners',
 ] as const
 
 export type PublicDoctorColumn = (typeof PUBLIC_DOCTOR_COLUMNS)[number]

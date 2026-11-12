@@ -7,6 +7,7 @@ import {
 } from '@/lib/doctor-joined-notify'
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email'
 import { sendWaitlistDoctorJoinedText, waitlistDoctorJoinedText } from '@/lib/sms/waitlist-alert'
+import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/listing-display'
 
 /**
  * Cron: Process pending doctor-joined notification queue.
@@ -83,7 +84,7 @@ export async function GET(req: NextRequest) {
     // Load doctor info
     const { data: doctor } = await (supabase as any)
       .from('doctors')
-      .select('first_name, last_name, clinic_name, city, state, slug, photo_url, verification_status')
+      .select('first_name, last_name, clinic_name, city, state, slug, photo_url, verification_status, listing_format, co_owners')
       .eq('id', entry.doctor_id)
       .single()
 
@@ -110,7 +111,11 @@ export async function GET(req: NextRequest) {
       continue
     }
 
-    const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`
+    const doctorName = listingDisplayName(doctor)
+    const ownerLine = isPracticeListing(doctor) ? listingCardCopy(doctor).detail : ''
+    const placeLine = isPracticeListing(doctor)
+      ? [ownerLine, [doctor.city, doctor.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ')
+      : `${doctor.clinic_name ? `${doctor.clinic_name} · ` : ''}${doctor.city}, ${doctor.state}`
     const profileUrl = `https://neurochiro.co/directory/${doctor.slug}`
     const contactUrl = `https://neurochiro.co/contact-request?doctor=${doctor.slug}&source=doctor_joined`
 
@@ -171,9 +176,9 @@ export async function GET(req: NextRequest) {
         const bodyHtml = `
           <p style="font-size:15px;color:#333;line-height:1.7;">You've been waiting for a nervous system chiropractor near you. ${doctorName} just listed in ${doctor.city}, ${distLabel} from your ZIP.</p>
           <div style="background:#f8f6f2;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
-            ${doctor.photo_url ? `<img src="${doctor.photo_url}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;" />` : ''}
+            ${!isPracticeListing(doctor) && doctor.photo_url ? `<img src="${doctor.photo_url}" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 12px;display:block;" />` : ''}
             <p style="font-size:18px;font-weight:900;color:#1E2D3B;margin:0 0 4px;">${doctorName}</p>
-            <p style="font-size:14px;color:#718096;margin:0;">${doctor.clinic_name ? `${doctor.clinic_name} · ` : ''}${doctor.city}, ${doctor.state}</p>
+            <p style="font-size:14px;color:#718096;margin:0;">${placeLine}</p>
             <p style="font-size:13px;color:#718096;margin:4px 0 0;">${distLabel} from you</p>
           </div>
           <p style="font-size:15px;color:#333;line-height:1.7;">If you'd rather they reach out to you, tap below and leave your name and number. I'll send it straight to their office.</p>
@@ -256,13 +261,13 @@ export async function GET(req: NextRequest) {
   for (const entry of (sentEntries || [])) {
     const { data: doctor } = await (supabase as any)
       .from('doctors')
-      .select('first_name, last_name, clinic_name, city, state, slug, verification_status')
+      .select('first_name, last_name, clinic_name, city, state, slug, verification_status, listing_format, co_owners')
       .eq('id', entry.doctor_id)
       .single()
 
     if (!doctor || doctor.verification_status !== 'verified') continue
 
-    const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`
+    const doctorName = listingDisplayName(doctor)
     const profileUrl = `https://neurochiro.co/directory/${doctor.slug}`
     const contactUrl = `https://neurochiro.co/contact-request?doctor=${doctor.slug}&source=doctor_joined`
     const subscribers = entry.matched_subscribers as MatchedSubscriber[]

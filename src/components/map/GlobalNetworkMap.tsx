@@ -18,6 +18,7 @@ import {
 import { getDoctors, getStudentsForMap } from "@/app/(public)/directory/actions";
 import { getSeminarsForMap } from "@/app/(public)/seminars/actions";
 import { pinsToFeatures, type SeminarMapPin } from "@/lib/seminars/map-pins";
+import { isPracticeListing, listingCardCopy, listingPhotos } from "@/lib/listing-display";
 import { Doctor } from "@/types/directory";
 
 interface GlobalNetworkMapProps {
@@ -155,12 +156,12 @@ export default function GlobalNetworkMap({
         geometry: { type: 'Point' as const, coordinates: [lng, lat] },
         properties: {
           doctorId: String(doc.id),
-          name: `Dr. ${doc.first_name || ''} ${doc.last_name || ''}`.trim(),
+          name: listingCardCopy(doc).title,
           slug: doc.slug || '',
-          clinic: doc.clinic_name || '',
+          clinic: isPracticeListing(doc) ? listingCardCopy(doc).detail : (doc.clinic_name || ''),
           city: doc.city || '',
           state: doc.state || '',
-          photo_url: doc.photo_url || '',
+          photo_url: isPracticeListing(doc) ? (listingPhotos(doc).length === 1 ? listingPhotos(doc)[0].src : '') : (doc.photo_url || ''),
           membership_tier: doc.membership_tier || '',
           matched: matched ? 1 : 0
         }

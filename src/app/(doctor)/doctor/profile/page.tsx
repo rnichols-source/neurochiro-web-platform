@@ -82,6 +82,8 @@ type DoctorProfile = {
   has_weekend_hours?: boolean;
   faq?: { question: string; answer: string }[];
   team_members?: { name: string; role: string; photo_url: string }[];
+  listing_format?: "lead" | "practice" | string | null;
+  co_owners?: { name: string; credentials?: string | null; photo_url?: string | null; bio?: string | null; role?: string | null }[];
   gallery_images?: string[];
   amenities?: string[];
 };
@@ -199,6 +201,8 @@ function ProfileEditor() {
 
   const [faqItems, setFaqItems] = useState<{ question: string; answer: string }[]>([]);
   const [teamMembers, setTeamMembers] = useState<{ name: string; role: string; photo_url: string }[]>([]);
+  const [listingFormat, setListingFormat] = useState<"lead" | "practice">("lead");
+  const [coOwners, setCoOwners] = useState<{ name: string; credentials: string; photo_url: string; bio: string }[]>([]);
   const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [amenitiesSelected, setAmenitiesSelected] = useState<string[]>([]);
   const [uploadingGallery, setUploadingGallery] = useState(false);
@@ -268,6 +272,13 @@ function ProfileEditor() {
         setCountryCode(storedCountryCode(loaded.country));
         setFaqItems(Array.isArray(loaded.faq) ? loaded.faq : []);
         setTeamMembers(Array.isArray(loaded.team_members) ? loaded.team_members : []);
+        setListingFormat(loaded.listing_format === "practice" ? "practice" : "lead");
+        setCoOwners(Array.isArray(loaded.co_owners) ? loaded.co_owners.map((owner) => ({
+          name: owner?.name || "",
+          credentials: owner?.credentials || "",
+          photo_url: owner?.photo_url || "",
+          bio: owner?.bio || "",
+        })) : []);
         setGalleryUrls(Array.isArray(loaded.gallery_images) ? loaded.gallery_images : []);
         setAmenitiesSelected(Array.isArray(loaded.amenities) ? loaded.amenities : []);
       })
@@ -717,7 +728,39 @@ function ProfileEditor() {
                 </button>
               </Section>
 
-              <Section title="Team members">
+              <Section title="How patients see this office" hint="Lead doctor keeps your name as the page title. Practice-first puts the practice name in the title and shows every co-owner equally. Saving will not rename a practice-first URL back to a doctor slug.">
+                <input type="hidden" name="listing_format" value={listingFormat} />
+                <input type="hidden" name="co_owners" value={JSON.stringify(coOwners)} />
+                <label className="block text-sm font-bold text-portal-ink">
+                  Listing format
+                  <select value={listingFormat} onChange={(e) => { setListingFormat(e.target.value === "practice" ? "practice" : "lead"); markDirty(); }} className={INPUT}>
+                    <option value="lead">Lead doctor</option>
+                    <option value="practice">Practice-first, equal co-owners</option>
+                  </select>
+                </label>
+                {listingFormat === "practice" && (
+                  <div className="space-y-3">
+                    {coOwners.map((owner, i) => (
+                      <div key={i} className="bg-portal-surface rounded-xl p-4 space-y-2">
+                        <input placeholder="Name" value={owner.name} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], name: e.target.value }; setCoOwners(next); markDirty(); }} className={INPUT} />
+                        <input placeholder="Credentials (for example, DC, CACCP)" value={owner.credentials} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], credentials: e.target.value }; setCoOwners(next); markDirty(); }} className={INPUT} />
+                        <textarea placeholder="Bio" value={owner.bio} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], bio: e.target.value }; setCoOwners(next); markDirty(); }} rows={4} className={AREA} />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button type="button" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.onchange = async () => { const f = input.files?.[0]; if (!f) return; const fd = new FormData(); fd.append("file", f); const r = await uploadTeamPhoto(fd); if (r.success && r.publicUrl) { const next = [...coOwners]; next[i] = { ...next[i], photo_url: r.publicUrl }; setCoOwners(next); markDirty(); } }; input.click(); }} className="min-h-11 text-sm font-bold text-portal-accent">Upload photo</button>
+                          <button type="button" onClick={() => { setCoOwners((prev) => prev.filter((_, j) => j !== i)); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-red-600">
+                            <Trash2 className="w-4 h-4" /> Remove
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => { setCoOwners((prev) => [...prev, { name: "", credentials: "", photo_url: "", bio: "" }]); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-portal-accent">
+                      <Plus className="w-4 h-4" /> Add co-owner
+                    </button>
+                  </div>
+                )}
+              </Section>
+
+              <Section title="Team members" hint="Staff who are not equal co-owners. On a practice-first page, co-owners are not repeated here.">
                 <input type="hidden" name="team_members" value={JSON.stringify(teamMembers)} />
                 <div className="space-y-3">
                   {teamMembers.map((member, i) => (

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { MapPin, Phone, Globe, Check, ArrowRight, Search, Users, Star, ShieldCheck } from "lucide-react";
 import { getDoctorsByLocation, getDoctorsByState } from "../actions";
+import { isPracticeListing, listingCardCopy, listingPhotos } from "@/lib/listing-display";
+import { nameInitials } from "@/lib/profile-display";
 import type { Metadata } from "next";
 
 // State abbreviation mapping
@@ -121,16 +123,26 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
         {/* Doctor Cards */}
         {doctors.length > 0 ? (
           <div className="space-y-4 mb-12">
-            {doctors.map((doc: any) => (
+            {doctors.map((doc: any) => {
+              const copy = listingCardCopy(doc);
+              const photos = listingPhotos(doc);
+              const detail = isPracticeListing(doc) ? copy.detail : doc.clinic_name;
+              return (
               <Link key={doc.id} href={`/directory/${doc.slug}`}>
                 <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-lg hover:border-neuro-orange/20 transition-all cursor-pointer flex gap-5 items-start">
                   {/* Photo */}
                   <div className="w-20 h-20 rounded-2xl bg-gray-100 flex-shrink-0 overflow-hidden">
-                    {doc.photo_url ? (
-                      <img src={doc.photo_url} alt={`Dr. ${doc.first_name} ${doc.last_name}`} className="w-full h-full object-cover" />
+                    {photos.length > 1 ? (
+                      <div className="grid h-full w-full grid-cols-2">
+                        {photos.map((photo) => (
+                          <img key={photo.src} src={photo.src} alt={photo.alt} className="h-full w-full object-cover" />
+                        ))}
+                      </div>
+                    ) : photos.length === 1 ? (
+                      <img src={photos[0].src} alt={photos[0].alt} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300 text-2xl font-black">
-                        {(doc.first_name?.[0] || "")}{(doc.last_name?.[0] || "")}
+                        {nameInitials(copy.title)}
                       </div>
                     )}
                   </div>
@@ -138,17 +150,17 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h2 className="font-heading font-black text-neuro-navy text-lg">Dr. {doc.first_name} {doc.last_name}</h2>
+                      <h2 className="font-heading font-black text-neuro-navy text-lg">{copy.title}</h2>
                       <ShieldCheck className="w-4 h-4 text-blue-500 flex-shrink-0" />
                     </div>
-                    {doc.clinic_name && (
-                      <p className="text-sm text-gray-500 font-medium">{doc.clinic_name}</p>
-                    )}
+                    {detail ? (
+                      <p className="text-sm text-gray-500 font-medium">{detail}</p>
+                    ) : null}
                     <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
                       <MapPin className="w-3 h-3" />
                       <span>{doc.city}, {doc.state}</span>
                     </div>
-                    {doc.bio && (
+                    {!isPracticeListing(doc) && doc.bio && (
                       <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">{doc.bio}</p>
                     )}
                     {doc.specialties && doc.specialties.length > 0 && (
@@ -167,7 +179,8 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-16">

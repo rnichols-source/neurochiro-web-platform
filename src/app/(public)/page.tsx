@@ -6,6 +6,7 @@ import { excludeDemo } from "@/lib/directory/exclude-demo";
 import { getPublicDirectoryCounts } from "@/lib/directory/public-counts";
 import { doctorJoinMenuLabel } from "@/lib/applications/flag";
 import { homepageFaqs } from "@/lib/content/faq";
+import { isPracticeListing } from "@/lib/listing-display";
 import Footer from "@/components/landing/Footer";
 import HeroSearch from "@/components/landing/HeroSearch";
 import {
@@ -84,14 +85,14 @@ async function getTrustFaces() {
     const { data } = await excludeDemo(
       supabase
         .from("doctors")
-        .select("first_name, last_name, photo_url")
+        .select("first_name, last_name, photo_url, clinic_name, listing_format")
         .eq("verification_status", "verified")
         .not("photo_url", "is", null)
         .order("accepting_new_patients", { ascending: false })
         .limit(12),
     );
     return (data || [])
-      .filter((row) => row.photo_url)
+      .filter((row) => row.photo_url && !isPracticeListing(row))
       .slice(0, 3)
       .map((row) => ({
         name: `Dr. ${row.first_name || ""} ${row.last_name || ""}`.trim(),

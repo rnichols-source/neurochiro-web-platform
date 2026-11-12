@@ -15,6 +15,7 @@ import {
 } from './deliver'
 import { getDoctorRecipients } from './recipients'
 import { isMissingColumn, isMissingTable, updateContactRequest } from './schema'
+import { isPracticeListing, listingDisplayName } from '@/lib/listing-display'
 import { containsHealthWords, isPlausibleEmail, isPlausiblePhone, normalizeEmail } from './validate'
 
 export type CreateLeadInput = {
@@ -37,6 +38,8 @@ export type CreateLeadResult = {
   requestId: string | null
   doctorName: string
   practiceName: string
+  /** Patient-facing name. Practice-first listings use the practice name. */
+  displayName: string
   withdrawUrl: string
   officePhone: string | null
   message?: string
@@ -51,6 +54,7 @@ const EMPTY: CreateLeadResult = {
   requestId: null,
   doctorName: '',
   practiceName: '',
+  displayName: '',
   withdrawUrl: '',
   officePhone: null,
   healthWarning: false,
@@ -121,13 +125,17 @@ async function loadDoctorAlerts(db: { from: (table: string) => AlertQuery }, doc
 }
 
 async function loadDoctor(db: any, doctorId: string): Promise<{ doctor: any | null; error?: string }> {
-  const first = await db.from('doctors').select(DOCTOR_COLUMNS).eq('id', doctorId).maybeSingle()
+  const withListing = `${DOCTOR_COLUMNS}, listing_format`
+  const first = await db.from('doctors').select(withListing).eq('id', doctorId).maybeSingle()
   if (!first.error) return { doctor: first.data }
   if (!isMissingColumn(first.error)) return { doctor: null, error: first.error.message }
-  console.error('[LEADS] doctors.lead_notification_emails is missing. Apply migration 20261030000000_lead_followup.sql.', first.error.message)
-  const second = await db.from('doctors').select(DOCTOR_COLUMNS_BASE).eq('id', doctorId).maybeSingle()
-  if (second.error) return { doctor: null, error: second.error.message }
-  return { doctor: second.data }
+  const second = await db.from('doctors').select(DOCTOR_COLUMNS).eq('id', doctorId).maybeSingle()
+  if (!second.error) return { doctor: second.data }
+  if (!isMissingColumn(second.error)) return { doctor: null, error: second.error.message }
+  console.error('[LEADS] doctors.lead_notification_emails is missing. Apply migration 20261030000000_lead_followup.sql.', second.error.message)
+  const third = await db.from('doctors').select(DOCTOR_COLUMNS_BASE).eq('id', doctorId).maybeSingle()
+  if (third.error) return { doctor: null, error: third.error.message }
+  return { doctor: third.data }
 }
 
 export async function createLead(input: CreateLeadInput): Promise<CreateLeadResult> {
@@ -163,7 +171,8 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   const doctor = loaded.doctor
   const alerts = await loadDoctorAlerts(db, doctor.id)
   const docName = doctorNameOf(doctor)
-  const practiceName = doctor.clinic_name || docName
+  const displayName = listingDisplayName(doctor)
+  const practiceName = isPracticeListing(doctor) ? displayName : (doctor.clinic_name || docName)
   const officePhone = doctor.phone || null
 
   const withdrawalToken = crypto.randomBytes(32).toString('hex')
@@ -234,6 +243,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
         ...EMPTY,
         doctorName: docName,
         practiceName,
+        displayName,
         officePhone,
         healthWarning,
         error: `We could not save your request.${call}`,
@@ -245,6 +255,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
       requestId: null,
       doctorName: docName,
       practiceName,
+      displayName,
       withdrawUrl: '',
       officePhone,
       healthWarning,
@@ -323,6 +334,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
         country: doctor.country ?? null,
         lastName: doctor.last_name || '',
         practice: doctor.clinic_name || '',
+        patientFacingName: isPracticeListing(doctor) ? displayName : null,
         leadAlertPhones: alerts?.lead_alert_phones || [],
         smsAlertsEnabled: alerts?.sms_alerts_enabled === true,
         smsAlertsConsentAt: alerts?.sms_alerts_consent_at || null,
@@ -372,6 +384,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
     requestId,
     doctorName: docName,
     practiceName,
+    displayName,
     withdrawUrl,
     officePhone,
     healthWarning,

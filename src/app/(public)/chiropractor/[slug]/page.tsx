@@ -8,6 +8,7 @@ import { formatDistance } from "@/lib/geo";
 import Footer from "@/components/landing/Footer";
 import FindSomeoneForm from "./FindSomeoneForm";
 import CityDoctorCard from "./CityDoctorCard";
+import { isPracticeListing, listingDisplayName } from "@/lib/listing-display";
 
 // Force dynamic rendering — database queries change as doctors join
 export const dynamic = 'force-dynamic';
@@ -90,7 +91,7 @@ export default async function CityPage({ params }: { params: Promise<{ slug: str
     const ld: Record<string, any> = {
       '@context': 'https://schema.org',
       '@type': ['LocalBusiness', 'Physician'],
-      name: doc.clinic_name || `Dr. ${doc.first_name} ${doc.last_name}`,
+      name: isPracticeListing(doc) ? listingDisplayName(doc) : (doc.clinic_name || `Dr. ${doc.first_name} ${doc.last_name}`),
       url: `https://neurochiro.co/directory/${doc.slug}`,
       ...(doc.phone && { telephone: doc.phone }),
       ...(doc.website_url && { url: doc.website_url }),

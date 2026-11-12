@@ -1,6 +1,7 @@
 import { ImageResponse } from '@vercel/og';
 import { SUPABASE_URL } from '@/lib/supabase-env';
 import { getSupabaseSecretKey } from '@/lib/supabase-secret';
+import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/listing-display';
 
 export const runtime = 'edge';
 
@@ -18,14 +19,14 @@ async function fetchDoctor(slug: string) {
 
   // Try slug first, then UUID
   let res = await fetch(
-    `${url}/rest/v1/doctors?slug=eq.${slug}&verification_status=in.(verified,pending)&select=id,first_name,last_name,clinic_name,city,state,specialties,photo_url,membership_tier,is_founding_member,slug&limit=1`,
+    `${url}/rest/v1/doctors?slug=eq.${slug}&verification_status=in.(verified,pending)&select=id,first_name,last_name,clinic_name,city,state,specialties,photo_url,membership_tier,is_founding_member,slug,listing_format,co_owners&limit=1`,
     { headers }
   );
   let data = await res.json();
 
   if (!data?.length) {
     res = await fetch(
-      `${url}/rest/v1/doctors?id=eq.${slug}&verification_status=in.(verified,pending)&select=id,first_name,last_name,clinic_name,city,state,specialties,photo_url,membership_tier,is_founding_member,slug&limit=1`,
+      `${url}/rest/v1/doctors?id=eq.${slug}&verification_status=in.(verified,pending)&select=id,first_name,last_name,clinic_name,city,state,specialties,photo_url,membership_tier,is_founding_member,slug,listing_format,co_owners&limit=1`,
       { headers }
     );
     data = await res.json();
@@ -44,7 +45,9 @@ export async function GET(req: Request) {
     return new Response('Doctor not found', { status: 404 });
   }
 
-  const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.trim();
+  const practiceFacing = isPracticeListing(doctor);
+  const name = listingDisplayName(doctor);
+  const subtitle = practiceFacing ? (listingCardCopy(doctor).detail || 'Co-owners') : (doctor.clinic_name || 'Private Practice');
   const location = [doctor.city, doctor.state].filter(Boolean).join(', ');
   const specialties = (doctor.specialties || []).slice(0, 3);
   const profileUrl = `neurochiro.co/directory/${doctor.slug || doctor.id}`;
@@ -62,7 +65,7 @@ export async function GET(req: Request) {
 
   // Fetch photo as base64 if available
   let photoSrc: string | null = null;
-  if (doctor.photo_url) {
+  if (!practiceFacing && doctor.photo_url) {
     try {
       const photoRes = await fetch(doctor.photo_url);
       if (photoRes.ok) {
@@ -115,7 +118,7 @@ export async function GET(req: Request) {
             gap: isStory ? '28px' : '16px',
           }}
         >
-          {/* Photo */}
+          {practiceFacing ? null : (
           <div
             style={{
               width: `${photoSize}px`,
@@ -144,6 +147,7 @@ export async function GET(req: Request) {
               </span>
             )}
           </div>
+          )}
 
           {/* Verified + Founding badges */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -208,7 +212,7 @@ export async function GET(req: Request) {
                 textAlign: 'center',
               }}
             >
-              {doctor.clinic_name || 'Private Practice'}
+              {subtitle}
             </span>
             {location && (
               <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '15px', fontWeight: 600 }}>

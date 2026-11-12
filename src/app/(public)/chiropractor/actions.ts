@@ -29,6 +29,8 @@ export interface CityDoctor {
   accepted_payment: string[] | null;
   offers_telehealth: boolean;
   accepts_walkins: boolean;
+  listing_format?: string | null;
+  co_owners?: unknown;
 }
 
 /**
@@ -48,7 +50,7 @@ export async function getDoctorsNearCity(
 
   const { data } = await excludeDemo((supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
+    .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins, listing_format, co_owners')
     .eq('verification_status', 'verified')
     .or('country.is.null,country.eq.US')
     .gte('latitude', lat - latDelta)
@@ -79,7 +81,7 @@ export async function getNearestDoctors(
 
   const { data } = await excludeDemo((supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins')
+    .select('id, first_name, last_name, slug, clinic_name, city, state, phone, website_url, booking_url, photo_url, bio, specialties, accepting_new_patients, latitude, longitude, hours, accepted_payment, offers_telehealth, accepts_walkins, listing_format, co_owners')
     .eq('verification_status', 'verified')
     .eq('accepting_new_patients', true)
     .or('country.is.null,country.eq.US')

@@ -49,6 +49,9 @@ export interface Doctor {
   average_case_value?: number;
   created_at?: string;
   updated_at?: string;
+  listing_format?: string | null;
+  co_owners?: unknown;
+  profile_style?: string | null;
 }
 
 export interface Student {

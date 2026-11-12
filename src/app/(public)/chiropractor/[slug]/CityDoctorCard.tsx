@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { MapPin, Phone, ShieldCheck, Calendar, Navigation, ArrowRight, CheckCircle } from "lucide-react";
 import { formatDistance } from "@/lib/geo";
+import { isPracticeListing, listingCardCopy, listingPhotos } from "@/lib/listing-display";
+import { nameInitials } from "@/lib/profile-display";
 
 interface CityDoctor {
   id: string;
@@ -22,10 +24,15 @@ interface CityDoctor {
   offers_telehealth: boolean;
   accepts_walkins: boolean;
   accepted_payment: string[] | null;
+  listing_format?: string | null;
+  co_owners?: unknown;
 }
 
 export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; searchCity: string }) {
-  const name = `Dr. ${doc.first_name} ${doc.last_name}`;
+  const copy = listingCardCopy(doc);
+  const name = copy.title;
+  const photos = listingPhotos(doc);
+  const detail = isPracticeListing(doc) ? copy.detail : doc.clinic_name;
   const isInCity = doc.city.toLowerCase() === searchCity.toLowerCase();
   const distLabel = isInCity
     ? formatDistance(doc.distance_miles)
@@ -45,10 +52,16 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
       <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-all">
         <div className="flex gap-5 items-start">
           <div className="w-16 h-16 rounded-2xl bg-neuro-navy flex-shrink-0 overflow-hidden flex items-center justify-center">
-            {doc.photo_url ? (
-              <img src={doc.photo_url} alt={name} className="w-full h-full object-cover" loading="lazy" />
+            {photos.length > 1 ? (
+              <div className="grid h-full w-full grid-cols-2">
+                {photos.map((photo) => (
+                  <img key={photo.src} src={photo.src} alt={photo.alt} className="h-full w-full object-cover" loading="lazy" />
+                ))}
+              </div>
+            ) : photos.length === 1 ? (
+              <img src={photos[0].src} alt={photos[0].alt} className="w-full h-full object-cover" loading="lazy" />
             ) : (
-              <span className="text-white font-black text-xl">{doc.first_name?.[0]}</span>
+              <span className="text-white font-black text-xl">{nameInitials(name)}</span>
             )}
           </div>
           <div className="flex-1 min-w-0">
@@ -58,7 +71,7 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
                 <ShieldCheck className="w-3 h-3" /> Verified
               </span>
             </div>
-            {doc.clinic_name && <p className="text-sm text-gray-500 font-medium">{doc.clinic_name}</p>}
+            {detail ? <p className="text-sm text-gray-500 font-medium">{detail}</p> : null}
             <div className="flex items-center gap-3 mt-1 flex-wrap">
               <span className="flex items-center gap-1 text-xs text-gray-400">
                 <MapPin className="w-3 h-3" /> {doc.city}, {doc.state}
@@ -73,7 +86,7 @@ export default function CityDoctorCard({ doc, searchCity }: { doc: CityDoctor; s
           </div>
         </div>
 
-        {doc.bio && <p className="text-sm text-gray-500 mt-3 line-clamp-2 leading-relaxed">{doc.bio}</p>}
+        {!isPracticeListing(doc) && doc.bio && <p className="text-sm text-gray-500 mt-3 line-clamp-2 leading-relaxed">{doc.bio}</p>}
 
         {specialties.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">

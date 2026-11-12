@@ -100,6 +100,9 @@ export interface Database {
           average_case_value: number | null
           referral_code: string | null
           referred_by: string | null
+          listing_format: string
+          co_owners: Json
+          co_owner_search: string | null
         }
         Insert: {
           id?: string
@@ -140,6 +143,9 @@ export interface Database {
           average_case_value?: number | null
           referral_code?: string | null
           referred_by?: string | null
+          listing_format?: string
+          co_owners?: Json
+          co_owner_search?: string | null
         }
         Update: {
           id?: string
@@ -180,6 +186,8 @@ export interface Database {
           average_case_value?: number | null
           referral_code?: string | null
           referred_by?: string | null
+          listing_format?: string
+          co_owners?: Json
         }
         Relationships: []
       }

@@ -148,7 +148,7 @@ export function RequestDialog({ doctor, sessionId, source, startedAt, onClose }:
         className="max-h-[100dvh] w-full max-w-xl overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl sm:p-6"
       >
         <h2 id={titleId} className="font-heading text-xl text-neuro-navy">
-          Request an appointment with Dr. {last}
+          {selected.practiceListing ? `Request an appointment with ${selected.name}` : `Request an appointment with Dr. ${last}`}
         </h2>
         {success ? (
           <div className="mt-4 space-y-4">

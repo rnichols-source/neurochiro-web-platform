@@ -22,6 +22,21 @@ function assertAscii(value: string) {
   }
 }
 
+test('a practice-first text names the practice and not one doctor', () => {
+  const body = patientRequestConfirm({
+    patientFirst: 'Jamie',
+    doctorLast: 'Babbitt',
+    practice: 'Rise Wellness Chiropractic',
+    recipient: 'Rise Wellness Chiropractic',
+  })
+  assert.equal(
+    body,
+    'NeuroChiro: Hi Jamie, your request was sent to Rise Wellness Chiropractic. Their office will reach out soon, usually within 1 business day. Reply STOP to opt out, HELP for help.',
+  )
+  assert.equal(body.includes('Dr.'), false)
+  assert.equal(body.includes('Babbitt'), false)
+})
+
 test('patient and doctor texts use the exact wording', () => {
   assert.equal(
     patient,

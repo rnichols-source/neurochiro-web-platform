@@ -1,6 +1,7 @@
 import 'server-only';
 import { Resend } from 'resend';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/listing-display';
 import { createServerSupabase } from '@/lib/supabase-server';
 import {
   acceptedToReferrerEmail,
@@ -370,7 +371,7 @@ export async function toggleFavorite(doctorId: string): Promise<{ ok: boolean; f
 }
 
 async function loadParty(admin: any, doctorId: string) {
-  const { data } = await admin.from('doctors').select('id, user_id, first_name, last_name, clinic_name, phone, address, booking_url, slug').eq('id', doctorId).maybeSingle();
+  const { data } = await admin.from('doctors').select('id, user_id, first_name, last_name, clinic_name, phone, address, booking_url, slug, listing_format, co_owners').eq('id', doctorId).maybeSingle();
   return data as {
     id: string;
     user_id: string | null;
@@ -381,6 +382,8 @@ async function loadParty(admin: any, doctorId: string) {
     address: string | null;
     booking_url: string | null;
     slug: string | null;
+    listing_format?: string | null;
+    co_owners?: unknown;
   } | null;
 }
 
@@ -522,8 +525,8 @@ export async function acceptReferral(id: string): Promise<{ success: boolean; er
   })) {
     const sent = await sendOnce(ctx.admin, id, 'patient_intro', ctx.v2, patientEmail, () => patientIntroEmail({
       patientFirst: ctx.row.patient_first_name,
-      receiverName: doctorName(receiver),
-      clinic: receiver?.clinic_name || null,
+      receiverName: listingDisplayName(receiver),
+      clinic: isPracticeListing(receiver) ? (listingCardCopy(receiver).detail || null) : (receiver?.clinic_name || null),
       phone: receiver?.phone || null,
       address: receiver?.address || null,
       bookingUrl: receiver?.booking_url || null,

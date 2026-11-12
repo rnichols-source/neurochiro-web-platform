@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { parseCoOwners } from '@/lib/listing-display'
 
 
 export async function getDoctorProfile() {
@@ -18,7 +19,7 @@ export async function getDoctorProfile() {
         .maybeSingle(),
       supabase
         .from('doctors')
-        .select('first_name, last_name, clinic_name, city, state, country, zip_code, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url')
+        .select('first_name, last_name, clinic_name, city, state, country, zip_code, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, listing_format, co_owners')
         .eq('user_id', user.id)
         .maybeSingle()
     ])
@@ -221,7 +222,7 @@ export async function updateDoctorProfile(formData: FormData) {
     // Load the current row before any write so validation can compare it.
     const { data: currentDocRow } = await adminSupabase
       .from('doctors')
-      .select('address, city, state, country, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated')
+      .select('address, city, state, country, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated, listing_format')
       .eq('user_id', user.id)
       .maybeSingle()
     // Generated doctors types omit columns this form already saves.
@@ -328,6 +329,12 @@ export async function updateDoctorProfile(formData: FormData) {
         years_in_practice: yearsInPractice,
         insurance_networks: insuranceNetworks.length ? insuranceNetworks : null,
         team_members: teamMembers.length ? teamMembers : null,
+        ...(formData.get('listing_format') === 'practice' || formData.get('listing_format') === 'lead'
+          ? { listing_format: formData.get('listing_format') === 'practice' ? 'practice' : 'lead' }
+          : {}),
+        ...(typeof formData.get('co_owners') === 'string'
+          ? { co_owners: parseCoOwners(formData.get('co_owners')) }
+          : {}),
         certifications: certifications.length ? certifications : null,
         first_visit_price: firstVisitPrice,
         payment_model: paymentModel,
@@ -352,7 +359,8 @@ export async function updateDoctorProfile(formData: FormData) {
     }
 
     // Slug regeneration on name change
-    if (currentDoc && (cleanFirst !== (currentDoc as any).first_name || cleanLast !== (currentDoc as any).last_name)) {
+    const practiceListing = formData.get('listing_format') === 'practice' || (currentDoc as any)?.listing_format === 'practice'
+    if (!practiceListing && currentDoc && (cleanFirst !== (currentDoc as any).first_name || cleanLast !== (currentDoc as any).last_name)) {
       const newSlug = `dr-${cleanFirst}-${cleanLast}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
       const existingSlug = (currentDoc as any).slug;
       if (existingSlug && existingSlug !== newSlug) {

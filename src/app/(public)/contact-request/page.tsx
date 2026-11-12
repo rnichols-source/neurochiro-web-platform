@@ -7,6 +7,8 @@ import Link from "next/link";
 import Footer from "@/components/landing/Footer";
 import { containsHealthWords, isPlausibleEmail, requiredPhoneError } from "@/lib/leads/validate";
 import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
+import { isPracticeListing, listingCardCopy, listingDisplayName, listingPhotos } from "@/lib/listing-display";
+import { nameInitials } from "@/lib/profile-display";
 
 export default function ContactRequestPage() {
   return (
@@ -69,8 +71,10 @@ function ContactRequestContent() {
     loadDoctor();
   }, [doctorSlug]);
 
-  const practiceName = doctor?.clinic_name || `Dr. ${doctor?.first_name} ${doctor?.last_name}`.trim();
-  const doctorDisplayName = doctor ? `Dr. ${doctor.first_name} ${doctor.last_name}`.trim() : "";
+  const practiceName = doctor ? (isPracticeListing(doctor) ? listingDisplayName(doctor) : (doctor.clinic_name || listingDisplayName(doctor))) : "";
+  const doctorDisplayName = doctor ? listingDisplayName(doctor) : "";
+  const cardCopy = doctor ? listingCardCopy(doctor) : { title: "", detail: "" };
+  const cardPhotos = doctor ? listingPhotos(doctor) : [];
   const consentText = `I am asking ${practiceName} to contact me by phone or text about becoming a patient.`;
 
   const validate = () => {
@@ -202,7 +206,7 @@ function ContactRequestContent() {
             href={`/directory/${doctorSlug}`}
             className="text-neuro-orange font-bold text-sm hover:underline"
           >
-            Back to {doctorDisplayName}'s profile
+            Back to {isPracticeListing(doctor) ? doctorDisplayName : `${doctorDisplayName}'s profile`}
           </Link>
         </div>
       </div>
@@ -233,19 +237,27 @@ function ContactRequestContent() {
           {/* Doctor info */}
           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-gray-100">
             <div className="w-14 h-14 rounded-xl bg-neuro-navy/5 flex items-center justify-center shrink-0 overflow-hidden">
-              {doctor.photo_url ? (
-                <img src={doctor.photo_url} alt={doctorDisplayName} className="w-full h-full object-cover" />
+              {cardPhotos.length > 1 ? (
+                <div className="grid h-full w-full grid-cols-2">
+                  {cardPhotos.map((photo) => (
+                    <img key={photo.src} src={photo.src} alt={photo.alt} className="h-full w-full object-cover" />
+                  ))}
+                </div>
+              ) : cardPhotos.length === 1 ? (
+                <img src={cardPhotos[0].src} alt={cardPhotos[0].alt} className="w-full h-full object-cover" />
               ) : (
                 <span className="text-neuro-navy font-bold text-lg">
-                  {(doctor.first_name?.[0] || "") + (doctor.last_name?.[0] || "")}
+                  {nameInitials(doctorDisplayName) || ((doctor.first_name?.[0] || "") + (doctor.last_name?.[0] || ""))}
                 </span>
               )}
             </div>
             <div>
-              <p className="font-bold text-neuro-navy">{doctorDisplayName}</p>
-              {doctor.clinic_name && (
+              <p className="font-bold text-neuro-navy">{cardCopy.title}</p>
+              {isPracticeListing(doctor) ? (
+                cardCopy.detail ? <p className="text-gray-500 text-sm">{cardCopy.detail}</p> : null
+              ) : doctor.clinic_name ? (
                 <p className="text-gray-500 text-sm">{doctor.clinic_name}</p>
-              )}
+              ) : null}
               <p className="text-gray-400 text-xs">{doctor.city}, {doctor.state}</p>
             </div>
           </div>

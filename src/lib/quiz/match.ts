@@ -14,6 +14,7 @@ import {
 } from './options.ts'
 import { orderedSpecialties, rankMatches, type RankDoctor } from './rank.ts'
 import { matchInputSchema, normalizedPostal, placeLabel, type MatchInput } from './schema.ts'
+import { isPracticeListing, listingCardCopy, listingPhotos } from '../listing-display.ts'
 
 export type QuizMatch = {
   id: string
@@ -29,6 +30,7 @@ export type QuizMatch = {
   accepting: boolean | null
   walkIns: boolean | null
   verified: boolean
+  practiceListing?: boolean
   offer?: { title: string } | null
   awayLabel: string
 }
@@ -69,18 +71,21 @@ export type MatchActionResult = MatchSuccess | MatchFailure
 
 function toMatch(doctor: RankDoctor & { distance_miles: number; fit: number }, input: MatchInput): QuizMatch {
   const shown = displayDistance(doctor.distance_miles, input.country)
-  const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.replace(/\s+/g, ' ').trim()
+  const copy = listingCardCopy(doctor)
+  const practiceListing = isPracticeListing(doctor)
+  const photos = listingPhotos(doctor)
   return {
     id: doctor.id,
     slug: doctor.slug || '',
-    name,
-    clinic: doctor.clinic_name || null,
+    name: copy.title,
+    clinic: practiceListing ? (copy.detail || null) : (doctor.clinic_name || null),
+    practiceListing,
     city: doctor.city || null,
     region: doctor.state || null,
     distance: shown.value,
     unit: shown.unit,
     specialties: orderedSpecialties(doctor.specialties, input.concern).map(sentenceChip),
-    photoUrl: doctor.photo_url || null,
+    photoUrl: practiceListing ? (photos.length === 1 ? photos[0].src : null) : (doctor.photo_url || null),
     accepting: doctor.accepting_new_patients === true ? true : null,
     walkIns: doctor.accepts_walkins === true ? true : doctor.accepts_walkins === false ? false : null,
     verified: true,

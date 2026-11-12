@@ -6,6 +6,8 @@ import Link from "next/link";
 import DoctorCard from "@/components/directory/DoctorCard";
 import type { DirectoryDoctor } from "@/components/directory/useDirectorySearch";
 import { formatDistance } from "@/lib/geo";
+import { isPracticeListing, listingCardCopy, listingDisplayName, listingPhotos } from "@/lib/listing-display";
+import { nameInitials } from "@/lib/profile-display";
 
 type NearbyPayload = {
   city: string | null;
@@ -54,7 +56,7 @@ function storedSearch() {
 }
 
 function doctorName(doctor: DirectoryDoctor) {
-  return `Dr. ${doctor.first_name || ""} ${doctor.last_name || ""}`.replace(/^Dr\.\s+Dr\./i, "Dr.").trim();
+  return listingDisplayName(doctor);
 }
 
 function placeOf(doctor: DirectoryDoctor) {
@@ -62,19 +64,29 @@ function placeOf(doctor: DirectoryDoctor) {
 }
 
 function PreviewCard({ doctor, unit }: { doctor: DirectoryDoctor; unit: "mi" | "km" }) {
-  const name = doctorName(doctor);
+  const copy = listingCardCopy(doctor);
+  const name = copy.title;
+  const photos = listingPhotos(doctor);
   return (
     <article className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white p-3">
-      {doctor.photo_url ? (
+      {photos.length > 1 ? (
+        <div className="grid h-12 w-12 grid-cols-2 overflow-hidden rounded-xl">
+          {photos.map((photo) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img key={photo.src} src={photo.src} alt={photo.alt} className="h-full w-full object-cover" />
+          ))}
+        </div>
+      ) : photos.length === 1 ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={doctor.photo_url} alt={name} width={48} height={48} sizes="48px" className="h-12 w-12 rounded-xl object-cover" />
+        <img src={photos[0].src} alt={photos[0].alt} width={48} height={48} sizes="48px" className="h-12 w-12 rounded-xl object-cover" />
       ) : (
         <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-neuro-navy text-sm font-bold text-white" aria-hidden>
-          {name.slice(0, 1)}
+          {nameInitials(name) || name.slice(0, 1)}
         </span>
       )}
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-bold text-neuro-navy">{name}</p>
+        {isPracticeListing(doctor) && copy.detail ? <p className="truncate text-sm text-gray-500">{copy.detail}</p> : null}
         <p className="truncate text-sm text-gray-500">
           {doctor.distance_miles != null ? `${formatDistance(doctor.distance_miles, unit)} · ` : ""}
           {placeOf(doctor)}
