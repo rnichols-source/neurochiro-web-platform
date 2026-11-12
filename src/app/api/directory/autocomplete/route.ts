@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { resolveStateCode } from '@/lib/resolve-state';
 import { EUROPEAN_ISO } from '@/lib/directory-countries';
 import { excludeDemo } from '@/lib/directory/exclude-demo';
+import { isPracticeListing, listingCardCopy } from '@/lib/listing-display';
 
 export const revalidate = 300; // Cache 5 min
 
@@ -83,21 +84,23 @@ export async function GET(request: NextRequest) {
       // Get matching doctor names (skip when searching by location only)
       let nameQuery = excludeDemo(supabase
         .from('doctors')
-        .select('first_name, last_name, slug, clinic_name, city, state, photo_url')
+        .select('first_name, last_name, slug, clinic_name, city, state, photo_url, listing_format, co_owners')
         .eq('verification_status', 'verified')
-        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,clinic_name.ilike.%${q}%`));
+        .or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,clinic_name.ilike.%${q}%,co_owner_search.ilike.%${q}%`));
       if (country === 'EU') nameQuery = nameQuery.in('country', EUROPEAN_ISO);
       else if (country === 'US') nameQuery = nameQuery.or('country.is.null,country.eq.US');
       else if (country && country !== 'ALL') nameQuery = nameQuery.eq('country', country === 'UK' ? 'GB' : country);
       const { data: nameData } = await nameQuery.limit(5);
 
-      results.doctors = (nameData || []).map(d => ({
-        name: `Dr. ${d.first_name} ${d.last_name}`,
+      results.doctors = (nameData || []).map(d => {
+        const copy = listingCardCopy(d)
+        return {
+        name: copy.title,
         slug: d.slug,
-        clinic: d.clinic_name,
+        clinic: isPracticeListing(d) ? (copy.detail || null) : d.clinic_name,
         location: [d.city, d.state].filter(Boolean).join(', '),
-        photo_url: d.photo_url,
-      }));
+        photo_url: isPracticeListing(d) ? null : d.photo_url,
+      }});
     }
 
     if (type !== 'location') {

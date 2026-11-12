@@ -4,6 +4,7 @@ import { zipToState } from '@/lib/zip-to-state'
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email'
 import { getThresholds } from '@/lib/thresholds'
 import { detectPostalCode, isPostalOptional } from '@/lib/detect-postal'
+import { isPracticeListing, listingCardCopy, listingPhotos } from '@/lib/listing-display'
 
 const SOURCE_ALLOWLIST = [
   'website', 'homepage', 'directory_empty', 'profile_footer', 'site_footer',
@@ -42,6 +43,8 @@ type CoverageDoctor = {
   photo_url: string | null
   booking_url: string | null
   phone: string | null
+  listing_format?: string | null
+  co_owners?: unknown
 }
 
 function textField(row: Record<string, unknown> | null, key: string): string {
@@ -201,7 +204,7 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
 
         let docQuery = supabase
           .from('doctors')
-          .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url, booking_url, phone')
+          .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url, booking_url, phone, listing_format, co_owners')
           .eq('verification_status', 'verified')
           .not('latitude', 'eq', 0)
           .not('latitude', 'is', null)
@@ -236,17 +239,19 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
             body: {
               ok: false,
               coverage: true,
-              doctors: nearby.map((doctor) => ({
-                name: `Dr. ${doctor.first_name} ${doctor.last_name}`,
-                clinic: doctor.clinic_name,
+              doctors: nearby.map((doctor) => {
+                const copy = listingCardCopy(doctor)
+                return {
+                name: copy.title,
+                clinic: isPracticeListing(doctor) ? (copy.detail || null) : doctor.clinic_name,
                 city: doctor.city,
                 state: doctor.state,
                 distance: Math.round(doctor.distance * 10) / 10,
                 slug: doctor.slug || doctor.id,
-                photo_url: doctor.photo_url,
+                photo_url: isPracticeListing(doctor) ? (listingPhotos(doctor).length === 1 ? listingPhotos(doctor)[0].src : null) : doctor.photo_url,
                 booking_url: doctor.booking_url || null,
                 phone: doctor.phone || null,
-              })),
+              }}),
               message: `Good news — there ${nearby.length === 1 ? 'is already a doctor' : `are already ${nearby.length} doctors`} near you.`,
             },
           }

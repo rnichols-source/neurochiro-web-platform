@@ -3,6 +3,7 @@
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { haversineDistance } from '@/lib/geo'
+import { listingDisplayName } from '@/lib/listing-display'
 import { extractInstagramHandle } from '@/lib/instagram'
 import { getThresholds } from '@/lib/thresholds'
 
@@ -111,7 +112,7 @@ export async function workLookup(query: string, country: string = 'US'): Promise
   // Load doctors with country isolation
   const { data: docs } = await (supabase as any)
     .from('doctors')
-    .select('id, first_name, last_name, city, state, country, latitude, longitude, instagram_url, clinic_name, slug, photo_url, booking_url, hours, phone, needs_review')
+    .select('id, first_name, last_name, city, state, country, latitude, longitude, instagram_url, clinic_name, slug, photo_url, booking_url, hours, phone, needs_review, listing_format')
     .eq('verification_status', 'verified')
     .eq('is_test', false)
     .not('latitude', 'is', null)
@@ -147,7 +148,7 @@ export async function workLookup(query: string, country: string = 'US'): Promise
       const dist = haversineDistance(lat, lng, Number(d.latitude), Number(d.longitude))
       return {
         id: d.id,
-        name: `Dr. ${d.first_name} ${d.last_name}`,
+        name: listingDisplayName(d),
         clinicName: d.clinic_name || null,
         city: d.city || '',
         state: d.state || '',

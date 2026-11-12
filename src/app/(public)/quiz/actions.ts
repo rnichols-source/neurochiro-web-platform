@@ -18,6 +18,7 @@ import {
   RATE_LIMIT_MESSAGE,
 } from '@/lib/quiz/options'
 import { directoryHref, displayDistance, requestSuccessMessage } from '@/lib/quiz/copy'
+import { isPracticeListing, listingCardCopy } from '@/lib/listing-display'
 import {
   emailResultsInputSchema,
   isBotSubmission,
@@ -139,10 +140,10 @@ function emailDoctors(doctors: RankDoctor[], ids: string[], country: 'US' | 'CA'
     if (!doctor?.slug || !/^[a-z0-9-]+$/.test(doctor.slug)) return []
     const miles = typeof doctor.distance_miles === 'number' ? doctor.distance_miles : null
     const shown = miles == null ? null : displayDistance(miles, country)
-    const name = `Dr. ${doctor.first_name || ''} ${doctor.last_name || ''}`.replace(/\s+/g, ' ').trim()
+    const copy = listingCardCopy(doctor)
     return [{
-      name,
-      clinic: doctor.clinic_name || null,
+      name: copy.title,
+      clinic: isPracticeListing(doctor) ? (copy.detail || null) : (doctor.clinic_name || null),
       city: doctor.city || null,
       region: doctor.state || null,
       distance: shown?.value ?? null,

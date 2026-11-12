@@ -18,6 +18,8 @@ export type DoctorAlertTarget = {
   country: string | null
   lastName: string
   practice: string
+  /** Set only for practice-first listings. Patient texts use this instead of the doctor name. */
+  patientFacingName?: string | null
   leadAlertPhones: string[]
   smsAlertsEnabled: boolean
   smsAlertsConsentAt: string | null

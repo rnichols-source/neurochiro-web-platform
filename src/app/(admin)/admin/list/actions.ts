@@ -2,6 +2,7 @@
 
 import { checkAdminAuth } from '@/lib/admin-auth';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/listing-display';
 
 interface SubscriberStats {
   total: number;
@@ -186,7 +187,7 @@ export async function previewDoctorNotification(
 
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('first_name, last_name, clinic_name, city, state, slug, address, country')
+    .select('first_name, last_name, clinic_name, city, state, slug, address, country, listing_format, co_owners')
     .eq('id', doctorId)
     .single();
 
@@ -214,7 +215,7 @@ export async function previewDoctorNotification(
 
   const { data: subscribers } = await query;
   if (!subscribers || subscribers.length === 0) {
-    return { ok: true, doctorName: `Dr. ${doctor.first_name} ${doctor.last_name}`, doctorCity: doctor.city, doctorState: doctor.state, doctorZipPrefix, radius, newRecipients: 0, alreadyNotified: 0, total: 0 };
+    return { ok: true, doctorName: listingDisplayName(doctor), doctorCity: doctor.city, doctorState: doctor.state, doctorZipPrefix, radius, newRecipients: 0, alreadyNotified: 0, total: 0 };
   }
 
   // Filter by ZIP prefix if using that radius
@@ -237,7 +238,7 @@ export async function previewDoctorNotification(
 
   return {
     ok: true,
-    doctorName: `Dr. ${doctor.first_name} ${doctor.last_name}`,
+    doctorName: listingDisplayName(doctor),
     doctorCity: doctor.city,
     doctorState: doctor.state,
     doctorZipPrefix,
@@ -260,7 +261,7 @@ export async function notifySubscribersNewDoctor(
 
   const { data: doctor } = await (supabase as any)
     .from('doctors')
-    .select('first_name, last_name, clinic_name, city, state, slug, address, country')
+    .select('first_name, last_name, clinic_name, city, state, slug, address, country, listing_format, co_owners')
     .eq('id', doctorId)
     .single();
 
@@ -319,7 +320,10 @@ export async function notifySubscribersNewDoctor(
   const from = getMarketingFrom();
   const address = getMailingAddress();
 
-  const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`;
+  const doctorName = listingDisplayName(doctor);
+  const placeLine = isPracticeListing(doctor)
+    ? [listingCardCopy(doctor).detail, [doctor.city, doctor.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ')
+    : `${doctor.clinic_name} &middot; ${doctor.city}, ${doctor.state}`;
   const profileUrl = `https://neurochiro.co/directory/${doctor.slug}`;
 
   let notified = 0;
@@ -350,7 +354,7 @@ export async function notifySubscribersNewDoctor(
               <p style="font-size:15px;color:#333;line-height:1.7;">You signed up to be notified when a nervous system chiropractor joined near you. Good news:</p>
               <div style="background:#f8f6f2;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
                 <p style="font-size:18px;font-weight:900;color:#1E2D3B;margin:0 0 4px;">${doctorName}</p>
-                <p style="font-size:14px;color:#718096;margin:0;">${doctor.clinic_name} &middot; ${doctor.city}, ${doctor.state}</p>
+                <p style="font-size:14px;color:#718096;margin:0;">${placeLine}</p>
               </div>
               <p style="font-size:15px;color:#333;line-height:1.7;">Check out their profile and see if they're the right fit for you:</p>
               <div style="text-align:center;margin:24px 0;">

@@ -117,6 +117,7 @@ export function planLeadTexts(input: {
         patientFirst: firstName(input.patient.name),
         doctorLast: input.doctor.lastName,
         practice: input.doctor.practice,
+        recipient: input.doctor.patientFacingName,
       }),
     })
   }

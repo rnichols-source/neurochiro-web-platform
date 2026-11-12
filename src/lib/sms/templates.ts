@@ -29,8 +29,14 @@ export function patientRequestConfirm(input: {
   patientFirst: string
   doctorLast: string
   practice: string
+  /** Practice-first listings pass the practice name. Lead listings omit this. */
+  recipient?: string | null
 }): string {
   const first = clip(input.patientFirst, 20)
+  const recipient = clip(input.recipient, 60)
+  if (recipient) {
+    return `NeuroChiro: Hi ${first}, your request was sent to ${recipient}. Their office will reach out soon, usually within 1 business day. Reply STOP to opt out, HELP for help.`
+  }
   const last = clip(input.doctorLast, 20)
   const atPractice = sameParty(input.practice, input.doctorLast) ? '' : ` at ${clip(input.practice, 30)}`
   return `NeuroChiro: Hi ${first}, your request was sent to Dr. ${last}${atPractice}. Their office will reach out soon, usually within 1 business day. Reply STOP to opt out, HELP for help.`

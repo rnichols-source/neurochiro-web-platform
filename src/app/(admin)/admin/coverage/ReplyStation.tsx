@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type RefObject } from 'react'
 import Link from 'next/link'
 import { Check, ChevronDown, ChevronUp, Copy, ExternalLink, MessageSquare, Search, Send } from 'lucide-react'
 import { getCountriesWithDemand } from '@/config/countries'
+import { isPracticeListing, listingDisplayName } from '@/lib/listing-display'
 import {
   autoLogDemand,
   checkHandleAgainstMembers,
@@ -521,9 +522,12 @@ function LookupResultRow({ doctor, searchedCity, templates, farThreshold, isPick
 
   const profileUrl = `https://neurochiro.co/directory/${doctor.slug || doctor.id}`
   const contactRequestUrl = `https://neurochiro.co/contact-request?doctor=${doctor.slug || doctor.id}&source=dm_outreach`
-  const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim()
+  const accountName = `Dr. ${doctor.first_name} ${doctor.last_name}`.trim()
+  const doctorName = listingDisplayName(doctor)
   const clinicBase = (doctor.clinic_name || '').replace(/\s*[-–—]\s*\w+$/, '').trim()
-  const practiceIntro = doctor.profile_style === 'practice' && clinicBase ? `${doctorName} at ${clinicBase}` : doctorName
+  const practiceIntro = isPracticeListing(doctor)
+    ? doctorName
+    : (doctor.profile_style === 'practice' && clinicBase ? `${accountName} at ${clinicBase}` : accountName)
   const handle = doctor.instagram_handle || ''
   const isFar = doctor.distance_miles >= farThreshold
   const commentTplId = isFar ? 'doctor_comment_far' : 'doctor_comment'
@@ -604,7 +608,7 @@ function LookupResultRow({ doctor, searchedCity, templates, farThreshold, isPick
           <span className={`font-bold text-neuro-orange ${isPick ? 'text-sm' : 'text-xs'}`}>{doctor.distance_miles} mi</span>
         </div>
       </div>
-      <p className="mt-0.5 truncate text-[11px] text-white/40">{doctor.clinic_name ? `${doctor.clinic_name} · ` : ''}{doctor.city}, {doctor.state}</p>
+      <p className="mt-0.5 truncate text-[11px] text-white/40">{isPracticeListing(doctor) ? '' : (doctor.clinic_name ? `${doctor.clinic_name} · ` : '')}{doctor.city}, {doctor.state}</p>
       <div className="mt-1.5 flex flex-col items-stretch gap-1.5 sm:flex-row sm:items-center">
         {handle ? (
           <button

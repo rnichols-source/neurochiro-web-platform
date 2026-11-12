@@ -14,6 +14,8 @@ export type RankDoctor = {
   first_name?: string | null
   last_name?: string | null
   clinic_name?: string | null
+  listing_format?: string | null
+  co_owners?: unknown
   city?: string | null
   state?: string | null
   country?: string | null

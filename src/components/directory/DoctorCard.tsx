@@ -8,6 +8,8 @@ import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
 import type { DirectoryDoctor } from "@/components/directory/useDirectorySearch";
 import { cn } from "@/lib/utils";
+import { isPracticeListing, listingCardCopy, listingPhotos } from "@/lib/listing-display";
+import { nameInitials } from "@/lib/profile-display";
 
 function trackConversion(doctorId: string, eventType: string) {
   const sessionId = typeof window !== "undefined"
@@ -44,10 +46,13 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
     .flatMap((s: string) => s.split(/\n|(?<=[a-z])(?=[A-Z][a-z].*(?:Care|Support|Wellness|Chiropractic|Restoration))/).map((t) => t.trim()))
     .filter((s: string) => s.length > 0 && s.length <= 45)
     .slice(0, 2);
-  const name = `Dr. ${doc.first_name || ""} ${doc.last_name || ""}`.replace(/^Dr\.\s+Dr\./i, "Dr.").trim();
+  const copy = listingCardCopy(doc);
+  const name = copy.title;
+  const detail = copy.detail || (isPracticeListing(doc) ? "" : "Private practice");
+  const photos = listingPhotos(doc);
   const distanceMiles = doc.distance_miles as number | null;
   const profileUrl = `/directory/${doc.slug || doc.id}`;
-  const initials = `${doc.first_name?.[0] || "N"}${doc.last_name?.[0] || ""}`.toUpperCase();
+  const initials = nameInitials(name) || "N";
 
   return (
     <motion.article
@@ -70,10 +75,18 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
         className="relative z-10 flex items-start gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neuro-orange"
       >
         <div className="w-14 h-14 rounded-xl bg-neuro-navy overflow-hidden flex items-center justify-center shrink-0">
-          {doc.photo_url && !cardPhotoError ? (
+          {photos.length > 1 && !cardPhotoError ? (
+            <div className="grid h-full w-full grid-cols-2">
+              {photos.map((photo) => (
+                // Co-owner photos are stored on several hosts.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={photo.src} src={photo.src} alt={photo.alt} className="h-full w-full object-cover" onError={() => setCardPhotoError(true)} />
+              ))}
+            </div>
+          ) : photos.length === 1 && !cardPhotoError ? (
             // Doctor photos are stored on several hosts.
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={doc.photo_url} alt={name} width={56} height={56} sizes="56px" className="w-full h-full object-cover" onError={() => setCardPhotoError(true)} />
+            <img src={photos[0].src} alt={photos[0].alt} width={56} height={56} sizes="56px" className="w-full h-full object-cover" onError={() => setCardPhotoError(true)} />
           ) : (
             <span className="text-white font-bold text-lg">{initials}</span>
           )}
@@ -87,7 +100,7 @@ export default function DoctorCard({ doc, index, onHover, onNavigate, dark = fal
               </span>
             )}
           </div>
-          <p className={cn("text-sm truncate", dark ? "text-white/70" : "text-gray-600")}>{doc.clinic_name || "Private practice"}</p>
+          {detail ? <p className={cn("text-sm truncate", dark ? "text-white/70" : "text-gray-600")}>{detail}</p> : null}
           <p className={cn("text-sm mt-0.5", dark ? "text-white/70" : "text-gray-600")}>
             {distanceMiles != null && <span className={cn("font-bold", dark ? "text-neuro-orange" : "text-neuro-orange-ink")}>{formatDistance(distanceMiles, distanceUnit)} · </span>}
             {location && <span className="inline-flex items-center gap-1"><MapPin className="w-3 h-3" />{location}</span>}

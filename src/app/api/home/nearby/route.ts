@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 const VARY = "x-vercel-ip-latitude, x-vercel-ip-longitude, x-vercel-ip-city, x-vercel-ip-country-region, x-vercel-ip-country";
 
-const FEATURED_FIELDS = "id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, photo_url, phone, accepting_new_patients, specialties, booking_url, latitude, longitude";
+const FEATURED_FIELDS = "id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, photo_url, phone, accepting_new_patients, specialties, booking_url, latitude, longitude, listing_format, co_owners";
 
 async function runSearch(params: Record<string, string>, trust: boolean) {
   const url = new URL("https://www.neurochiro.co/api/directory/search");
