@@ -6,19 +6,29 @@ import Link from "next/link";
 import { CheckCircle2, Loader2, Shield, Users, BarChart3, MessageSquare, Briefcase, Calendar, Star, Zap } from "lucide-react";
 import { FlowProgress } from "@/components/applications/FlowProgress";
 import { continueAfterAccount } from "@/lib/applications/resume-path";
+import { withReferralQuery } from "@/lib/member-referrals/logic";
 import { createFreeAccount } from "./actions";
 import { createClient } from "@/lib/supabase";
 
 type Role = "doctor" | "student";
 
-function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
+function GetStartedInner({
+  applicationFlow,
+  referralSlug,
+  referredBy,
+}: {
+  applicationFlow: boolean
+  referralSlug: string
+  referredBy: string | null
+}) {
   const searchParams = useSearchParams();
   const paramRole = searchParams.get("role") as Role | null;
   const paramChiroscore = searchParams.get("chiroscore");
   const paramCity = searchParams.get("city");
   const paramState = searchParams.get("state");
   const paramPlan = searchParams.get("plan") === "annual" ? "annual" : "monthly";
-  const referralCode = searchParams.get("ref") || "";
+  const referralCode = searchParams.get("ref") || referralSlug || "";
+  const continuePath = withReferralQuery("/doctor/apply?step=2", referralCode);
 
   const [role, setRole] = useState<Role>(paramRole === "student" ? "student" : "doctor");
   const [name, setName] = useState("");
@@ -52,7 +62,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
     const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password });
 
     if (result.nextPath) {
-      window.location.href = continueAfterAccount(!loginErr, result.nextPath);
+      window.location.href = continueAfterAccount(!loginErr, result.nextPath ? withReferralQuery(result.nextPath, referralCode) : continuePath);
       return;
     }
 
@@ -85,7 +95,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
             </p>
 
             <Link
-              href={role === "doctor" && applicationFlow ? continueAfterAccount(false) : "/login"}
+              href={role === "doctor" && applicationFlow ? continueAfterAccount(false, continuePath) : "/login"}
               className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors"
             >
               Log In Now
@@ -181,6 +191,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
         )}
 
         {/* Form */}
+        {referredBy ? <p className="text-center text-sm font-bold text-neuro-navy">Referred by {referredBy}</p> : null}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-neuro-orange p-8 shadow-lg space-y-4">
           {/* Role selector */}
           <div className="grid grid-cols-2 gap-3">
@@ -217,7 +228,7 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
 
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
           {accountExists && doctorFlow ? (
-            <Link href={continueAfterAccount(false)} className="block text-center text-sm font-bold text-neuro-orange hover:underline">
+            <Link href={continueAfterAccount(false, continuePath)} className="block text-center text-sm font-bold text-neuro-orange hover:underline">
               Log in and continue your application
             </Link>
           ) : null}
@@ -239,17 +250,25 @@ function GetStartedInner({ applicationFlow }: { applicationFlow: boolean }) {
 
         <p className="text-center text-xs text-gray-400 mt-6">
           Already a member?{" "}
-          <Link href={doctorFlow ? continueAfterAccount(false) : "/login"} className="text-neuro-orange font-bold hover:underline">Log in</Link>
+          <Link href={doctorFlow ? continueAfterAccount(false, continuePath) : "/login"} className="text-neuro-orange font-bold hover:underline">Log in</Link>
         </p>
       </div>
     </div>
   );
 }
 
-export default function GetStartedClient({ applicationFlow }: { applicationFlow: boolean }) {
+export default function GetStartedClient({
+  applicationFlow,
+  referralSlug = "",
+  referredBy = null,
+}: {
+  applicationFlow: boolean
+  referralSlug?: string
+  referredBy?: string | null
+}) {
   return (
     <Suspense fallback={<div className="min-h-dvh bg-neuro-cream flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-neuro-orange" /></div>}>
-      <GetStartedInner applicationFlow={applicationFlow} />
+      <GetStartedInner applicationFlow={applicationFlow} referralSlug={referralSlug} referredBy={referredBy} />
     </Suspense>
   );
 }

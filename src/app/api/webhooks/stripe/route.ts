@@ -12,6 +12,7 @@ import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 import { accessForStripeStatus } from "@/lib/portal/membership";
 import { fulfillDoctorApplicationSetup } from "@/lib/applications/fulfill";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
+import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
 import {
   isUndefinedPaymentIssueColumn,
   planSubscriptionChange,
@@ -159,6 +160,9 @@ async function applyMembershipFromSubscription(
   const profile = await loadBillingProfile(admin, customerId);
   if (!profile) {
     await syncDoctorMembershipByCustomer(admin, customerId, subscription.status || "");
+    if ((subscription.status || "").toLowerCase() === "active") {
+      await settleMemberReferral({ customerId, invoicePaid: true });
+    }
     return;
   }
 
@@ -194,6 +198,9 @@ async function applyMembershipFromSubscription(
     if (updated.error) console.error("[WEBHOOK] doctor tier update failed", updated.error.code);
   }
   await syncDoctorMembershipByCustomer(admin, customerId, status);
+  if (status.toLowerCase() === "active") {
+    await settleMemberReferral({ customerId, invoicePaid: true });
+  }
 }
 
 export async function POST(req: Request) {
@@ -1111,6 +1118,10 @@ export async function POST(req: Request) {
         }
 
         Automations.onPaymentSuccess(invoice);
+        const paidCustomer = customerIdFromInvoice(invoice);
+        if (paidCustomer && Number(invoice.amount_paid || 0) > 0) {
+          await settleMemberReferral({ customerId: paidCustomer, invoicePaid: true });
+        }
         break;
       }
 

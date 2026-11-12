@@ -19,6 +19,7 @@ export type AdminApplicationRow = {
   instagram: string
   heardAbout: string
   whyJoin: string
+  referredBy: string
   notes: string
   mobile: string
   smsConsent: string

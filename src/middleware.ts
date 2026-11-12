@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
+import { MEMBER_REF_COOKIE, normalizeRefSlug } from '@/lib/member-referrals/logic';
 import { SUPABASE_PUBLIC_KEY, SUPABASE_URL } from '@/lib/supabase-env';
 
 export async function middleware(req: NextRequest) {
@@ -31,6 +32,15 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession();
 
   const path = req.nextUrl.pathname
+  const referralSlug = normalizeRefSlug(req.nextUrl.searchParams.get('ref'));
+  const remembersReferral = path === '/get-started' || path === '/doctor/apply' || path.startsWith('/doctor/apply/');
+  const referralCookie = {
+    httpOnly: true,
+    sameSite: 'lax' as const,
+    path: '/',
+    maxAge: 60 * 60 * 24 * 90,
+    secure: process.env.NODE_ENV === 'production',
+  };
   const schoolVerify = path === '/student/verify'
   if (!session && !schoolVerify && (
     path.startsWith('/portal') ||
@@ -40,7 +50,13 @@ export async function middleware(req: NextRequest) {
   )) {
     const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
     const dest = applying ? loginPathWithReturn(`${path}${req.nextUrl.search}`) : '/login';
-    return NextResponse.redirect(new URL(dest, req.url));
+    const redirect = NextResponse.redirect(new URL(dest, req.url));
+    if (referralSlug && remembersReferral) redirect.cookies.set(MEMBER_REF_COOKIE, referralSlug, referralCookie);
+    return redirect;
+  }
+
+  if (referralSlug && remembersReferral) {
+    res.cookies.set(MEMBER_REF_COOKIE, referralSlug, referralCookie);
   }
 
   // Role-based access control: only enforce authentication in middleware.
@@ -53,5 +69,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/portal/:path*', '/doctor/:path*', '/student/:path*', '/admin/:path*'],
+  matcher: ['/portal/:path*', '/doctor/:path*', '/student/:path*', '/admin/:path*', '/get-started'],
 };

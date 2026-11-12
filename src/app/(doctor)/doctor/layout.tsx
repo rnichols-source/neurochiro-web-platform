@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -8,6 +9,8 @@ import PortalShell from '@/components/portal/PortalShell';
 import ReferralProvider from '@/components/portal/ReferralProvider';
 import OnboardingGate from '@/components/portal/OnboardingGate';
 import { PortalProvider } from '@/components/portal/PortalProvider';
+import { MemberReferralBanner } from '@/components/portal/MemberReferralInvite';
+import { loadMemberInvite } from '@/lib/member-referrals/invite';
 import { getPortalContext } from '@/lib/portal/context';
 import { recordPortalLogin } from '@/lib/portal/login-ping';
 import { firstName } from '@/lib/portal/greeting';
@@ -17,6 +20,12 @@ import { lookupStaffOffice } from './kpi/actions';
 import StaffScorecardFrame from './StaffScorecardFrame';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+
+async function ReferralBanner({ doctorId }: { doctorId: string }) {
+  const invite = await loadMemberInvite(doctorId);
+  if (!invite || invite.dismissed) return null;
+  return <MemberReferralBanner title={invite.title} body={invite.body} message={invite.message} />;
+}
 
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
   const headerStore = await headers();
@@ -78,7 +87,7 @@ export default async function DoctorLayout({ children }: { children: React.React
         <PortalProvider value={ctx}>
           <ReferralProvider>
             <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName} applicationGate={applicationGate}>
-              <PortalShell>{children}</PortalShell>
+              <PortalShell banner={ctx.doctor ? <Suspense fallback={null}><ReferralBanner doctorId={ctx.doctor.id} /></Suspense> : null}>{children}</PortalShell>
             </OnboardingGate>
           </ReferralProvider>
         </PortalProvider>

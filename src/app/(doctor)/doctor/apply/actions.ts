@@ -7,6 +7,9 @@ import { createSetupCheckout, readPriceAmount } from '@/lib/applications/billing
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { currencyForCountry, planLabel, priceIdFor, type BillingCycle, type DoctorCurrency } from '@/lib/applications/prices'
 import { ensureDraftApplication, loadApplicationByDoctor, saveAnswers, saveDraftStep, savePlan } from '@/lib/applications/store'
+import { rememberApplicantReferral } from '@/lib/member-referrals/db'
+import { MEMBER_REF_COOKIE, persistedRef } from '@/lib/member-referrals/logic'
+import { cookies } from 'next/headers'
 
 export type PlanChoice = {
   cycle: BillingCycle
@@ -46,9 +49,24 @@ export async function plansForCountry(country: string): Promise<{ currency: Doct
   return { currency, plans }
 }
 
+async function keptReferral(requested: string | undefined, typedName: string | null | undefined, doctorId: string): Promise<string> {
+  const jar = await cookies()
+  const slug = persistedRef({
+    query: requested,
+    cookie: jar.get(MEMBER_REF_COOKIE)?.value,
+  })
+  const saved = await rememberApplicantReferral({
+    applicantDoctorId: doctorId,
+    requestedSlug: slug,
+    typedName,
+  })
+  return (saved.slug || '').slice(0, 80)
+}
+
 export async function saveApplyStep(step: 1 | 2, input: {
   answers: unknown
   referralCode?: string
+  referrerName?: string | null
 }): Promise<{ error?: string }> {
   if (!isApplicationFlowEnabled()) return { error: 'Applications are not open yet.' }
   const session = await requireDoctor()
@@ -61,7 +79,7 @@ export async function saveApplyStep(step: 1 | 2, input: {
   })
   if (!ready) return { error: 'We could not save the application. The database step may still need to be run.' }
 
-  const referralCode = (input.referralCode || '').slice(0, 32)
+  const referralCode = await keptReferral(input.referralCode, input.referrerName, session.doctor.id)
   if (step === 1) {
     const parsed = validateStep1(input.answers)
     if (!parsed.ok) return { error: parsed.error }
@@ -112,6 +130,7 @@ export async function submitApplication(input: {
   answers: unknown
   plan: BillingCycle
   referralCode?: string
+  referrerName?: string | null
 }): Promise<{ error?: string; url?: string }> {
   if (!isApplicationFlowEnabled()) return { error: 'Applications are not open yet.' }
   const session = await requireDoctor()
@@ -128,7 +147,8 @@ export async function submitApplication(input: {
   })
   if (!ready) return { error: 'We could not save the application. The database step may still need to be run.' }
 
-  const saved = await saveAnswers(session.doctor.id, session.user.id, parsed.value, (input.referralCode || '').slice(0, 32))
+  const referralCode = await keptReferral(input.referralCode, input.referrerName, session.doctor.id)
+  const saved = await saveAnswers(session.doctor.id, session.user.id, parsed.value, referralCode)
   if (!saved) return { error: 'We could not save your answers. Please try again.' }
 
   const existing = await loadApplicationByDoctor(session.doctor.id)
@@ -166,6 +186,8 @@ export async function submitApplication(input: {
       const admin = createAdminClient()
       await admin.from('profiles').update({ stripe_customer_id: checkout.customerId }).eq('id', session.user.id)
     }
+    const jar = await cookies()
+    jar.delete(MEMBER_REF_COOKIE)
     return { url: checkout.url }
   } catch (error) {
     console.error('[application] setup checkout failed', error instanceof Error ? error.name : 'error')
@@ -186,6 +208,7 @@ export async function loadApplyState() {
   const plans = await plansForCountry(country)
   return {
     enabled: true as const,
+    doctorId: session.doctor.id,
     doctorName: session.doctor.first_name || '',
     country,
     application,

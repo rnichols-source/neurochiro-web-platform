@@ -76,6 +76,7 @@ export function ApplicationsClient({
             <div className="sm:col-span-2"><dt className="font-bold">Office</dt><dd>{row.address || '—'}</dd></div>
             <div><dt className="font-bold">Website</dt><dd>{row.website || '—'}</dd></div>
             <div><dt className="font-bold">Instagram</dt><dd>{row.instagram || '—'}</dd></div>
+            <div className="sm:col-span-2"><dt className="font-bold">Referred by</dt><dd>{row.referredBy || '—'}</dd></div>
             <div className="sm:col-span-2"><dt className="font-bold">How they heard</dt><dd>{row.heardAbout || '—'}</dd></div>
             <div className="sm:col-span-2"><dt className="font-bold">Why they want to join</dt><dd>{row.whyJoin || '—'}</dd></div>
           </dl>
