@@ -19,6 +19,8 @@ import { ReferButton } from '@/components/portal/ReferralProvider';
 import { getAttention, getSetupFields, getSpotlight, getViewSeries } from './home-data';
 import StatusPill from '@/components/portal/StatusPill';
 
+export const dynamic = 'force-dynamic'
+
 function Card({ children }: { children: React.ReactNode }) {
   return <section className="bg-white border border-portal-border rounded-xl p-4">{children}</section>;
 }

@@ -19,6 +19,8 @@ import { loadApplicationGate } from '@/lib/applications/gate';
 import { lookupStaffOffice } from './kpi/actions';
 import StaffScorecardFrame from './StaffScorecardFrame';
 
+export const dynamic = 'force-dynamic'
+
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 async function ReferralBanner({ doctorId }: { doctorId: string }) {

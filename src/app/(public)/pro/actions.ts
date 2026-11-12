@@ -46,7 +46,24 @@ export interface DemandNearbyResult {
 
 // ── Stats ──
 
+function adminConfigured(): boolean {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim()
+  const key = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim()
+  return Boolean(url && key)
+}
+
+const EMPTY_PRO_STATS: ProPageStats = {
+  activeDoctors: 0,
+  statesCovered: 0,
+  confirmedSubscribers: 0,
+  totalMentions: 0,
+  totalDemandSignals: 0,
+  mentionsByCountry: [],
+  countriesWithDemand: 0,
+}
+
 export async function getProPageStats(): Promise<ProPageStats> {
+  if (!adminConfigured()) return EMPTY_PRO_STATS
   const supabase = createAdminClient()
   const [doctors, subs, mentions] = await Promise.all([
     getDoctorCounts(),
@@ -81,6 +98,7 @@ export async function getProPageStats(): Promise<ProPageStats> {
 // ── Map Data (all countries, aggregated to city level) ──
 
 export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demandCities: MapDemandCity[] }> {
+  if (!adminConfigured()) return { doctors: [], demandCities: [] }
   const supabase = createAdminClient()
 
   // All verified doctors with valid coords (no PII, just location + country)

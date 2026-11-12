@@ -20,7 +20,17 @@ const MEMBER_SELECT = 'id, user_id, email, slug, first_name, last_name, clinic_n
 
 type Row = Record<string, unknown>
 
+/** False during a production build that has no Supabase env. Callers skip the query instead of throwing. */
+export function referralDatabaseReady(): boolean {
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim()
+  const key = (process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim()
+  if (!url || url.includes('your-project-url')) return false
+  if (!key) return false
+  return true
+}
+
 function admin(): any {
+  if (!referralDatabaseReady()) return null
   return createAdminClient()
 }
 
@@ -50,7 +60,9 @@ export function memberFromRow(row: Row | null | undefined): MemberSnapshot | nul
 }
 
 async function loadDoctor(column: 'id' | 'slug', value: string): Promise<MemberSnapshot | null> {
-  const result = await admin().from('doctors').select(MEMBER_SELECT).eq(column, value).maybeSingle()
+  const client = admin()
+  if (!client || !value) return null
+  const result = await client.from('doctors').select(MEMBER_SELECT).eq(column, value).maybeSingle()
   if (result.error) {
     console.error('[member-referral] doctor lookup failed', result.error.code || 'error')
     return null
@@ -74,7 +86,9 @@ export async function resolveActiveMemberBySlug(slug: string): Promise<MemberSna
 async function matchActiveMemberByName(name: string | null): Promise<MemberSnapshot | null> {
   const parsed = parseReferrerName(name)
   if (!parsed) return null
-  const result = await admin()
+  const client = admin()
+  if (!client) return null
+  const result = await client
     .from('doctors')
     .select(MEMBER_SELECT)
     .ilike('first_name', parsed.first)
@@ -95,13 +109,15 @@ function eligible(candidate: MemberSnapshot | null, applicant: MemberSnapshot): 
 }
 
 async function applicationReferral(doctorId: string): Promise<{ doctorId: string | null; slug: string | null; name: string | null } | null> {
-  const result = await admin()
+  const client = admin()
+  if (!client) return { doctorId: null, slug: null, name: null }
+  const result = await client
     .from('doctor_applications')
     .select('referred_by_doctor_id, referral_code, referrer_name')
     .eq('doctor_id', doctorId)
     .maybeSingle()
   if (result.error && (isMissingColumn(result.error) || isMissingTable(result.error))) {
-    const legacy = await admin().from('doctor_applications').select('referral_code').eq('doctor_id', doctorId).maybeSingle()
+    const legacy = await client.from('doctor_applications').select('referral_code').eq('doctor_id', doctorId).maybeSingle()
     if (legacy.error || !legacy.data) return { doctorId: null, slug: null, name: null }
     return { doctorId: null, slug: normalizeRefSlug(text(legacy.data.referral_code)), name: null }
   }
@@ -121,6 +137,7 @@ async function writeAttribution(input: {
   name: string | null
 }): Promise<void> {
   const client = admin()
+  if (!client) return
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (input.doctorId) patch.referred_by_doctor_id = input.doctorId
   if (input.slug) patch.referral_code = input.slug
@@ -215,7 +232,9 @@ function rewardFromRow(row: Row): RewardRow {
 export function rewardStore(): RewardStore {
   return {
     async findByReferred(referredDoctorId) {
-      const result = await admin().from('member_referral_rewards').select('*').eq('referred_doctor_id', referredDoctorId).maybeSingle()
+      const client = admin()
+      if (!client) return null
+      const result = await client.from('member_referral_rewards').select('*').eq('referred_doctor_id', referredDoctorId).maybeSingle()
       if (result.error) {
         if (isMissingTable(result.error)) console.error(`[member-referral] rewards table missing. Apply ${MIGRATION}`)
         return null
@@ -223,7 +242,9 @@ export function rewardStore(): RewardStore {
       return result.data ? rewardFromRow(result.data) : null
     },
     async insertPending(row) {
-      const inserted = await admin().from('member_referral_rewards').insert({
+      const client = admin()
+      if (!client) throw new Error('referral database is not configured')
+      const inserted = await client.from('member_referral_rewards').insert({
         referrer_doctor_id: row.referrerDoctorId,
         referred_doctor_id: row.referredDoctorId,
         application_id: row.applicationId,
@@ -232,14 +253,16 @@ export function rewardStore(): RewardStore {
         updated_at: new Date().toISOString(),
       }).select('*').maybeSingle()
       if (inserted.error || !inserted.data) {
-        const existing = await admin().from('member_referral_rewards').select('*').eq('referred_doctor_id', row.referredDoctorId).maybeSingle()
+        const existing = await client.from('member_referral_rewards').select('*').eq('referred_doctor_id', row.referredDoctorId).maybeSingle()
         if (existing.data) return rewardFromRow(existing.data)
         throw new Error(inserted.error?.code || 'reward insert failed')
       }
       return rewardFromRow(inserted.data)
     },
     async markGranted(id, patch) {
-      await admin().from('member_referral_rewards').update({
+      const client = admin()
+      if (!client) return
+      await client.from('member_referral_rewards').update({
         status: 'granted',
         stripe_action: patch.stripeAction,
         amount_cents: patch.amount,
@@ -256,14 +279,18 @@ export function rewardStore(): RewardStore {
       }).eq('id', id)
     },
     async markFailed(id, error) {
-      await admin().from('member_referral_rewards').update({
+      const client = admin()
+      if (!client) return
+      await client.from('member_referral_rewards').update({
         status: 'failed',
         error: error.slice(0, 500),
         updated_at: new Date().toISOString(),
       }).eq('id', id)
     },
     async markSkipped(row) {
-      const existing = await admin().from('member_referral_rewards').select('id').eq('referred_doctor_id', row.referredDoctorId).maybeSingle()
+      const client = admin()
+      if (!client) return
+      const existing = await client.from('member_referral_rewards').select('id').eq('referred_doctor_id', row.referredDoctorId).maybeSingle()
       const patch = {
         referrer_doctor_id: row.referrerDoctorId,
         referred_doctor_id: row.referredDoctorId,
@@ -275,10 +302,10 @@ export function rewardStore(): RewardStore {
         updated_at: new Date().toISOString(),
       }
       if (existing.data?.id) {
-        await admin().from('member_referral_rewards').update(patch).eq('id', existing.data.id)
+        await client.from('member_referral_rewards').update(patch).eq('id', existing.data.id)
         return
       }
-      const inserted = await admin().from('member_referral_rewards').insert(patch)
+      const inserted = await client.from('member_referral_rewards').insert(patch)
       if (inserted.error && !isMissingTable(inserted.error)) {
         console.error('[member-referral] skip save failed', inserted.error.code || 'error')
       }
@@ -287,13 +314,17 @@ export function rewardStore(): RewardStore {
 }
 
 export async function loadReferralCaseByApplication(applicationId: string): Promise<ReferralCase | null> {
-  const result = await admin().from('doctor_applications').select('*').eq('id', applicationId).maybeSingle()
+  const client = admin()
+  if (!client) return null
+  const result = await client.from('doctor_applications').select('*').eq('id', applicationId).maybeSingle()
   if (result.error || !result.data) return null
   return caseFromApplication(result.data)
 }
 
 export async function loadReferralCaseByCustomer(customerId: string): Promise<ReferralCase | null> {
-  const result = await admin().from('doctor_applications').select('*').eq('stripe_customer_id', customerId).maybeSingle()
+  const client = admin()
+  if (!client) return null
+  const result = await client.from('doctor_applications').select('*').eq('stripe_customer_id', customerId).maybeSingle()
   if (result.error || !result.data) return null
   return caseFromApplication(result.data)
 }
@@ -321,12 +352,13 @@ async function caseFromApplication(row: Row): Promise<ReferralCase | null> {
   }
   const loadedReferrer = referrerId ? await loadMemberById(referrerId) : null
   const referrer = loadedReferrer && isPublishedActiveMember(loadedReferrer) ? loadedReferrer : null
-  const profile = referred.userId
-    ? await admin().from('profiles').select('role').eq('id', referred.userId).maybeSingle()
+  const client = admin()
+  const profile = client && referred.userId
+    ? await client.from('profiles').select('role').eq('id', referred.userId).maybeSingle()
     : { data: null, error: null }
   let referrerSubscriptionId: string | null = null
-  if (referrer) {
-    const extra = await admin().from('doctors').select('stripe_subscription_id').eq('id', referrer.id).maybeSingle()
+  if (referrer && client) {
+    const extra = await client.from('doctors').select('stripe_subscription_id').eq('id', referrer.id).maybeSingle()
     if (!extra.error) referrerSubscriptionId = text(extra.data?.stripe_subscription_id) || null
   }
   return {
@@ -343,7 +375,9 @@ async function caseFromApplication(row: Row): Promise<ReferralCase | null> {
 }
 
 export async function countGrantedReferrals(referrerDoctorId: string): Promise<number> {
-  const result = await admin()
+  const client = admin()
+  if (!client) return 0
+  const result = await client
     .from('member_referral_rewards')
     .select('id', { count: 'exact', head: true })
     .eq('referrer_doctor_id', referrerDoctorId)
@@ -353,13 +387,17 @@ export async function countGrantedReferrals(referrerDoctorId: string): Promise<n
 }
 
 export async function bannerDismissedAt(doctorId: string): Promise<string | null> {
-  const result = await admin().from('doctors').select('member_referral_banner_dismissed_at').eq('id', doctorId).maybeSingle()
+  const client = admin()
+  if (!client) return null
+  const result = await client.from('doctors').select('member_referral_banner_dismissed_at').eq('id', doctorId).maybeSingle()
   if (result.error) return null
   return text(result.data?.member_referral_banner_dismissed_at) || null
 }
 
 export async function dismissBanner(doctorId: string, userId: string): Promise<void> {
-  const result = await admin()
+  const client = admin()
+  if (!client) return
+  const result = await client
     .from('doctors')
     .update({ member_referral_banner_dismissed_at: new Date().toISOString() })
     .eq('id', doctorId)

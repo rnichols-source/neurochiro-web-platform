@@ -2,7 +2,6 @@ import 'server-only'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
 import { SUPABASE_URL } from '@/lib/supabase-env'
-import { getSupabaseSecretKey } from '@/lib/supabase-secret'
 
 /**
  * ⚠️  SUPABASE DEFAULT ROW LIMIT IS 1000.
@@ -20,9 +19,45 @@ import { getSupabaseSecretKey } from '@/lib/supabase-secret'
  *   → Use .range(0, N-1) and add a comment: // intentional bound
  */
 
+function adminEnv(): { url: string; key: string } | null {
+  const url = (SUPABASE_URL || '').trim()
+  const key = (process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
+  if (!url || url.includes('your-project-url') || !key) return null
+  return { url, key }
+}
+
+/**
+ * Used only when the build has no Supabase env. Queries resolve to no rows
+ * so static pages can finish. A configured environment still uses the real client.
+ */
+function unavailableAdminClient(): SupabaseClient<Database> {
+  const payload = { data: null, error: null, count: 0, status: 200, statusText: 'OK' }
+  const builder: any = new Proxy(function unavailable() { return builder }, {
+    get(_target, prop) {
+      if (prop === 'then') {
+        return (onFulfilled: (value: unknown) => unknown, onRejected?: (reason: unknown) => unknown) =>
+          Promise.resolve(payload).then(onFulfilled, onRejected)
+      }
+      return () => builder
+    },
+    apply() {
+      return builder
+    },
+  })
+  return {
+    from() { return builder },
+    rpc() { return builder },
+  } as unknown as SupabaseClient<Database>
+}
+
 export const createAdminClient = () => {
-  const supabaseUrl = SUPABASE_URL;
-  const supabaseServiceKey = getSupabaseSecretKey();
+  const env = adminEnv()
+  if (!env) {
+    console.error('[supabase-admin] Supabase env is missing. Queries return no rows.')
+    return unavailableAdminClient()
+  }
+  const supabaseUrl = env.url
+  const supabaseServiceKey = env.key
 
   if (!supabaseUrl || !supabaseServiceKey) {
     throw new Error("Missing Supabase admin environment variables.");
