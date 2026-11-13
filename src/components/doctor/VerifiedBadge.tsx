@@ -14,6 +14,7 @@ export default function VerifiedBadge({
   const locked = portal.membership.tier === "free";
   const ready = Boolean(doctorSlug && doctorName.trim());
   const [copied, setCopied] = useState(false);
+  const [imageOk, setImageOk] = useState(true);
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://neurochiro.co";
   const embedCode = ready
     ? `<a href="${baseUrl}/directory/${doctorSlug}" target="_blank" rel="noopener noreferrer" style="display:inline-block;">\n  <img loading="lazy" decoding="async" src="${baseUrl}/api/badge/${doctorSlug}" alt="Verified NeuroChiro Provider - ${doctorName}" width="200" height="60" style="border:none;border-radius:12px;" />\n</a>`
@@ -43,13 +44,23 @@ export default function VerifiedBadge({
         </div>
       ) : (
         <div className="mt-4 space-y-3">
-          <img
-            src={`${baseUrl}/api/badge/${doctorSlug}`}
-            alt={`Verified NeuroChiro Provider - ${doctorName}`}
-            width={200}
-            height={60}
-            className="h-auto w-[200px] rounded-xl border border-portal-border bg-white"
-          />
+          {imageOk ? (
+            <img
+              src={`/api/badge/${doctorSlug}`}
+              alt={`Verified NeuroChiro Provider - ${doctorName}`}
+              width={200}
+              height={60}
+              className="h-auto w-[200px] rounded-xl border border-portal-border bg-white"
+              onError={() => setImageOk(false)}
+            />
+          ) : (
+            <svg viewBox="0 0 200 60" width="200" height="60" className="rounded-xl border border-portal-border" role="img" aria-label={`Verified NeuroChiro Provider - ${doctorName}`}>
+              <rect width="200" height="60" rx="12" fill="#0B1118" />
+              <rect x="1" y="1" width="198" height="58" rx="11" fill="none" stroke="#D66829" strokeWidth="2" />
+              <text x="52" y="27" fill="white" fontFamily="Montserrat, sans-serif" fontWeight="800" fontSize="11">PRO PROVIDER</text>
+              <text x="52" y="43" fill="#9CA3AF" fontFamily="Montserrat, sans-serif" fontWeight="600" fontSize="9">NeuroChiro Directory</text>
+            </svg>
+          )}
           <pre className="overflow-x-auto rounded-lg bg-portal-sidebar p-4 text-sm text-white">{embedCode}</pre>
           <button type="button" onClick={copy} className="min-h-11 px-4 rounded-lg bg-portal-accent text-sm font-bold text-white">
             {copied ? "Copied" : "Copy"}

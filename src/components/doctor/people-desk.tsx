@@ -65,6 +65,7 @@ export function PeopleDesk({ people, ready, initialFilter }: { people: PersonCar
       } else {
         existing.history.push(line)
         existing.detail = `${existing.history.length} updates`
+        existing.canMessage = Boolean(existing.canMessage || row.canMessage)
       }
     }
     return order.map((row) => byPerson.get(personKey(row)) || row)
@@ -128,7 +129,7 @@ export function PeopleDesk({ people, ready, initialFilter }: { people: PersonCar
               </ul>
             ) : null}
             <div className="mt-5 flex flex-wrap gap-2">
-              {selected.profileId ? (
+              {selected.profileId && selected.canMessage ? (
                 <Link href={`/doctor/messages?to=${selected.profileId}`} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#2C6BB4] px-5 text-[15px] font-extrabold text-white">Message</Link>
               ) : null}
               {selected.href ? (

@@ -9,6 +9,7 @@ import StudentOptIn from "@/components/doctor/StudentOptIn";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
 import { ALL_COUNTRIES, getCountryByIso2 } from "@/config/countries";
+import { profileChecklist } from "@/lib/doctor/places";
 
 const INPUT = "w-full min-h-11 px-3 rounded-lg border border-portal-border bg-white text-base";
 const AREA = "w-full px-3 py-2 rounded-lg border border-portal-border bg-white text-base";
@@ -436,19 +437,19 @@ function ProfileEditor() {
   };
 
   const educationLines = asLines(profile?.education);
-  const checks = [
-    { done: !!profile?.photo_url, label: "Profile photo", why: "Community members look for a face before they call." },
-    { done: !!(profile?.bio && profile.bio.length >= 20) || !!(profile?.short_intro && profile.short_intro.length >= 20), label: "Bio or intro", why: "Tells community members who you are and what you do." },
-    { done: !!profile?.chiropractic_school, label: "Education", why: "Community members want to know where you trained." },
-    { done: (profile?.specialties || []).length > 0, label: "Specialties", why: "Helps community members find you when searching." },
-    { done: !!profile?.hours, label: "Office hours", why: "Community members check hours before calling." },
-    { done: !!profile?.first_visit_price || !!profile?.payment_model, label: "Cost and insurance", why: "Community members ask this before they book." },
-    { done: !!profile?.phone, label: "Phone number", why: "Many community members prefer to call." },
-    { done: !!profile?.booking_url, label: "Online booking link", why: "Community members who can book online are more likely to show up." },
-    { done: !!profile?.google_reviews_url, label: "Google Reviews link", why: "Reviews help community members decide." },
-  ];
-  const doneCount = checks.filter((item) => item.done).length;
-  const pct = Math.round((doneCount / checks.length) * 100);
+  const checklist = profileChecklist({
+    photoUrl: profile?.photo_url || null,
+    bio: profile?.bio || null,
+    shortIntro: profile?.short_intro || null,
+    listingFormat: listingFormat,
+    coOwnerCount: coOwners.filter((owner) => owner.name).length,
+    city: profile?.city || null,
+    address: profile?.address || null,
+    techniques: (profile?.specialties || []).length,
+    hours: profile?.hours || null,
+  });
+  const checks = checklist.steps;
+  const pct = checklist.percent;
   const missing = checks.filter((item) => !item.done);
 
   return (

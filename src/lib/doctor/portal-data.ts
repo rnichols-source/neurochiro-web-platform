@@ -197,6 +197,7 @@ export type PersonCard = {
   href?: string
   leadId?: string
   leadType?: string
+  canMessage?: boolean
 }
 
 export async function loadPeople(doctorId: string): Promise<{ ready: boolean; waiting: PersonCard[]; members: PersonCard[]; people: PersonCard[] }> {
@@ -216,6 +217,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     user ? getInbox(user.id, 20).catch(() => []) : Promise.resolve([]),
   ])
   const ready = !(visits.error && schemaNotReady(visits.error))
+  const threadProfiles = new Set((threads || []).map((row) => row.otherUser?.id).filter(Boolean))
   const waiting: PersonCard[] = (visits.data || []).map((row: Record<string, string | null>) => ({
     id: String(row.id),
     profileId: row.profile_id,
@@ -224,6 +226,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     note: row.note,
     status: String(row.status || 'requested'),
     kind: 'visit' as const,
+    canMessage: Boolean(row.profile_id && threadProfiles.has(String(row.profile_id))),
   }))
   const home: PersonCard[] = members.map((member) => ({
     id: member.id,
@@ -233,6 +236,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     note: null,
     status: 'home',
     kind: 'member' as const,
+    canMessage: threadProfiles.has(member.id),
   }))
   const requests: PersonCard[] = ((leads && 'leads' in leads ? leads.leads : []) as Array<Record<string, string | null>>).map((lead) => ({
     id: `lead-${lead.id}`,
@@ -277,6 +281,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     status: String(row.status || 'active'),
     kind: 'care' as const,
     href: '/doctor/care-sets',
+    canMessage: Boolean(row.profile_id && threadProfiles.has(String(row.profile_id))),
   }))
   const messageCards: PersonCard[] = (threads || []).map((row) => ({
     id: `msg-${row.id}`,
@@ -287,6 +292,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     status: row.unreadCount ? 'new' : 'contacted',
     kind: 'message' as const,
     href: `/doctor/messages?c=${row.id}`,
+    canMessage: true,
   }))
   return { ready, waiting, members: home, people: [...waiting, ...requests, ...referralCards, ...careCards, ...messageCards, ...home] }
 }

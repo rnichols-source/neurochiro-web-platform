@@ -9,6 +9,7 @@ import {
   interpretLocation,
   isOpenDuplicate,
   looksLikePostal,
+  chooseReferralDoctors,
   nameMatchSkipsPlace,
   nameNeedles,
   searchCountryForQuery,
@@ -20,6 +21,58 @@ import {
   validPhone,
   validateReferralDraft,
 } from './pure.ts';
+
+test('Greenville SC keeps Dr. Raymond Nichols in Greer at 12 miles', () => {
+  const far = Array.from({ length: 80 }, (_, index) => ({
+    id: `far-${index}`,
+    name: `Far doctor ${index}`,
+    miles: 800 + index,
+  }))
+  const picked = chooseReferralDoctors({
+    radiusMiles: 250,
+    cap: 80,
+    inRadius: [{ id: 'ray', name: 'Raymond Nichols', miles: 12 }],
+    wide: far,
+  })
+  assert.equal(picked.widened, false)
+  assert.equal(picked.doctors[0]?.name, 'Raymond Nichols')
+  assert.equal(picked.doctors[0]?.miles, 12)
+  assert.equal(picked.doctors.some((row) => (row.miles ?? 0) > 250), false)
+})
+
+test('90210 keeps Frank Kaden at 17 miles and Nicole Clark at 24 miles', () => {
+  const crowd = Array.from({ length: 210 }, (_, index) => ({
+    id: `crowd-${index}`,
+    name: `Other doctor ${index}`,
+    miles: 40 + (index % 180),
+  }))
+  crowd.push({ id: 'kaden', name: 'Frank Kaden', miles: 17 })
+  crowd.push({ id: 'clark', name: 'Nicole Clark', miles: 24 })
+  const picked = chooseReferralDoctors({
+    radiusMiles: 250,
+    cap: 80,
+    inRadius: crowd,
+    wide: [{ id: 'far', name: 'Someone in another state', miles: 1400 }],
+  })
+  assert.equal(picked.widened, false)
+  assert.equal(picked.doctors[0]?.name, 'Frank Kaden')
+  assert.equal(picked.doctors[1]?.name, 'Nicole Clark')
+  assert.ok(picked.doctors.length >= 200)
+  assert.equal(picked.doctors.some((row) => row.name === 'Someone in another state'), false)
+})
+
+test('an empty radius falls back to the nearest doctors outside it', () => {
+  const picked = chooseReferralDoctors({
+    radiusMiles: 250,
+    inRadius: [],
+    wide: [
+      { id: 'perth', name: 'Perth doctor', miles: 2040 },
+      { id: 'adelaide', name: 'Adelaide doctor', miles: 850 },
+    ],
+  })
+  assert.equal(picked.widened, true)
+  assert.equal(picked.doctors[0]?.name, 'Adelaide doctor')
+})
 
 test('a person or clinic name is not sent to the map, and a city still is', () => {
   const bruni = { firstName: 'Leanne', lastName: 'Bruni', clinicName: 'Whitby Chiropractic' }

@@ -407,3 +407,34 @@ export function formatDistance(miles: number, country: string): string {
 export function placeLabel(place: { city?: string | null; state?: string | null }): string {
   return [place.city, place.state].filter(Boolean).join(', ');
 }
+
+export type ReferralCandidate = { id: string; name: string; miles: number | null }
+
+/**
+ * Keep doctors inside the configured radius, nearest first, at least 200 of them.
+ * A wide list is used only when the radius list is empty, so a crowded far box
+ * cannot push out someone 12 miles away.
+ */
+export function chooseReferralDoctors(input: {
+  radiusMiles: number
+  cap?: number
+  inRadius: ReferralCandidate[]
+  wide?: ReferralCandidate[]
+}): { doctors: ReferralCandidate[]; widened: boolean } {
+  const cap = Math.max(200, input.cap || 200)
+  const byMiles = (a: ReferralCandidate, b: ReferralCandidate) => {
+    if (a.miles == null) return 1
+    if (b.miles == null) return -1
+    return a.miles - b.miles || a.name.localeCompare(b.name)
+  }
+  const nearby = input.inRadius
+    .filter((row) => row.miles != null && row.miles <= input.radiusMiles)
+    .sort(byMiles)
+    .slice(0, cap)
+  if (nearby.length) return { doctors: nearby, widened: false }
+  const nearest = (input.wide || [])
+    .filter((row) => row.miles != null)
+    .sort(byMiles)
+    .slice(0, 8)
+  return { doctors: nearest, widened: nearest.length > 0 }
+}

@@ -5,6 +5,7 @@ import { boundingBox, isValidCoord } from '@/lib/geo';
 import { deriveMembership } from '@/lib/portal/membership';
 import {
   blockedSearchNote,
+  chooseReferralDoctors,
   interpretLocation,
   looksLikePostal,
   nameMatchSkipsPlace,
@@ -21,7 +22,7 @@ import { hiddenTestUserIds } from '@/lib/profiles/test-users';
 import { REFERRAL_DOCTOR_SELECT } from '@/lib/referrals/columns';
 import { resolveFastPlace } from '@/lib/founder/geo-search';
 import { countryStoredValues, matchCountry } from '@/lib/geo/country-alias';
-import { THRESHOLD_DEFAULTS } from '@/lib/thresholds';
+import { getThresholds } from '@/lib/thresholds';
 
 const GENERIC_NAME = new Set(['chiropractic', 'chiropractor', 'clinic', 'centre', 'center', 'office', 'the', 'and', 'of'])
 const geoCache = new Map<string, { at: number; value: Awaited<ReturnType<typeof resolveFastPlace>> }>()
@@ -141,6 +142,37 @@ async function stripeSet(admin: any, userIds: string[]): Promise<Set<string>> {
   return ids;
 }
 
+const NEAR_CAP = 200
+
+async function doctorsNear(admin: any, origin: Place, radiusMiles: number, country: string, selfDoctorId: string): Promise<DoctorRow[]> {
+  const rpc = await admin.rpc('referral_doctors_near', {
+    origin_lat: origin.lat,
+    origin_lng: origin.lng,
+    radius_miles: radiusMiles,
+    row_cap: NEAR_CAP,
+    exclude_id: selfDoctorId,
+    country_iso: referralCountry(country),
+  })
+  if (!rpc.error && Array.isArray(rpc.data)) return rpc.data as DoctorRow[]
+  if (rpc.error) console.error('[referrals] near query failed', rpc.error.code || '', rpc.error.message || '')
+  const [minLng, minLat, maxLng, maxLat] = boundingBox(origin.lat, origin.lng, radiusMiles)
+  const rows = await runQuery(() => applyCountry(
+    admin.from('doctors').select(SELECT)
+      .gte('latitude', minLat)
+      .lte('latitude', maxLat)
+      .gte('longitude', minLng)
+      .lte('longitude', maxLng)
+      .neq('id', selfDoctorId)
+      .limit(NEAR_CAP),
+    country,
+  ))
+  return rows
+    .map((row) => ({ row, miles: origin && isValidCoord(row.latitude, row.longitude) ? referralDistance(origin.lat, origin.lng, Number(row.latitude), Number(row.longitude)) : null }))
+    .filter((item) => item.miles != null && item.miles <= radiusMiles)
+    .sort((a, b) => (a.miles || 0) - (b.miles || 0))
+    .map((item) => item.row)
+}
+
 async function runQuery(build: () => any): Promise<DoctorRow[]> {
   const { data, error } = await build();
   if (error) {
@@ -253,21 +285,10 @@ export async function searchReferableDoctors(input: {
     }
   }
 
-  const radius = THRESHOLD_DEFAULTS.directory_expansion_2;
-  const wide = Math.max(radius * 12, 3000);
+  const thresholds = await getThresholds();
+  const radius = thresholds.directory_expansion_2;
   if (!namedCountry && origin) {
-    const [minLng, minLat, maxLng, maxLat] = boundingBox(origin.lat, origin.lng, wide);
-    locationRows = await runQuery(() => {
-      let q = admin.from('doctors').select(SELECT)
-        .gte('latitude', minLat)
-        .lte('latitude', maxLat)
-        .gte('longitude', minLng)
-        .lte('longitude', maxLng)
-        .neq('id', input.selfDoctorId)
-        .limit(80);
-      q = applyCountry(q, country);
-      return q;
-    });
+    locationRows = await doctorsNear(admin, origin, radius, country, input.selfDoctorId);
   }
 
   let postalRows: DoctorRow[] = [];
@@ -302,18 +323,47 @@ export async function searchReferableDoctors(input: {
       return reason === null;
     })
     .map((row) => toDoctor(row, origin));
-  const byDistance = (a: ReferableDoctor, b: ReferableDoctor) => {
-    if (a.distanceMiles == null) return 1;
-    if (b.distanceMiles == null) return -1;
-    return a.distanceMiles - b.distanceMiles;
-  };
   const names = referable.filter((row) => nameIds.has(row.id));
   const local = referable.filter((row) => !nameIds.has(row.id));
-  const inRange = local.filter((row) => row.distanceMiles == null || row.distanceMiles <= radius);
-  const placePool = inRange.length ? inRange : local.slice().sort(byDistance).slice(0, 8);
+  let placePick = chooseReferralDoctors({
+    radiusMiles: radius,
+    cap: NEAR_CAP,
+    inRadius: local.map((row) => ({ id: row.id, name: `${row.firstName} ${row.lastName}`.trim(), miles: row.distanceMiles })),
+  });
+  if (!placePick.doctors.length && origin && !namedCountry) {
+    const wideRows = await doctorsNear(admin, origin, Math.max(radius * 12, 3000), country, input.selfDoctorId);
+    const extraStripe = await stripeSet(admin, wideRows.map((row) => row.user_id).filter(Boolean) as string[]);
+    for (const id of extraStripe) stripeIds.add(id);
+    const wideReferable = wideRows
+      .filter((row) => matchesSpecialty(row, input.specialty))
+      .filter((row) => {
+        const membership = membershipOf(row, stripeIds);
+        return referralBlockReason({
+          doctorId: row.id,
+          selfDoctorId: input.selfDoctorId,
+          userId: row.user_id,
+          verificationStatus: row.verification_status,
+          membershipTier: membership.tier,
+          membershipStatus: membership.status,
+          hidden: !input.allowTestDoctors && Boolean(row.user_id && hidden.has(row.user_id)),
+        }) === null;
+      })
+      .map((row) => toDoctor(row, origin));
+    placePick = chooseReferralDoctors({
+      radiusMiles: radius,
+      cap: NEAR_CAP,
+      inRadius: [],
+      wide: wideReferable.map((row) => ({ id: row.id, name: `${row.firstName} ${row.lastName}`.trim(), miles: row.distanceMiles })),
+    });
+    for (const row of wideReferable) {
+      if (!local.some((item) => item.id === row.id)) local.push(row);
+    }
+  }
+  const widened = placePick.widened;
+  const placeIds = new Set(placePick.doctors.map((row) => row.id));
   const seen = new Set<string>();
   const pool: ReferableDoctor[] = [];
-  for (const row of [...names, ...placePool]) {
+  for (const row of [...names, ...local.filter((row) => placeIds.has(row.id))]) {
     if (seen.has(row.id)) continue;
     seen.add(row.id);
     pool.push(row);
@@ -335,7 +385,7 @@ export async function searchReferableDoctors(input: {
     : acceptingHid
       ? 'No doctors there are marked as accepting new community members. Turn off that filter to see every active member.'
       : blockedSearchNote(blocked);
-  const showingNearest = inRange.length === 0 && pool.length > 0 && Boolean(origin);
+  const showingNearest = widened && pool.length > 0 && Boolean(origin);
   const where = origin ? placeLabel(origin) : '';
   const label = namedCountry
     ? `Doctors in ${namedCountry.name}`

@@ -1,10 +1,19 @@
 'use client';
 
-import { Loader2, MessageSquare, Plus, Search } from 'lucide-react';
+import { Loader2, MessageSquare, Search } from 'lucide-react';
 import type { InboxItem } from './types';
 
 const TABS = ['All', 'Members', 'Doctors', 'Students', 'Team'] as const;
 export type InboxTab = (typeof TABS)[number];
+
+function roleBadge(role: string) {
+  if (role === 'doctor') return 'Doctor';
+  if (role === 'student') return 'Student';
+  if (role === 'patient' || role === 'member') return 'Community member';
+  if (role === 'admin' || role === 'super_admin' || role === 'founder' || role === 'regional_admin') return 'Team';
+  if (!role) return 'Member';
+  return role.charAt(0).toUpperCase() + role.slice(1);
+}
 
 const ROLE: Record<InboxTab, string | null> = {
   All: null,
@@ -41,10 +50,9 @@ export function Inbox(props: {
   return (
     <div className="flex h-full min-h-0 w-full shrink-0 flex-col border-r border-[#E7E2D8] bg-white md:w-80">
       <div className="p-4 border-b border-portal-border shrink-0">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-portal-ink">Messages</h2>
-          <button type="button" onClick={props.onCompose} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-[#D66829] text-white" aria-label="New conversation" title="New conversation">
-            <Plus className="w-4 h-4" />
+        <div className="mb-3 flex justify-end">
+          <button type="button" onClick={props.onCompose} className="inline-flex min-h-11 items-center rounded-full bg-[#1E2D3B] px-4 text-sm font-extrabold text-white">
+            New message
           </button>
         </div>
         <div className="relative mb-3">
@@ -70,7 +78,7 @@ export function Inbox(props: {
           <div className="px-4 py-10 text-center">
             <MessageSquare className="w-6 h-6 text-portal-muted mx-auto mb-3" />
             <p className="text-sm text-portal-ink-2">{props.emptyMessage || 'This inbox is for community members, doctors, and students. When you accept a referral, the conversation with that doctor starts here.'}</p>
-            <button type="button" onClick={props.onCompose} className="mt-3 min-h-11 px-4 rounded-full bg-portal-accent text-white text-sm font-bold">Start a conversation</button>
+            <button type="button" onClick={props.onCompose} className="mt-3 inline-flex min-h-11 items-center rounded-full bg-[#1E2D3B] px-4 text-sm font-extrabold text-white">New message</button>
           </div>
         ) : visible.map((item) => (
           <button key={item.id} type="button" onClick={() => props.onSelect(item)} className={`m-2 flex min-h-[72px] w-[calc(100%-1rem)] items-center gap-3 rounded-2xl px-3 py-3 text-left ${props.selectedId === item.id ? 'bg-[#E5E9EE] outline outline-2 outline-[#1E2D3B]' : 'bg-[#F7F6F3]'}`}>
@@ -81,7 +89,7 @@ export function Inbox(props: {
                 <span className="shrink-0 text-[11px] text-[#6b7785]">{item.last_message_at ? new Date(item.last_message_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}</span>
               </span>
               <span className="mt-1 flex items-center gap-2">
-                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#1E2D3B]">{item.otherUser.role === 'patient' ? 'Community member' : item.otherUser.role || 'Member'}</span>
+                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#1E2D3B]">{roleBadge(item.otherUser.role)}</span>
                 {item.contextType === 'referral' ? <span className="rounded-full bg-[#EFE5F5] px-2 py-0.5 text-[11px] font-bold text-[#5C3473]">About your referral</span> : null}
               </span>
               <span className="mt-1 block truncate text-xs text-[#5b6773]">{item.lastMessagePreview || 'No messages yet'}</span>

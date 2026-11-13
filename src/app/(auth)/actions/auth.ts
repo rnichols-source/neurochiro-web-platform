@@ -62,6 +62,9 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     return loginErrorRedirect('auth_failed', next)
   }
 
+  const { claimPendingCareInvites } = await import('@/lib/community/data')
+  await claimPendingCareInvites(data.user.id, data.user.email || email).catch(() => undefined)
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('role, full_name, tier, stripe_customer_id')
@@ -217,6 +220,8 @@ export async function createAccountAction(formData: FormData, role: string, _tie
 
   if (data?.user) {
     Automations.onSignup(data.user.id, email, name, role, phone);
+    const { claimPendingCareInvites } = await import('@/lib/community/data')
+    await claimPendingCareInvites(data.user.id, email).catch(() => undefined)
 
     // Create doctors row with is_approved = false (approval gate)
     if (role === 'doctor') {

@@ -31,15 +31,8 @@ export async function GET(request: Request) {
       // Prevents OAuth from bypassing the paywall
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role, tier, stripe_customer_id')
-          .eq('id', user.id)
-          .single()
-
-        // Free tier — no subscription redirects needed
-        // All doctors and students can access their portals
-        // Features are gated inside via sidebar locks and UpgradeGate components
+        const { claimPendingCareInvites } = await import('@/lib/community/data')
+        await claimPendingCareInvites(user.id, user.email || null).catch(() => undefined)
       }
 
       console.log(`[AUTH_CALLBACK] Successfully exchanged code. Redirecting to: ${next}`);

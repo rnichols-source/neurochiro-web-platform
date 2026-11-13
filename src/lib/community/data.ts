@@ -59,7 +59,7 @@ export type CommunitySnapshot = {
 
 type DbError = { message?: string; code?: string } | null
 
-async function claimPendingCareInvites(userId: string, email: string | null) {
+export async function claimPendingCareInvites(userId: string, email: string | null) {
   if (!email) return
   const admin = createAdminClient() as any
   const invites = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note').ilike('email', email).is('claimed_profile_id', null)
@@ -106,8 +106,6 @@ export async function requireCommunityMember(): Promise<CommunitySession> {
     .select('full_name, role')
     .eq('id', user.id)
     .maybeSingle()
-
-  await claimPendingCareInvites(user.id, user.email || null)
 
   const role = profile?.role || ''
   if (!isStoredCommunityRole(role)) {

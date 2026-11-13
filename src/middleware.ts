@@ -49,7 +49,8 @@ export async function middleware(req: NextRequest) {
     path.startsWith('/admin')
   )) {
     const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
-    const dest = applying ? loginPathWithReturn(`${path}${req.nextUrl.search}`) : '/login';
+    const careInvite = path === '/portal/care/from-doctor' || path.startsWith('/portal/care/from-doctor/');
+    const dest = applying || careInvite ? loginPathWithReturn(`${path}${req.nextUrl.search}`) : '/login';
     const redirect = NextResponse.redirect(new URL(dest, req.url));
     if (referralSlug && remembersReferral) redirect.cookies.set(MEMBER_REF_COOKIE, referralSlug, referralCookie);
     return redirect;

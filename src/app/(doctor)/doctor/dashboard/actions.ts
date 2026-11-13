@@ -480,7 +480,7 @@ export async function getSmartActionItems() {
     // Missing video
     const { data: doc } = await createAdminClient().from('doctors').select('video_url, photo_url, bio, specialties').eq('user_id', user.id).single()
     if (doc && !doc.video_url) {
-      items.push({ id: 'video', priority: 'medium', title: 'Add a profile video', description: 'Doctors with video get 3x more patient leads', href: '/doctor/profile', icon: 'Video' })
+      items.push({ id: 'video', priority: 'medium', title: 'Add a profile video', description: 'Doctors with video get 3x more community member leads', href: '/doctor/profile', icon: 'Video' })
     }
 
     // Profile gaps
