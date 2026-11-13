@@ -39,7 +39,7 @@ export function PracticeView({
           <p className="text-[13px] text-[#5b6773]">{place || 'Add a city on your profile'} · {plan}</p>
         </div>
       </section>
-      <Link href="/doctor/profile" className="dp-ui flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#D66829] text-[16px] font-extrabold text-white">
+      <Link prefetch href="/doctor/profile" className="dp-ui flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#D66829] text-[16px] font-extrabold text-white">
         Edit profile
       </Link>
       <Row href="/doctor/analytics" title="Analytics" detail={views} iconBg="#2C6BB4" />
@@ -51,7 +51,7 @@ export function PracticeView({
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {TOOLS.map((tool) => (
             <li key={tool.href}>
-              <Link href={tool.href} className="block min-h-11 rounded-xl bg-[#F5F3EF] px-3 py-2">
+              <Link prefetch href={tool.href} className="block min-h-11 rounded-xl bg-[#F5F3EF] px-3 py-2">
                 <span className="dp-ui block text-[14px] font-extrabold text-[#15202B]">{tool.title}</span>
                 <span className="block text-[13px] text-[#5b6773]">{tool.detail}</span>
               </Link>
@@ -59,7 +59,7 @@ export function PracticeView({
           ))}
           {showNeuros ? (
             <li>
-              <Link href="/doctor/neuros" className="block min-h-11 rounded-xl bg-[#F5F3EF] px-3 py-2">
+              <Link prefetch href="/doctor/neuros" className="block min-h-11 rounded-xl bg-[#F5F3EF] px-3 py-2">
                 <span className="dp-ui block text-[14px] font-extrabold text-[#15202B]">Neuros program</span>
                 <span className="block text-[13px] text-[#5b6773]">Your Neuros home</span>
               </Link>
@@ -69,8 +69,8 @@ export function PracticeView({
       </section>
       <Row href="/doctor/notifications" title="Notifications" detail="Alerts for your office" iconBg="#D66829" />
       <Row href="/doctor/settings" title="Settings" detail="Notifications, account, and text alerts" iconBg="#0E857A" />
-      <Link href="/doctor/help" className="dp-ui inline-flex min-h-11 items-center px-1 text-[14px] font-extrabold text-[#1E2D3B]">Help</Link>
-      <Link href="/doctor/coming-soon" className="flex items-center justify-between rounded-[20px] border border-dashed border-[#E3C27A] bg-[#FFF8F1] px-4 py-4">
+      <Link prefetch href="/doctor/help" className="dp-ui inline-flex min-h-11 items-center px-1 text-[14px] font-extrabold text-[#1E2D3B]">Help</Link>
+      <Link prefetch href="/doctor/coming-soon" className="flex items-center justify-between rounded-[20px] border border-dashed border-[#E3C27A] bg-[#FFF8F1] px-4 py-4">
         <span>
           <span className="dp-ui block text-[16px] font-extrabold text-[#B4501A]">Coming soon</span>
           <span className="text-[13px] text-[#5b6773]">ChiroMatch, hiring, seminars, CE, and screening kits</span>
@@ -83,7 +83,7 @@ export function PracticeView({
 
 function Row({ href, title, detail, iconBg }: { href: string; title: string; detail: string; iconBg: string }) {
   return (
-    <Link href={href} className="flex items-center gap-3 rounded-[20px] bg-white px-4 py-3">
+    <Link prefetch href={href} className="flex items-center gap-3 rounded-[20px] bg-white px-4 py-3">
       <span className="h-10 w-10 shrink-0 rounded-xl" style={{ background: iconBg }} />
       <span className="min-w-0 flex-1">
         <span className="dp-ui block text-[16px] font-extrabold text-[#15202B]">{title}</span>

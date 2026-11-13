@@ -36,7 +36,7 @@ export function PlaceHeader({
       {segments ? (
         <div className="mt-4 flex flex-wrap gap-2">
           {segments.map((segment) => (
-            <Link key={segment.href} href={segment.href} className={`fd-ui inline-flex min-h-11 items-center rounded-xl px-4 text-[14px] font-extrabold ${segment.on ? 'bg-white' : 'bg-black/15 text-white'}`} style={segment.on ? { color: tone.dark } : undefined}>
+            <Link prefetch key={segment.href} href={segment.href} className={`fd-ui inline-flex min-h-11 items-center rounded-xl px-4 text-[14px] font-extrabold ${segment.on ? 'bg-white' : 'bg-black/15 text-white'}`} style={segment.on ? { color: tone.dark } : undefined}>
               {segment.label}
             </Link>
           ))}

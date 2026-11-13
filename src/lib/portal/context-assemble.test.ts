@@ -56,11 +56,16 @@ test('portal context calls getUser once, then the shell, then one parallel round
       order.push(shellDone ? 'referrals' : 'referrals-early');
       return 3;
     },
+    countWaiting: async () => {
+      order.push(shellDone ? 'waiting' : 'waiting-early');
+      return 4;
+    },
   });
 
   assert.equal(order.filter((step) => step === 'user').length, 1);
   assert.deepEqual(order.slice(0, 2), ['user', 'shell']);
-  assert.deepEqual(order.slice(2).sort(), ['cycles', 'purchase', 'referrals', 'unread']);
+  assert.deepEqual(order.slice(2).sort(), ['cycles', 'purchase', 'referrals', 'unread', 'waiting']);
+  assert.equal(ctx?.waitingVisits, 4);
   assert.equal(ctx?.userId, 'user-1');
   assert.equal(ctx?.membership.source, 'founding');
   assert.equal(ctx?.membership.tier, 'pro');

@@ -18,7 +18,7 @@ export function ComingView({
         <p className="text-[15px] leading-relaxed text-[#3d4a57]">{body}</p>
       </Card>
       <p className="mt-2 text-[13px] text-[#6b7785]">
-        <Link href="/portal" className="font-semibold text-[#B4501A]">Back to home</Link>
+        <Link prefetch href="/portal" className="font-semibold text-[#B4501A]">Back to home</Link>
       </p>
     </div>
   )

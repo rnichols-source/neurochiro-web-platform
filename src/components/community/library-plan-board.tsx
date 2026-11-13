@@ -215,7 +215,7 @@ function PlanHeader({ title, crumb, children }: { title: string; crumb: string; 
       className={`nc-band ${bleed} rounded-b-[26px] px-5 pb-[18px] pt-3 text-white lg:rounded-none lg:px-10 lg:pb-7 lg:pt-6`}
       style={{ ['--c' as string]: care.color, ['--d' as string]: care.dark }}
     >
-      <Link href="/portal/care" className="nc-ui inline-flex min-h-11 items-center gap-0.5 rounded-full bg-white/20 py-1.5 pl-2 pr-3.5 text-[15px] font-extrabold text-white">
+      <Link prefetch href="/portal/care" className="nc-ui inline-flex min-h-11 items-center gap-0.5 rounded-full bg-white/20 py-1.5 pl-2 pr-3.5 text-[15px] font-extrabold text-white">
         <BackIcon />
         Care
       </Link>

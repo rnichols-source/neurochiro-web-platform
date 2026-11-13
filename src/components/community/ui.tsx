@@ -16,7 +16,7 @@ export function Kicker({ children }: { children: React.ReactNode }) {
 
 export function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-[11px] bg-neuro-orange px-3 text-[13.5px] font-semibold text-white">
+    <Link prefetch href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-[11px] bg-neuro-orange px-3 text-[13.5px] font-semibold text-white">
       {children}
     </Link>
   )
@@ -24,7 +24,7 @@ export function PrimaryLink({ href, children }: { href: string; children: React.
 
 export function GhostLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
-    <Link href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-[11px] border border-[#d9dfe5] px-3 text-[13.5px] font-semibold text-neuro-navy">
+    <Link prefetch href={href} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-[11px] border border-[#d9dfe5] px-3 text-[13.5px] font-semibold text-neuro-navy">
       {children}
     </Link>
   )

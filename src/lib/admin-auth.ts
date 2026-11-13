@@ -1,6 +1,36 @@
+import { cache } from 'react';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { isAdminRole } from '@/lib/founder';
+
+export type AdminActor = {
+  user: { id: string; email?: string | null };
+  role: string;
+  name: string;
+};
+
+/**
+ * One auth read and one profile read per request.
+ * Layouts and pages both call this; React cache() collapses them.
+ */
+export const loadAdminActor = cache(async (): Promise<AdminActor | null> => {
+  const supabase = createServerSupabase();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const admin = createAdminClient();
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role, full_name')
+    .eq('id', user.id)
+    .maybeSingle() as { data: { role: string | null; full_name: string | null } | null };
+
+  return {
+    user,
+    role: profile?.role || '',
+    name: profile?.full_name || '',
+  };
+});
 
 /**
  * Shared admin authorization check for server actions.
@@ -10,21 +40,10 @@ import { isAdminRole } from '@/lib/founder';
  * Throws an error if unauthorized — callers should catch and return a safe default.
  */
 export async function checkAdminAuth() {
-  const supabase = createServerSupabase();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Unauthorized");
-
-  // Read role via admin client — authoritative source, bypasses RLS
-  const admin = createAdminClient();
-  const { data: profile } = await admin
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single() as { data: { role: string } | null };
-
-  if (!profile || !isAdminRole(profile.role)) {
+  const actor = await loadAdminActor();
+  if (!actor) throw new Error("Unauthorized");
+  if (!isAdminRole(actor.role)) {
     throw new Error("Forbidden: Admin access required");
   }
-
-  return user;
+  return actor.user;
 }

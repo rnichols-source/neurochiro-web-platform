@@ -89,7 +89,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
       : Promise.resolve({ data: [], error: null }),
     doctorId ? loadHomeDoctorMembers(doctorId).catch(() => []) : Promise.resolve([]),
     doctorId
-      ? admin.from('community_exercise_assignments').select('library_plan_slug').eq('doctor_id', doctorId).eq('status', 'active')
+      ? admin.from('community_exercise_assignments').select('library_plan_slug').eq('doctor_id', doctorId).eq('status', 'active').limit(200)
       : Promise.resolve({ data: [], error: null }),
     countStudentsNear(doctor?.city),
     doctorId

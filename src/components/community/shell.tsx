@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -20,7 +21,7 @@ export function CommunityNav({ active }: { active: AreaId }) {
         {AREA_LIST.map((item) => {
           const on = active === item.id
           return (
-            <Link
+            <Link prefetch
               key={item.id}
               href={item.href}
               aria-current={on ? 'page' : undefined}
@@ -46,9 +47,9 @@ export function CommunityNav({ active }: { active: AreaId }) {
 export function Sidebar({ active, name, initial, onSignOut }: { active: AreaId; name: string; initial: string; onSignOut: () => void }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-[260px] shrink-0 flex-col border-r border-[#ECE8E1] bg-white px-4 py-6 lg:flex">
-      <Link href="/portal" className="mb-[22px] flex items-center gap-2.5 px-2">
+      <Link prefetch href="/portal" className="mb-[22px] flex items-center gap-2.5 px-2">
         <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#F5F3EF]">
-          <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
+          <Image src="/logo-mark.png" alt="" width={30} height={30} sizes="30px" className="h-[30px] w-[30px] object-contain" />
         </span>
         <span className="nc-ui text-[14px] font-black tracking-[0.1em] text-[#15202B]">NEUROCHIRO</span>
       </Link>
@@ -56,7 +57,7 @@ export function Sidebar({ active, name, initial, onSignOut }: { active: AreaId; 
         {AREA_LIST.map((item) => {
           const on = active === item.id
           return (
-            <Link
+            <Link prefetch
               key={item.id}
               href={item.href}
               aria-current={on ? 'page' : undefined}
@@ -78,7 +79,7 @@ export function Sidebar({ active, name, initial, onSignOut }: { active: AreaId; 
         })}
       </nav>
       <div className="mt-4 flex items-center gap-2.5 border-t border-[#EFECE7] px-3 pt-3">
-        <Link href="/portal/me" aria-label="Me" className="grid h-11 w-11 place-items-center rounded-full bg-[#D66829] nc-ui text-[16px] font-extrabold text-white">
+        <Link prefetch href="/portal/me" aria-label="Me" className="grid h-11 w-11 place-items-center rounded-full bg-[#D66829] nc-ui text-[16px] font-extrabold text-white">
           {initial}
         </Link>
         <div className="min-w-0 flex-1">
@@ -93,13 +94,13 @@ export function Sidebar({ active, name, initial, onSignOut }: { active: AreaId; 
   )
 }
 
-export default function CommunityShell({ children }: { children: React.ReactNode }) {
+export default function CommunityShell({ children, initialName }: { children: React.ReactNode; initialName?: string | null }) {
   const router = useRouter()
   const pathname = usePathname()
   const { user, loading } = useAuth()
   const active = communityNavId(pathname)
-  const [name, setName] = useState('Community member')
-  const [initial, setInitial] = useState('Y')
+  const [name, setName] = useState(initialName?.trim() || 'Community member')
+  const [initial, setInitial] = useState(initialName?.trim() ? memberInitial(initialName) : 'Y')
 
   useEffect(() => {
     if (loading) return
@@ -107,6 +108,7 @@ export default function CommunityShell({ children }: { children: React.ReactNode
   }, [user, loading, router])
 
   useEffect(() => {
+    if (initialName?.trim()) return
     if (!user?.id) return
     const supabase = createClient()
     supabase.from('profiles').select('full_name').eq('id', user.id).maybeSingle().then(({ data }) => {
@@ -116,7 +118,7 @@ export default function CommunityShell({ children }: { children: React.ReactNode
         setInitial(memberInitial(full))
       }
     })
-  }, [user?.id])
+  }, [user?.id, initialName])
 
   function signOut() {
     const supabase = createClient()

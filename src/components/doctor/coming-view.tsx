@@ -39,11 +39,11 @@ export function ComingView() {
             <h2 className="dp-ui mt-2 text-[20px] font-extrabold text-[#15202B]">{card.title}</h2>
             <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">{card.body}</p>
             <div className="mt-3"><NotifyButton featureKey={card.key} /></div>
-            <Link href={card.href} className="dp-ui mt-2 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#1E2D3B]">{card.action}</Link>
+            <Link prefetch href={card.href} className="dp-ui mt-2 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#1E2D3B]">{card.action}</Link>
           </article>
         ))}
       </div>
-      <Link href="/doctor/help" className="flex items-center justify-between rounded-[20px] bg-[#FFF5E9] px-4 py-4">
+      <Link prefetch href="/doctor/help" className="flex items-center justify-between rounded-[20px] bg-[#FFF5E9] px-4 py-4">
         <span>
           <span className="dp-ui block text-[16px] font-extrabold text-[#15202B]">What should we build next?</span>
           <span className="text-[14px] text-[#5b6773]">Tell us what would help your practice.</span>

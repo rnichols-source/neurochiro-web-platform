@@ -14,6 +14,21 @@ import { matchesCountryPostal } from '@/lib/referrals/pure'
 import { resolveStateCode } from '@/lib/resolve-state'
 import { detectPostalCode } from '@/lib/detect-postal'
 
+async function zipCities(supabase: any, needle: string, country: string, state?: string) {
+  const rpc = await supabase.rpc('zip_codes_city_ilike', { needle, country_code: country || null })
+  let rows: any[] = []
+  if (!rpc.error && Array.isArray(rpc.data)) rows = rpc.data
+  else {
+    let query = supabase.from('zip_codes').select('city, state, lat, lng').ilike('city', needle)
+    if (country) query = query.eq('country', country)
+    if (state) query = query.eq('state', state)
+    const fallback = await query.limit(state ? 1 : 40)
+    rows = fallback.data || []
+  }
+  if (state) rows = rows.filter((row) => String(row.state || '').toUpperCase() === state.toUpperCase())
+  return rows
+}
+
 export interface CityResolution {
   city: string
   state: string
@@ -174,21 +189,13 @@ export async function resolveLocation(
   const bareCity = normalizeCityName(raw)
   if (bareCity.length < 2) return { resolved: null, ambiguous: null, label: `Couldn't resolve "${raw}".` }
 
-  const { data: cityMatches } = await (supabase as any)
-    .from('zip_codes')
-    .select('city, state, lat, lng')
-    .ilike('city', bareCity)
-    .eq('country', country)
+  const cityMatches = await zipCities(supabase, bareCity, country)
 
   if (!cityMatches || cityMatches.length === 0) {
     // Try abbreviation variants
     const variants = cityAbbreviationVariants(bareCity)
     for (const variant of variants) {
-      const { data: vd } = await (supabase as any)
-        .from('zip_codes')
-        .select('city, state, lat, lng')
-        .ilike('city', variant)
-        .eq('country', country)
+      const vd = await zipCities(supabase, variant, country)
 
       if (vd && vd.length > 0) {
         return dedupeByState(vd, variant)
@@ -307,13 +314,7 @@ async function lookupCityInState(
   country: string,
 ): Promise<CityResolution | null> {
   // Exact match
-  const { data } = await (supabase as any)
-    .from('zip_codes')
-    .select('city, state, lat, lng')
-    .ilike('city', city)
-    .eq('state', state)
-    .eq('country', country)
-    .limit(1)
+  const data = await zipCities(supabase, city, country, state)
 
   if (data && data.length > 0) {
     return { city: data[0].city, state: data[0].state, lat: Number(data[0].lat), lng: Number(data[0].lng) }
@@ -322,13 +323,7 @@ async function lookupCityInState(
   // Try abbreviation variants
   const variants = cityAbbreviationVariants(city)
   for (const variant of variants) {
-    const { data: vd } = await (supabase as any)
-      .from('zip_codes')
-      .select('city, state, lat, lng')
-      .ilike('city', variant)
-      .eq('state', state)
-      .eq('country', country)
-      .limit(1)
+    const vd = await zipCities(supabase, variant, country, state)
 
     if (vd && vd.length > 0) {
       return { city: vd[0].city, state: vd[0].state, lat: Number(vd[0].lat), lng: Number(vd[0].lng) }

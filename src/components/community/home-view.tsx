@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { AREAS } from '@/components/community/areas'
 import { bleed } from '@/components/community/chrome'
@@ -29,10 +30,10 @@ export function HomeView({
       <header className={`nc-band ${bleed} rounded-b-[30px] px-[22px] pb-14 pt-4 text-white`} style={{ ['--c' as string]: AREAS.home.color, ['--d' as string]: AREAS.home.dark }}>
         <div className="flex items-center gap-2.5">
           <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-white">
-            <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
+            <Image src="/logo-mark.png" alt="" width={30} height={30} sizes="30px" className="h-[30px] w-[30px] object-contain" />
           </span>
           <span className="nc-ui flex-1 text-[19px] font-black tracking-[0.08em] text-white">NEUROCHIRO</span>
-          <Link href="/portal/me" aria-label="Me" className="grid h-11 w-11 place-items-center rounded-full border-2 border-white/60 bg-white/20 nc-ui text-[16px] font-extrabold text-white">
+          <Link prefetch href="/portal/me" aria-label="Me" className="grid h-11 w-11 place-items-center rounded-full border-2 border-white/60 bg-white/20 nc-ui text-[16px] font-extrabold text-white">
             {initial}
           </Link>
         </div>
@@ -62,7 +63,7 @@ export function HomeView({
               <p className="mt-1.5 text-[13px] font-bold text-[#5b6773]">{action.progress.label}</p>
             </>
           ) : null}
-          <Link
+          <Link prefetch
             href={action.href}
             className="nc-ui mt-3.5 flex h-[52px] items-center justify-center gap-2 rounded-2xl text-[16px] font-extrabold text-white"
             style={{ background: action.color }}
@@ -86,7 +87,7 @@ function SectionGo() {
         {TILES.map((tile) => {
           const tone = AREAS[tile.id]
           return (
-            <Link
+            <Link prefetch
               key={tile.id}
               href={tile.href}
               className="relative flex h-32 flex-col justify-end overflow-hidden rounded-[22px] p-4 text-white"

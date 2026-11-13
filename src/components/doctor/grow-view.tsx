@@ -13,7 +13,7 @@ export function GrowView() {
   return (
     <div className="mt-4 grid gap-3 sm:grid-cols-2">
       {CARDS.map((card) => (
-        <Link key={card.href} href={card.href} className="rounded-[20px] border-2 border-[#EFE5F5] bg-white p-4">
+        <Link prefetch key={card.href} href={card.href} className="rounded-[20px] border-2 border-[#EFE5F5] bg-white p-4">
           <span className="dp-ui block text-[16px] font-extrabold text-[#15202B]">{card.title}</span>
           <span className="mt-1 block text-[13px] leading-snug text-[#5b6773]">{card.detail}</span>
         </Link>

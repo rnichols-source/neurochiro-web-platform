@@ -62,7 +62,7 @@ export function TodayView({ data }: { data: TodayData }) {
               <Stat value={doing} label={doingLabel} />
             </div>
             <HeaderTools />
-            <Link href="/doctor/practice" aria-label="Practice" className="grid h-10 w-10 place-items-center rounded-full border-2 border-white/70 bg-white/20 dp-ui text-[13px] font-extrabold lg:hidden">
+            <Link prefetch href="/doctor/practice" aria-label="Practice" className="grid h-10 w-10 place-items-center rounded-full border-2 border-white/70 bg-white/20 dp-ui text-[13px] font-extrabold lg:hidden">
               {data.initials}
             </Link>
           </div>
@@ -92,7 +92,7 @@ export function TodayView({ data }: { data: TodayData }) {
             </>
           ) : null}
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link href={step.href} className="dp-ui inline-flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#D66829] px-5 text-[16px] font-extrabold text-white">
+            <Link prefetch href={step.href} className="dp-ui inline-flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#D66829] px-5 text-[16px] font-extrabold text-white">
               {step.button}
               <ChevronIcon />
             </Link>
@@ -115,7 +115,7 @@ export function TodayView({ data }: { data: TodayData }) {
                     <span className="dp-ui block truncate text-[15px] font-extrabold text-[#15202B]">{item.title}</span>
                     <span className="block truncate text-[13px] text-[#5b6773]">{item.subtitle}</span>
                   </span>
-                  <Link href={item.href} className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#2C6BB4] px-3 text-[13px] font-extrabold text-white">{item.action}</Link>
+                  <Link prefetch href={item.href} className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#2C6BB4] px-3 text-[13px] font-extrabold text-white">{item.action}</Link>
                 </li>
               ))}
             </ul>
@@ -127,7 +127,7 @@ export function TodayView({ data }: { data: TodayData }) {
         {TILES.map((tile) => {
           const tone = DOCTOR_PLACES[tile.id]
           return (
-            <Link key={tile.id} href={tile.href} className="relative flex h-[150px] flex-col justify-end overflow-hidden rounded-[22px] p-4 text-white lg:h-[170px]" style={{ background: tone.color }}>
+            <Link prefetch key={tile.id} href={tile.href} className="relative flex h-[150px] flex-col justify-end overflow-hidden rounded-[22px] p-4 text-white lg:h-[170px]" style={{ background: tone.color }}>
               <span className="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10" />
               <span className="absolute left-4 top-4 grid h-11 w-11 place-items-center rounded-2xl bg-white/20">
                 <PlaceIcon id={tile.id} size={22} />

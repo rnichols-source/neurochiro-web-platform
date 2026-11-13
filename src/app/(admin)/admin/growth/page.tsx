@@ -1,5 +1,7 @@
 import Link from 'next/link'
-import { DemandMap } from '@/components/founder/demand-map'
+import { Suspense } from 'react'
+import { DemandMapLazy } from '@/components/founder/demand-map-lazy'
+import { AdminRouteSkeleton } from '@/components/loading/route-skeletons'
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, Tag, ToolLinks } from '@/components/founder/bits'
 import { resolveGrowthPoint } from '@/lib/founder/geo-search'
@@ -16,6 +18,26 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
   const params = await searchParams
   const q = typeof params.q === 'string' ? params.q : ''
   const world = params.view === 'world'
+  return (
+    <div>
+      <PlaceHeader
+        place="growth"
+        title="Growth"
+        subtitle="Where people want a NeuroChiro doctor, and where we don’t have one yet."
+        segments={[
+          { label: 'Demand map', href: '/admin/growth', on: true },
+          { label: 'Funnel & ROI', href: '/admin/growth/funnel', on: false },
+          { label: 'Doctor referrals', href: '/admin/doctor-referrals', on: false },
+        ]}
+      />
+      <Suspense fallback={<AdminRouteSkeleton />}>
+        <GrowthBody q={q} world={world} />
+      </Suspense>
+    </div>
+  )
+}
+
+async function GrowthBody({ q, world }: { q: string; world: boolean }) {
   const roster = await loadFounderRoster()
   const doctors = liveDoctors(roster).map((doctor) => ({
     lat: doctor.lat || 0,
@@ -57,17 +79,7 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
   const outside = roster.countries.filter((row) => row.label !== 'United States')
 
   return (
-    <div>
-      <PlaceHeader
-        place="growth"
-        title="Growth"
-        subtitle="Where people want a NeuroChiro doctor, and where we don’t have one yet."
-        segments={[
-          { label: 'Demand map', href: '/admin/growth', on: true },
-          { label: 'Funnel & ROI', href: '/admin/growth/funnel', on: false },
-          { label: 'Doctor referrals', href: '/admin/doctor-referrals', on: false },
-        ]}
-      />
+    <>
       <div className="grid gap-4 px-4 py-4 xl:grid-cols-[1fr_320px] xl:px-8">
         <Card>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -101,7 +113,7 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
               </ul>
             </div>
           ) : null}
-          <DemandMap points={points} doctors={showWorld ? doctors : doctors.filter((doctor) => doctor.lng < -50 && doctor.lat > 14)} gaps={gaps} focus={focus} world={showWorld} />
+          <DemandMapLazy points={points} doctors={showWorld ? doctors : doctors.filter((doctor) => doctor.lng < -50 && doctor.lat > 14)} gaps={gaps} focus={focus} world={showWorld} />
           <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-[#4a5865]">
             <span>Blue circles: people asking</span>
             <span className="text-[#D66829]">Orange: live doctor</span>
@@ -149,6 +161,6 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
         </Card>
         <div className="mt-4"><ToolLinks links={GROWTH_TOOLS} /></div>
       </section>
-    </div>
+    </>
   )
 }

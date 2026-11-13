@@ -17,7 +17,7 @@ export function HeaderTools({ onDark = true }: { onDark?: boolean }) {
         variant={onDark ? 'dark' : 'light'}
         viewAllHref="/doctor/notifications"
       />
-      <Link
+      <Link prefetch
         href="/doctor/messages"
         aria-label={label}
         title={label}

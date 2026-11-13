@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Briefcase, Trash2, CheckCircle2, XCircle, Clock, Search } from "lucide-react";
 import { getAdminJobPostings, updateJobStatus, deleteJobPosting, approveJobPost, rejectJobPost } from "./actions";
 import { adminQueue, paidAmountLabel, type AdminQueue } from "@/lib/jobs/posting-pure";
@@ -140,7 +141,7 @@ export default function AdminJobsPage() {
                     }}>Reject + refund</button>
                   </>
                 ) : null}
-                <a href={`/jobs/${job.id}`} className="min-h-11 inline-flex items-center px-2 text-sm">Preview</a>
+                <Link href={`/jobs/${job.id}`} prefetch className="min-h-11 inline-flex items-center px-2 text-sm">Preview</Link>
                 {(job.status === "open" || job.status === "Active") ? (
                   <button
                     onClick={() => handleStatusChange(job.id, "closed")}

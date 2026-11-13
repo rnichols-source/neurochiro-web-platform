@@ -7,9 +7,11 @@ import { listBlockedPeople, saveNotificationPrefs, unblockUser } from "@/app/act
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
 import LeadTextAlerts from "./LeadTextAlerts";
+import { useSettingsSeed } from "./seed";
 
 export default function SettingsPage() {
   const router = useRouter();
+  const chrome = useSettingsSeed();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -30,6 +32,13 @@ export default function SettingsPage() {
   const [blocked, setBlocked] = useState<{ id: string; full_name: string }[]>([]);
 
   useEffect(() => {
+    if (chrome) {
+      const el = document.getElementById('current-email');
+      if (el) el.textContent = chrome.email || '';
+      if (chrome.prefs) setNotifPrefs(prev => ({ ...prev, ...chrome.prefs }));
+      setBlocked(chrome.blocked);
+      return;
+    }
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
@@ -43,7 +52,7 @@ export default function SettingsPage() {
       }
       setBlocked(await listBlockedPeople());
     });
-  }, []);
+  }, [chrome]);
 
   const handleSavePrefs = async () => {
     setSavingPrefs(true);

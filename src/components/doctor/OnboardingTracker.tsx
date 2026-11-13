@@ -44,7 +44,7 @@ export default function OnboardingTracker() {
           </div>
 
           <div className="flex-shrink-0">
-            <Link 
+            <Link prefetch 
               href="/doctor/profile" 
               className="px-8 py-4 bg-neuro-orange text-white font-black rounded-2xl hover:bg-neuro-orange-light transition-all transform hover:scale-105 flex items-center gap-3 shadow-xl shadow-neuro-orange/20 uppercase tracking-widest text-xs"
             >
@@ -55,7 +55,7 @@ export default function OnboardingTracker() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {steps.map((step) => (
-            <Link
+            <Link prefetch
               href="/doctor/profile"
               key={step.id}
               className={`p-5 rounded-[2rem] border transition-all block ${

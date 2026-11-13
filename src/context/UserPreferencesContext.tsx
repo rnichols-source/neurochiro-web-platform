@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect, useMemo, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 
 interface SavedItems {
@@ -17,6 +17,7 @@ interface UserPreferencesContextType {
   isSaved: (type: keyof SavedItems, id: string) => boolean;
   lastLocation: string;
   setLastLocation: (location: string) => void;
+  seedSaved: (items: SavedItems) => void;
 }
 
 const EMPTY_SAVED: SavedItems = { doctors: [], jobs: [], vendors: [], seminars: [], articles: [] };
@@ -29,9 +30,22 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const [lastLocation, setLastLocationState] = useState("");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loaded = useRef(false);
+  const seeded = useRef(false);
 
-  // Load from Supabase (localStorage fallback)
+  const seedSaved = useCallback((items: SavedItems) => {
+    seeded.current = true;
+    loaded.current = true;
+    setSaved({ ...EMPTY_SAVED, ...items });
+  }, []);
+
+  // Server layouts seed this before the effect below, so the browser does not
+  // call auth or doctor_tool_data on every portal page.
+  useLayoutEffect(() => {
+    if (seeded.current) loaded.current = true;
+  }, []);
+
   useEffect(() => {
+    if (seeded.current) return;
     async function load() {
       // Try localStorage first for instant display
       try {
@@ -121,8 +135,8 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   }, [saved]);
 
   const value = useMemo(() => ({
-    saved, toggleSave, isSaved, lastLocation, setLastLocation
-  }), [saved, toggleSave, isSaved, lastLocation, setLastLocation]);
+    saved, toggleSave, isSaved, lastLocation, setLastLocation, seedSaved
+  }), [saved, toggleSave, isSaved, lastLocation, setLastLocation, seedSaved]);
 
   return (
     <UserPreferencesContext.Provider value={value}>

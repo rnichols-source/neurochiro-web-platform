@@ -53,7 +53,7 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
         {!pro ? (
           <div className="mt-3">
             <EmptyNote title="Students are part of Pro" sentence="Activate Pro to invite students to shadow, mentor, or join the practice." />
-            <Link href="/doctor/billing" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#7A4A94] px-4 text-[14px] font-extrabold text-white">Activate Pro</Link>
+            <Link prefetch href="/doctor/billing" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#7A4A94] px-4 text-[14px] font-extrabold text-white">Activate Pro</Link>
           </div>
         ) : null}
         {pro && shown.length === 0 ? (
@@ -73,30 +73,30 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
                 </span>
               </span>
               {student.userId ? (
-                <Link href={`/doctor/messages?to=${student.userId}`} className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#7A4A94] px-3 text-[13px] font-extrabold text-white">
+                <Link prefetch href={`/doctor/messages?to=${student.userId}`} className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#7A4A94] px-3 text-[13px] font-extrabold text-white">
                   {student.bucket === 'shadowing' ? 'Invite to shadow' : 'Message'}
                 </Link>
               ) : (
-                <Link href="/doctor/students" className="dp-ui inline-flex min-h-11 items-center rounded-xl border border-[#D7DEE6] px-3 text-[13px] font-extrabold text-[#3d4a57]">View</Link>
+                <Link prefetch href="/doctor/students" className="dp-ui inline-flex min-h-11 items-center rounded-xl border border-[#D7DEE6] px-3 text-[13px] font-extrabold text-[#3d4a57]">View</Link>
               )}
             </li>
           ))}
         </ul>
-        <Link href="/doctor/students" className="dp-ui mt-3 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Browse the full student list</Link>
+        <Link prefetch href="/doctor/students" className="dp-ui mt-3 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Browse the full student list</Link>
       </div>
       <aside className="space-y-3">
         <section className="rounded-[22px] bg-[#F8F1E4] p-4">
           <p className="dp-ui text-[18px] font-extrabold text-[#15202B]">ChiroMatch</p>
           <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">Post an associate position and meet graduating students.</p>
-          <Link href="/doctor/coming-soon#chiromatch" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">ChiroMatch is coming soon</Link>
+          <Link prefetch href="/doctor/coming-soon#chiromatch" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">ChiroMatch is coming soon</Link>
         </section>
-        <Link href="/doctor/coming-soon#shadow" className="block rounded-[22px] border border-dashed border-[#E3C27A] bg-white px-4 py-4">
+        <Link prefetch href="/doctor/coming-soon#shadow" className="block rounded-[22px] border border-dashed border-[#E3C27A] bg-white px-4 py-4">
           <p className="dp-ui text-[15px] font-extrabold text-[#15202B]">Shadow requests</p>
           <p className="mt-1 text-[13px] text-[#5b6773]">Students ask to shadow you. The inbox is open if a request is already in.</p>
         </Link>
         <div className="flex flex-col items-start gap-4">
-          <Link href="/doctor/students/shadow" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Open the shadow inbox</Link>
-          <Link href="/doctor/coming-soon#hiring" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Hiring is coming soon</Link>
+          <Link prefetch href="/doctor/students/shadow" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Open the shadow inbox</Link>
+          <Link prefetch href="/doctor/coming-soon#hiring" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Hiring is coming soon</Link>
         </div>
       </aside>
     </div>

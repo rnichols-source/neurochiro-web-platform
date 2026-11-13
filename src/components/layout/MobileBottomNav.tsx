@@ -74,7 +74,7 @@ export default function MobileBottomNav({ items, onMenuClick }: MobileBottomNavP
           }
 
           return (
-            <Link 
+            <Link prefetch 
               key={item.name} 
               href={item.href}
               className="flex-1 h-full"

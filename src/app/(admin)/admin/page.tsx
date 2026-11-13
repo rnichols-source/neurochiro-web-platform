@@ -1,9 +1,10 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, FunnelList, Tag, ToolLinks } from '@/components/founder/bits'
 import { NudgeButton } from '@/components/founder/nudge-button'
 import { greeting, firstName } from '@/lib/portal/greeting'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { loadAdminActor } from '@/lib/admin-auth'
 import { requireAdminPage } from '@/lib/founder/guard'
 import { etStamp, formatMoney, formatNumber, median } from '@/lib/founder/format'
 import { buildFunnel, buildNeeds, openRequests, since, waitingRequests, weekSeries } from '@/lib/founder/model'
@@ -15,13 +16,63 @@ export const dynamic = 'force-dynamic'
 
 export default async function PulsePage() {
   const now = new Date()
-  const user = await requireAdminPage()
-  const [roster, billing] = await Promise.all([loadFounderRoster(), loadDoctorBilling()])
+  await requireAdminPage()
+  const actor = await loadAdminActor()
+  const short = firstName(actor?.name)
+  const helloName = short === 'Raymond' ? 'Ray' : short
+  const nowIso = now.toISOString()
+  return (
+    <div>
+      <PlaceHeader place="pulse" eyebrow={etStamp(now)} title={`${greeting(now, 'America/New_York')}, ${helloName}`}>
+        <Suspense fallback={<KpiSkeleton />}>
+          <PulseKpis nowIso={nowIso} />
+        </Suspense>
+      </PlaceHeader>
+      <Suspense fallback={<BodySkeleton />}>
+        <PulseBody nowIso={nowIso} />
+      </Suspense>
+    </div>
+  )
+}
+
+async function PulseKpis({ nowIso }: { nowIso: string }) {
+  const now = new Date(nowIso)
+  const roster = await loadFounderRoster()
+  const open = openRequests(roster, now)
+  const live = roster.doctors.filter((doctor) => doctor.verified).length
+  const newDoctors = roster.doctors.filter((doctor) => since(doctor.createdAt, now, 30)).length
+  return (
+    <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <Kpi label="Demand" value={roster.mentionsOk ? formatNumber(roster.demandCount) : '—'} detail={`${roster.cities.toLocaleString('en-US')} cities · ${roster.countryCount} countries`} />
+      <Kpi label="Visit requests" value={formatNumber(open.length + (roster.communityVisits || 0))} detail={`${open.filter((row) => since(row.createdAt, now, 30)).length} in the last 30 days`} />
+      <Kpi label="Doctors live" value={formatNumber(live)} detail={`${formatNumber(roster.doctors.length)} listed · ${formatNumber(newDoctors)} new in 30 days`} />
+      <Suspense fallback={<div className="h-28 animate-pulse rounded-[18px] bg-white/80" aria-hidden="true" />}>
+        <PayingKpi />
+      </Suspense>
+      <Suspense fallback={<div className="h-28 animate-pulse rounded-[18px] bg-white/80" aria-hidden="true" />}>
+        <MrrKpi />
+      </Suspense>
+    </div>
+  )
+}
+
+async function PayingKpi() {
+  const billing = await loadDoctorBilling()
+  return <Kpi label="Paying doctors" value={billing.paying == null ? '—' : formatNumber(billing.paying)} detail="Doctor memberships only" />
+}
+
+async function MrrKpi() {
+  const billing = await loadDoctorBilling()
+  return <Kpi label="MRR" value={billing.mrrUsd == null ? '—' : formatMoney(billing.mrrUsd)} detail={billing.stripeOk ? 'Doctor memberships only · $99, $990, CA$139, $199' : 'Stripe unavailable'} />
+}
+
+async function PulseBody({ nowIso }: { nowIso: string }) {
+  const now = new Date(nowIso)
+  const roster = await loadFounderRoster()
   const open = openRequests(roster, now)
   const repliedHours = open
     .map((row) => row.acknowledgedAt ? (new Date(row.acknowledgedAt).getTime() - new Date(row.createdAt).getTime()) / 3_600_000 : null)
     .filter((value): value is number => value != null && value >= 0)
-  const live = roster.doctors.filter((doctor) => doctor.verified).length
   const newDoctors = roster.doctors.filter((doctor) => since(doctor.createdAt, now, 30)).length
   const members = roster.people.filter((person) => person.role === 'patient').length
   const students = roster.people.filter((person) => person.role === 'student').length
@@ -29,23 +80,9 @@ export default async function PulsePage() {
   const needs = buildNeeds(roster, now)
   const weeks = weekSeries(roster, now)
   const maxWeek = Math.max(1, ...weeks.map((week) => week.n))
-  const countries = roster.countryCount
-  const profile = await (createAdminClient() as any).from('profiles').select('full_name').eq('id', user.id).maybeSingle()
-  const short = firstName(profile.data?.full_name)
-  const helloName = short === 'Raymond' ? 'Ray' : short
   const waitingDoctorCount = new Set(waitingRequests(roster, now).map((row) => row.doctorId).filter(Boolean)).size
 
   return (
-    <div>
-      <PlaceHeader place="pulse" eyebrow={etStamp(now)} title={`${greeting(now, 'America/New_York')}, ${helloName}`}>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          <Kpi label="Demand" value={roster.mentionsOk ? formatNumber(roster.demandCount) : '—'} detail={`${roster.cities.toLocaleString('en-US')} cities · ${countries} countries`} />
-          <Kpi label="Visit requests" value={formatNumber(open.length + (roster.communityVisits || 0))} detail={`${open.filter((row) => since(row.createdAt, now, 30)).length} in the last 30 days`} />
-          <Kpi label="Doctors live" value={formatNumber(live)} detail={`${formatNumber(roster.doctors.length)} listed · ${formatNumber(newDoctors)} new in 30 days`} />
-          <Kpi label="Paying doctors" value={billing.paying == null ? '—' : formatNumber(billing.paying)} detail="Doctor memberships only" />
-          <Kpi label="MRR" value={billing.mrrUsd == null ? '—' : formatMoney(billing.mrrUsd)} detail={billing.stripeOk ? 'Doctor memberships only · $99, $990, CA$139, $199' : 'Stripe unavailable'} />
-        </div>
-      </PlaceHeader>
       <div className="grid gap-4 px-4 py-4 lg:grid-cols-2 lg:px-8">
         <div className="space-y-4">
           <Card>
@@ -107,6 +144,24 @@ export default async function PulsePage() {
           <ToolLinks links={PEOPLE_TOOLS.slice(0, 4)} />
         </div>
       </div>
+  )
+}
+
+function KpiSkeleton() {
+  return (
+    <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5" aria-hidden="true">
+      {Array.from({ length: 5 }, (_, index) => (
+        <div key={index} className="h-28 animate-pulse rounded-[18px] bg-white/80" />
+      ))}
+    </div>
+  )
+}
+
+function BodySkeleton() {
+  return (
+    <div className="grid gap-4 px-4 py-4 lg:grid-cols-2 lg:px-8" aria-hidden="true">
+      <div className="h-64 animate-pulse rounded-[22px] bg-white" />
+      <div className="h-64 animate-pulse rounded-[22px] bg-white" />
     </div>
   )
 }

@@ -63,7 +63,7 @@ function Group({ label, rows }: { label: string; rows: MeRow[] }) {
       <p className="nc-ui mb-2.5 text-[12px] font-extrabold uppercase tracking-[0.08em] text-[#5b6773]">{label}</p>
       <div className="overflow-hidden rounded-[20px] bg-white">
         {rows.map((row) => (
-          <Link key={row.href + row.title} href={row.href} className="flex min-h-[64px] items-center gap-3 border-t border-[#EFECE7] px-3.5 py-3 first:border-t-0">
+          <Link prefetch key={row.href + row.title} href={row.href} className="flex min-h-[64px] items-center gap-3 border-t border-[#EFECE7] px-3.5 py-3 first:border-t-0">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: row.color }}>
               <RowIcon id={row.icon} />
             </span>

@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 import type Stripe from 'stripe'
 import { subscriptionMonthlyByCurrency } from '@/lib/admin/metrics'
 import { stripe } from '@/lib/stripe'
@@ -71,7 +73,7 @@ function planLabel(sub: Stripe.Subscription): string {
   return `${money} / ${every}`
 }
 
-export async function loadDoctorBilling(): Promise<DoctorBilling> {
+async function loadDoctorBillingFresh(): Promise<DoctorBilling> {
   const empty: DoctorBilling = {
     stripeOk: false,
     mrrUsd: null,
@@ -142,3 +144,8 @@ export async function loadDoctorBilling(): Promise<DoctorBilling> {
     return empty
   }
 }
+
+const loadDoctorBillingCached = unstable_cache(loadDoctorBillingFresh, ['founder-doctor-billing-v1'], { revalidate: 180 })
+
+/** Stripe membership totals. Cached 3 minutes so a page click never waits on Stripe after the first read. */
+export const loadDoctorBilling = cache(loadDoctorBillingCached)

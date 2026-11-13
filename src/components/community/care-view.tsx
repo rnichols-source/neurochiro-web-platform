@@ -77,7 +77,7 @@ export function CareView({
                 ))}
               </div>
               <p className="mt-2.5 text-[13px] text-white/95">{plan.meta}</p>
-              <Link href="/portal/care/exercises" className="nc-ui mt-3.5 flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-white text-[16px] font-extrabold text-[#0A6159]">
+              <Link prefetch href="/portal/care/exercises" className="nc-ui mt-3.5 flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-white text-[16px] font-extrabold text-[#0A6159]">
                 Open my plan
                 <ChevronIcon size={18} />
               </Link>
@@ -105,17 +105,17 @@ export function CareView({
             </form>
             <div className="mt-3 flex flex-wrap gap-2">
               {chips.map((chip) => (
-                <Link key={chip.label} href={chip.href} className="nc-ui inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white px-3 text-[13px] font-bold text-[#0A6159]">
+                <Link prefetch key={chip.label} href={chip.href} className="nc-ui inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white px-3 text-[13px] font-bold text-[#0A6159]">
                   {chip.label}
                 </Link>
               ))}
             </div>
             <div className="mt-2.5 flex gap-2">
-              <Link href="/portal/care/remedies/shopping" className="nc-ui inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-[#A9D8D0] px-2 text-[13px] font-bold text-[#0A6159]">
+              <Link prefetch href="/portal/care/remedies/shopping" className="nc-ui inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-[#A9D8D0] px-2 text-[13px] font-bold text-[#0A6159]">
                 <BasketIcon />
                 Shopping list
               </Link>
-              <Link href="/portal/care/remedies/protocols" className="nc-ui inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-[#A9D8D0] px-2 text-[13px] font-bold text-[#0A6159]">
+              <Link prefetch href="/portal/care/remedies/protocols" className="nc-ui inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-[#A9D8D0] px-2 text-[13px] font-bold text-[#0A6159]">
                 <ListIcon />
                 Daily protocols
               </Link>
@@ -139,7 +139,7 @@ function DoctorRow({ doctor, onBand = false }: { doctor: CareDoctor | null; onBa
           <p className={`nc-ui text-[15px] font-extrabold ${onBand ? 'text-white' : 'text-[#15202B]'}`}>Choose a home doctor</p>
           <p className={`text-[13px] ${onBand ? 'text-white/85' : 'text-[#5b6773]'}`}>A listed nervous system chiropractor</p>
         </div>
-        <Link href="/portal/find" className={`nc-ui inline-flex min-h-11 items-center rounded-xl px-3 text-[13px] font-extrabold ${onBand ? 'bg-white text-[#0A6159]' : 'bg-[#0E857A] text-white'}`}>
+        <Link prefetch href="/portal/find" className={`nc-ui inline-flex min-h-11 items-center rounded-xl px-3 text-[13px] font-extrabold ${onBand ? 'bg-white text-[#0A6159]' : 'bg-[#0E857A] text-white'}`}>
           Find
         </Link>
       </div>
@@ -157,11 +157,11 @@ function DoctorRow({ doctor, onBand = false }: { doctor: CareDoctor | null; onBa
         <p className={`truncate text-[13px] ${onBand ? 'text-white/85' : 'text-[#5b6773]'}`}>{doctor.meta}</p>
       </div>
       {doctor.listed ? (
-        <Link href={`/portal/visit?doctor=${doctor.id}`} className={`nc-ui inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-[13px] font-extrabold ${onBand ? 'bg-white text-[#0A6159]' : 'bg-[#0E857A] text-white'}`}>
+        <Link prefetch href={`/portal/visit?doctor=${doctor.id}`} className={`nc-ui inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-[13px] font-extrabold ${onBand ? 'bg-white text-[#0A6159]' : 'bg-[#0E857A] text-white'}`}>
           Request visit
         </Link>
       ) : (
-        <Link href="/portal/find" className="nc-ui inline-flex min-h-11 shrink-0 items-center rounded-xl bg-white px-3 text-[13px] font-extrabold text-[#0A6159]">
+        <Link prefetch href="/portal/find" className="nc-ui inline-flex min-h-11 shrink-0 items-center rounded-xl bg-white px-3 text-[13px] font-extrabold text-[#0A6159]">
           Change
         </Link>
       )}

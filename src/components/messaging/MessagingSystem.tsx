@@ -79,6 +79,7 @@ export default function MessagingSystem({
   userRole,
   initialOtherUserId,
   initialConversationId,
+  initialInbox,
   emptyMessage,
   header,
   fill = false,
@@ -87,6 +88,7 @@ export default function MessagingSystem({
   userRole: string;
   initialOtherUserId?: string;
   initialConversationId?: string;
+  initialInbox?: { rows: InboxItem[]; unreadMessages: number } | null;
   emptyMessage?: string;
   header?: ReactNode;
   fill?: boolean;
@@ -94,12 +96,12 @@ export default function MessagingSystem({
   const referral = useReferralOptional();
   const router = useRouter();
   const pathname = usePathname();
-  const [items, setItems] = useState<InboxItem[]>([]);
-  const [unreadTotal, setUnreadTotal] = useState(0);
+  const [items, setItems] = useState<InboxItem[]>(initialInbox?.rows || []);
+  const [unreadTotal, setUnreadTotal] = useState(initialInbox?.unreadMessages || 0);
   const [selected, setSelected] = useState<InboxItem | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialInbox);
   const [threadLoading, setThreadLoading] = useState(false);
   const [hasEarlier, setHasEarlier] = useState(false);
   const [canLoadMore, setCanLoadMore] = useState(false);
@@ -159,7 +161,8 @@ export default function MessagingSystem({
   }, []);
 
   useEffect(() => {
-    refreshInbox().then(async (rows) => {
+    const ready = initialInbox ? Promise.resolve(initialInbox.rows) : refreshInbox();
+    ready.then(async (rows) => {
       if (initialConversationId) {
         const found = rows.find((row) => row.id === initialConversationId);
         await openThread(found || {

@@ -1,4 +1,6 @@
+import { Suspense } from 'react'
 import { PlaceHeader } from '@/components/founder/header'
+import { AdminRouteSkeleton } from '@/components/loading/route-skeletons'
 import { Card, Tag } from '@/components/founder/bits'
 import { founderTablesReady } from '@/lib/founder/audit'
 import { loadDoctorBilling } from '@/lib/founder/money'
@@ -11,6 +13,17 @@ export const dynamic = 'force-dynamic'
 
 export default async function HealthPage() {
   await requireAdminPage()
+  return (
+    <div>
+      <PlaceHeader place="pulse" title="System health" subtitle="What this command center can reach right now." />
+      <Suspense fallback={<AdminRouteSkeleton />}>
+        <HealthBody />
+      </Suspense>
+    </div>
+  )
+}
+
+async function HealthBody() {
   const [roster, billing, tables, settings] = await Promise.all([
     loadFounderRoster(),
     loadDoctorBilling(),
@@ -31,8 +44,6 @@ export default async function HealthPage() {
   ] as const
 
   return (
-    <div>
-      <PlaceHeader place="pulse" title="System health" subtitle="What this command center can reach right now." />
       <div className="grid gap-3 px-4 py-4 md:grid-cols-2 lg:px-8">
         {rows.map(([label, detail, ok]) => (
           <Card key={label}>
@@ -44,6 +55,5 @@ export default async function HealthPage() {
           </Card>
         ))}
       </div>
-    </div>
   )
 }

@@ -58,7 +58,7 @@ export function SubTabs({
       {tabs.map((tab) => {
         const on = tab.href === active
         return (
-          <Link
+          <Link prefetch
             key={tab.href}
             href={tab.href}
             aria-current={on ? 'page' : undefined}

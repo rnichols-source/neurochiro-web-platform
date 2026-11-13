@@ -30,6 +30,10 @@ export type PortalContextValue = {
   unreadNotifications: number;
   unreadMessages: number;
   unreadReferrals: number;
+  waitingVisits: number;
+  staffOffice: boolean;
+  applicationGate: string | null;
+  savedItems: Record<string, unknown> | null;
   hasPurchase: boolean;
   chiroMatchOpen: boolean;
   nav: PortalNavItem[];

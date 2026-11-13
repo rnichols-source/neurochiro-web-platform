@@ -26,7 +26,7 @@ export async function getDoctors(options: {
     
     let query = applyPublicListing(supabase
       .from('doctors')
-      .select(selectFields, { count: 'exact' })
+      .select(selectFields)
       .in('verification_status', ['verified', 'pending']));
 
     const region = (regionCode || '').toUpperCase();
@@ -83,7 +83,7 @@ export async function getDoctors(options: {
     }
 
     // Fetch with pagination
-    const { data, error, count } = await query
+    const { data, error } = await query
       .range((page - 1) * limit, page * limit - 1);
 
     if (error) {
@@ -109,7 +109,7 @@ export async function getDoctors(options: {
     
     return {
       doctors: ((data || []) as unknown as Doctor[]).filter((doctor) => isDoctorPubliclyVisible(doctor)),
-      total: count || 0,
+      total: (data || []).length < limit ? ((page - 1) * limit) + (data || []).length : (page * limit) + 1,
       error: false
     };
   } catch (e) {
