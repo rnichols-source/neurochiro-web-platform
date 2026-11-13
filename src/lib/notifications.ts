@@ -1,3 +1,4 @@
+import { createAdminClient } from "@/lib/supabase-admin";
 import { createServerSupabase } from "./supabase-server";
 
 export type NotificationPayload = {
@@ -12,8 +13,12 @@ export type NotificationPayload = {
 
 export async function sendNotification(payload: NotificationPayload) {
   const supabase = createServerSupabase();
+  // Notifications for another person are written with the service role.
+  // The caller's session is often a visitor, and RLS only lets a member
+  // update their own rows.
+  const admin = createAdminClient();
 
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('notifications')
     .insert({
       user_id: payload.userId,

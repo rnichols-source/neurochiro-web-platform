@@ -1,5 +1,6 @@
 "use server";
 
+import { createAdminClient } from "@/lib/supabase-admin";
 import { createServerSupabase } from "@/lib/supabase-server";
 import { Automations } from "@/lib/automations";
 import { loadPublicBoard, loadPublicJob } from "@/lib/jobs/board";
@@ -56,7 +57,7 @@ export async function applyToJob(
 
     if (job) {
       // Insert notification
-      await supabase.from("notifications").insert({
+      await createAdminClient().from("notifications").insert({
         user_id: job.doctor_id,
         title: "New Job Application",
         body: `${data.name} applied for "${job.title}"`,

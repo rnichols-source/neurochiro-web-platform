@@ -39,22 +39,19 @@ export async function submitVendorApplication(formData: any) {
 
     const isNew = !existingVendor;
     const slug = existingVendor?.slug || formData.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Math.floor(Math.random() * 1000);
-    const isActive = existingVendor ? existingVendor.is_active : false;
-    const tier = existingVendor ? existingVendor.tier : 'basic';
-    
-    const { error: vendorError } = await supabase
-      .from('vendors')
-      .upsert({
-        id: user.id,
-        name: formData.companyName,
-        website_url: formData.website,
-        categories: [formData.category],
-        short_description: formData.techSpecs.substring(0, 160),
-        full_description: formData.techSpecs + "\n\nPhilosophy: " + formData.philosophy,
-        slug: slug,
-        is_active: isActive, 
-        tier: tier
-      })
+    const profile = {
+      name: formData.companyName,
+      website_url: formData.website,
+      categories: [formData.category],
+      short_description: formData.techSpecs.substring(0, 160),
+      full_description: formData.techSpecs + "\n\nPhilosophy: " + formData.philosophy,
+      slug,
+    }
+    // A new application stays inactive. Listing status and tier are not
+    // fields the applicant can set; the database trigger rejects those writes.
+    const { error: vendorError } = isNew
+      ? await supabase.from('vendors').insert({ ...profile, id: user.id, is_active: false, tier: 'basic' })
+      : await supabase.from('vendors').update(profile).eq('id', user.id)
 
     if (vendorError) throw vendorError
 
