@@ -69,7 +69,6 @@ export default function CommunityShell({ children }: { children: React.ReactNode
   return (
     <div
       className="min-h-dvh bg-[#F5F3EF] text-[#16202a]"
-      style={{ fontFamily: 'var(--font-community), Inter, sans-serif' }}
     >
       <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col md:max-w-[640px] lg:max-w-[720px]">
         <main className="flex-1 px-[18px] pb-28 pt-3">{children}</main>
