@@ -52,7 +52,7 @@ export function PeopleDesk({ waiting, members, ready }: { waiting: PersonCard[];
             })}
           </ul>
         )}
-        <Link href="/doctor/leads" className="dp-ui mt-4 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#1F4F8C]">Directory requests</Link>
+        <Link href="/doctor/leads" className="dp-ui mt-4 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#1F4F8C]">Leads</Link>
       </div>
       <div>
         {selected ? (

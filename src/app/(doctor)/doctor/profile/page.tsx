@@ -1,12 +1,10 @@
 "use client";
 
 import { Camera, Loader2, Plus, Trash2 } from "lucide-react";
-import { ProfileStudio } from "@/components/doctor/profile-studio";
-import { HeaderTools } from "@/components/doctor/header-tools";
 import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import PageHeader from "@/components/portal/PageHeader";
+import { DoctorBand } from "@/components/doctor/chrome";
 import StudentOptIn from "@/components/doctor/StudentOptIn";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
@@ -432,11 +430,32 @@ function ProfileEditor() {
       )}
 
       <div ref={headerRef} onClickCapture={openLiveProfile}>
-        <PageHeader
-          title="All profile fields"
-          description="This is what community members see on neurochiro.co."
-          secondary={profile?.slug ? { label: "View live profile", href: `/directory/${profile.slug}` } : undefined}
-        />
+        <DoctorBand
+          place="practice"
+          title="Profile"
+          subtitle="Edit your photo, bio, hours, services, insurance, and links on this page."
+        >
+          {profile?.slug ? (
+            <a
+              href={`/directory/${profile.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="dp-ui hidden min-h-11 shrink-0 items-center rounded-xl bg-white px-3 text-[13px] font-extrabold text-[#1E2D3B] sm:inline-flex"
+            >
+              View public profile
+            </a>
+          ) : null}
+        </DoctorBand>
+        {profile?.slug ? (
+          <a
+            href={`/directory/${profile.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="dp-ui mt-3 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#D66829] sm:hidden"
+          >
+            View public profile
+          </a>
+        ) : null}
       </div>
 
       {loading ? (
@@ -462,6 +481,27 @@ function ProfileEditor() {
           )}
 
           <StudentOptIn />
+          <div className="sticky top-0 z-30 -mx-[18px] mb-4 bg-[#F5F3EF] px-[18px] py-2 lg:-mx-10 lg:px-10">
+            <div role="tablist" aria-label="Profile sections" className="flex gap-1 overflow-x-auto rounded-2xl bg-white p-1">
+              {TABS.map((item) => {
+                const selected = tab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="tab"
+                    id={`profile-tab-${item.id}`}
+                    aria-selected={selected}
+                    aria-controls={`profile-panel-${item.id}`}
+                    onClick={() => selectTab(item.id)}
+                    className={`dp-ui shrink-0 min-h-11 rounded-xl px-3 text-sm font-extrabold ${selected ? "bg-[#1E2D3B] text-white" : "text-[#5b6773]"}`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
             <h2 className="text-lg font-bold text-portal-ink">Profile photo</h2>
             <div className="mt-4 flex items-center gap-4">
@@ -500,28 +540,6 @@ function ProfileEditor() {
               </ul>
             )}
           </section>
-
-          <div className="sticky top-0 z-30 -mx-4 md:-mx-8 px-4 md:px-8 py-2 bg-portal-canvas">
-            <div role="tablist" aria-label="Profile sections" className="flex gap-1 overflow-x-auto bg-portal-surface p-1 rounded-xl">
-              {TABS.map((item) => {
-                const selected = tab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    id={`profile-tab-${item.id}`}
-                    aria-selected={selected}
-                    aria-controls={`profile-panel-${item.id}`}
-                    onClick={() => selectTab(item.id)}
-                    className={`shrink-0 min-h-11 px-3 rounded-lg text-sm font-bold ${selected ? "bg-white text-portal-ink shadow-sm" : "text-portal-ink-2"}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
           <form onSubmit={handleSave} onChange={markDirty} className="mt-4 space-y-4">
             {profile?.bio ? <input type="hidden" name="bio" value={profile.bio} /> : null}
@@ -911,24 +929,10 @@ function ProfileEditor() {
   );
 }
 
-function ProfileGate() {
-  const full = useSearchParams().get('full') === '1';
-  if (!full) return <ProfileStudio />;
-  return (
-    <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <a href="/doctor/profile" className="text-sm font-bold text-portal-accent">Back to the simple editor</a>
-        <HeaderTools onDark={false} />
-      </div>
-      <ProfileEditor />
-    </div>
-  );
-}
-
 export default function ProfilePage() {
   return (
     <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-portal-accent animate-spin" /></div>}>
-      <ProfileGate />
+      <ProfileEditor />
     </Suspense>
   );
 }

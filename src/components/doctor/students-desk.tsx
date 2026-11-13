@@ -89,7 +89,7 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
           <p className="dp-ui text-[18px] font-extrabold text-[#15202B]">ChiroMatch</p>
           <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">Post an associate position and meet graduating students.</p>
           <Link href="/doctor/chiromatch/create" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">Post a position</Link>
-          <Link href="/doctor/match" className="dp-ui mt-2 block text-[14px] font-extrabold text-[#B4501A]">Open ChiroMatch</Link>
+          <Link href="/doctor/chiromatch" className="dp-ui mt-2 block text-[14px] font-extrabold text-[#B4501A]">Open ChiroMatch</Link>
         </section>
         <Link href="/doctor/coming-soon#shadow" className="block rounded-[22px] border border-dashed border-[#E3C27A] bg-white px-4 py-4">
           <p className="dp-ui text-[15px] font-extrabold text-[#15202B]">Shadow requests</p>

@@ -48,7 +48,7 @@ export function PracticeView({
         </div>
       </section>
       <Link href="/doctor/profile" className="dp-ui flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#D66829] text-[16px] font-extrabold text-white">
-        Edit my profile
+        Edit profile
       </Link>
       <Row href="/doctor/analytics" title="Analytics" detail={views} iconBg="#2C6BB4" />
       <Row href="/doctor/billing" title="Membership and billing" detail={plan} iconBg="#1E2D3B" />
@@ -75,7 +75,8 @@ export function PracticeView({
           ) : null}
         </ul>
       </section>
-      <Row href="/doctor/settings" title="Settings and help" detail="Notifications, account, and a way to reach us" iconBg="#0E857A" />
+      <Row href="/doctor/notifications" title="Notifications" detail="Alerts for your office" iconBg="#D66829" />
+      <Row href="/doctor/settings" title="Settings" detail="Notifications, account, and text alerts" iconBg="#0E857A" />
       <Link href="/doctor/help" className="dp-ui inline-flex min-h-11 items-center px-1 text-[14px] font-extrabold text-[#1E2D3B]">Help</Link>
       <Link href="/doctor/coming-soon" className="flex items-center justify-between rounded-[20px] border border-dashed border-[#E3C27A] bg-[#FFF8F1] px-4 py-4">
         <span>

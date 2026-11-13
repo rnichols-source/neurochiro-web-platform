@@ -1,4 +1,5 @@
 import { DoctorBand, SubTabs } from '@/components/doctor/chrome'
+import { ToolChips } from '@/components/doctor/tool-chips'
 
 const TABS = [
   { href: '/doctor/network', label: 'Refer' },
@@ -15,6 +16,7 @@ export function NetworkFrame({ active, children }: { active: string; children: R
         subtitle="Refer to other doctors, meet students, and grow."
         footer={<SubTabs tabs={TABS} active={active} />}
       />
+      <ToolChips group="network" />
       {children}
     </div>
   )

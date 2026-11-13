@@ -9,6 +9,8 @@ import { createClient } from '@/lib/supabase'
 import {
   DOCTOR_PLACE_LIST,
   DOCTOR_PLACES,
+  DOCTOR_TOOL_GROUPS,
+  DOCTOR_TOOL_LINKS,
   doctorNavId,
   legacyTitle,
   usesOwnChrome,
@@ -40,7 +42,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
 
   return (
     <div className="doctor-portal flex h-dvh min-h-0 bg-[#F5F3EF] text-[#15202B]" data-portal-notifications={ctx.unreadNotifications}>
-      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-[#ECE8E1] bg-white px-4 py-6 lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col overflow-hidden border-r border-[#ECE8E1] bg-white px-4 py-6 lg:flex">
         <Link href="/doctor" className="mb-3 flex items-center gap-2.5 px-2">
           <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#F5F3EF]">
             <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
@@ -50,57 +52,97 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
             <span className="dp-ui block text-[11px] font-extrabold tracking-[0.12em] text-[#8a95a1]">DOCTOR PORTAL</span>
           </span>
         </Link>
-        <nav className="flex flex-1 flex-col gap-1.5" aria-label="Doctor portal">
-          {DOCTOR_PLACE_LIST.map((item) => {
-            const on = nav === item.id
-            return (
-              <Link
-                key={item.id}
-                href={item.href}
-                aria-current={on ? 'page' : undefined}
-                className="relative flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px]"
-                style={on ? { background: item.tint, color: item.ink, fontWeight: 800 } : { color: '#3d4a57', fontWeight: 700 }}
-              >
-                {on ? <span className="absolute -left-4 bottom-2.5 top-2.5 w-[5px] rounded-r" style={{ background: item.color }} /> : null}
-                <span
-                  className="grid h-[38px] w-[38px] place-items-center rounded-xl"
-                  style={on ? { background: item.color, color: '#fff' } : { background: item.tint, color: item.ink }}
+        <nav className="flex min-h-0 flex-1 flex-col" aria-label="Doctor portal">
+          <div className="flex shrink-0 flex-col gap-1.5">
+            {DOCTOR_PLACE_LIST.map((item) => {
+              const on = nav === item.id
+              return (
+                <Link
+                  key={item.id}
+                  href={item.href}
+                  aria-current={on ? 'page' : undefined}
+                  className="relative flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px]"
+                  style={on ? { background: item.tint, color: item.ink, fontWeight: 800 } : { color: '#3d4a57', fontWeight: 700 }}
                 >
-                  <PlaceIcon id={item.id} size={20} />
-                </span>
-                <span className="min-w-0 flex-1">{item.label}</span>
-                {item.id === 'people' && peopleBadge ? (
-                  <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#2C6BB4] px-1.5 text-[12px] font-extrabold text-white">{peopleBadge}</span>
-                ) : null}
-              </Link>
-            )
-          })}
-          <div className="my-2 border-t border-[#EFECE7]" />
-          <Link
-            href="/doctor/messages"
-            aria-current={nav === 'messages' ? 'page' : undefined}
-            className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold"
-            style={nav === 'messages' ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#3d4a57' }}
-          >
-            <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#E5E9EE] text-[#1E2D3B]">
-              <MessagesIcon size={20} />
-            </span>
-            <span className="flex-1">Messages</span>
-            {messageBadge ? (
-              <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#D66829] px-1.5 text-[12px] font-extrabold text-white" data-messages-badge={ctx.unreadMessages}>{messageBadge}</span>
-            ) : null}
-          </Link>
-          <Link
-            href="/doctor/coming-soon"
-            aria-current={nav === 'soon' ? 'page' : undefined}
-            className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold text-[#3d4a57]"
-            style={nav === 'soon' ? { background: '#FCEBDF', color: '#B4501A' } : undefined}
-          >
-            <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#FCEBDF] text-[#D66829]">
-              <RocketIcon />
-            </span>
+                  {on ? <span className="absolute -left-4 bottom-2.5 top-2.5 w-[5px] rounded-r" style={{ background: item.color }} /> : null}
+                  <span
+                    className="grid h-[38px] w-[38px] place-items-center rounded-xl"
+                    style={on ? { background: item.color, color: '#fff' } : { background: item.tint, color: item.ink }}
+                  >
+                    <PlaceIcon id={item.id} size={20} />
+                  </span>
+                  <span className="min-w-0 flex-1">{item.label}</span>
+                  {item.id === 'people' && peopleBadge ? (
+                    <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#2C6BB4] px-1.5 text-[12px] font-extrabold text-white">{peopleBadge}</span>
+                  ) : null}
+                </Link>
+              )
+            })}
+            <div className="my-2 border-t border-[#EFECE7]" />
+            <Link
+              href="/doctor/messages"
+              aria-current={nav === 'messages' ? 'page' : undefined}
+              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold"
+              style={nav === 'messages' ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#3d4a57' }}
+            >
+              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#E5E9EE] text-[#1E2D3B]">
+                <MessagesIcon size={20} />
+              </span>
+              <span className="flex-1">Messages</span>
+              {messageBadge ? (
+                <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#D66829] px-1.5 text-[12px] font-extrabold text-white" data-messages-badge={ctx.unreadMessages}>{messageBadge}</span>
+              ) : null}
+            </Link>
+            <Link
+              href="/doctor/coming-soon"
+              aria-current={nav === 'soon' ? 'page' : undefined}
+              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold text-[#3d4a57]"
+              style={nav === 'soon' ? { background: '#FCEBDF', color: '#B4501A' } : undefined}
+            >
+              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#FCEBDF] text-[#D66829]">
+                <RocketIcon />
+              </span>
             Coming soon
           </Link>
+            <Link
+              href="/doctor/profile"
+              aria-current={pathname === '/doctor/profile' ? 'page' : undefined}
+              className="mt-1 flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-extrabold"
+              style={pathname === '/doctor/profile' ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#1E2D3B' }}
+            >
+              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#1E2D3B] text-[12px] font-extrabold text-white">
+                {ctx.initials || 'DR'}
+              </span>
+              Profile
+            </Link>
+          </div>
+          <div className="mt-3 min-h-0 flex-1 overflow-y-auto border-t border-[#EFECE7] pt-3">
+            <p className="px-3 pb-2 dp-ui text-[11px] font-extrabold tracking-[0.12em] text-[#8a95a1]">YOUR TOOLS</p>
+            {DOCTOR_TOOL_GROUPS.map((group) => {
+              const tone = DOCTOR_PLACES[group.place]
+              const links = DOCTOR_TOOL_LINKS.filter((link) => link.group === group.id && link.href !== '/doctor/profile')
+              return (
+                <div key={group.id} className="mb-3">
+                  <p className="px-3 pb-1 dp-ui text-[11px] font-extrabold tracking-[0.08em]" style={{ color: tone.ink }}>{group.label}</p>
+                  {links.map((link) => {
+                    const on = pathname === link.href || pathname.startsWith(`${link.href}/`)
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        aria-current={on ? 'page' : undefined}
+                        className="flex min-h-11 items-center gap-2 rounded-xl px-3 dp-ui text-[14px] font-bold"
+                        style={on ? { background: tone.tint, color: tone.ink } : { color: '#3d4a57' }}
+                      >
+                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: tone.color }} />
+                        <span className="min-w-0 truncate">{link.label}</span>
+                      </Link>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </div>
         </nav>
         <div className="mt-4 flex items-center gap-2.5 border-t border-[#EFECE7] px-1 pt-3">
           <Link href="/doctor/practice" aria-label="Practice" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#D66829] dp-ui text-[14px] font-extrabold text-white">

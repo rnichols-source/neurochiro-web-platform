@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { DoctorBand } from '@/components/doctor/chrome'
 import { PeopleDesk } from '@/components/doctor/people-desk'
+import { ToolChips } from '@/components/doctor/tool-chips'
 import { getPortalContext } from '@/lib/portal/context'
 import { loadPeople } from '@/lib/doctor/portal-data'
 
@@ -13,6 +14,7 @@ export default async function PeoplePage() {
     return (
       <div>
         <DoctorBand place="people" title="People" subtitle="Community members who chose you, and people coming your way." />
+        <ToolChips group="people" />
         <p className="mt-4 text-[15px] text-[#5b6773]">A doctor profile is required before people can land here.</p>
       </div>
     )
@@ -21,6 +23,7 @@ export default async function PeoplePage() {
   return (
     <div>
       <DoctorBand place="people" title="People" subtitle="Community members who chose you, and people coming your way." />
+      <ToolChips group="people" />
       <PeopleDesk waiting={data.waiting} members={data.members} ready={data.ready} />
     </div>
   )

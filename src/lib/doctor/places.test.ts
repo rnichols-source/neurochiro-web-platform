@@ -3,8 +3,11 @@ import test from 'node:test'
 import {
   buildNextSteps,
   communityMemberCopy,
+  desktopClicks,
   doctorGreetingName,
   doctorNavId,
+  DOCTOR_TOOL_LINKS,
+  mobileClicks,
   profileChecklist,
   usesOwnChrome,
 } from './places.ts'
@@ -23,6 +26,9 @@ test('nav keeps today, people, care, network, and practice apart', () => {
   assert.equal(doctorNavId('/doctor/care-plan-closer'), 'practice')
   assert.equal(doctorNavId('/doctor/messages'), 'messages')
   assert.equal(doctorNavId('/doctor/coming-soon'), 'soon')
+  assert.equal(doctorNavId('/doctor/introductions'), 'people')
+  assert.equal(doctorNavId('/doctor/community-interest'), 'network')
+  assert.equal(doctorNavId('/doctor/profile'), 'practice')
 })
 
 test('new places use their own chrome and older tools stay inside the shell', () => {
@@ -69,6 +75,46 @@ test('profile checklist counts six sections and names what is left', () => {
   })
   assert.equal(done.complete, true)
   assert.equal(done.percent, 100)
+})
+
+test('old sidebar tools open in one desktop click and two taps on a phone', () => {
+  const oldSidebar = [
+    '/doctor/dashboard',
+    '/doctor/profile',
+    '/doctor/messages',
+    '/doctor/referral-network',
+    '/doctor/notifications',
+    '/doctor/leads',
+    '/doctor/visit-requests',
+    '/doctor/care-sets',
+    '/doctor/introductions',
+    '/doctor/lives',
+    '/doctor/jobs',
+    '/doctor/community-interest',
+    '/doctor/chiromatch',
+    '/doctor/students',
+    '/doctor/seminars',
+    '/doctor/community',
+    '/doctor/marketplace',
+    '/doctor/care-plan-closer',
+    '/doctor/analytics',
+    '/doctor/settings',
+    '/doctor/billing',
+    '/doctor/help',
+    '/doctor/care-plan',
+    '/doctor/scan-report',
+    '/doctor/kpi',
+    '/doctor/pl-analyzer',
+    '/doctor/ce-tracker',
+    '/doctor/billing-guide',
+  ]
+  for (const href of oldSidebar) {
+    assert.equal(desktopClicks(href), 1, href)
+    assert.ok(mobileClicks(href) <= 2, href)
+  }
+  assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Profile')?.href, '/doctor/profile')
+  assert.equal(desktopClicks('/doctor/match'), 1)
+  assert.equal(mobileClicks('/doctor/messages'), 1)
 })
 
 test('the next step is the profile until it is finished or skipped', () => {

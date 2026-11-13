@@ -22,7 +22,7 @@ export type PortalFeature = {
 
 export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'dashboard', label: 'Today', href: '/doctor', group: 'main', subtitle: 'Your next step', state: 'live', icon: 'LayoutDashboard', match: ['/doctor/dashboard'] },
-  { key: 'leads', label: 'Directory requests', href: '/doctor/leads', group: 'main', subtitle: 'People who asked to book from the directory', state: 'live', requires: 'pro', icon: 'Target' },
+  { key: 'leads', label: 'Leads', href: '/doctor/leads', group: 'main', subtitle: 'People who asked to book from the directory', state: 'live', requires: 'pro', icon: 'Target' },
   { key: 'messages', label: 'Messages', href: '/doctor/messages', group: 'main', subtitle: 'One inbox for community members, doctors, and students', state: 'live', icon: 'MessageSquare' },
   { key: 'profile', label: 'My profile', href: '/doctor/profile', group: 'main', subtitle: 'What community members see', state: 'live', icon: 'User' },
   { key: 'analytics', label: 'Results', href: '/doctor/analytics', group: 'grow', subtitle: 'Views, requests, where they came from', state: 'live', requires: 'pro', icon: 'BarChart3' },

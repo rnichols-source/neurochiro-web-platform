@@ -17,6 +17,81 @@ export const DOCTOR_PLACE_LIST = [
   DOCTOR_PLACES.practice,
 ] as const
 
+export type DoctorToolGroup = 'people' | 'network' | 'account' | 'tools'
+
+export type DoctorToolLink = {
+  href: string
+  label: string
+  detail: string
+  place: DoctorPlaceId
+  group: DoctorToolGroup
+  /** Chip text when the sidebar label would repeat a tab on the same screen. */
+  chipLabel?: string
+}
+
+export const DOCTOR_TOOL_GROUPS: { id: DoctorToolGroup; label: string; place: DoctorPlaceId }[] = [
+  { id: 'people', label: 'People', place: 'people' },
+  { id: 'network', label: 'Network', place: 'network' },
+  { id: 'account', label: 'Account', place: 'practice' },
+  { id: 'tools', label: 'Practice tools', place: 'practice' },
+]
+
+/** Familiar destinations from the old sidebar. Desktop sidebar opens each in one click. */
+export const DOCTOR_TOOL_LINKS: DoctorToolLink[] = [
+  { href: '/doctor/visit-requests', label: 'Visit requests', detail: 'People asking to see you', place: 'people', group: 'people' },
+  { href: '/doctor/leads', label: 'Leads', detail: 'Requests from your directory listing', place: 'people', group: 'people' },
+  { href: '/doctor/introductions', label: 'Introductions', detail: 'When someone travels with their care', place: 'people', group: 'people' },
+  { href: '/doctor/referrals', label: 'Referral network', detail: 'Referrals you have sent and received', place: 'network', group: 'network' },
+  { href: '/doctor/students', label: 'Students', chipLabel: 'Browse students', detail: 'Browse students looking for a practice', place: 'network', group: 'network' },
+  { href: '/doctor/jobs', label: 'Jobs & hiring', detail: 'Post a role and read applications', place: 'network', group: 'network' },
+  { href: '/doctor/chiromatch', label: 'ChiroMatch', detail: 'Match with an associate', place: 'network', group: 'network' },
+  { href: '/doctor/match', label: 'Match', detail: 'You and a student both say yes', place: 'network', group: 'network' },
+  { href: '/doctor/seminars', label: 'Seminars', detail: 'Host a seminar or find one', place: 'network', group: 'network' },
+  { href: '/doctor/lives', label: 'The Weekly Adjustment', detail: 'Thursday at 8 PM ET', place: 'network', group: 'network' },
+  { href: '/doctor/community', label: 'Community', detail: 'Announcements and spotlights', place: 'network', group: 'network' },
+  { href: '/doctor/community-interest', label: 'Community interest', detail: 'People near you raising a hand', place: 'network', group: 'network' },
+  { href: '/doctor/marketplace', label: 'Synapse', detail: 'Member deals', place: 'network', group: 'network' },
+  { href: '/doctor/profile', label: 'Profile', detail: 'Edit what community members see', place: 'practice', group: 'account' },
+  { href: '/doctor/analytics', label: 'Analytics', detail: 'Views and where they came from', place: 'practice', group: 'account' },
+  { href: '/doctor/billing', label: 'Billing', detail: 'Plan, invoices, and payment', place: 'practice', group: 'account' },
+  { href: '/doctor/settings', label: 'Settings', detail: 'Notifications and account', place: 'practice', group: 'account' },
+  { href: '/doctor/notifications', label: 'Notifications', detail: 'Alerts for your office', place: 'practice', group: 'account' },
+  { href: '/doctor/care-plan-closer', label: 'Care Plan Closer', detail: 'Done-for-you care plan setup', place: 'practice', group: 'account' },
+  { href: '/doctor/help', label: 'Help', detail: 'Ask us anything', place: 'practice', group: 'account' },
+  { href: '/doctor/care-plan', label: 'Care plan', detail: 'A visit-by-visit plan for your office', place: 'practice', group: 'tools' },
+  { href: '/doctor/scan-report', label: 'Scan reports', detail: 'Turn scan numbers into a report', place: 'practice', group: 'tools' },
+  { href: '/doctor/kpi', label: 'KPI tracker', detail: 'Today’s numbers and goals', place: 'practice', group: 'tools' },
+  { href: '/doctor/pl-analyzer', label: 'P&L analyzer', detail: 'Where the practice makes and spends money', place: 'practice', group: 'tools' },
+  { href: '/doctor/ce-tracker', label: 'CE tracker', detail: 'Certificates from seminars you attended', place: 'practice', group: 'tools' },
+  { href: '/doctor/billing-guide', label: 'Billing guide', detail: 'Coding notes included with practice tools', place: 'practice', group: 'tools' },
+]
+
+const ONE_CLICK_DESKTOP = new Set<string>([
+  '/doctor',
+  '/doctor/dashboard',
+  '/doctor/messages',
+  '/doctor/coming-soon',
+  ...DOCTOR_PLACE_LIST.map((item) => item.href),
+  ...DOCTOR_TOOL_LINKS.map((item) => item.href),
+])
+
+export function desktopClicks(href: string): number {
+  const path = (href.split('?')[0] || '/').replace(/\/$/, '') || '/'
+  if (path === '/doctor/referral-network') return 1
+  return ONE_CLICK_DESKTOP.has(path) ? 1 : 2
+}
+
+export function mobileClicks(href: string): number {
+  const path = (href.split('?')[0] || '/').replace(/\/$/, '') || '/'
+  if (path === '/doctor' || path === '/doctor/dashboard' || path === '/doctor/messages') return 1
+  if (DOCTOR_PLACE_LIST.some((item) => item.href === path)) return 1
+  return 2
+}
+
+export function toolLinksFor(group: DoctorToolGroup): DoctorToolLink[] {
+  return DOCTOR_TOOL_LINKS.filter((link) => link.group === group)
+}
+
 const NETWORK_PREFIXES = [
   '/doctor/network',
   '/doctor/referrals',
@@ -27,9 +102,9 @@ const NETWORK_PREFIXES = [
   '/doctor/seminars',
   '/doctor/marketplace',
   '/doctor/lives',
-  '/doctor/introductions',
   '/doctor/referral-network',
   '/doctor/community',
+  '/doctor/community-interest',
 ]
 
 function pathOnly(pathname: string): string {
@@ -46,8 +121,8 @@ export function doctorNavId(pathname: string): DoctorNavId {
   const path = pathOnly(pathname)
   if (path === '/doctor' || path === '/doctor/dashboard') return 'today'
   if (under(path, '/doctor/messages')) return 'messages'
-  if (under(path, '/doctor/coming-soon') || under(path, '/doctor/community-interest')) return 'soon'
-  if (under(path, '/doctor/people') || under(path, '/doctor/leads') || under(path, '/doctor/visit-requests')) return 'people'
+  if (under(path, '/doctor/coming-soon')) return 'soon'
+  if (under(path, '/doctor/people') || under(path, '/doctor/leads') || under(path, '/doctor/visit-requests') || under(path, '/doctor/introductions')) return 'people'
   if (under(path, '/doctor/care-sets')) return 'care'
   if (NETWORK_PREFIXES.some((prefix) => under(path, prefix))) return 'network'
   return 'practice'
@@ -68,7 +143,7 @@ export function usesOwnChrome(pathname: string): boolean {
 }
 
 const LEGACY_TITLES: [string, string][] = [
-  ['/doctor/leads', 'Directory requests'],
+  ['/doctor/leads', 'Leads'],
   ['/doctor/visit-requests', 'Visit requests'],
   ['/doctor/analytics', 'Analytics'],
   ['/doctor/billing', 'Membership and billing'],
@@ -193,7 +268,7 @@ export function buildNextSteps(input: {
       detail: left.length ? `${input.checklist.percent}% complete · ${left.join(', ')} left` : 'A few fields are still open',
       percent: input.checklist.percent,
       href: '/doctor/profile',
-      button: 'Edit my profile',
+      button: 'Edit profile',
       skip: true,
     })
   }
