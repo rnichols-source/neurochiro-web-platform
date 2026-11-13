@@ -143,6 +143,21 @@ export type MemberDetail = {
     contactTotal: number | null
     introductions: { city: string; state: string; date: string; type: string }[]
     introductionTotal: number
+    officialIntroCount: number | null
+    patientsStarted: number
+    estRevenueUsd: number | null
+    valueIsEstimate: boolean
+    membershipAnnualUsd: number | null
+    membershipCostUnknown: string | null
+    startReports: {
+      id: string
+      patientsStarted: number
+      reportedOn: string
+      carePlanValueUsd: number | null
+      valueIsEstimate: boolean
+      estRevenueUsd: number | null
+      notes: string | null
+    }[]
     routing: MemberRouting | null
   }
 }

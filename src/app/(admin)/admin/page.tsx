@@ -11,6 +11,7 @@ import { buildFunnel, buildNeeds, openRequests, since, waitingRequests, weekSeri
 import { loadDoctorBilling } from '@/lib/founder/money'
 import { loadFounderRoster } from '@/lib/founder/roster'
 import { PEOPLE_TOOLS } from '@/lib/founder/places'
+import { StartsPulseCard } from '@/app/(admin)/admin/starts/pulse-card'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,6 +104,9 @@ async function PulseBody({ nowIso }: { nowIso: string }) {
   return (
       <div className="grid gap-4 px-4 py-4 lg:grid-cols-2 lg:px-8">
         <div className="space-y-4">
+          <Suspense fallback={<div className="h-40 animate-pulse rounded-[22px] bg-white" />}>
+            <StartsPulseCard />
+          </Suspense>
           <Card>
             <h2 className="fd-ui mb-2 text-[17px] font-extrabold text-[#D66829]">Needs you today · {needs.length}</h2>
             {needs.length === 0 ? <p className="text-[14px] text-[#5b6773]">Nothing in this list is waiting.</p> : needs.map((need) => (

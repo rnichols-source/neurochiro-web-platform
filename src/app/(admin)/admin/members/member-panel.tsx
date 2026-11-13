@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { activateAfterOnboardingCall, updateDoctorManually } from '@/app/(admin)/admin/directory/actions'
 import { type DoctorFormValues, type MemberDetail } from '@/lib/admin/member-search'
+import { formatMoney, formatNumber } from '@/lib/founder/format'
+import { formatRoiMultiple, roiMultiple } from '@/lib/founder/patient-starts-calc'
 
 const MemberMiniMap = dynamic(() => import('./MemberMiniMap'), {
   ssr: false,
@@ -113,6 +115,28 @@ function DoctorSections({ detail }: { detail: MemberDetail }) {
               </li>
             ))}
           </ul>
+        )}
+      </section>
+      <section className="space-y-2">
+        <h3 className="font-heading text-base font-bold">Patients started</h3>
+        {doctor.patientsStarted === 0 && doctor.startReports.length === 0 ? (
+          <p className="text-neuro-gray">No patients-started reports yet. <Link className="text-neuro-orange" href="/admin/starts">Add one</Link></p>
+        ) : (
+          <>
+            <p className="tabular-nums">{formatNumber(doctor.patientsStarted)} started{doctor.officialIntroCount != null ? ` · ${formatNumber(doctor.officialIntroCount)} official introductions` : ''}</p>
+            <p>
+              Est. revenue: {doctor.estRevenueUsd == null ? 'unknown until a care plan value is entered' : formatMoney(doctor.estRevenueUsd)}
+              {doctor.estRevenueUsd != null && doctor.valueIsEstimate ? ' (Estimate)' : ''}
+            </p>
+            {doctor.estRevenueUsd != null && doctor.membershipAnnualUsd != null ? (
+              <p>
+                {formatMoney(doctor.estRevenueUsd)} vs {formatMoney(doctor.membershipAnnualUsd)} annual membership, about {formatRoiMultiple(roiMultiple(doctor.estRevenueUsd, doctor.membershipAnnualUsd) || 0)} the annual membership cost.
+              </p>
+            ) : doctor.estRevenueUsd != null ? (
+              <p className="text-neuro-gray">{doctor.membershipCostUnknown}</p>
+            ) : null}
+            <Link className="inline-flex min-h-11 items-center text-neuro-orange" href="/admin/starts">Open patients started</Link>
+          </>
         )}
       </section>
       <section className="space-y-2">

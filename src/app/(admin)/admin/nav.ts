@@ -7,6 +7,7 @@ import {
   Clapperboard,
   FileText,
   Flag,
+  HeartPulse,
   Inbox,
   LayoutDashboard,
   Mail,
@@ -48,6 +49,7 @@ export const moreNav: AdminNavItem[] = [
   { name: 'Agents', href: '/admin/agents', icon: Bot },
   { name: 'Logs', href: '/admin/logs', icon: ScrollText },
   { name: 'Message reports', href: '/admin/message-reports', icon: Flag },
+  { name: 'Patients started', href: '/admin/starts', icon: HeartPulse },
 ]
 
 const contentPrefixes = ['/admin/content', '/admin/clips', '/admin/spotlight', '/admin/announcements', '/admin/content-tracker']
