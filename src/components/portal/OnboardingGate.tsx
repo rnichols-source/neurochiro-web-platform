@@ -13,7 +13,7 @@ const CALENDLY_URL = 'https://calendly.com/drray-neurochirodirectory/neurochiro-
 
 function ReviewScreen({ title, body, action }: { title: string; body: string; action?: { href: string; label: string } }) {
   return (
-    <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
+    <div className="onboarding-gate min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full text-center">
         <h1 className="text-2xl font-bold text-white mb-3">{title}</h1>
         <p className="text-white/70 leading-relaxed mb-6">{body}</p>
@@ -90,7 +90,7 @@ export default function OnboardingGate({
   const name = firstName(doctorName);
 
   return (
-    <div className="min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
+    <div className="onboarding-gate min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
           <div className="w-20 h-20 rounded-full bg-neuro-orange/20 flex items-center justify-center mx-auto mb-6">

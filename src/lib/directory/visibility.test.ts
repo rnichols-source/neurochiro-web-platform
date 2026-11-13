@@ -76,6 +76,16 @@ describe('public doctor listings', () => {
     assert.equal(isDoctorPubliclyVisible(row({ verification_status: '', user_id: null })), false)
   })
 
+  it('hides a verified test doctor', () => {
+    assert.equal(isDoctorPubliclyVisible(row({
+      user_id: 'user-test',
+      verification_status: 'verified',
+      is_approved: true,
+      membership_tier: 'pro',
+      is_test: true,
+    })), false)
+  })
+
   it('publishes an approved doctor', () => {
     assert.equal(isDoctorPubliclyVisible(row({
       user_id: 'user-5',

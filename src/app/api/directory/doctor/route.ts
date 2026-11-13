@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { excludeTestDoctors } from '@/lib/directory/visibility'
 import { attachDisplayName } from '@/lib/listing-display'
 
 const DOCTOR_FIELDS = 'id, first_name, last_name, clinic_name, city, state, photo_url, slug, listing_format, co_owners'
@@ -16,10 +17,10 @@ export async function GET(req: NextRequest) {
 
   const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug)
 
-  let query = supabase
+  let query = excludeTestDoctors(supabase
     .from('doctors')
     .select(DOCTOR_FIELDS)
-    .eq('verification_status', 'verified')
+    .eq('verification_status', 'verified'))
 
   if (isUuid) {
     query = query.eq('id', slug)
@@ -38,11 +39,11 @@ export async function GET(req: NextRequest) {
       .maybeSingle()
     if (redir?.new_slug) {
       // Re-fetch with the new slug
-      const { data: redirected } = await supabase
+      const { data: redirected } = await excludeTestDoctors(supabase
         .from('doctors')
         .select(DOCTOR_FIELDS)
         .eq('verification_status', 'verified')
-        .eq('slug', redir.new_slug)
+        .eq('slug', redir.new_slug))
         .single()
       if (redirected) return NextResponse.json(attachDisplayName(redirected))
     }

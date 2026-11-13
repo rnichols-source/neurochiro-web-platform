@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase-admin";
+import { excludeTestDoctors } from "@/lib/directory/visibility";
 import { resolveStateCode } from "@/lib/resolve-state";
 
 export async function getDoctorsByLocation(city: string, state: string) {
@@ -9,13 +10,13 @@ export async function getDoctorsByLocation(city: string, state: string) {
   const decodedCity = decodeURIComponent(city).replace(/-/g, " ");
   const decodedState = decodeURIComponent(state).replace(/-/g, " ");
 
-  const { data: doctors } = await supabase
+  const { data: doctors } = await excludeTestDoctors(supabase
     .from("doctors")
     .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views, listing_format, co_owners")
     .eq("verification_status", "verified")
     .ilike("city", decodedCity)
     .eq("state", resolveStateCode(decodedState) || decodedState)
-    .order("profile_views", { ascending: false });
+    .order("profile_views", { ascending: false }));
 
   return doctors || [];
 }
@@ -25,12 +26,12 @@ export async function getDoctorsByState(state: string) {
 
   const decodedState = decodeURIComponent(state).replace(/-/g, " ");
 
-  const { data: doctors } = await supabase
+  const { data: doctors } = await excludeTestDoctors(supabase
     .from("doctors")
     .select("id, first_name, last_name, clinic_name, slug, city, state, photo_url, bio, specialties, profile_views, listing_format, co_owners")
     .eq("verification_status", "verified")
     .eq("state", resolveStateCode(decodedState) || decodedState)
-    .order("profile_views", { ascending: false });
+    .order("profile_views", { ascending: false }));
 
   return doctors || [];
 }
@@ -41,12 +42,12 @@ export async function getCityStats(city: string, state: string) {
   const decodedCity = decodeURIComponent(city).replace(/-/g, " ");
   const decodedState = decodeURIComponent(state).replace(/-/g, " ");
 
-  const { data, count } = await supabase
+  const { data, count } = await excludeTestDoctors(supabase
     .from("doctors")
     .select("profile_views", { count: "exact" })
     .eq("verification_status", "verified")
     .ilike("city", decodedCity)
-    .eq("state", resolveStateCode(decodedState) || decodedState);
+    .eq("state", resolveStateCode(decodedState) || decodedState));
 
   const totalViews = (data || []).reduce((sum: number, d: any) => sum + (d.profile_views || 0), 0);
 

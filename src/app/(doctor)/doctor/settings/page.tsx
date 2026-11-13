@@ -104,7 +104,7 @@ export default function SettingsPage() {
         <h2 className="text-sm font-bold text-gray-400 tracking-wide mb-4">Notifications</h2>
         <div className="space-y-4">
           {[
-            { key: 'appointment_requests', label: 'Appointment Requests', desc: 'When a patient requests an appointment' },
+            { key: 'appointment_requests', label: 'Appointment Requests', desc: 'When a community member requests an appointment' },
             { key: 'referrals', label: 'Referrals', desc: 'When a doctor sends you a referral' },
             { key: 'messages', label: 'Messages', desc: 'When you receive a new message' },
             { key: 'system_updates', label: 'Platform Updates', desc: 'News and feature updates from NeuroChiro' },

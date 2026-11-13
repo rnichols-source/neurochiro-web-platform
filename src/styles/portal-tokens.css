@@ -43,6 +43,10 @@
   text-transform: none;
 }
 
+.portal .onboarding-gate :is(h1, h2, h3, h4, h5, h6) {
+  color: #fff;
+}
+
 .portal .portal-sidebar h1,
 .portal .portal-sidebar h2,
 .portal .portal-sidebar h3,

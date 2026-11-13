@@ -32,7 +32,7 @@ export default function ReferralHistory({
     <div className="max-w-3xl">
       <PageHeader
         title="Referrals"
-        description={waiting ? `${waiting} waiting on you` : 'Patients you sent, and patients sent to you.'}
+        description={waiting ? `${waiting} waiting on you` : 'Community members you sent, and community members sent to you.'}
         action={<ReferButton />}
       />
       <div className="grid grid-cols-2 gap-2 mb-4">
@@ -43,7 +43,7 @@ export default function ReferralHistory({
         <EmptyState
           icon={Users}
           title={tab === 'received' ? 'No referrals yet' : 'No referrals sent'}
-          sentence={tab === 'received' ? 'When a doctor sends you a patient, it shows up here.' : 'Use Refer a patient above to send your first one.'}
+          sentence={tab === 'received' ? 'When a doctor sends you a community member, it shows up here.' : 'Use Refer a community member above to send your first one.'}
         />
       ) : (
         <ul className="space-y-2">

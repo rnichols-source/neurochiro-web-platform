@@ -7,7 +7,7 @@ import { resolveStateCode } from '@/lib/resolve-state'
 import { Doctor } from '@/types/directory'
 import { revalidatePath } from 'next/cache'
 import { getThresholds } from '@/lib/thresholds'
-import { applyPublicListing, isDoctorPubliclyVisible, type PublicListingRow } from '@/lib/directory/visibility'
+import { applyPublicListing, excludeTestDoctors, isDoctorPubliclyVisible, type PublicListingRow } from '@/lib/directory/visibility'
 
 export async function getDoctors(options: {
   regionCode?: string;
@@ -125,11 +125,11 @@ export async function getDoctorBySlug(slug: string) {
   const selectFields = 'id, first_name, last_name, clinic_name, slug, city, state, country, verification_status, membership_tier, is_founding_member, is_approved, paid_at, user_id, address, latitude, longitude, bio, specialties, region_code, email, phone, website_url, instagram_url, facebook_url, tiktok_url, photo_url, video_url, seo_keywords, profile_views, patient_leads, banner_url, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, created_at, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, profile_style, listing_format, co_owners';
   
   try {
-    let { data, error } = await supabase
+    let { data, error } = await excludeTestDoctors(supabase
       .from('doctors')
       .select(selectFields)
       .eq('slug', slug)
-      .in('verification_status', ['verified', 'pending'])
+      .in('verification_status', ['verified', 'pending']))
       .maybeSingle()
 
     if (!data) {
@@ -137,11 +137,11 @@ export async function getDoctorBySlug(slug: string) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       
       if (isUuid) {
-          const { data: byId, error: errorId } = await supabase
+          const { data: byId, error: errorId } = await excludeTestDoctors(supabase
               .from('doctors')
               .select(selectFields)
               .eq('id', slug)
-              .in('verification_status', ['verified', 'pending'])
+              .in('verification_status', ['verified', 'pending']))
               .maybeSingle()
           
           if (byId) {
@@ -247,12 +247,12 @@ export async function getNearbyDoctors(doctorId: string, state: string, limit = 
   if (!state) return [];
   const supabase = createServerSupabase();
   try {
-    const { data } = await (supabase as any)
+    const { data } = await excludeTestDoctors((supabase as any)
       .from('doctors')
       .select('id, first_name, last_name, clinic_name, city, state, slug, photo_url, specialties, latitude, longitude, accepting_new_patients, listing_format, co_owners')
       .eq('verification_status', 'verified')
       .eq('state', resolveStateCode(state) || state)
-      .neq('id', doctorId);
+      .neq('id', doctorId));
 
     if (!data || data.length === 0) return [];
 
