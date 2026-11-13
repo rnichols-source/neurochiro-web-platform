@@ -88,7 +88,7 @@ export function ExerciseBoard({ assignments, sampleReady }: { assignments: Exerc
       {!hasSample ? (
         <div className="rounded-2xl bg-[#fdf1ea] px-3.5 py-3">
           <p className="font-heading text-[13px] font-bold text-neuro-navy">Sample · not care</p>
-          <p className="mt-1 text-[12.5px] leading-snug text-[#3d4a57]">This preview shows how a set looks. It is not a stretch, a remedy, or advice. Your doctor writes the real steps.</p>
+          <p className="mt-1 text-[12.5px] leading-snug text-[#3d4a57]">This preview shows how a short set looks. It is not a plan from the library, and it is not care.</p>
           <button
             type="button"
             disabled={pending || !sampleReady}

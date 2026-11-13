@@ -2,13 +2,18 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BackHeading, Card, Kicker } from '@/components/community/ui'
 import { loadCommunitySnapshot, requireCommunityMember } from '@/lib/community/data'
+import { LIBRARY_COPY } from '@/lib/community/library-model'
+import { loadPhaseHome } from '@/lib/community/phase-data'
 
 export const metadata: Metadata = { title: 'Your care · Your NeuroChiro' }
 export const dynamic = 'force-dynamic'
 
 export default async function CarePage() {
   const session = await requireCommunityMember()
-  const snapshot = await loadCommunitySnapshot(session)
+  const [snapshot, phase] = await Promise.all([
+    loadCommunitySnapshot(session),
+    loadPhaseHome(session.userId),
+  ])
   const doctor = snapshot.homeDoctor
   return (
     <div>
@@ -67,8 +72,11 @@ export default async function CarePage() {
       </Card>
       <Card>
         <Kicker>Exercises and remedies</Kicker>
-        <p className="text-[13.5px] leading-snug text-[#3d4a57]">A set your home doctor assigns. NeuroChiro does not keep a library of stretches or remedies.</p>
-        <Link href="/portal/care/exercises" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Open →</Link>
+        <p className="text-[13.5px] leading-snug text-[#3d4a57]">{phase.careLine || LIBRARY_COPY.careCard}</p>
+        <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
+          <Link href="/portal/care/exercises">Exercises</Link>
+          <Link href="/portal/care/remedies">Remedies</Link>
+        </div>
       </Card>
       <div id="message" className="rounded-2xl bg-[#fdf1ea] px-3.5 py-3">
         <strong className="mb-1 block font-heading text-[13px] font-bold text-neuro-navy">Message</strong>

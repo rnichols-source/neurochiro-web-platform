@@ -2,7 +2,10 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { excludeDemo } from '@/lib/directory/exclude-demo'
 import { applyPublicListing } from '@/lib/directory/visibility'
+import { doctorFormalName } from '@/lib/listing-display'
 import { listSeminars } from '@/lib/seminars/queries'
+import { libraryPlans } from '@/lib/community/library-content'
+import { careHomeLine, memberAssignmentRank, planBySlug, type LibraryPlan } from '@/lib/community/library-model'
 import {
   doctorMayBeHomeDoctor,
   homeDoctorCard,
@@ -38,6 +41,12 @@ export function missingRelation(error: DbError): boolean {
   return error.code === '42P01' || error.code === 'PGRST205' || /does not exist|schema cache|could not find the table/i.test(message)
 }
 
+export function schemaNotReady(error: DbError): boolean {
+  if (missingRelation(error)) return true
+  const message = error?.message || ''
+  return error?.code === '42703' || error?.code === 'PGRST204' || /column .+ does not exist|could not find the '.+' column/i.test(message)
+}
+
 export type PhaseHome = {
   ready: boolean
   feeling: Feeling | null
@@ -45,6 +54,7 @@ export type PhaseHome = {
   showLabel: string
   showTonight: boolean
   reminderTitle: string | null
+  careLine: string
   tripLine: string | null
   workLine: string | null
 }
@@ -58,28 +68,24 @@ export async function loadPhaseHome(profileId: string, now = new Date()): Promis
     showLabel: show.label,
     showTonight: show.tonight,
     reminderTitle: null,
+    careLine: careHomeLine([]),
     tripLine: null,
     workLine: null,
   }
   const admin = createAdminClient() as any
   const weekStart = weekStartKey(now)
-  const [checkin, assignments, trip, work] = await Promise.all([
+  const [checkin, assignmentState, trip, work] = await Promise.all([
     admin.from('community_week_checkins').select('feeling').eq('profile_id', profileId).eq('week_start', weekStart).maybeSingle(),
-    admin.from('community_exercise_assignments').select('id, set_id, reminder_enabled, status').eq('profile_id', profileId).eq('status', 'active').eq('reminder_enabled', true).limit(1),
+    loadActiveAssignments(admin, profileId),
     admin.from('community_passport_trips').select('place_label, starts_on, ends_on, status').eq('profile_id', profileId).eq('status', 'upcoming').order('starts_on', { ascending: true }).limit(1),
     admin.from('community_work_interest').select('path, status').eq('profile_id', profileId).neq('status', 'closed').order('created_at', { ascending: false }).limit(1),
   ])
-  if ([checkin.error, assignments.error, trip.error, work.error].some(missingRelation)) {
+  if ([checkin.error, trip.error, work.error].some(missingRelation) || !assignmentState.ready) {
     return { ...empty, ready: false }
   }
   const feelingValue = checkin.data?.feeling
   const feeling: Feeling | null = typeof feelingValue === 'string' && isFeeling(feelingValue) ? feelingValue : null
-  let reminderTitle: string | null = null
-  const assignment = assignments.data?.[0]
-  if (assignment?.set_id) {
-    const set = await admin.from('community_exercise_sets').select('title').eq('id', assignment.set_id).maybeSingle()
-    if (set.data?.title) reminderTitle = reminderLine(set.data.title)
-  }
+  const { reminderTitle, careLine } = await careSignals(admin, assignmentState.rows)
   const nextTrip = trip.data?.[0]
   const workPathRaw: unknown = work.data?.[0]?.path
   const workPath = typeof workPathRaw === 'string' && isWorkPath(workPathRaw) ? workPathRaw : null
@@ -88,9 +94,57 @@ export async function loadPhaseHome(profileId: string, now = new Date()): Promis
     feeling,
     feelingLabel: feeling ? FEELING_LABELS[feeling] : null,
     reminderTitle,
+    careLine,
     tripLine: nextTrip ? passportHomeLine(nextTrip.place_label, nextTrip.starts_on, nextTrip.ends_on) : null,
     workLine: workPath ? `You raised a hand for ${WORK_PATH_LABELS[workPath]}.` : null,
   }
+}
+
+type ActiveAssignment = {
+  id: string
+  set_id: string | null
+  library_plan_slug?: string | null
+  reminder_enabled?: boolean
+}
+
+async function loadActiveAssignments(admin: any, profileId: string): Promise<{ ready: boolean; rows: ActiveAssignment[] }> {
+  const rich = await admin
+    .from('community_exercise_assignments')
+    .select('id, set_id, library_plan_slug, reminder_enabled, status')
+    .eq('profile_id', profileId)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(24)
+  if (!rich.error) return { ready: true, rows: rich.data || [] }
+  if (!schemaNotReady(rich.error)) return { ready: false, rows: [] }
+  const plain = await admin
+    .from('community_exercise_assignments')
+    .select('id, set_id, reminder_enabled, status')
+    .eq('profile_id', profileId)
+    .eq('status', 'active')
+    .limit(24)
+  if (missingRelation(plain.error)) return { ready: false, rows: [] }
+  return { ready: true, rows: plain.data || [] }
+}
+
+async function careSignals(admin: any, rows: ActiveAssignment[]): Promise<{ reminderTitle: string | null; careLine: string }> {
+  const setIds = [...new Set(rows.map((row) => row.set_id).filter(Boolean))] as string[]
+  const sets = setIds.length
+    ? await admin.from('community_exercise_sets').select('id, title, is_sample').in('id', setIds)
+    : { data: [] }
+  const setMap = new Map((sets.data || []).map((row: { id: string; title: string; is_sample: boolean }) => [row.id, row]))
+  const plans = libraryPlans()
+  const titles: string[] = []
+  let reminderTitle: string | null = null
+  for (const row of rows) {
+    const plan = row.library_plan_slug ? planBySlug(plans, row.library_plan_slug) : null
+    const set = row.set_id ? setMap.get(row.set_id) as { title?: string; is_sample?: boolean } | undefined : undefined
+    const sample = set?.is_sample === true || row.set_id === SAMPLE_SET_ID
+    const title = plan?.name || set?.title || null
+    if (title && !sample) titles.push(title)
+    if (!reminderTitle && row.reminder_enabled && title) reminderTitle = reminderLine(title)
+  }
+  return { reminderTitle, careLine: careHomeLine(titles) }
 }
 
 export type LiveEvent = { title: string; when: string; place: string | null; href: string }
@@ -130,42 +184,82 @@ export type ExerciseAssignment = {
   shareOnPassport: boolean
   status: 'active' | 'done'
   steps: ExerciseStep[]
+  kind: 'library' | 'custom' | 'sample'
+  doctorName: string | null
+  library: LibraryPlan | null
+  doneKeys: string[]
 }
 
 export async function loadExercises(profileId: string): Promise<{ ready: boolean; assignments: ExerciseAssignment[]; sampleReady: boolean }> {
   const admin = createAdminClient() as any
-  const rows = await admin
+  const rich = await admin
     .from('community_exercise_assignments')
-    .select('id, set_id, reminder_enabled, share_on_passport, status')
+    .select('id, set_id, library_plan_slug, doctor_id, doctor_note, reminder_enabled, share_on_passport, status, created_at')
     .eq('profile_id', profileId)
     .order('created_at', { ascending: false })
-    .limit(12)
-  if (missingRelation(rows.error)) return { ready: false, assignments: [], sampleReady: false }
-  const setIds = [...new Set((rows.data || []).map((row: { set_id: string }) => row.set_id))]
+    .limit(24)
+  const rows = schemaNotReady(rich.error)
+    ? await admin
+      .from('community_exercise_assignments')
+      .select('id, set_id, reminder_enabled, share_on_passport, status')
+      .eq('profile_id', profileId)
+      .order('created_at', { ascending: false })
+      .limit(24)
+    : rich
+  if (rows.error) return { ready: false, assignments: [], sampleReady: false }
+  const data = rows.data || []
+  const setIds = [...new Set(data.map((row: { set_id?: string | null }) => row.set_id).filter(Boolean))] as string[]
   const sets = setIds.length
     ? await admin.from('community_exercise_sets').select('id, title, note, is_sample').in('id', setIds)
     : { data: [], error: null }
   const steps = setIds.length
     ? await admin.from('community_exercise_steps').select('id, set_id, position, label').in('set_id', setIds).order('position', { ascending: true })
     : { data: [], error: null }
-  const assignmentIds = (rows.data || []).map((row: { id: string }) => row.id)
+  const assignmentIds = data.map((row: { id: string }) => row.id)
   const done = assignmentIds.length
     ? await admin.from('community_exercise_step_done').select('assignment_id, step_id').in('assignment_id', assignmentIds)
     : { data: [], error: null }
+  const libraryDone = assignmentIds.length
+    ? await admin.from('community_library_exercise_done').select('assignment_id, exercise_key').in('assignment_id', assignmentIds)
+    : { data: [], error: null }
   if ([sets.error, steps.error, done.error].some(missingRelation)) return { ready: false, assignments: [], sampleReady: false }
+  const doctorIds = [...new Set(data.map((row: { doctor_id?: string | null }) => row.doctor_id).filter(Boolean))] as string[]
+  const doctors = doctorIds.length
+    ? await admin.from('doctors').select('id, first_name, last_name').in('id', doctorIds)
+    : { data: [] }
+  const doctorNames = new Map((doctors.data || []).map((row: { id: string; first_name?: string | null; last_name?: string | null }) => [row.id, doctorFormalName(row)]))
   const setMap = new Map((sets.data || []).map((row: { id: string }) => [row.id, row]))
   const doneKey = new Set((done.data || []).map((row: { assignment_id: string; step_id: string }) => `${row.assignment_id}:${row.step_id}`))
-  const assignments: ExerciseAssignment[] = (rows.data || []).map((row: Record<string, unknown>) => {
-    const set = setMap.get(String(row.set_id)) as { title?: string; note?: string | null; is_sample?: boolean } | undefined
-    const setSteps = (steps.data || []).filter((step: { set_id: string }) => step.set_id === row.set_id)
+  const libraryDoneKeys = new Map<string, string[]>()
+  if (!schemaNotReady(libraryDone.error)) {
+    for (const row of libraryDone.data || []) {
+      const list = libraryDoneKeys.get(row.assignment_id) || []
+      list.push(row.exercise_key)
+      libraryDoneKeys.set(row.assignment_id, list)
+    }
+  }
+  const plans = libraryPlans()
+  const assignments: ExerciseAssignment[] = data.map((row: Record<string, unknown>) => {
+    const setId = row.set_id ? String(row.set_id) : ''
+    const set = setId ? setMap.get(setId) as { title?: string; note?: string | null; is_sample?: boolean } | undefined : undefined
+    const slug = typeof row.library_plan_slug === 'string' ? row.library_plan_slug : ''
+    const plan = slug ? planBySlug(plans, slug) : null
+    const sample = set?.is_sample === true || setId === SAMPLE_SET_ID
+    const kind = plan ? 'library' : sample ? 'sample' : 'custom'
+    const setSteps = (steps.data || []).filter((step: { set_id: string }) => step.set_id === setId)
+    const doctorId = typeof row.doctor_id === 'string' ? row.doctor_id : ''
     return {
       id: String(row.id),
-      title: set?.title || 'A set',
-      note: set?.note || null,
-      sample: set?.is_sample === true || row.set_id === SAMPLE_SET_ID,
+      title: plan?.name || set?.title || 'A set',
+      note: plan ? (typeof row.doctor_note === 'string' ? row.doctor_note : null) : (set?.note || null),
+      sample,
       reminder: row.reminder_enabled === true,
       shareOnPassport: row.share_on_passport === true,
       status: row.status === 'done' ? 'done' : 'active',
+      kind,
+      doctorName: doctorNames.get(doctorId) || null,
+      library: plan,
+      doneKeys: libraryDoneKeys.get(String(row.id)) || [],
       steps: setSteps.map((step: { id: string; position: number; label: string }) => ({
         id: step.id,
         position: step.position,
@@ -174,6 +268,7 @@ export async function loadExercises(profileId: string): Promise<{ ready: boolean
       })),
     }
   })
+  assignments.sort((a, b) => memberAssignmentRank(a.kind) - memberAssignmentRank(b.kind))
   const sample = await admin.from('community_exercise_sets').select('id').eq('id', SAMPLE_SET_ID).maybeSingle()
   return { ready: true, assignments, sampleReady: Boolean(sample.data?.id) }
 }
