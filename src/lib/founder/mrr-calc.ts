@@ -270,6 +270,35 @@ function percentFactor(coupons: CouponBits[]): number {
   return Math.max(0, factor)
 }
 
+export function productIdsIn(subs: MrrSub[]): string[] {
+  const ids = new Set<string>()
+  for (const sub of subs) {
+    for (const item of sub.items?.data || []) {
+      const product = item.price?.product
+      if (typeof product === 'string' && product) ids.add(product)
+      else if (product && typeof product === 'object' && product.id) ids.add(product.id)
+    }
+  }
+  return [...ids]
+}
+
+/** Product ids on subscriptions that products.list did not return. */
+export function missingProductIds(subs: MrrSub[], catalog: Record<string, ProductBits>): string[] {
+  return productIdsIn(subs).filter((id) => !catalog[id])
+}
+
+export function mergeProducts(
+  catalog: Record<string, ProductBits>,
+  products: Array<ProductBits & { deleted?: boolean }>,
+): Record<string, ProductBits> {
+  const next = { ...catalog }
+  for (const product of products) {
+    if (!product?.id || product.deleted) continue
+    next[product.id] = { id: product.id, name: product.name || '', metadata: product.metadata || {} }
+  }
+  return next
+}
+
 export function couponIdsIn(sub: MrrSub): string[] {
   const ids: string[] = []
   const take = (discount: DiscountBits) => {

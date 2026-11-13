@@ -7,6 +7,8 @@ import {
   failedSnapshot,
   FALLBACK_FX,
   fxFromFrankfurter,
+  mergeProducts,
+  missingProductIds,
   parseFxOverride,
   summarizeMrr,
   type CouponBits,
@@ -96,6 +98,20 @@ async function loadCatalog(): Promise<Record<string, ProductBits>> {
   return catalog
 }
 
+async function retrieveMissingProducts(ids: string[]): Promise<ProductBits[]> {
+  const found: ProductBits[] = []
+  await Promise.all(ids.map(async (id) => {
+    try {
+      const product = await stripe.products.retrieve(id)
+      if ('deleted' in product && product.deleted) return
+      found.push({ id: product.id, name: product.name, metadata: product.metadata || {} })
+    } catch {
+      // A product that cannot be read stays out. That subscription is skipped.
+    }
+  }))
+  return found
+}
+
 async function loadCoupons(ids: string[]): Promise<Record<string, CouponBits>> {
   const coupons: Record<string, CouponBits> = {}
   await Promise.all(ids.map(async (id) => {
@@ -120,7 +136,9 @@ async function compute(): Promise<Memo> {
   const catalogPromise = loadCatalog()
   const subs = await listSubscriptions()
   const couponIds = [...new Set(subs.flatMap((sub) => couponIdsIn(sub)))]
-  const [rates, catalog, coupons] = await Promise.all([ratesPromise, catalogPromise, loadCoupons(couponIds)])
+  const [rates, listed, coupons] = await Promise.all([ratesPromise, catalogPromise, loadCoupons(couponIds)])
+  const retrieved = await retrieveMissingProducts(missingProductIds(subs, listed))
+  const catalog = mergeProducts(listed, retrieved)
   const math = summarizeMrr(subs, {
     rates,
     catalog,

@@ -63,7 +63,7 @@ async function MoneyBody() {
           <Card>
             <div className="mb-2 flex items-center justify-between"><h2 className="fd-ui font-extrabold">Churn · last 30 days</h2><Tag kind={billing.churn30 == null ? 'tracking' : 'live'}>{billing.churn30 == null ? 'Unavailable' : 'Live data'}</Tag></div>
             <b className="fd-ui text-[40px]">{billing.churn30 == null ? '—' : formatNumber(billing.churn30)}</b>
-            <p className="text-[13px] text-[#5b6773]">canceled doctor memberships</p>
+            <p className="text-[13px] text-[#5b6773]">canceled NeuroChiro subscriptions</p>
           </Card>
           <Card className="lg:col-span-3">
             <div className="mb-2 flex items-center justify-between"><h2 className="fd-ui font-extrabold">Where MRR comes from</h2><Tag kind={billing.stripeOk ? 'live' : 'tracking'}>{billing.stripeOk ? 'Live from Stripe' : 'Unavailable'}</Tag></div>

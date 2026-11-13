@@ -5,8 +5,8 @@ import { cache } from 'react'
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import { formatMoney } from './format'
-import { isDoctorMembershipPrice, type MembershipPrice } from './membership-price'
-import { loadNeuroChiroMrr, type MrrSnapshot } from './mrr'
+import { isNeuroChiroProduct, type ProductBits } from './mrr-calc'
+import { loadMrrBaselineInputs, loadNeuroChiroMrr, type MrrSnapshot } from './mrr'
 
 export type PlanRow = { label: string; n: number }
 export type CurrencyAmount = { currency: string; amount: number }
@@ -31,22 +31,19 @@ export type DoctorBilling = {
   disputeAmount: string | null
 }
 
-function priceShape(price: Stripe.Price | null | undefined): MembershipPrice | null {
-  if (!price) return null
-  return {
-    id: price.id,
-    currency: price.currency || null,
-    unitAmount: price.unit_amount,
-    interval: price.recurring?.interval || null,
-  }
-}
-
-function isDoctorSubscription(sub: Stripe.Subscription): boolean {
+function isNeuroChiroSubscription(sub: Stripe.Subscription, catalog: Record<string, ProductBits>): boolean {
   const recurring = (sub.items?.data || []).filter((item) => item.price?.recurring?.interval)
   if (!recurring.length) return false
-  return recurring.every((item) => {
-    const shape = priceShape(item.price)
-    return shape ? isDoctorMembershipPrice(shape) : false
+  return recurring.some((item) => {
+    const product = item.price?.product
+    const id = typeof product === 'string' ? product : product?.id || ''
+    const known = id ? catalog[id] : undefined
+    const embedded = product && typeof product === 'object' && !('deleted' in product && product.deleted) ? product : null
+    return isNeuroChiroProduct({
+      id,
+      name: embedded?.name || known?.name || '',
+      metadata: embedded?.metadata || known?.metadata || {},
+    })
   })
 }
 
@@ -83,13 +80,14 @@ async function loadDoctorBillingFresh(): Promise<DoctorBilling> {
   const empty = emptyBilling()
   try {
     const since = Math.floor((Date.now() - 30 * 86_400_000) / 1000)
-    const [snap, canceled] = await Promise.all([
+    const [snap, canceled, inputs] = await Promise.all([
       loadNeuroChiroMrr(),
       listSubscriptions('canceled'),
+      loadMrrBaselineInputs(),
     ])
     let churn = 0
     for (const sub of canceled) {
-      if ((sub.canceled_at || 0) >= since && isDoctorSubscription(sub)) churn += 1
+      if ((sub.canceled_at || 0) >= since && isNeuroChiroSubscription(sub, inputs.catalog)) churn += 1
     }
     let refunds = 0
     for await (const refund of stripe.refunds.list({ created: { gte: since }, limit: 100 })) {

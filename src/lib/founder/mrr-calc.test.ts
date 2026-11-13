@@ -5,6 +5,8 @@ import {
   baselinePayingCount,
   FALLBACK_FX,
   fxFromFrankfurter,
+  mergeProducts,
+  missingProductIds,
   parseFxOverride,
   summarizeMrr,
   type MrrSub,
@@ -110,6 +112,23 @@ test('customer, subscription, and item percents multiply', () => {
     items: { data: [{ discounts: [{ id: 'di_item', source: { coupon: { percent_off: 10, duration: 'forever' } } }] }] },
   })])
   assert.equal(result.mrrUsd, 72.9)
+})
+
+test('an archived product missing from the list counts after retrieve fills it in', () => {
+  const lone = priceSub('archived', 'prod_UW0OJOXaSsBEIU', 1200, 'usd', 'month', 1)
+  const before = run([lone])
+  assert.equal(before.mrrUsd, 0)
+  assert.equal(before.payingSubscriptions, 0)
+  assert.deepEqual(missingProductIds([lone], CATALOG), ['prod_UW0OJOXaSsBEIU'])
+  const catalog = mergeProducts(CATALOG, [
+    { id: 'prod_UW0OJOXaSsBEIU', name: 'NeuroChiro Student Membership', metadata: {} },
+    { id: 'prod_deleted', name: 'NeuroChiro Deleted', deleted: true },
+  ])
+  const after = summarizeMrr([lone], { rates: RATES, now: NOW, catalog })
+  assert.equal(after.mrrUsd, 12)
+  assert.equal(after.payingSubscriptions, 1)
+  assert.equal(after.segments.find((row) => row.key === 'student')?.subscriptions, 1)
+  assert.equal(catalog.prod_deleted, undefined)
 })
 
 test('a coupon id on source.coupon is applied from the coupon map', () => {
