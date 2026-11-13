@@ -1,9 +1,10 @@
+import { Suspense } from 'react';
 import PageHeader from '@/components/portal/PageHeader';
 import StatusPill from '@/components/portal/StatusPill';
 import { getBillingData } from './actions';
 import { ActivateProButtons, ManageBillingButton } from './BillingButtons';
 import { getPortalContext } from '@/lib/portal/context';
-import { PRO_PRICE_LABEL } from '@/lib/portal/membership';
+import { PRO_PRICE_LABEL, type Membership } from '@/lib/portal/membership';
 import { billingView } from '@/lib/portal/billing-view';
 import { redirect } from 'next/navigation';
 import { portalTimer } from '@/lib/portal/timing';
@@ -11,7 +12,14 @@ import { portalTimer } from '@/lib/portal/timing';
 export default async function BillingPage() {
   const ctx = await getPortalContext();
   if (!ctx) redirect('/login');
-  const membership = ctx.membership;
+  return (
+    <Suspense fallback={<BillingSkeleton />}>
+      <BillingLoaded membership={ctx.membership} />
+    </Suspense>
+  );
+}
+
+async function BillingLoaded({ membership }: { membership: Membership }) {
   const done = portalTimer('billing');
   const billing = await getBillingData();
   done();
@@ -83,6 +91,15 @@ export default async function BillingPage() {
           </ul>
         </section>
       ) : null}
+    </div>
+  );
+}
+
+function BillingSkeleton() {
+  return (
+    <div className="space-y-6" aria-hidden="true">
+      <div className="h-8 w-40 animate-pulse rounded-lg bg-portal-surface" />
+      <div className="h-36 animate-pulse rounded-xl border border-portal-border bg-white" />
     </div>
   );
 }

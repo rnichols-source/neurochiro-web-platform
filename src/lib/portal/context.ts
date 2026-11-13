@@ -58,7 +58,8 @@ async function lookupStaffOffice(userId: string): Promise<boolean> {
 async function loadSavedItems(userId: string): Promise<Record<string, unknown> | null> {
   const admin = createAdminClient() as any;
   const row = await admin.from('doctor_tool_data').select('data').eq('user_id', userId).eq('tool', 'saved_items').maybeSingle();
-  if (row.error || !row.data?.data || typeof row.data.data !== 'object') return null;
+  if (row.error) return null;
+  if (!row.data?.data || typeof row.data.data !== 'object') return {};
   return row.data.data as Record<string, unknown>;
 }
 

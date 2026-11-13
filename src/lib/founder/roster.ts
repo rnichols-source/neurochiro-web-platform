@@ -294,7 +294,7 @@ const loadFounderRosterCached = unstable_cache(loadFounderRosterFresh, ['founder
   tags: ['founder-roster'],
 })
 
-/** Shared roster for the founder admin. Cached 2 minutes so tab switches do not rebuild it. */
+/** Shared roster for the founder admin. Cached 60 seconds so tab switches do not rebuild it. */
 export const loadFounderRoster = cache(loadFounderRosterCached)
 
 function mapDoctor(row: any): DoctorRecord {

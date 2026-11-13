@@ -116,9 +116,8 @@ $$;
 
 grant execute on function public.zip_codes_city_ilike(text, text) to anon, authenticated, service_role;
 
--- Rewrite every public policy that still calls auth.uid() per row.
--- Policies that already use (select auth.uid()) are left alone, so this is safe to re-run.
--- USING / WITH CHECK text is copied from pg_get_expr and only the auth.uid() call is wrapped.
+-- Rewrite public policies that call auth.uid(), auth.role(), auth.jwt(), or current_setting() per row.
+-- Each call is wrapped as (select ...) once. Already-wrapped calls are left alone, so this is safe to re-run.
 do $$
 declare
   rec record;
@@ -136,14 +135,39 @@ begin
     join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public'
   loop
-    if coalesce(rec.qual, '') ~* 'select auth\.uid\(\)' or coalesce(rec.chk, '') ~* 'select auth\.uid\(\)' then
+    next_using := rec.qual;
+    next_check := rec.chk;
+    if next_using is not null then
+      if next_using !~* 'select[[:space:]]+auth\.uid\(\)' then
+        next_using := replace(next_using, 'auth.uid()', '(select auth.uid())');
+      end if;
+      if next_using !~* 'select[[:space:]]+auth\.role\(\)' then
+        next_using := replace(next_using, 'auth.role()', '(select auth.role())');
+      end if;
+      if next_using !~* 'select[[:space:]]+auth\.jwt\(\)' then
+        next_using := replace(next_using, 'auth.jwt()', '(select auth.jwt())');
+      end if;
+      if next_using !~* 'select[[:space:]]+current_setting[[:space:]]*\(' then
+        next_using := regexp_replace(next_using, 'current_setting[[:space:]]*\(((?:[^()]|\([^()]*\))*)\)', '(select current_setting(\1))', 'gi');
+      end if;
+    end if;
+    if next_check is not null then
+      if next_check !~* 'select[[:space:]]+auth\.uid\(\)' then
+        next_check := replace(next_check, 'auth.uid()', '(select auth.uid())');
+      end if;
+      if next_check !~* 'select[[:space:]]+auth\.role\(\)' then
+        next_check := replace(next_check, 'auth.role()', '(select auth.role())');
+      end if;
+      if next_check !~* 'select[[:space:]]+auth\.jwt\(\)' then
+        next_check := replace(next_check, 'auth.jwt()', '(select auth.jwt())');
+      end if;
+      if next_check !~* 'select[[:space:]]+current_setting[[:space:]]*\(' then
+        next_check := regexp_replace(next_check, 'current_setting[[:space:]]*\(((?:[^()]|\([^()]*\))*)\)', '(select current_setting(\1))', 'gi');
+      end if;
+    end if;
+    if next_using is not distinct from rec.qual and next_check is not distinct from rec.chk then
       continue;
     end if;
-    if coalesce(rec.qual, '') !~ 'auth\.uid\(\)' and coalesce(rec.chk, '') !~ 'auth\.uid\(\)' then
-      continue;
-    end if;
-    next_using := replace(rec.qual, 'auth.uid()', '(select auth.uid())');
-    next_check := replace(rec.chk, 'auth.uid()', '(select auth.uid())');
     stmt := format('alter policy %I on public.%I', rec.name, rec.tbl);
     if rec.qual is not null then
       stmt := stmt || ' using (' || next_using || ')';

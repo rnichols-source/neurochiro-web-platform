@@ -31,10 +31,12 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loaded = useRef(false);
   const seeded = useRef(false);
+  const skipRemoteWrite = useRef(false);
 
   const seedSaved = useCallback((items: SavedItems) => {
     seeded.current = true;
     loaded.current = true;
+    skipRemoteWrite.current = true;
     setSaved({ ...EMPTY_SAVED, ...items });
   }, []);
 
@@ -83,6 +85,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   // Save to Supabase + localStorage (debounced)
   useEffect(() => {
     if (!loaded.current) return;
+    if (skipRemoteWrite.current) {
+      skipRemoteWrite.current = false;
+      try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
+      return;
+    }
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       // localStorage (always)

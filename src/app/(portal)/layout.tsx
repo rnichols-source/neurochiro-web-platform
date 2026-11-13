@@ -30,6 +30,6 @@ async function loadMemberChrome(): Promise<{ fullName: string | null; saved: Rec
   const data = saved.data?.data
   return {
     fullName: profile.data?.full_name || null,
-    saved: data && typeof data === 'object' ? data as Record<string, unknown> : null,
+    saved: data && typeof data === 'object' ? data as Record<string, unknown> : {},
   }
 }

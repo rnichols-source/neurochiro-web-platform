@@ -1,8 +1,76 @@
 'use server'
 
+import { unstable_cache } from 'next/cache';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { stripe } from '@/lib/stripe';
 import Stripe from 'stripe';
+
+type StripeBilling = {
+  subscription: {
+    id: string;
+    status: string;
+    price: number;
+    interval: string;
+    nextBilling: string;
+    paymentMethod: string | null;
+  } | null;
+  invoices: {
+    id: string;
+    date: string;
+    amount: number;
+    status: Stripe.Invoice.Status | null;
+    url: string | null;
+    number: string | null;
+  }[];
+};
+
+const loadStripeBilling = unstable_cache(
+  async (customerId: string): Promise<StripeBilling> => {
+    const [subscriptions, invoices] = await Promise.all([
+      stripe.subscriptions.list({
+        customer: customerId,
+        limit: 1,
+        status: 'all',
+        expand: ['data.default_payment_method'],
+      }),
+      stripe.invoices.list({
+        customer: customerId,
+        limit: 10,
+      }),
+    ]);
+    const activeSubscription = subscriptions.data[0] as any;
+    return {
+      subscription: activeSubscription ? {
+        id: activeSubscription.id,
+        status: activeSubscription.status,
+        price: activeSubscription.items?.data?.[0]?.price?.unit_amount ? activeSubscription.items.data[0].price.unit_amount / 100 : 0,
+        interval: activeSubscription.items?.data?.[0]?.plan?.interval || 'month',
+        nextBilling: activeSubscription.current_period_end
+          ? new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
+              month: 'short',
+              day: '2-digit',
+              year: 'numeric',
+            })
+          : '---',
+        paymentMethod: activeSubscription.default_payment_method?.card?.last4 || null,
+      } : null,
+      invoices: invoices.data.map((inv) => ({
+        id: inv.id,
+        date: new Date(inv.created * 1000).toLocaleDateString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        }),
+        amount: inv.amount_paid / 100,
+        status: inv.status,
+        url: inv.hosted_invoice_url ?? null,
+        number: inv.number,
+      })),
+    };
+  },
+  ['doctor-stripe-billing-v1'],
+  { revalidate: 60 },
+);
 
 export async function getBillingData() {
   try {
@@ -21,50 +89,12 @@ export async function getBillingData() {
       return { noCustomer: true, tier: profile?.tier };
     }
 
-    // Fetch subscription details
-    const subscriptions = await stripe.subscriptions.list({
-      customer: profile.stripe_customer_id,
-      limit: 1,
-      status: 'all',
-      expand: ['data.default_payment_method']
-    });
-
-    const activeSubscription = subscriptions.data[0] as any;
-
-    // Fetch last 10 invoices
-    const invoices = await stripe.invoices.list({
-      customer: profile.stripe_customer_id,
-      limit: 10,
-    });
+    const stripeBilling = await loadStripeBilling(profile.stripe_customer_id);
 
     return {
       tier: profile.tier,
-      subscription: activeSubscription ? {
-        id: activeSubscription.id,
-        status: activeSubscription.status,
-        price: activeSubscription.items?.data?.[0]?.price?.unit_amount ? activeSubscription.items.data[0].price.unit_amount / 100 : 0,
-        interval: activeSubscription.items?.data?.[0]?.plan?.interval || 'month',
-        nextBilling: activeSubscription.current_period_end 
-          ? new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
-              month: 'short',
-              day: '2-digit',
-              year: 'numeric'
-            })
-          : '---',
-        paymentMethod: activeSubscription.default_payment_method?.card?.last4 || null
-      } : null,
-      invoices: invoices.data.map(inv => ({
-        id: inv.id,
-        date: new Date(inv.created * 1000).toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric'
-        }),
-        amount: inv.amount_paid / 100,
-        status: inv.status,
-        url: inv.hosted_invoice_url,
-        number: inv.number
-      }))
+      subscription: stripeBilling.subscription,
+      invoices: stripeBilling.invoices,
     };
   } catch (error) {
     console.error("[billing] failed to load");

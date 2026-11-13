@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, Suspense } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
 import HiringTabs from "./HiringTabs";
@@ -52,7 +52,6 @@ import {
 } from "./hiring-data";
 import type { PipelineStage } from "./hiring-data";
 import ChiroScoreInline from "./ChiroScoreInline";
-import { useJobsSeed } from "./seed";
 
 // ─── Utility Components ──────────────────────────────────────────────────────
 
@@ -142,11 +141,9 @@ function JobsPageInner() {
   const justPosted = searchParams.get('posted') === 'success'
   const [showPostedBanner, setShowPostedBanner] = useState(justPosted)
 
-  const seed = useJobsSeed();
-  const seedRef = useRef(seed);
-  const [jobs, setJobs] = useState<any[]>(seed?.jobs || []);
-  const [applications, setApplications] = useState<any[]>(seed?.applications || []);
-  const [loading, setLoading] = useState(!seed);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [applications, setApplications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -183,19 +180,6 @@ function JobsPageInner() {
   }, []);
 
   useEffect(() => {
-    const seeded = seedRef.current;
-    if (seeded) {
-      const nr: Record<string, number> = {};
-      const nn: Record<string, string> = {};
-      seeded.applications.forEach((app: any) => {
-        if (app.rating) nr[app.id] = app.rating;
-        if (app.doctorNotes) nn[app.id] = app.doctorNotes;
-      });
-      setLocalRatings((prev) => ({ ...nr, ...prev }));
-      setLocalNotes((prev) => ({ ...nn, ...prev }));
-      setLoading(false);
-      return;
-    }
     loadData();
   }, [loadData]);
 

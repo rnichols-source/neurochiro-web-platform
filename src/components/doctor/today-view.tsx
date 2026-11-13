@@ -44,7 +44,7 @@ export function TodayView({ data }: { data: TodayData }) {
         <div className="grid grid-cols-[1fr_auto] items-start gap-x-3 gap-y-4">
           <div className="flex items-center gap-2.5 lg:hidden">
             <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-white">
-              <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
+              <img src="/logo-mark.png" alt="" className="h-[30px] w-[30px] object-contain" />
             </span>
             <span className="dp-ui text-[13px] font-extrabold tracking-[0.08em]">NEUROCHIRO</span>
             <span className="dp-ui rounded-full bg-white/20 px-2 py-1 text-[11px] font-extrabold">Doctor</span>
