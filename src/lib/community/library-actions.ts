@@ -92,6 +92,88 @@ export async function assignLibraryPlan(input: { profileId: string; slug: string
   return { ok: true }
 }
 
+export async function sendCareSetInvite(input: { email: string; slug: string; note: string; message: string }): Promise<Result & { preview?: string }> {
+  const doctor = await requireDoctor()
+  if (!doctor) return fail('A doctor profile is required.')
+  const email = input.email.trim().toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail('Enter an email address.')
+  const plans = libraryPlans()
+  if (!isAssignableSlug(plans, input.slug)) return fail('That plan is not in the NeuroChiro library.')
+  const plan = planBySlug(plans, input.slug)
+  if (!plan) return fail('That plan is not in the NeuroChiro library.')
+  const note = parseDoctorNote(input.note || '')
+  if ('error' in note) return fail(note.error)
+  const message = (input.message || '').trim()
+  if (!message) return fail('Write the note you want to send, then click send.')
+  const admin = createAdminClient() as any
+  const token = crypto.randomUUID().replace(/-/g, '')
+  const row = await admin.from('community_doctor_care_invites').insert({
+    doctor_id: doctor.doctorId,
+    email,
+    plan_slug: plan.slug,
+    note: note.note,
+    token,
+  }).select('id').maybeSingle()
+  if (schemaNotReady(row.error)) return fail('Care invites need the latest database update.')
+  if (!row.data?.id) return fail('Could not save that invite.')
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'
+  const link = `${site}/portal/care/from-doctor?token=${token}`
+  const { Resend } = await import('resend')
+  const key = process.env.RESEND_API_KEY
+  if (!key) return fail('Email is not configured on this server, so nothing was sent.')
+  const resend = new Resend(key)
+  const sent = await resend.emails.send({
+    from: 'NeuroChiro <support@neurochirodirectory.com>',
+    to: email,
+    subject: `${plan.name} from your NeuroChiro doctor`,
+    text: `${message}\n\nOpen your care set: ${link}\n\nneurochiro.co`,
+  })
+  if (sent.error) return fail('The invite was saved, but the email did not send.')
+  await admin.from('community_doctor_care_invites').update({ sent_at: new Date().toISOString() }).eq('id', row.data.id)
+  return { ok: true, preview: link }
+}
+
+export async function claimCareSetInvite(token: string): Promise<Result> {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    const { loginPathWithReturn } = await import('@/lib/auth/safe-return-path')
+    const { redirect } = await import('next/navigation')
+    redirect(loginPathWithReturn(`/portal/care/from-doctor?token=${encodeURIComponent(token)}`))
+  }
+  const session = await requireCommunityMember()
+  const admin = createAdminClient() as any
+  const invite = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note, claimed_profile_id, email').eq('token', token).maybeSingle()
+  if (schemaNotReady(invite.error)) return fail('Care invites need the latest database update.')
+  if (!invite.data?.id) return fail('This link is not active.')
+  if (invite.data.claimed_profile_id && invite.data.claimed_profile_id !== session.userId) return fail('This link was already used.')
+  const profile = await admin.from('profiles').select('email').eq('id', session.userId).maybeSingle()
+  if ((profile.data?.email || '').toLowerCase() !== String(invite.data.email || '').toLowerCase()) {
+    return fail('Sign in with the email address this invite was sent to.')
+  }
+  if (!invite.data.claimed_profile_id) {
+    const existing = await admin.from('community_exercise_assignments').select('id').eq('profile_id', session.userId).eq('library_plan_slug', invite.data.plan_slug).eq('status', 'active').maybeSingle()
+    if (!existing.data?.id) {
+      const assignment = await admin.from('community_exercise_assignments').insert({
+        profile_id: session.userId,
+        set_id: null,
+        library_plan_slug: invite.data.plan_slug,
+        doctor_id: invite.data.doctor_id,
+        doctor_note: invite.data.note,
+        status: 'active',
+      }).select('id').maybeSingle()
+      if (!assignment.data?.id && !existing.data?.id) return fail('We could not add that care set to your account.')
+    }
+    const home = await admin.from('community_home_doctors').select('doctor_id').eq('profile_id', session.userId).maybeSingle()
+    if (!home.data?.doctor_id) {
+      await admin.from('community_home_doctors').insert({ profile_id: session.userId, doctor_id: invite.data.doctor_id })
+    }
+    await admin.from('community_doctor_care_invites').update({ claimed_profile_id: session.userId, claimed_at: new Date().toISOString() }).eq('id', invite.data.id)
+  }
+  refresh()
+  return { ok: true }
+}
+
 export async function markLibraryPhaseDone(assignmentId: string, phaseKey: string): Promise<Result> {
   const session = await requireCommunityMember()
   const admin = createAdminClient() as any

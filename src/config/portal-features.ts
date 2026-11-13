@@ -22,7 +22,7 @@ export type PortalFeature = {
 
 export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'dashboard', label: 'Today', href: '/doctor', group: 'main', subtitle: 'Your next step', state: 'live', icon: 'LayoutDashboard', match: ['/doctor/dashboard'] },
-  { key: 'leads', label: 'Directory requests', href: '/doctor/leads', group: 'main', subtitle: 'People who asked to book from the directory', state: 'live', requires: 'pro', icon: 'Target' },
+  { key: 'leads', label: 'Leads', href: '/doctor/leads', group: 'main', subtitle: 'People who asked to book from the directory', state: 'live', requires: 'pro', icon: 'Target' },
   { key: 'messages', label: 'Messages', href: '/doctor/messages', group: 'main', subtitle: 'One inbox for community members, doctors, and students', state: 'live', icon: 'MessageSquare' },
   { key: 'profile', label: 'My profile', href: '/doctor/profile', group: 'main', subtitle: 'What community members see', state: 'live', icon: 'User' },
   { key: 'analytics', label: 'Results', href: '/doctor/analytics', group: 'grow', subtitle: 'Views, requests, where they came from', state: 'live', requires: 'pro', icon: 'BarChart3' },
@@ -41,7 +41,7 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'practice_tools', label: 'Practice tools', href: '/doctor/tools', group: 'tools', subtitle: 'Care plan, scan reports, KPIs, P&L, CE, billing guide', state: 'live', requires: 'practice_tools', icon: 'Wrench', match: ['/doctor/care-plan', '/doctor/scan-report', '/doctor/kpi', '/doctor/pl-analyzer', '/doctor/ce-tracker', '/doctor/billing-guide'] },
   { key: 'care_plan_closer', label: 'Services from Dr. Ray', href: '/doctor/care-plan-closer', group: 'tools', subtitle: 'Done-for-you care plan setup', state: 'live', icon: 'Calculator' },
   { key: 'purchases', label: 'My purchases', href: '/doctor/purchases', group: 'tools', subtitle: 'Kits you have bought', state: 'live', requires: 'owned_purchase', icon: 'ShoppingBag' },
-  { key: 'badges', label: 'Achievements', href: '/doctor/badges', group: 'tools', subtitle: '', state: 'hidden', icon: 'Award' },
+  { key: 'badges', label: 'Achievements', href: '/doctor/badges', group: 'tools', subtitle: 'Badges on your account', state: 'live', icon: 'Award' },
   { key: 'neuros', label: 'Neuros program', href: '/doctor/neuros', group: 'tools', subtitle: '', state: 'hidden', requires: 'neuros', icon: 'ShieldCheck' },
   { key: 'notifications', label: 'Notifications', href: '/doctor/notifications', group: 'account', subtitle: '', state: 'live', icon: 'Bell' },
   { key: 'billing', label: 'Plan & billing', href: '/doctor/billing', group: 'account', subtitle: 'Your plan, invoices, payment method', state: 'live', icon: 'CreditCard' },

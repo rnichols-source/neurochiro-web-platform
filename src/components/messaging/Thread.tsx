@@ -9,6 +9,15 @@ export type ThreadScroller = {
   scrollToBottom: () => void;
 };
 
+function profileHref(viewerRole: string, otherRole: string): string | null {
+  const doctor = viewerRole === 'doctor' || viewerRole.startsWith('doctor');
+  if (!doctor) return null;
+  if (otherRole === 'doctor') return '/doctor/network';
+  if (otherRole === 'student') return '/doctor/students';
+  if (otherRole === 'patient' || otherRole === 'member') return '/doctor/people';
+  return null;
+}
+
 function roleLabel(role: string) {
   if (role === 'doctor') return 'Doctor';
   if (role === 'student') return 'Student';
@@ -40,6 +49,7 @@ export const Thread = forwardRef<ThreadScroller, {
   onDelete: (messageId: string) => void;
   onRetry: (message: ChatMessage) => void;
   onRefer?: () => void;
+  viewerRole?: string;
   showMenu: boolean;
   onToggleMenu: () => void;
   onMute: () => void;
@@ -65,21 +75,24 @@ export const Thread = forwardRef<ThreadScroller, {
           <button type="button" onClick={props.onBack} className="min-h-11 min-w-11 inline-flex items-center justify-center md:hidden" aria-label="Back to conversations" title="Back to conversations">
             <ChevronLeft className="w-5 h-5" />
           </button>
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#1E2D3B] text-[13px] font-extrabold text-white">{(props.item.otherUser.full_name || 'NC').slice(0, 2).toUpperCase()}</span>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold text-portal-ink truncate">{props.item.otherUser.full_name || 'Former member'}</h3>
-            <p className="text-xs text-portal-ink-2 truncate">
-              {roleLabel(props.item.otherUser.role)}
-              {props.item.referralChip ? (
-                <>
-                  {roleLabel(props.item.otherUser.role) ? ' · ' : null}
-                  <Link href={props.item.referralChip.href} className="font-bold text-portal-accent">{props.item.referralChip.label}</Link>
-                </>
-              ) : null}
-            </p>
+            <h3 className="truncate text-sm font-extrabold text-[#15202B]">{props.item.otherUser.full_name || 'Former member'}</h3>
+            <p className="truncate text-xs text-[#5b6773]">{roleLabel(props.item.otherUser.role)}</p>
           </div>
+          {profileHref(props.viewerRole || '', props.item.otherUser.role) ? (
+            <Link href={profileHref(props.viewerRole || '', props.item.otherUser.role) || '/doctor/people'} className="inline-flex min-h-11 shrink-0 items-center rounded-xl border border-[#D7DEE6] px-3 text-[13px] font-extrabold text-[#1E2D3B]">View profile</Link>
+          ) : null}
         </div>
+        {props.item.contextType === 'referral' || props.item.referralChip ? (
+          props.item.referralChip && (props.viewerRole === 'doctor' || (props.viewerRole || '').startsWith('doctor')) ? (
+            <Link href={props.item.referralChip.href} className="mr-2 inline-flex min-h-11 shrink-0 items-center rounded-full bg-[#EFE5F5] px-3 text-[12px] font-extrabold text-[#5C3473]">About your referral</Link>
+          ) : (
+            <span className="mr-2 inline-flex min-h-11 shrink-0 items-center rounded-full bg-[#EFE5F5] px-3 text-[12px] font-extrabold text-[#5C3473]">About your referral</span>
+          )
+        ) : null}
         {props.onRefer && props.item.otherUser.role === 'doctor' ? (
-          <button type="button" onClick={props.onRefer} className="min-h-11 min-w-11 inline-flex items-center justify-center gap-2 rounded-lg border border-portal-border px-3 text-sm font-bold text-portal-ink" aria-label="Refer a patient to this doctor" title="Refer a patient to this doctor">
+            <button type="button" onClick={props.onRefer} className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border border-[#D7DEE6] px-3 text-sm font-bold text-[#15202B]" aria-label="Refer a community member to this doctor" title="Refer a community member to this doctor">
             <UserPlus className="w-4 h-4" aria-hidden />
             <span className="hidden md:inline">Refer</span>
           </button>
@@ -117,7 +130,7 @@ export const Thread = forwardRef<ThreadScroller, {
           const seen = mine && lastMine?.id === message.id && Boolean(message.read_at);
           return (
             <div key={message.id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`} data-message-body>
-              <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${mine ? 'bg-portal-ink text-white' : 'bg-portal-surface text-portal-ink'}`} onContextMenu={(event) => { if (!mine) { event.preventDefault(); props.onReport(message.id); } }}>
+              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${mine ? 'bg-[#1E2D3B] text-white' : 'bg-[#F5F3EF] text-[#15202B]'}`} onContextMenu={(event) => { if (!mine) { event.preventDefault(); props.onReport(message.id); } }}>
                 <p className="text-sm whitespace-pre-wrap break-words">{message.deleted_at ? 'This message was deleted.' : linkify(message.body)}</p>
                 {seen ? <p className="text-xs mt-1 text-white/70" data-seen>Seen</p> : null}
                 {message.failed ? (

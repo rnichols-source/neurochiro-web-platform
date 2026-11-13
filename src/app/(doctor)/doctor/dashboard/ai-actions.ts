@@ -124,7 +124,7 @@ Rules:
 
 function generateFallbackInsight(ctx: any): string {
   if (!ctx.hasPhoto) return `Profiles with photos get 5x more views. Adding one could push your ${ctx.profileViews} views significantly higher.`;
-  if (!ctx.hasVideo) return `You have ${ctx.profileViews} profile views but no video. Doctors who add video see 3x more patient leads.`;
+  if (!ctx.hasVideo) return `You have ${ctx.profileViews} profile views but no video. Doctors who add video see 3x more community member leads.`;
   if (ctx.newLeads > 0) return `You have ${ctx.newLeads} new lead${ctx.newLeads > 1 ? 's' : ''} waiting to be contacted. Speed to contact is the #1 factor in conversion.`;
   if (ctx.totalLeads > 0 && ctx.conversionRate < 30) return `Your lead conversion rate is ${ctx.conversionRate}%. Following up within 24 hours could push this above 40%.`;
   if (ctx.profileViews === 0) return `Your profile hasn't been viewed yet. Sharing your NeuroChiro profile link on social media is the fastest way to get your first leads.`;

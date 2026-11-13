@@ -1,15 +1,8 @@
 import Link from 'next/link'
 import NotifyButton from '@/app/(doctor)/doctor/coming-soon/NotifyButton'
+import { COMING_SOON_TOOLS } from '@/lib/doctor/places'
 
-const CARDS = [
-  {
-    key: 'synapse_deals',
-    title: 'Synapse',
-    body: 'Member deals from founding partners. Tell us what you want deals on.',
-    href: '/doctor/marketplace',
-    action: 'Open Synapse',
-    border: '#0E857A',
-  },
+const EARLIER = [
   {
     key: 'community',
     title: 'The Network feed',
@@ -31,8 +24,16 @@ const CARDS = [
 export function ComingView() {
   return (
     <div className="mt-5 space-y-4">
-      <div className="grid gap-3 lg:grid-cols-3">
-        {CARDS.map((card) => (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {COMING_SOON_TOOLS.map((card) => (
+          <article key={card.id} id={card.id} className="rounded-[22px] border-2 border-dashed border-[#E3C27A] bg-white p-4">
+            <p className="dp-ui text-[11px] font-extrabold tracking-[0.08em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Coming soon</p>
+            <h2 className="dp-ui mt-2 text-[20px] font-extrabold text-[#15202B]">{card.title}</h2>
+            <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">{card.body}</p>
+            <div className="mt-3"><NotifyButton featureKey={card.id} /></div>
+          </article>
+        ))}
+        {EARLIER.map((card) => (
           <article key={card.key} id={card.key === 'shadow_requests' ? 'shadow' : card.key} className="rounded-[22px] border-2 border-dashed bg-white p-4" style={{ borderColor: card.border }}>
             <p className="dp-ui text-[11px] font-extrabold tracking-[0.08em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Coming soon</p>
             <h2 className="dp-ui mt-2 text-[20px] font-extrabold text-[#15202B]">{card.title}</h2>

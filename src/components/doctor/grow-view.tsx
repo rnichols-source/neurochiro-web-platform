@@ -1,14 +1,12 @@
 import Link from 'next/link'
 
 const CARDS = [
-  { href: '/doctor/seminars', title: 'Seminars', detail: 'Host a seminar or find one near you.' },
-  { href: '/doctor/match', title: 'ChiroMatch', detail: 'You and a student both say yes.' },
-  { href: '/doctor/jobs', title: 'Hiring', detail: 'Post a role and read applications.' },
-  { href: '/doctor/lives', title: 'The Weekly Adjustment', detail: 'Thursday at 8 PM ET.' },
-  { href: '/doctor/marketplace', title: 'Synapse', detail: 'Member deals that are already open.' },
+  { href: '/doctor/students', title: 'Students', detail: 'Browse students looking for a practice.' },
+  { href: '/doctor/referrals', title: 'Referral network', detail: 'Referrals you have sent and received.' },
   { href: '/doctor/introductions', title: 'Introductions', detail: 'When a community member travels with their care.' },
-  { href: '/doctor/referral-network', title: 'Referral network', detail: 'Doctors you send people to.' },
-  { href: '/doctor/community', title: 'The Network feed', detail: 'Announcements that are already posted.' },
+  { href: '/doctor/community', title: 'Community', detail: 'Announcements that are already posted.' },
+  { href: '/doctor/community-interest', title: 'Community interest', detail: 'People near your office raising a hand.' },
+  { href: '/doctor/coming-soon', title: 'Coming soon', detail: 'ChiroMatch, hiring, seminars, CE, and screening kits.' },
 ]
 
 export function GrowView() {

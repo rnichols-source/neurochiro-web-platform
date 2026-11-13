@@ -67,7 +67,8 @@ export function sameCity(practiceCity: string | null | undefined, doctorCity: st
 
 export function mapListedStudent(profile: StudentProfileRow, verification?: StudentVerificationRow | null): ListedStudent {
   const interests = studentInterests(profile.areas_of_interest)
-  const school = text(profile.chiropractic_school) || text(profile.school_name) || text(verification?.school_name)
+  const rawSchool = text(profile.chiropractic_school) || text(profile.school_name) || text(verification?.school_name)
+  const school = /grandfathered \(pre-verification\)/i.test(rawSchool) ? '' : rawSchool
   const year = graduationYear(profile.graduation_year) ?? graduationYear(verification?.graduation_year)
   const city = text(profile.practice_city)
   const state = text(profile.practice_state)

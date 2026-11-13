@@ -19,6 +19,7 @@ import {
   Zap,
 } from "lucide-react";
 import PageHeader from "@/components/portal/PageHeader";
+import { billingGuideCopy } from "@/lib/doctor/places";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -376,7 +377,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
                       <Lock className="w-3.5 h-3.5 text-portal-muted" />
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-0.5">{section.description}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{billingGuideCopy("code", section.description, "description")}</p>
                 </div>
               </button>
 
@@ -427,7 +428,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <p className="font-bold text-sm text-portal-ink-2 truncate">{item.title}</p>
+                                <p className="font-bold text-sm text-portal-ink-2 truncate">{billingGuideCopy(item.type, item.title, "title")}</p>
                               </div>
                               <span className="text-xs font-bold text-portal-ink-2 bg-gray-100 px-2 py-1 rounded flex-shrink-0">
                                 LOCKED
@@ -453,7 +454,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                <p className="font-bold text-sm text-neuro-navy truncate">{item.title}</p>
+                                <p className="font-bold text-sm text-neuro-navy truncate">{billingGuideCopy(item.type, item.title, "title")}</p>
                               </div>
                               {isItemOpen ? (
                                 <ChevronDown className="w-4 h-4 text-portal-muted flex-shrink-0" />
@@ -466,7 +467,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
                             {isItemOpen && (
                               <div className="border-t border-gray-100 p-3 md:p-4">
                                 <div className="bg-gray-50 rounded-xl p-4 max-h-[32rem] overflow-y-auto">
-                                  {renderContent(item.content)}
+                                  {renderContent(billingGuideCopy(item.type, item.content, "content"))}
                                 </div>
                                 {copyable && (
                                   <div className="mt-3">

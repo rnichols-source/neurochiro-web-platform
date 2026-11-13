@@ -18,7 +18,7 @@ const EMPTY_CHOICES: GrowthPoint['choices'] = []
  * A bare name that matches a small US place and a major world city comes back
  * as a pick list instead of a silent choice.
  */
-export async function resolveGrowthPoint(query: string): Promise<GrowthPoint> {
+export async function resolveGrowthPoint(query: string, options?: { autoPick?: boolean }): Promise<GrowthPoint> {
   const raw = query.trim().slice(0, 160)
   if (!raw) return { resolved: null, unavailable: false, message: 'Type a city, ZIP, or address.', choices: EMPTY_CHOICES }
   const admin = createAdminClient()
@@ -55,6 +55,16 @@ export async function resolveGrowthPoint(query: string): Promise<GrowthPoint> {
     }
     const choices = ambiguousPlaceChoices(hits)
     if (choices) {
+      const [best, second] = choices
+      const gap = best.importance - (second?.importance || 0)
+      if (options?.autoPick && best.lat != null && best.lng != null && (!second || gap >= 0.08 || second.importance < 0.5)) {
+        return {
+          resolved: { lat: best.lat, lng: best.lng, city: best.city || raw, state: best.state || '', country: best.country, label: best.label },
+          unavailable: false,
+          message: '',
+          choices: EMPTY_CHOICES,
+        }
+      }
       return {
         resolved: null,
         unavailable: false,
@@ -69,6 +79,43 @@ export async function resolveGrowthPoint(query: string): Promise<GrowthPoint> {
   const world = await worldLookup(raw)
   if (world) return { resolved: world, unavailable: false, message: '', choices: EMPTY_CHOICES }
   return { ...us, choices: EMPTY_CHOICES }
+}
+
+/** One worldwide lookup. Picks the main city unless two countries are genuinely tied. */
+export async function resolveFastPlace(query: string): Promise<GrowthPoint> {
+  const raw = query.trim().slice(0, 160)
+  if (!raw) return { resolved: null, unavailable: false, message: '', choices: EMPTY_CHOICES }
+  const hits = await worldCandidates(raw)
+  const ranked = hits
+    .filter((hit) => hit.lat != null && hit.lng != null)
+    .sort((a, b) => b.importance - a.importance || a.label.localeCompare(b.label))
+  const best = ranked[0]
+  if (!best || best.lat == null || best.lng == null) {
+    return { resolved: null, unavailable: false, message: "Couldn't find that place", choices: EMPTY_CHOICES }
+  }
+  const second = ranked.find((hit) => hit.country !== best.country)
+  const gap = best.importance - (second?.importance || 0)
+  if (second && second.importance >= 0.55 && gap < 0.08) {
+    return {
+      resolved: null,
+      unavailable: false,
+      message: 'More than one place matches. Pick one.',
+      choices: [best, second].map((hit) => ({ label: hit.label, query: hit.query })),
+    }
+  }
+  return {
+    resolved: {
+      lat: best.lat,
+      lng: best.lng,
+      city: best.city || raw,
+      state: best.state || '',
+      country: best.country,
+      label: best.label,
+    },
+    unavailable: false,
+    message: '',
+    choices: EMPTY_CHOICES,
+  }
 }
 
 function bareCity(raw: string): boolean {
@@ -144,6 +191,10 @@ async function worldCandidates(query: string): Promise<PlaceHit[]> {
         query: refined,
         country: place.country || 'US',
         importance: typeof hit.importance === 'number' ? hit.importance : 0,
+        lat: place.lat,
+        lng: place.lng,
+        city: place.city,
+        state: place.state,
       }]
     })
   } catch {

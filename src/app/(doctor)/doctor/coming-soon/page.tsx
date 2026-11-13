@@ -10,7 +10,7 @@ export default async function ComingSoonPage() {
   if (!ctx) redirect('/login')
   return (
     <div>
-      <DoctorBand place="practice" title="Coming soon" subtitle="Synapse, the Network feed, and shadow requests." />
+      <DoctorBand place="practice" title="Coming soon" subtitle="ChiroMatch, hiring, seminars, CE, and screening kits." />
       <ComingView />
     </div>
   )

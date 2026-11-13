@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { assignLibraryPlan } from '@/lib/community/library-actions'
+import { assignLibraryPlan, sendCareSetInvite } from '@/lib/community/library-actions'
 import { EmptyNote } from '@/components/doctor/chrome'
 import { SearchIcon } from '@/components/doctor/icons'
 
@@ -36,9 +36,17 @@ export function CareDesk({
   const [phase, setPhase] = useState(0)
   const [memberId, setMemberId] = useState(initialMember && members.some((member) => member.id === initialMember) ? initialMember : members[0]?.id || '')
   const [note, setNote] = useState('')
+  const [memberQuery, setMemberQuery] = useState('')
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteMessage, setInviteMessage] = useState('I put a care set aside for you on NeuroChiro. Create your free account with this email and it will be waiting.')
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
   const [pending, start] = useTransition()
+  const memberChoices = useMemo(() => {
+    const q = memberQuery.trim().toLowerCase()
+    if (!q) return members
+    return members.filter((member) => member.label.toLowerCase().includes(q))
+  }, [members, memberQuery])
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase()
     return plans.filter((plan) => {
@@ -122,14 +130,19 @@ export function CareDesk({
             </ol>
             {(phaseRow?.exercises.length || 0) > 8 ? <p className="mt-1 text-[12px] text-[#6b7785]">+{(phaseRow?.exercises.length || 0) - 8} more in this phase</p> : null}
             <div className="mt-4">
+              <a href={`/api/doctor/care-pdf?slug=${selected.slug}`} className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#0A6159]">Print / Download PDF</a>
               {members.length === 0 ? (
-                <p className="text-[14px] text-[#5b6773]">When a community member chooses you as their home doctor, you can assign this plan.</p>
+                <p className="mt-3 text-[14px] text-[#5b6773]">When a community member chooses you as their home doctor, you can assign this plan. Or email an invite below.</p>
               ) : (
                 <>
-                  <label className="block text-[13px] font-bold text-[#0A6159]">
-                    Assign to
+                  <label className="mt-3 block text-[13px] font-bold text-[#0A6159]">
+                    Search your community members
+                    <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Name or email" className="mt-1 h-11 w-full rounded-xl border border-[#D7DEE6] px-3 text-[14px] font-normal text-[#15202B]" />
+                  </label>
+                  <label className="mt-2 block text-[13px] font-bold text-[#0A6159]">
+                    Send to
                     <select value={memberId} onChange={(event) => setMemberId(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#D7DEE6] px-3 text-[14px] font-normal text-[#15202B]">
-                      {members.map((member) => <option key={member.id} value={member.id}>{member.label}</option>)}
+                      {memberChoices.map((member) => <option key={member.id} value={member.id}>{member.label}</option>)}
                     </select>
                   </label>
                   <label className="mt-2 block text-[13px] font-bold text-[#0A6159]">
@@ -141,11 +154,26 @@ export function CareDesk({
                   </button>
                 </>
               )}
+              <div className="mt-4 rounded-2xl bg-[#F5F3EF] p-3">
+                <p className="dp-ui text-[14px] font-extrabold text-[#15202B]">No account yet</p>
+                <p className="mt-1 text-[13px] text-[#5b6773]">Write the note, then click send. Nothing goes out until you do.</p>
+                <input value={inviteEmail} onChange={(event) => setInviteEmail(event.target.value)} placeholder="Email" className="mt-2 h-11 w-full rounded-xl border border-[#D7DEE6] px-3 text-[14px]" />
+                <textarea value={inviteMessage} onChange={(event) => setInviteMessage(event.target.value)} rows={3} className="mt-2 w-full rounded-xl border border-[#D7DEE6] px-3 py-2 text-[14px]" />
+                <button type="button" disabled={pending} onClick={() => {
+                  if (!selected) return
+                  setError('')
+                  start(async () => {
+                    const result = await sendCareSetInvite({ email: inviteEmail, slug: selected.slug, note, message: inviteMessage })
+                    if (!result.ok) setError(result.error)
+                    else setSaved('Invite sent. The care set is waiting when they sign up with that email.')
+                  })
+                }} className="dp-ui mt-2 inline-flex h-11 items-center rounded-xl bg-[#1E2D3B] px-4 text-[14px] font-extrabold text-white">Send invite email</button>
+              </div>
               {error ? <p className="mt-2 text-[14px] text-[#B4501A]" role="alert">{error}</p> : null}
               {saved ? <p className="mt-2 text-[14px] text-[#0A6159]" role="status">{saved}</p> : null}
             </div>
           </>
-        ) : <EmptyNote title="Pick a plan" sentence="The library is on the left. The preview shows the exercises before you assign them." />}
+        ) : <EmptyNote title="Pick a plan" sentence="Choose a plan from the library. The preview shows the exercises before you assign them." />}
       </aside>
     </div>
   )

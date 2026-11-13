@@ -53,9 +53,9 @@ export default function WeeklyAdjustmentPage() {
           {[
             { time: "8:00", icon: Video, title: "Open", desc: "Dr. Ray opens the show with what's new at NeuroChiro" },
             { time: "8:05", icon: Mic2, title: "Featured Doctor", desc: "This week's guest doctor joins. Quick intro about their practice." },
-            { time: "8:07", icon: MessageSquare, title: "Your Questions", desc: "Dr. Ray and the guest answer 5-7 real patient questions collected during the week." },
+            { time: "8:07", icon: MessageSquare, title: "Your Questions", desc: "Dr. Ray and the guest answer 5-7 real questions from community members collected during the week." },
             { time: "8:25", icon: Users, title: "Live Q&A", desc: "Open it up to the live audience. Drop your questions in the comments." },
-            { time: "8:35", icon: Calendar, title: "Find Your Doctor", desc: "Patients drop their city in the comments. Dr. Ray pulls up the directory and finds them a chiropractor." },
+            { time: "8:35", icon: Calendar, title: "Find Your Doctor", desc: "Community members drop their city in the comments. Dr. Ray pulls up the directory and finds them a chiropractor." },
             { time: "8:45", icon: Users, title: "Member Shoutouts", desc: "Quick round of 5-10 member doctors. Name, city, go find them." },
             { time: "8:50", icon: Video, title: "Close", desc: "\"You've been adjusted.\" See you next Thursday." },
           ].map((segment, i) => (

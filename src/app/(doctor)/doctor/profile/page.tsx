@@ -1,16 +1,15 @@
 "use client";
 
 import { Camera, Loader2, Plus, Trash2 } from "lucide-react";
-import { ProfileStudio } from "@/components/doctor/profile-studio";
-import { HeaderTools } from "@/components/doctor/header-tools";
 import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import PageHeader from "@/components/portal/PageHeader";
+import { DoctorBand } from "@/components/doctor/chrome";
 import StudentOptIn from "@/components/doctor/StudentOptIn";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
 import { ALL_COUNTRIES, getCountryByIso2 } from "@/config/countries";
+import { profileChecklist } from "@/lib/doctor/places";
 
 const INPUT = "w-full min-h-11 px-3 rounded-lg border border-portal-border bg-white text-base";
 const AREA = "w-full px-3 py-2 rounded-lg border border-portal-border bg-white text-base";
@@ -165,9 +164,22 @@ function compressImage(file: File, maxWidth: number, quality: number): Promise<F
   });
 }
 
+function ProfileFold({ title, children }: { title: string; openOnDesktop?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="rounded-[20px] bg-white">
+      <button type="button" onClick={() => setOpen((value) => !value)} className="flex min-h-14 w-full items-center gap-3 px-4 text-left lg:cursor-default">
+        <span className="dp-ui text-[15px] font-extrabold text-[#15202B]">{title}</span>
+        <span className="ml-auto text-[12px] font-bold text-[#6b7785] lg:hidden">{open ? "Hide" : "Show"}</span>
+      </button>
+      <div className={`${open ? "block" : "hidden"} space-y-4 px-4 pb-4 lg:block`}>{children}</div>
+    </section>
+  );
+}
+
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white border border-portal-border rounded-xl p-4 space-y-4">
+    <section className="rounded-[20px] bg-white p-4 space-y-4">
       <div>
         <h2 className="text-lg font-bold text-portal-ink">{title}</h2>
         {hint ? <p className="mt-1 text-sm text-portal-ink-2">{hint}</p> : null}
@@ -313,6 +325,23 @@ function ProfileEditor() {
     if (result.success) {
       setHasUnsavedChanges(false);
       setSaveSuccess(true);
+      const fresh = await getDoctorProfile();
+      if (fresh && (fresh.slug || fresh.clinic_name || fresh.email)) {
+        const loaded = fresh as DoctorProfile;
+        setProfile(loaded);
+        setCountryCode(storedCountryCode(loaded.country));
+        setFaqItems(Array.isArray(loaded.faq) ? loaded.faq : []);
+        setTeamMembers(Array.isArray(loaded.team_members) ? loaded.team_members : []);
+        setListingFormat(loaded.listing_format === "practice" ? "practice" : "lead");
+        setCoOwners(Array.isArray(loaded.co_owners) ? loaded.co_owners.map((owner) => ({
+          name: owner?.name || "",
+          credentials: owner?.credentials || "",
+          photo_url: owner?.photo_url || "",
+          bio: owner?.bio || "",
+        })) : []);
+        setGalleryUrls(Array.isArray(loaded.gallery_images) ? loaded.gallery_images : []);
+        setAmenitiesSelected(Array.isArray(loaded.amenities) ? loaded.amenities : []);
+      }
       setTimeout(() => setSaveSuccess(false), 3000);
     }
     toast(result.success ? "Profile saved." : (result.error || "Failed to save."), result.success ? "success" : "error");
@@ -408,19 +437,19 @@ function ProfileEditor() {
   };
 
   const educationLines = asLines(profile?.education);
-  const checks = [
-    { done: !!profile?.photo_url, label: "Profile photo", why: "Community members look for a face before they call." },
-    { done: !!(profile?.bio && profile.bio.length >= 20) || !!(profile?.short_intro && profile.short_intro.length >= 20), label: "Bio or intro", why: "Tells community members who you are and what you do." },
-    { done: !!profile?.chiropractic_school, label: "Education", why: "Community members want to know where you trained." },
-    { done: (profile?.specialties || []).length > 0, label: "Specialties", why: "Helps community members find you when searching." },
-    { done: !!profile?.hours, label: "Office hours", why: "Community members check hours before calling." },
-    { done: !!profile?.first_visit_price || !!profile?.payment_model, label: "Cost and insurance", why: "Community members ask this before they book." },
-    { done: !!profile?.phone, label: "Phone number", why: "Many community members prefer to call." },
-    { done: !!profile?.booking_url, label: "Online booking link", why: "Community members who can book online are more likely to show up." },
-    { done: !!profile?.google_reviews_url, label: "Google Reviews link", why: "Reviews help community members decide." },
-  ];
-  const doneCount = checks.filter((item) => item.done).length;
-  const pct = Math.round((doneCount / checks.length) * 100);
+  const checklist = profileChecklist({
+    photoUrl: profile?.photo_url || null,
+    bio: profile?.bio || null,
+    shortIntro: profile?.short_intro || null,
+    listingFormat: listingFormat,
+    coOwnerCount: coOwners.filter((owner) => owner.name).length,
+    city: profile?.city || null,
+    address: profile?.address || null,
+    techniques: (profile?.specialties || []).length,
+    hours: profile?.hours || null,
+  });
+  const checks = checklist.steps;
+  const pct = checklist.percent;
   const missing = checks.filter((item) => !item.done);
 
   return (
@@ -432,11 +461,32 @@ function ProfileEditor() {
       )}
 
       <div ref={headerRef} onClickCapture={openLiveProfile}>
-        <PageHeader
-          title="All profile fields"
-          description="This is what community members see on neurochiro.co."
-          secondary={profile?.slug ? { label: "View live profile", href: `/directory/${profile.slug}` } : undefined}
-        />
+        <DoctorBand
+          place="practice"
+          title="Edit my profile"
+          subtitle={`${pct}% complete. Every field is on this page.`}
+        >
+          {profile?.slug ? (
+            <a
+              href={`/directory/${profile.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="dp-ui hidden min-h-11 shrink-0 items-center rounded-xl bg-white px-3 text-[13px] font-extrabold text-[#1E2D3B] sm:inline-flex"
+            >
+              View public profile
+            </a>
+          ) : null}
+        </DoctorBand>
+        {profile?.slug ? (
+          <a
+            href={`/directory/${profile.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="dp-ui mt-3 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#D66829] sm:hidden"
+          >
+            View public profile
+          </a>
+        ) : null}
       </div>
 
       {loading ? (
@@ -461,74 +511,40 @@ function ProfileEditor() {
             </div>
           )}
 
-          <StudentOptIn />
-          <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
-            <h2 className="text-lg font-bold text-portal-ink">Profile photo</h2>
-            <div className="mt-4 flex items-center gap-4">
-              <div className="relative w-24 h-24 rounded-xl bg-portal-surface overflow-hidden border border-portal-border shrink-0">
-                {profile?.photo_url ? (
-                  <Image src={profile.photo_url} alt="Profile photo" fill className="object-cover" sizes="96px" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-portal-muted"><Camera className="w-8 h-8" /></div>
-                )}
+          <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-3">
+          <section className="rounded-[20px] bg-white p-4">
+            <div className="flex items-center gap-4">
+              <div className="grid h-[66px] w-[66px] shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#D66829 ${pct}%, #ECEAE5 0)` }}>
+                <span className="grid h-[52px] w-[52px] place-items-center rounded-full bg-white dp-ui text-[15px] font-extrabold text-[#15202B]">{pct}%</span>
               </div>
               <div>
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-11 px-4 rounded-lg bg-portal-ink text-white text-sm font-bold">
-                  Upload photo
-                </button>
-                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
-                <p className="text-sm text-portal-ink-2 mt-1">JPG, PNG, WebP, or HEIC. Max 5MB.</p>
+                <p className="dp-ui text-[16px] font-extrabold text-[#15202B]">Edit my profile</p>
+                <p className="text-[13px] text-[#5b6773]">{missing.length ? `${missing.length} still open` : 'Ready for community members'}</p>
               </div>
+              <button type="button" onClick={() => fileInputRef.current?.click()} className="dp-ui ml-auto inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-3 text-[13px] font-extrabold text-white">Upload photo</button>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
             </div>
+            {profile?.photo_url ? <img src={profile.photo_url} alt="" className="mt-3 h-16 w-16 rounded-2xl object-cover" /> : null}
+            <ul className="mt-3 space-y-1">
+              {checks.map((item) => (
+                <li key={item.label} className="flex items-center gap-2 text-[13px] text-[#3d4a57]">
+                  <span className={`grid h-5 w-5 place-items-center rounded-full text-[11px] font-extrabold ${item.done ? 'bg-[#E8F5EE] text-[#1f8a4c]' : 'bg-[#F5F3EF] text-[#6b7785]'}`}>{item.done ? 'OK' : ''}</span>
+                  {item.label}
+                </li>
+              ))}
+            </ul>
           </section>
+          <form onSubmit={handleSave} onChange={markDirty} className="space-y-3">
+            <section className="rounded-[20px] bg-white p-4 space-y-4">
+              <h2 className="text-lg font-bold text-portal-ink">Bio</h2>
+              <textarea name="bio" defaultValue={profile?.bio || ""} rows={4} className={AREA} placeholder="What community members should know about you." />
+            </section>
+            <input type="hidden" name="seo_keywords" value={profile?.seo_keywords || ""} />
+            <input type="hidden" name="education" value={educationLines} />
 
-          <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
-            <h2 className="text-lg font-bold text-portal-ink">Profile completeness</h2>
-            <div className="flex items-center gap-3 mt-3 mb-3">
-              <div className="flex-1 h-2 bg-portal-surface rounded-full overflow-hidden">
-                <div className="h-full bg-portal-accent rounded-full" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="text-sm font-bold text-portal-accent">{pct}%</span>
-            </div>
-            {missing.length > 0 && (
-              <ul className="space-y-2">
-                {missing.slice(0, 3).map((item) => (
-                  <li key={item.label} className="text-sm text-portal-ink-2">
-                    <span className="font-bold text-portal-ink">{item.label}.</span> {item.why}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <div className="sticky top-0 z-30 -mx-4 md:-mx-8 px-4 md:px-8 py-2 bg-portal-canvas">
-            <div role="tablist" aria-label="Profile sections" className="flex gap-1 overflow-x-auto bg-portal-surface p-1 rounded-xl">
-              {TABS.map((item) => {
-                const selected = tab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    id={`profile-tab-${item.id}`}
-                    aria-selected={selected}
-                    aria-controls={`profile-panel-${item.id}`}
-                    onClick={() => selectTab(item.id)}
-                    className={`shrink-0 min-h-11 px-3 rounded-lg text-sm font-bold ${selected ? "bg-white text-portal-ink shadow-sm" : "text-portal-ink-2"}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <form onSubmit={handleSave} onChange={markDirty} className="mt-4 space-y-4">
-            {profile?.bio ? <input type="hidden" name="bio" value={profile.bio} /> : null}
-            {profile?.seo_keywords ? <input type="hidden" name="seo_keywords" value={profile.seo_keywords} /> : null}
-            {educationLines ? <input type="hidden" name="education" value={educationLines} /> : null}
-
-            <div id="profile-panel-basics" role="tabpanel" aria-labelledby="profile-tab-basics" hidden={tab !== "basics"} className="space-y-4">
+            <ProfileFold title="Basics" openOnDesktop>
+            <div id="profile-panel-basics" className="space-y-4">
               <Section title="Personal info">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Label label="First name">
@@ -607,7 +623,9 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-photos" role="tabpanel" aria-labelledby="profile-tab-photos" hidden={tab !== "photos"} className="space-y-4">
+            </ProfileFold>
+            <ProfileFold title="Photos" openOnDesktop>
+            <div id="profile-panel-photos" className="space-y-4">
               <p className="text-sm text-portal-ink-2">Your profile photo is at the top of this page.</p>
               <Section title="Intro video" hint="Add a short intro video so community members can meet you before they call.">
                 <div id="video">
@@ -656,7 +674,9 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-about" role="tabpanel" aria-labelledby="profile-tab-about" hidden={tab !== "about"} className="space-y-4">
+            </ProfileFold>
+            <ProfileFold title="About" openOnDesktop>
+            <div id="profile-panel-about" className="space-y-4">
               <Section title="About you" hint="This is what community members read first. Keep it personal and direct.">
                 <Label label="Short intro" hint="2-3 sentences about you and your practice. No URLs or phone numbers.">
                   <textarea
@@ -790,7 +810,9 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-services" role="tabpanel" aria-labelledby="profile-tab-services" hidden={tab !== "services"} className="space-y-4">
+            </ProfileFold>
+            <ProfileFold title="Services and pricing" openOnDesktop>
+            <div id="profile-panel-services" className="space-y-4">
               <Section title="Specialties" hint="Comma separated.">
                 <input name="specialties" defaultValue={(profile?.specialties || []).join(", ")} placeholder="Nervous system focused, Pediatric, Upper cervical" className={INPUT} />
               </Section>
@@ -816,7 +838,9 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-insurance" role="tabpanel" aria-labelledby="profile-tab-insurance" hidden={tab !== "insurance"} className="space-y-4">
+            </ProfileFold>
+            <ProfileFold title="Insurance and payment" openOnDesktop>
+            <div id="profile-panel-insurance" className="space-y-4">
               <Section title="Insurance and payment" hint="Community members check this before they book. Even “Call for pricing” is better than blank.">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Label label="First visit price" hint='Or "Call for pricing".'>
@@ -862,7 +886,9 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-links" role="tabpanel" aria-labelledby="profile-tab-links" hidden={tab !== "links"} className="space-y-4">
+            </ProfileFold>
+            <ProfileFold title="Links" openOnDesktop>
+            <div id="profile-panel-links" className="space-y-4">
               <Section title="Website and social">
                 <Label label="Website">
                   <input name="website" defaultValue={profile?.website_url || ""} placeholder="https://yourpractice.com" className={INPUT} />
@@ -888,6 +914,7 @@ function ProfileEditor() {
                 </Label>
               </Section>
             </div>
+            </ProfileFold>
 
             <div className="fixed z-[160] inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-0 lg:left-64 bg-white border-t border-portal-border px-4 py-3 flex items-center justify-between gap-3">
               <p className="text-sm text-portal-ink-2" aria-live="polite">
@@ -898,8 +925,27 @@ function ProfileEditor() {
               </button>
             </div>
           </form>
+          </div>
+          <aside className="hidden h-fit rounded-[24px] bg-[#F4F7FA] p-4 lg:block">
+            <p className="dp-ui text-[11px] font-extrabold tracking-[0.1em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Live preview</p>
+            <div className="mt-3 rounded-[20px] bg-white p-4">
+              <div className="flex items-center gap-3">
+                {profile?.photo_url ? <img src={profile.photo_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : (
+                  <span className="grid h-14 w-14 place-items-center rounded-2xl bg-[#1E2D3B] dp-ui text-[16px] font-extrabold text-white">{(profile?.first_name || 'D').slice(0, 1)}{(profile?.last_name || '').slice(0, 1)}</span>
+                )}
+                <div>
+                  <p className="dp-ui text-[18px] font-extrabold text-[#15202B]">{[profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Your name'}</p>
+                  <p className="text-[13px] text-[#5b6773]">{[profile?.clinic_name, [profile?.city, profile?.state].filter(Boolean).join(', ')].filter(Boolean).join(' · ')}</p>
+                </div>
+              </div>
+              <p className="mt-3 text-[14px] leading-snug text-[#15202B]">{profile?.bio || profile?.short_intro || 'Your bio shows up here.'}</p>
+              <p className="mt-3 text-[13px] text-[#5b6773]">{profile?.hours || 'Hours not added yet'}</p>
+            </div>
+          </aside>
+          </div>
 
-          <div className="mt-8">
+          <div className="mt-8 space-y-4">
+            <StudentOptIn />
             <VerifiedBadge
               doctorSlug={profile?.slug || ""}
               doctorName={profile?.first_name && profile?.last_name ? `Dr. ${profile.first_name} ${profile.last_name}` : ""}
@@ -911,24 +957,10 @@ function ProfileEditor() {
   );
 }
 
-function ProfileGate() {
-  const full = useSearchParams().get('full') === '1';
-  if (!full) return <ProfileStudio />;
-  return (
-    <div>
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <a href="/doctor/profile" className="text-sm font-bold text-portal-accent">Back to the simple editor</a>
-        <HeaderTools onDark={false} />
-      </div>
-      <ProfileEditor />
-    </div>
-  );
-}
-
 export default function ProfilePage() {
   return (
     <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-portal-accent animate-spin" /></div>}>
-      <ProfileGate />
+      <ProfileEditor />
     </Suspense>
   );
 }

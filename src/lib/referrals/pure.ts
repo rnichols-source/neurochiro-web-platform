@@ -214,6 +214,31 @@ export function validEmail(email: string | null | undefined): string | null {
   return trimmed;
 }
 
+const ALWAYS_A_PLACE = new Set([
+  'sydney', 'melbourne', 'brisbane', 'perth', 'adelaide', 'london', 'toronto', 'vancouver',
+  'montreal', 'calgary', 'ottawa', 'auckland', 'wellington', 'dublin', 'paris', 'berlin',
+])
+
+/** A person or clinic hit is the result. A city name still goes to the map. */
+export function nameMatchSkipsPlace(
+  query: string,
+  rows: { firstName: string; lastName: string; clinicName: string | null }[],
+): boolean {
+  const q = query.trim().toLowerCase().replace(/^dr\s+/, '')
+  if (!q || !rows.length || ALWAYS_A_PLACE.has(q)) return false
+  const parts = q.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    const first = parts[0]
+    const last = parts[parts.length - 1]
+    return rows.some((row) => {
+      const clinic = (row.clinicName || '').toLowerCase()
+      const person = row.firstName.toLowerCase().includes(first) && row.lastName.toLowerCase().includes(last)
+      return person || clinic.includes(q)
+    })
+  }
+  return rows.some((row) => row.lastName.toLowerCase() === q || row.firstName.toLowerCase() === q)
+}
+
 export function nameNeedles(query: string): { full: string; first?: string; last?: string } {
   const cleaned = query.replace(/[%_,().:*\\"]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
   const withoutTitle = cleaned.replace(/^dr\s+/i, '');
@@ -381,4 +406,35 @@ export function formatDistance(miles: number, country: string): string {
 
 export function placeLabel(place: { city?: string | null; state?: string | null }): string {
   return [place.city, place.state].filter(Boolean).join(', ');
+}
+
+export type ReferralCandidate = { id: string; name: string; miles: number | null }
+
+/**
+ * Keep doctors inside the configured radius, nearest first, at least 200 of them.
+ * A wide list is used only when the radius list is empty, so a crowded far box
+ * cannot push out someone 12 miles away.
+ */
+export function chooseReferralDoctors(input: {
+  radiusMiles: number
+  cap?: number
+  inRadius: ReferralCandidate[]
+  wide?: ReferralCandidate[]
+}): { doctors: ReferralCandidate[]; widened: boolean } {
+  const cap = Math.max(200, input.cap || 200)
+  const byMiles = (a: ReferralCandidate, b: ReferralCandidate) => {
+    if (a.miles == null) return 1
+    if (b.miles == null) return -1
+    return a.miles - b.miles || a.name.localeCompare(b.name)
+  }
+  const nearby = input.inRadius
+    .filter((row) => row.miles != null && row.miles <= input.radiusMiles)
+    .sort(byMiles)
+    .slice(0, cap)
+  if (nearby.length) return { doctors: nearby, widened: false }
+  const nearest = (input.wide || [])
+    .filter((row) => row.miles != null)
+    .sort(byMiles)
+    .slice(0, 8)
+  return { doctors: nearest, widened: nearest.length > 0 }
 }

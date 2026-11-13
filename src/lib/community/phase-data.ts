@@ -489,24 +489,24 @@ export async function loadLiveQuestions(): Promise<{ body: string; createdAt: st
   }))
 }
 
+export function homeMemberLabel(fullName: string | null | undefined, email: string | null | undefined): string {
+  const name = (fullName || '').trim()
+  if (name) return name
+  const mail = (email || '').trim()
+  if (mail) return mail
+  return 'Community member'
+}
+
 export async function loadHomeDoctorMembers(doctorId: string): Promise<{ id: string; label: string }[]> {
   const admin = createAdminClient() as any
   const links = await admin.from('community_home_doctors').select('profile_id, created_at').eq('doctor_id', doctorId).limit(50)
   if (links.error || !links.data?.length) return []
   const ids = links.data.map((row: { profile_id: string }) => row.profile_id)
-  const chosen = new Map(links.data.map((row: { profile_id: string; created_at?: string }) => [row.profile_id, row.created_at || '']))
-  const [profiles, privacy] = await Promise.all([
-    admin.from('profiles').select('id, full_name').in('id', ids),
-    admin.from('community_privacy').select('profile_id, share_name_with_home_doctor').in('profile_id', ids),
-  ])
-  const names = new Map((profiles.data || []).map((row: { id: string; full_name: string | null }) => [row.id, row.full_name]))
-  const shared = new Map((privacy.data || []).map((row: { profile_id: string; share_name_with_home_doctor: boolean }) => [row.profile_id, row.share_name_with_home_doctor === true]))
+  const profiles = await admin.from('profiles').select('id, full_name, email').in('id', ids)
+  const names = new Map((profiles.data || []).map((row: { id: string; full_name: string | null; email?: string | null }) => [row.id, row]))
   return ids.map((id: string) => {
-    const full = names.get(id) || ''
-    const first = String(full).trim().split(/\s+/)[0]
-    const joined = chosen.get(id)
-    const when = joined ? new Date(String(joined)).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : ''
-    const label = shared.get(id) && first ? first : `Community member${when && when !== 'Invalid Date' ? ` · ${when}` : ''}`
+    const row = names.get(id) as { full_name?: string | null; email?: string | null } | undefined
+    const label = homeMemberLabel(row?.full_name, row?.email)
     return { id, label }
   })
 }

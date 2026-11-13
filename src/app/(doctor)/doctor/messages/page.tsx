@@ -1,5 +1,6 @@
 import MessagingSystem from "@/components/messaging/MessagingSystem";
 import { DoctorBand } from "@/components/doctor/chrome";
+import { MessagesIcon } from "@/components/doctor/icons";
 import { getPortalContext } from "@/lib/portal/context";
 import { portalTimer } from "@/lib/portal/timing";
 import { redirect } from "next/navigation";
@@ -22,6 +23,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
         title="Messages"
         subtitle="Community members, doctors, and students, all in one inbox."
         bleed={false}
+        icon={<MessagesIcon size={26} />}
       />
       <MessagingSystem
         fill

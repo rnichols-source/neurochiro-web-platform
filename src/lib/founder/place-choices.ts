@@ -3,6 +3,10 @@ export type PlaceHit = {
   query: string
   country: string
   importance: number
+  lat?: number
+  lng?: number
+  city?: string
+  state?: string
 }
 
 /**

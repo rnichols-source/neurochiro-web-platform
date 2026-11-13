@@ -11,6 +11,7 @@ export function DoctorBand({
   footer,
   home = false,
   bleed = true,
+  icon,
 }: {
   place: DoctorPlaceId
   title: string
@@ -19,6 +20,7 @@ export function DoctorBand({
   footer?: React.ReactNode
   home?: boolean
   bleed?: boolean
+  icon?: React.ReactNode
 }) {
   const tone = DOCTOR_PLACES[place]
   return (
@@ -29,7 +31,7 @@ export function DoctorBand({
       <div className="flex items-start gap-4">
         {home ? null : (
           <span className="grid h-[52px] w-[52px] shrink-0 place-items-center rounded-2xl bg-white/20 text-white">
-            <PlaceIcon id={place} size={26} />
+            {icon || <PlaceIcon id={place} size={26} />}
           </span>
         )}
         <div className="min-w-0 flex-1">

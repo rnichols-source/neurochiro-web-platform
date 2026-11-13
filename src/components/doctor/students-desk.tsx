@@ -88,8 +88,7 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
         <section className="rounded-[22px] bg-[#F8F1E4] p-4">
           <p className="dp-ui text-[18px] font-extrabold text-[#15202B]">ChiroMatch</p>
           <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">Post an associate position and meet graduating students.</p>
-          <Link href="/doctor/chiromatch/create" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">Post a position</Link>
-          <Link href="/doctor/match" className="dp-ui mt-2 block text-[14px] font-extrabold text-[#B4501A]">Open ChiroMatch</Link>
+          <Link href="/doctor/coming-soon#chiromatch" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">ChiroMatch is coming soon</Link>
         </section>
         <Link href="/doctor/coming-soon#shadow" className="block rounded-[22px] border border-dashed border-[#E3C27A] bg-white px-4 py-4">
           <p className="dp-ui text-[15px] font-extrabold text-[#15202B]">Shadow requests</p>
@@ -97,7 +96,7 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
         </Link>
         <div className="flex flex-col items-start gap-4">
           <Link href="/doctor/students/shadow" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Open the shadow inbox</Link>
-          <Link href="/doctor/jobs" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Hiring and jobs</Link>
+          <Link href="/doctor/coming-soon#hiring" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Hiring is coming soon</Link>
         </div>
       </aside>
     </div>

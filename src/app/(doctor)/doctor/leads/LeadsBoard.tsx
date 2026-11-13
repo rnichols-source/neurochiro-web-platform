@@ -67,7 +67,7 @@ export default function LeadsBoard({ initial, timeZone }: { initial: any; timeZo
     <div className="space-y-4">
       <LeadsHeader total={month.total} fresh={month.new} contacted={month.contacted} booked={month.booked} />
       <div className="flex items-end justify-between gap-4">
-        <PageHeader title="Directory requests" description="Track every request from first contact to a booked visit." />
+        <PageHeader title="Leads" description="Track every directory request from first contact to a booked visit." />
         {data?.conversionRate != null && (
           <div className="text-right">
             <p className="text-2xl font-bold text-portal-success">{data.conversionRate}%</p>

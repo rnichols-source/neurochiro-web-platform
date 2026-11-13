@@ -14,7 +14,7 @@ export interface BadgeDefinition {
 export const BADGE_DEFINITIONS: BadgeDefinition[] = [
   { id: 'profile_complete', name: 'Profile Complete', description: 'Complete your profile to 100%', icon: 'User', category: 'profile', color: 'blue' },
   { id: 'first_100_views', name: 'First 100 Views', description: 'Reach 100 profile views', icon: 'Eye', category: 'growth', color: 'emerald' },
-  { id: 'lead_magnet', name: 'Lead Magnet', description: 'Generate 10+ patient leads', icon: 'Users', category: 'patients', color: 'violet' },
+  { id: 'lead_magnet', name: 'Lead Magnet', description: 'Generate 10+ community member leads', icon: 'Users', category: 'patients', color: 'violet' },
   { id: 'seminar_host', name: 'Seminar Host', description: 'Host your first seminar', icon: 'Calendar', category: 'community', color: 'orange' },
   { id: 'hiring_pro', name: 'Hiring Pro', description: 'Post 3+ job listings', icon: 'Briefcase', category: 'growth', color: 'blue' },
   { id: 'ce_champion', name: 'CE Champion', description: 'Earn 20+ CE hours', icon: 'Award', category: 'community', color: 'emerald' },
