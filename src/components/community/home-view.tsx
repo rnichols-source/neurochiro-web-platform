@@ -10,6 +10,7 @@ export type HomePhase = {
   showLabel: string
   showTonight: boolean
   reminderTitle: string | null
+  careLine: string
   tripLine: string | null
   workLine: string | null
 }
@@ -67,6 +68,11 @@ export function HomeView({ greeting, initial, doctor, familyNames, ready, phase 
               {doctor.listed ? <PrimaryLink href={`/portal/visit?doctor=${doctor.id}`}>Request a visit</PrimaryLink> : <PrimaryLink href="/portal/find">Find a doctor</PrimaryLink>}
               <GhostLink href="/portal/care#message">Message</GhostLink>
             </div>
+            <p className="mt-3 text-[13px] leading-snug text-[#3d4a57]">{phase.careLine}</p>
+            <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
+              <Link href="/portal/care/exercises">Exercises</Link>
+              <Link href="/portal/care/remedies">Remedies</Link>
+            </div>
             <Link href="/portal/care/invite" className="mt-3 inline-block text-[13px] font-semibold text-[#B4501A]">Send someone you love →</Link>
             {!doctor.listed ? <p className="mt-2 text-[12.5px] text-[#6b7785]">This office is not currently listed. You can choose another home doctor.</p> : null}
           </>
@@ -77,6 +83,11 @@ export function HomeView({ greeting, initial, doctor, familyNames, ready, phase 
             <div className="mt-3 flex gap-2">
               <PrimaryLink href="/portal/find">Find a doctor</PrimaryLink>
               <GhostLink href="/directory">Directory</GhostLink>
+            </div>
+            <p className="mt-3 text-[13px] leading-snug text-[#3d4a57]">{phase.careLine}</p>
+            <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
+              <Link href="/portal/care/exercises">Exercises</Link>
+              <Link href="/portal/care/remedies">Remedies</Link>
             </div>
             <Link href="/portal/care/invite" className="mt-3 inline-block text-[13px] font-semibold text-[#B4501A]">Send someone you love →</Link>
           </>

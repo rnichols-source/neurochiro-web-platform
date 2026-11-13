@@ -4,6 +4,7 @@ import { LiveQuestionForm } from '@/components/community/live-question-form'
 import { WeekCheckIn } from '@/components/community/week-check-in'
 import { BackHeading, Card, Kicker } from '@/components/community/ui'
 import { requireCommunityMember } from '@/lib/community/data'
+import { LIBRARY_COPY } from '@/lib/community/library-model'
 import { loadPhaseHome, loadUpcomingLives } from '@/lib/community/phase-data'
 
 export const metadata: Metadata = { title: 'This week · Your NeuroChiro' }
@@ -34,8 +35,11 @@ export default async function WeekPage() {
       ) : (
         <Card>
           <Kicker>Exercises and remedies</Kicker>
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">Your home doctor can assign a set. NeuroChiro does not keep a library of stretches or remedies, and a set is not a visit.</p>
-          <Link href="/portal/care/exercises" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Open sets →</Link>
+          <p className="text-[13.5px] leading-snug text-[#3d4a57]">{LIBRARY_COPY.weekEmpty}</p>
+          <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
+            <Link href="/portal/care/exercises">Exercises</Link>
+            <Link href="/portal/care/remedies">Remedies</Link>
+          </div>
         </Card>
       )}
       <Card>

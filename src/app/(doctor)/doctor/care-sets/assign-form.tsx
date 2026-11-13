@@ -58,7 +58,7 @@ export function AssignForm({ members }: { members: { id: string; label: string }
         Steps, one per line
         <textarea className="mt-1 w-full rounded-lg border border-portal-border px-3 py-2 text-sm font-normal" rows={5} value={stepsText} onChange={(event) => setStepsText(event.target.value)} />
       </label>
-      <p className="text-sm text-portal-ink-2">Write the steps yourself. NeuroChiro does not supply a clinical library, and a set is not a substitute for a visit.</p>
+      <p className="text-sm text-portal-ink-2">One to eight steps, in your own words. This is separate from a library plan.</p>
       <button type="submit" disabled={pending} className="min-h-11 rounded-lg bg-neuro-orange px-4 text-sm font-bold text-white disabled:opacity-60">
         {pending ? 'Assigning…' : 'Assign this set'}
       </button>
