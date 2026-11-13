@@ -18,6 +18,7 @@ import {
   type NextStep,
   type ProfileChecklist,
 } from '@/lib/doctor/places'
+import { countStudentsNear, listStudentDirectory } from '@/lib/doctor/student-directory'
 
 export type ThenItem = {
   id: string
@@ -89,9 +90,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
     doctorId
       ? admin.from('community_exercise_assignments').select('library_plan_slug').eq('doctor_id', doctorId).eq('status', 'active')
       : Promise.resolve({ data: [], error: null }),
-    doctor?.city
-      ? admin.from('students').select('id', { count: 'exact', head: true }).ilike('location_city', doctor.city)
-      : Promise.resolve({ count: null, error: null }),
+    countStudentsNear(doctor?.city),
     doctorId
       ? getDoctorPortalStats({
         doctorId,
@@ -176,7 +175,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
     memberCount: members.length,
     plansInUse,
     libraryCount: LIBRARY_PLAN_COUNT,
-    studentsNear: students.error ? null : (typeof students.count === 'number' ? students.count : null),
+    studentsNear: students,
     checklist,
     step: steps[0],
     stepIndex: 1,
@@ -266,43 +265,28 @@ export type StudentCard = {
   bucket: 'mentoring' | 'shadowing' | 'associate' | 'other'
 }
 
-function studentBucket(interests: unknown, looking: boolean, bio: string): StudentCard['bucket'] {
-  const text = `${Array.isArray(interests) ? interests.join(' ') : ''} ${bio}`.toLowerCase()
-  if (text.includes('shadow')) return 'shadowing'
-  if (text.includes('associate')) return 'associate'
-  if (looking || text.includes('mentor')) return 'mentoring'
-  return 'other'
-}
-
 export async function loadStudentDesk(city: string | null): Promise<{ students: StudentCard[]; open: boolean; near: number | null }> {
   const admin = createAdminClient() as any
   const { createServerSupabase } = await import('@/lib/supabase-server')
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { students: [], open: false, near: null }
-  const [mine, rows, near] = await Promise.all([
+  const [mine, students, near] = await Promise.all([
     admin.from('doctors').select('accepts_student_messages').eq('user_id', user.id).maybeSingle(),
-    admin.from('students').select('id, user_id, full_name, school, graduation_year, interests, bio, is_looking_for_mentorship, location_city').order('created_at', { ascending: false }).limit(40),
-    city
-      ? admin.from('students').select('id', { count: 'exact', head: true }).ilike('location_city', city)
-      : Promise.resolve({ count: null, error: null }),
+    listStudentDirectory(),
+    countStudentsNear(city),
   ])
-  const students: StudentCard[] = (rows.error ? [] : rows.data || []).map((row: Record<string, unknown>) => {
-    const year = row.graduation_year ? `class of ${row.graduation_year}` : ''
-    const place = typeof row.location_city === 'string' ? row.location_city : ''
-    return {
-      id: String(row.id),
-      userId: typeof row.user_id === 'string' ? row.user_id : null,
-      name: typeof row.full_name === 'string' && row.full_name.trim() ? row.full_name : 'Student',
-      school: typeof row.school === 'string' ? row.school : '',
-      detail: [year, place].filter(Boolean).join(' · '),
-      bucket: studentBucket(row.interests, row.is_looking_for_mentorship === true, typeof row.bio === 'string' ? row.bio : ''),
-    }
-  })
   return {
-    students,
+    students: students.map((student) => ({
+      id: student.id,
+      userId: student.userId,
+      name: student.name,
+      school: student.school,
+      detail: student.detail,
+      bucket: student.bucket,
+    })),
     open: mine.data?.accepts_student_messages === true,
-    near: near.error ? null : (typeof near.count === 'number' ? near.count : null),
+    near,
   }
 }
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { excludeTestDoctors } from '@/lib/directory/visibility';
 
 export async function GET(
   request: NextRequest,
@@ -9,10 +10,10 @@ export async function GET(
 
   // Verify the doctor exists and has Pro tier
   const supabase = createAdminClient();
-  const { data: doctor } = await supabase
+  const { data: doctor } = await excludeTestDoctors(supabase
     .from('doctors')
     .select('first_name, last_name, membership_tier, verification_status')
-    .eq('slug', slug)
+    .eq('slug', slug))
     .single();
 
   if (!doctor || doctor.verification_status !== 'verified') {

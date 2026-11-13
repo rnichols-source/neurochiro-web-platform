@@ -95,8 +95,10 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
           <p className="dp-ui text-[15px] font-extrabold text-[#15202B]">Shadow requests</p>
           <p className="mt-1 text-[13px] text-[#5b6773]">Students ask to shadow you. The inbox is open if a request is already in.</p>
         </Link>
-        <Link href="/doctor/students/shadow" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Open the shadow inbox</Link>
-        <Link href="/doctor/jobs" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Hiring and jobs</Link>
+        <div className="flex flex-col items-start gap-4">
+          <Link href="/doctor/students/shadow" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Open the shadow inbox</Link>
+          <Link href="/doctor/jobs" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Hiring and jobs</Link>
+        </div>
       </aside>
     </div>
   )

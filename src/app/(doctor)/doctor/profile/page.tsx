@@ -409,14 +409,14 @@ function ProfileEditor() {
 
   const educationLines = asLines(profile?.education);
   const checks = [
-    { done: !!profile?.photo_url, label: "Profile photo", why: "Patients look for a face before they call." },
+    { done: !!profile?.photo_url, label: "Profile photo", why: "Community members look for a face before they call." },
     { done: !!(profile?.bio && profile.bio.length >= 20) || !!(profile?.short_intro && profile.short_intro.length >= 20), label: "Bio or intro", why: "Tells community members who you are and what you do." },
-    { done: !!profile?.chiropractic_school, label: "Education", why: "Patients want to know where you trained." },
+    { done: !!profile?.chiropractic_school, label: "Education", why: "Community members want to know where you trained." },
     { done: (profile?.specialties || []).length > 0, label: "Specialties", why: "Helps community members find you when searching." },
-    { done: !!profile?.hours, label: "Office hours", why: "Patients check hours before calling." },
-    { done: !!profile?.first_visit_price || !!profile?.payment_model, label: "Cost and insurance", why: "Patients ask this before they book." },
+    { done: !!profile?.hours, label: "Office hours", why: "Community members check hours before calling." },
+    { done: !!profile?.first_visit_price || !!profile?.payment_model, label: "Cost and insurance", why: "Community members ask this before they book." },
     { done: !!profile?.phone, label: "Phone number", why: "Many community members prefer to call." },
-    { done: !!profile?.booking_url, label: "Online booking link", why: "Patients who can book online are more likely to show up." },
+    { done: !!profile?.booking_url, label: "Online booking link", why: "Community members who can book online are more likely to show up." },
     { done: !!profile?.google_reviews_url, label: "Google Reviews link", why: "Reviews help community members decide." },
   ];
   const doneCount = checks.filter((item) => item.done).length;
@@ -686,7 +686,7 @@ function ProfileEditor() {
                 <textarea name="highlights" defaultValue={(profile?.highlights || []).join("\n")} placeholder={"Board certified\nFamily-friendly office"} rows={4} className={AREA} />
               </Section>
 
-              <Section title="Education" hint="Patients want to know where you trained. This shows on your profile.">
+              <Section title="Education" hint="Community members want to know where you trained. This shows on your profile.">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Label label="Chiropractic school">
                     <input name="chiropractic_school" defaultValue={profile?.chiropractic_school || ""} placeholder="Life University" className={INPUT} />
@@ -794,7 +794,7 @@ function ProfileEditor() {
               <Section title="Specialties" hint="Comma separated.">
                 <input name="specialties" defaultValue={(profile?.specialties || []).join(", ")} placeholder="Nervous system focused, Pediatric, Upper cervical" className={INPUT} />
               </Section>
-              <Section title="Patients we help" hint="Comma separated.">
+              <Section title="Community members we help" hint="Comma separated.">
                 <input name="conditions_treated" defaultValue={(profile?.conditions_treated || []).join(", ")} placeholder="Back pain, Neck pain, Headaches and migraines" className={INPUT} />
               </Section>
               <Section title="What to expect on the first visit">
@@ -817,7 +817,7 @@ function ProfileEditor() {
             </div>
 
             <div id="profile-panel-insurance" role="tabpanel" aria-labelledby="profile-tab-insurance" hidden={tab !== "insurance"} className="space-y-4">
-              <Section title="Insurance and payment" hint="Patients check this before they book. Even “Call for pricing” is better than blank.">
+              <Section title="Insurance and payment" hint="Community members check this before they book. Even “Call for pricing” is better than blank.">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Label label="First visit price" hint='Or "Call for pricing".'>
                     <input name="first_visit_price" defaultValue={profile?.first_visit_price || ""} placeholder="$150-$250 or Call for pricing" className={INPUT} />

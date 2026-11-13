@@ -30,7 +30,7 @@ export default function VerifiedBadge({
     <section className="bg-white rounded-xl border border-portal-border p-6">
       <h2 className="text-lg font-bold text-portal-ink">Add your NeuroChiro badge to your website</h2>
       <p className="mt-2 text-sm text-portal-ink-2 max-w-xl">
-        Paste this code on your clinic website. It shows patients you&apos;re a verified NeuroChiro member and links to your profile on neurochiro.co.
+        Paste this code on your clinic website. It shows community members you&apos;re a verified NeuroChiro member and links to your profile on neurochiro.co.
       </p>
       {locked ? (
         <p className="mt-4 text-sm font-bold text-portal-ink">Badges are part of Pro.</p>

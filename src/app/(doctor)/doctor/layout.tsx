@@ -1,4 +1,3 @@
-import { Suspense } from 'react';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
@@ -8,8 +7,6 @@ import DoctorShell from '@/components/doctor/shell';
 import ReferralProvider from '@/components/portal/ReferralProvider';
 import OnboardingGate from '@/components/portal/OnboardingGate';
 import { PortalProvider } from '@/components/portal/PortalProvider';
-import { MemberReferralBanner } from '@/components/portal/MemberReferralInvite';
-import { loadMemberInvite } from '@/lib/member-referrals/invite';
 import { getPortalContext } from '@/lib/portal/context';
 import { recordPortalLogin } from '@/lib/portal/login-ping';
 import { firstName } from '@/lib/portal/greeting';
@@ -20,12 +17,6 @@ import StaffScorecardFrame from './StaffScorecardFrame';
 import { countWaitingVisits } from '@/lib/doctor/portal-data';
 
 export const dynamic = 'force-dynamic'
-
-async function ReferralBanner({ doctorId }: { doctorId: string }) {
-  const invite = await loadMemberInvite(doctorId);
-  if (!invite || invite.dismissed) return null;
-  return <MemberReferralBanner title={invite.title} body={invite.body} message={invite.message} />;
-}
 
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
   const headerStore = await headers();
@@ -88,7 +79,6 @@ export default async function DoctorLayout({ children }: { children: React.React
           <ReferralProvider>
             <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName} applicationGate={applicationGate}>
               <DoctorShell waiting={ctx.doctor ? await countWaitingVisits(ctx.doctor.id) : 0}>
-                {ctx.doctor ? <Suspense fallback={null}><ReferralBanner doctorId={ctx.doctor.id} /></Suspense> : null}
                 {children}
               </DoctorShell>
             </OnboardingGate>

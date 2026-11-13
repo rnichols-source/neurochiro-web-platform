@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { excludeTestDoctors } from '@/lib/directory/visibility';
 
 export const revalidate = 300; // Cache for 5 minutes
 
@@ -8,8 +9,8 @@ export async function GET() {
     const supabase = createAdminClient();
 
     const [doctorsRes, locationsRes] = await Promise.all([
-      supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified'),
-      supabase.from('doctors').select('city, state, region_code').eq('verification_status', 'verified'),
+      excludeTestDoctors(supabase.from('doctors').select('*', { count: 'exact', head: true }).eq('verification_status', 'verified')),
+      excludeTestDoctors(supabase.from('doctors').select('city, state, region_code').eq('verification_status', 'verified')),
     ]);
 
     const rows = locationsRes.data || [];

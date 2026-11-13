@@ -22,7 +22,7 @@ async function runSearch(params: Record<string, string>, trust: boolean) {
 
 type DoctorChain = {
   select(columns: string): DoctorChain;
-  eq(column: string, value: string): DoctorChain;
+  eq(column: string, value: string | boolean): DoctorChain;
   not(column: string, operator: string, value: string | null): DoctorChain;
   order(column: string, options: { ascending: boolean }): DoctorChain;
   limit(count: number): DoctorChain;
@@ -36,6 +36,7 @@ async function featuredDoctors() {
     doctors
       .select(FEATURED_FIELDS)
       .eq("verification_status", "verified")
+      .eq("is_test", false)
       .not("photo_url", "is", null)
       .order("accepting_new_patients", { ascending: false })
       .order("created_at", { ascending: false })

@@ -14,12 +14,14 @@ export type PublicListingRow = {
   is_founding_member?: boolean | null
   membership_tier?: string | null
   paid_at?: string | null
+  is_test?: boolean | null
 }
 
 const PUBLIC_STATUSES = new Set(['verified', 'pending'])
 const PAID_TIERS = new Set(['basic', 'growth', 'pro', 'neuros'])
 
 export function isDoctorPubliclyVisible(row: PublicListingRow): boolean {
+  if (row.is_test === true) return false
   const status = (row.verification_status || '').trim().toLowerCase()
   if (!PUBLIC_STATUSES.has(status)) return false
   if (!row.user_id) return true
@@ -36,6 +38,12 @@ export function isDoctorPubliclyVisible(row: PublicListingRow): boolean {
 export const PUBLIC_LISTING_OR =
   'user_id.is.null,is_approved.eq.true,is_founding_member.eq.true,membership_tier.in.(basic,growth,pro,neuros),paid_at.not.is.null,verification_status.eq.verified'
 
+/** The generated doctor type omits is_test. The live column is boolean not null, default false. */
+export function excludeTestDoctors<T>(query: T): T {
+  const builder = query as T & { eq: (column: string, value: boolean) => T }
+  return builder.eq('is_test', false)
+}
+
 export function applyPublicListing<T extends { or: (filters: string) => T }>(query: T): T {
-  return query.or(PUBLIC_LISTING_OR)
+  return excludeTestDoctors(query.or(PUBLIC_LISTING_OR))
 }

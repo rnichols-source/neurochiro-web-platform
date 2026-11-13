@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MapPin, ArrowRight } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { excludeTestDoctors } from "@/lib/directory/visibility";
 
 export const metadata = {
   title: "Find Nervous System Chiropractors by City | NeuroChiro",
@@ -9,14 +10,14 @@ export const metadata = {
 
 async function getCitiesWithDoctors() {
   const supabase = createAdminClient();
-  const { data } = await supabase
+  const { data } = await excludeTestDoctors(supabase
     .from("doctors")
     .select("city, state")
     .eq("verification_status", "verified")
     .not("city", "is", null)
     .not("state", "is", null)
     .neq("city", "")
-    .neq("state", "");
+    .neq("state", ""));
 
   if (!data) return {};
 
