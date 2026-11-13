@@ -29,7 +29,7 @@ const ROWS: { key: keyof PrivacyPrefs; label: string; detail: string }[] = [
   {
     key: 'shareHomeClinicWithOtherDoctors',
     label: 'My home clinic, with a doctor I meet later',
-    detail: 'For a future care passport. Off, and nothing is sent now.',
+    detail: 'Only if you also check it when you send a passport introduction.',
   },
 ]
 

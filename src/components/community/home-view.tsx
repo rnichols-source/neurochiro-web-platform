@@ -1,6 +1,18 @@
 import Link from 'next/link'
+import { WeekCheckIn } from '@/components/community/week-check-in'
 import { Card, GhostLink, Kicker, PrimaryLink } from '@/components/community/ui'
 import { householdLine, type HomeDoctorCard } from '@/lib/community/logic'
+import type { Feeling } from '@/lib/community/phases'
+
+export type HomePhase = {
+  ready: boolean
+  feeling: Feeling | null
+  showLabel: string
+  showTonight: boolean
+  reminderTitle: string | null
+  tripLine: string | null
+  workLine: string | null
+}
 
 export type HomeViewProps = {
   greeting: string
@@ -8,9 +20,10 @@ export type HomeViewProps = {
   doctor: HomeDoctorCard | null
   familyNames: string[]
   ready: boolean
+  phase: HomePhase
 }
 
-export function HomeView({ greeting, initial, doctor, familyNames, ready }: HomeViewProps) {
+export function HomeView({ greeting, initial, doctor, familyNames, ready, phase }: HomeViewProps) {
   return (
     <div>
       <div className="mb-3.5 flex items-center justify-between">
@@ -54,6 +67,7 @@ export function HomeView({ greeting, initial, doctor, familyNames, ready }: Home
               {doctor.listed ? <PrimaryLink href={`/portal/visit?doctor=${doctor.id}`}>Request a visit</PrimaryLink> : <PrimaryLink href="/portal/find">Find a doctor</PrimaryLink>}
               <GhostLink href="/portal/care#message">Message</GhostLink>
             </div>
+            <Link href="/portal/care/invite" className="mt-3 inline-block text-[13px] font-semibold text-[#B4501A]">Send someone you love →</Link>
             {!doctor.listed ? <p className="mt-2 text-[12.5px] text-[#6b7785]">This office is not currently listed. You can choose another home doctor.</p> : null}
           </>
         ) : (
@@ -64,6 +78,7 @@ export function HomeView({ greeting, initial, doctor, familyNames, ready }: Home
               <PrimaryLink href="/portal/find">Find a doctor</PrimaryLink>
               <GhostLink href="/directory">Directory</GhostLink>
             </div>
+            <Link href="/portal/care/invite" className="mt-3 inline-block text-[13px] font-semibold text-[#B4501A]">Send someone you love →</Link>
           </>
         )}
       </Card>
@@ -78,16 +93,26 @@ export function HomeView({ greeting, initial, doctor, familyNames, ready }: Home
 
       <Card>
         <Kicker>This week</Kicker>
-        <div className="flex items-center justify-between gap-2.5">
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">A weekly check-in for your household is on the way. It is not a chart, and it is not here yet.</p>
-          <Link href="/portal/week" className="whitespace-nowrap text-[13px] font-semibold text-[#B4501A]">See what’s coming →</Link>
-        </div>
+        <p className="mb-2 font-heading text-[15px] font-bold tracking-[-0.02em] text-neuro-navy">How is your family’s nervous system this week?</p>
+        {phase.ready ? <WeekCheckIn initial={phase.feeling} /> : (
+          <p className="text-[13.5px] leading-snug text-[#3d4a57]">The check-in saves with the latest database update.</p>
+        )}
+        <Link href="/portal/week" className="mt-3 flex items-center gap-3">
+          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-[9px] font-bold text-white ${phase.showTonight ? 'bg-[#B4501A]' : 'bg-neuro-navy'}`}>
+            {phase.showTonight ? 'LIVE' : 'SHOW'}
+          </span>
+          <span>
+            <span className="block font-heading text-[14px] font-bold text-neuro-navy">The Weekly Adjustment</span>
+            <span className="block text-[12.5px] text-[#3d4a57]">{phase.showLabel}</span>
+          </span>
+        </Link>
+        {phase.reminderTitle ? <p className="mt-2 text-[12.5px] leading-snug text-[#3d4a57]">{phase.reminderTitle}</p> : null}
       </Card>
 
       <Card>
         <Kicker>Your passport</Kicker>
         <div className="flex items-center justify-between gap-2.5">
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">When you travel, your care can travel with you. A care passport is on the way.</p>
+          <p className="text-[13.5px] leading-snug text-[#3d4a57]">{phase.tripLine || 'When you travel, your care can travel with you.'}</p>
           <Link href="/portal/passport" className="whitespace-nowrap text-[13px] font-semibold text-[#B4501A]">Open →</Link>
         </div>
       </Card>
@@ -95,7 +120,7 @@ export function HomeView({ greeting, initial, doctor, familyNames, ready }: Home
       <Card className="mb-0">
         <Kicker>Work in this field</Kicker>
         <div className="flex items-center justify-between gap-2.5">
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">Openings in member offices will live here. Not yet.</p>
+          <p className="text-[13.5px] leading-snug text-[#3d4a57]">{phase.workLine || 'Raise a hand for CA, front desk, or a student path.'}</p>
           <Link href="/portal/work" className="whitespace-nowrap text-[13px] font-semibold text-[#B4501A]">See openings →</Link>
         </div>
       </Card>

@@ -50,6 +50,26 @@ function noteLine(message: string | null | undefined): string {
   return note
 }
 
+/** Office text for a Your NeuroChiro visit request. Community member, never patient. */
+export function communityVisitOfficeText(input: {
+  name: string | null
+  phone: string | null
+  email: string | null
+  bestTime: string | null
+  note: string | null
+}): string {
+  const name = ascii(input.name) || 'A community member'
+  const contact = ascii(input.phone) || ascii(input.email)
+  const who = contact ? `${name}, ${contact}` : name
+  const parts = [`NeuroChiro: New community member visit request. ${who}.`]
+  const when = ascii(input.bestTime)
+  if (when) parts.push(`Best time: ${when}.`)
+  const note = noteLine(input.note)
+  if (note) parts.push(`Note: ${note}.`)
+  parts.push('Please reach out within 24 hrs. Details: https://neurochiro.co/doctor/visit-requests Reply STOP to opt out.')
+  return parts.join(' ')
+}
+
 export function doctorNewLead(input: {
   patientName: string
   patientPhone: string

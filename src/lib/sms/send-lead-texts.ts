@@ -10,6 +10,7 @@ export async function sendLeadTexts(input: {
   doctor: DoctorAlertTarget
   patient: PatientAlertTarget
   smsConsentSaved: boolean
+  officeBody?: string | null
 }): Promise<void> {
   try {
     const db = createAdminClient()
@@ -18,6 +19,7 @@ export async function sendLeadTexts(input: {
       doctor: input.doctor,
       patient: input.patient,
       smsConsentSaved: input.smsConsentSaved,
+      officeBody: input.officeBody,
       store: supabaseSmsStore(db as unknown as Parameters<typeof supabaseSmsStore>[0]),
       runtime: readSmsConfig(),
     })

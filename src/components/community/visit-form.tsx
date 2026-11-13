@@ -67,10 +67,17 @@ export function VisitForm({
             setError(result.error)
             return
           }
-          if (!result.claimed) {
+          const office = [
+            result.emailed ? 'The office was emailed what you checked.' : '',
+            result.texted ? 'A text was sent to the office.' : '',
+            result.textHeld ? 'A text is held until the office’s morning hours.' : '',
+          ].filter(Boolean)
+          if (office.length > 0) {
+            setDone(`Saved. ${office.join(' ')} Nothing else was included.`)
+          } else if (!result.claimed) {
             setDone('Saved. This office does not have a NeuroChiro login yet, so they will not get an in-app alert. Your request is still on your account.')
           } else if (result.notified) {
-            setDone(`${doctorTitle} has an alert in their NeuroChiro account. They only received what you checked.`)
+            setDone(`${doctorTitle} has an alert in their NeuroChiro account. They only received what you checked. Email or text was not sent just now.`)
           } else {
             setDone('Saved on your account. The office alert could not be delivered just now. They can still see it under visit requests when they sign in.')
           }

@@ -26,7 +26,7 @@ export default async function DoctorVisitRequestsPage() {
     <div>
       <PageHeader
         title="Visit requests"
-        description="A community member only sends what they chose to share. Email and text alerts from the public directory are not sent for these."
+        description="A community member only sends what they chose to share. Email and text say community member, and they include only those fields."
       />
       {!ready ? <p className="text-sm text-portal-ink-2">The visit request table is not on this database yet.</p> : null}
       {ready && requests.length === 0 ? (

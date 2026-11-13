@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { FlowProgress } from "@/components/applications/FlowProgress";
 import { createAccountAction, signInWithProvider, claimDoctorProfileAction } from "../actions/auth";
+import { safeReturnPath } from "@/lib/auth/safe-return-path";
 
 type Role = "doctor" | "student" | "patient";
 
@@ -84,7 +85,7 @@ function RegisterForm({ applicationFlow }: { applicationFlow: boolean }) {
 
     // Patient: redirect immediately (free, no verification needed)
     if (role === "patient") {
-      router.push("/portal");
+      router.push(safeReturnPath(searchParams.get("next")) || "/portal");
       return;
     }
 

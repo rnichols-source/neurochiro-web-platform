@@ -60,6 +60,16 @@ export default async function CarePage() {
           </ul>
         )}
       </Card>
+      <Card>
+        <Kicker>Send someone you love</Kicker>
+        <p className="text-[13.5px] leading-snug text-[#3d4a57]">A private link for a friend or family member, in this city or another country.</p>
+        <Link href="/portal/care/invite" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Open →</Link>
+      </Card>
+      <Card>
+        <Kicker>Exercises and remedies</Kicker>
+        <p className="text-[13.5px] leading-snug text-[#3d4a57]">A set your home doctor assigns. NeuroChiro does not keep a library of stretches or remedies.</p>
+        <Link href="/portal/care/exercises" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Open →</Link>
+      </Card>
       <div id="message" className="rounded-2xl bg-[#fdf1ea] px-3.5 py-3">
         <strong className="mb-1 block font-heading text-[13px] font-bold text-neuro-navy">Message</strong>
         <p className="text-[12.5px] leading-snug text-[#3d4a57]">Messages with your home doctor are not open yet. A visit request is how you reach the office, and they only receive what you check.</p>
