@@ -11,10 +11,9 @@ import { countAttention } from '@/lib/leads/attention-count'
 import { DEFAULT_LEAD_FOLLOWUP, parseLeadFollowupConfig } from '@/lib/leads/config'
 import { isMissingColumn } from '@/lib/leads/schema'
 import { looseFrom } from '@/lib/admin/loose-query'
+import { loadNeuroChiroMrr } from '@/lib/founder/mrr'
 
 const STATUSES = new Set<MembershipStatus>(['active', 'trialing', 'past_due', 'canceled', 'none'])
-const ZERO_DECIMAL = new Set(['bif', 'clp', 'djf', 'gnf', 'jpy', 'kmf', 'krw', 'mga', 'pyg', 'rwf', 'ugx', 'vnd', 'vuv', 'xaf', 'xof', 'xpf'])
-
 export type CurrencyAmount = { currency: string; amount: number }
 
 export type AdminToday = {
@@ -67,11 +66,6 @@ export function monthlyAmountCents(unitAmount: number, quantity: number, interva
   if (interval === 'week') return (amount * 52) / (count * 12)
   if (interval === 'day') return (amount * 365) / (count * 12)
   return 0
-}
-
-function majorUnits(minor: number, currency: string): number {
-  const divisor = ZERO_DECIMAL.has(currency.toLowerCase()) ? 1 : 100
-  return Math.round(minor) / divisor
 }
 
 function customerId(customer: Stripe.Subscription['customer']): string | null {
@@ -293,17 +287,9 @@ async function loadAdminTodayUncached(): Promise<AdminToday> {
       listSubscriptions('past_due'),
       listSubscriptions('unpaid'),
     ])
-    const byCurrency = new Map<string, number>()
-    for (const sub of active) {
-      if (sub.status !== 'active') continue
-      for (const [currency, minor] of subscriptionMonthlyByCurrency(sub)) {
-        byCurrency.set(currency, (byCurrency.get(currency) || 0) + minor)
-      }
-    }
-    snapshot.mrrUsd = majorUnits(byCurrency.get('usd') || 0, 'usd')
-    snapshot.mrrOther = [...byCurrency.entries()]
-      .filter(([currency]) => currency !== 'usd')
-      .map(([currency, minor]) => ({ currency: currency.toUpperCase(), amount: majorUnits(minor, currency) }))
+    const snap = await loadNeuroChiroMrr()
+    snapshot.mrrUsd = snap.ok ? snap.mrrUsd : null
+    snapshot.mrrOther = []
     snapshot.failedSubscriptions = pastDue.length + unpaid.length
     snapshot.failedInvoices30d = await countFailedInvoices()
     snapshot.stripeOk = true
@@ -395,6 +381,7 @@ export async function adminToday(): Promise<AdminToday> {
 
 export async function mrr(): Promise<{ usd: number | null; other: CurrencyAmount[] }> {
   await checkAdminAuth()
-  const today = await getCachedAdminToday()
-  return { usd: today.mrrUsd, other: today.mrrOther }
+  const snap = await loadNeuroChiroMrr()
+  if (!snap.ok) return { usd: null, other: [] }
+  return { usd: snap.mrrUsd, other: [] }
 }

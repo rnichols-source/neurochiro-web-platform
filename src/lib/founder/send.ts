@@ -279,8 +279,8 @@ export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendR
   }
   const roster = await loadFounderRoster()
   const { buildNeeds, buildFunnel } = await import('./model')
-  const { adminToday } = await import('@/lib/admin/metrics')
-  const todayStats = await adminToday().catch(() => null)
+  const { loadNeuroChiroMrr } = await import('./mrr')
+  const snap = await loadNeuroChiroMrr().catch(() => null)
   const needs = buildNeeds(roster)
   const lines = [
     'Pulse for this Monday.',
@@ -288,8 +288,8 @@ export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendR
     `Asks for a doctor: ${roster.demandCount}`,
     `Visit requests still open: ${openRequests(roster).length}`,
     `Doctors live: ${roster.doctors.filter((doctor) => doctor.verified).length}`,
-    `Paying doctors: ${todayStats?.paying ?? 'unavailable'}`,
-    `MRR: ${todayStats?.mrrUsd == null ? 'unavailable' : `$${Math.round(todayStats.mrrUsd)}`}`,
+    `Paying doctors: ${snap?.ok && snap.payingSubscriptions != null ? snap.payingSubscriptions : 'unavailable'}`,
+    `MRR: ${!snap?.ok || snap.mrrUsd == null ? 'unavailable' : `$${Math.round(snap.mrrUsd)}`}`,
     '',
     'Needs you:',
     ...(needs.length ? needs.map((item) => `- ${item.title}`) : ['- Nothing in this list.']),

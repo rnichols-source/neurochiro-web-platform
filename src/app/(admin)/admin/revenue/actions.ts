@@ -2,8 +2,9 @@
 
 import { stripe } from "@/lib/stripe";
 import { checkAdminAuth } from '@/lib/admin-auth';
-import { mrr } from '@/lib/admin/metrics';
 import { formatMoney } from '@/lib/admin/member-search';
+import { baselineMrrUsd, baselinePayingCount } from '@/lib/founder/mrr-calc';
+import { loadMrrBaselineInputs, loadNeuroChiroMrr } from '@/lib/founder/mrr';
 
 /**
  * Fetches all records from a Stripe list API using async iteration.
@@ -68,59 +69,16 @@ export async function getRevenueData(timeRange: string) {
     const previousRevenue = calcRevenue(previousCharges);
     const revenueTrend = previousRevenue === 0 ? null : ((currentRevenue - previousRevenue) / previousRevenue) * 100;
 
-    // 4. Real MRR & Active Subscriptions Trend Calculation
-    const getMrrAt = (timestamp: number) => {
-      let mrrCents = 0;
-      allSubs.forEach((sub: any) => {
-        // Was this subscription active at the given timestamp?
-        const isCreatedBefore = sub.created <= timestamp;
-        const isNotCanceledYet = !sub.canceled_at || sub.canceled_at > timestamp;
-        const isCurrentlyActive = ['active', 'past_due', 'trialing'].includes(sub.status);
-        
-        // At historical timestamp, we only care about created/canceled dates
-        // For 'now' (if timestamp is current), we also check status
-        const isActive = isCreatedBefore && isNotCanceledYet && (timestamp < Math.floor(Date.now()/1000) || isCurrentlyActive);
-
-        if (isActive) {
-          sub.items.data.forEach((item: any) => {
-            const recurring = item.price.recurring;
-            if (!recurring) return;
-
-            const amount = (item.price.unit_amount || 0) * (item.quantity || 1);
-            let monthlyAmount = 0;
-
-            if (recurring.interval === 'month') {
-              monthlyAmount = amount / recurring.interval_count;
-            } else if (recurring.interval === 'year') {
-              monthlyAmount = amount / (recurring.interval_count * 12);
-            } else if (recurring.interval === 'week') {
-              monthlyAmount = (amount * 4.333333) / recurring.interval_count;
-            } else if (recurring.interval === 'day') {
-              monthlyAmount = (amount * 30.41666) / recurring.interval_count;
-            }
-            mrrCents += monthlyAmount;
-          });
-        }
-      });
-      return mrrCents / 100;
-    };
-
-    const countActiveAt = (timestamp: number) => {
-      return allSubs.filter((sub: any) => {
-        const isCreatedBefore = sub.created <= timestamp;
-        const isNotCanceledYet = !sub.canceled_at || sub.canceled_at > timestamp;
-        const isCurrentlyActive = ['active', 'past_due', 'trialing'].includes(sub.status);
-        return isCreatedBefore && isNotCanceledYet && (timestamp < Math.floor(Date.now()/1000) || isCurrentlyActive);
-      }).length;
-    };
-
-    const sharedMrr = await mrr();
-    const headlineMrr = sharedMrr.usd;
-    const previousMrr = getMrrAt(prevEndTs);
+    // 4. MRR trend. Headline is the shared live total. The baseline uses the
+    // same product filter and monthly math, and leaves out past_due and trialing.
+    const snap = await loadNeuroChiroMrr();
+    const inputs = await loadMrrBaselineInputs();
+    const headlineMrr = snap.ok ? snap.mrrUsd : null;
+    const previousMrr = baselineMrrUsd(allSubs, prevEndTs, inputs);
     const mrrTrend = headlineMrr == null || previousMrr === 0 ? null : ((headlineMrr - previousMrr) / previousMrr) * 100;
 
-    const currentActiveCount = countActiveAt(Math.floor(now.getTime() / 1000));
-    const previousActiveCount = countActiveAt(prevEndTs);
+    const currentActiveCount = snap.payingSubscriptions ?? 0;
+    const previousActiveCount = baselinePayingCount(allSubs, prevEndTs, inputs);
     const activeSubscriptionsTrend = currentActiveCount - previousActiveCount;
 
     // 5. Failed Payments Accuracy
@@ -177,7 +135,7 @@ export async function getRevenueData(timeRange: string) {
         totalRevenue: currentRevenue,
         revenueTrend,
         mrr: headlineMrr,
-        mrrOther: sharedMrr.other,
+        mrrOther: [],
         mrrTrend,
         activeSubscriptions: currentActiveCount,
         activeSubscriptionsTrend,

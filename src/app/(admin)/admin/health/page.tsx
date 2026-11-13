@@ -34,7 +34,7 @@ async function HealthBody() {
   const rows = [
     ['Database', roster.doctors.length > 0 ? 'Doctors loaded' : 'No doctors came back', roster.doctors.length > 0],
     ['Demand asks', roster.mentionsOk ? `${roster.demandCount.toLocaleString('en-US')} mentions` : 'Demand table did not load', roster.mentionsOk],
-    ['Stripe', billing.stripeOk ? 'Doctor memberships answered' : 'Stripe did not answer', billing.stripeOk],
+    ['Stripe', billing.stripeOk ? 'Subscriptions answered' : 'Stripe did not answer', billing.stripeOk],
     ['Quo texting', sms.enabled && sms.apiKey ? 'Configured' : 'Switched off or missing a key', Boolean(sms.enabled && sms.apiKey)],
     ['Broadcast log', tables.broadcasts ? 'Table is present' : 'Migration not applied', tables.broadcasts],
     ['Office-visit columns', tables.officeVisit ? 'Present' : 'Migration not applied', tables.officeVisit],
