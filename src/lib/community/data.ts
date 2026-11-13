@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path'
@@ -92,7 +93,7 @@ function missingRelation(error: DbError): boolean {
   return error.code === '42P01' || error.code === 'PGRST205' || /does not exist|schema cache|could not find the table/i.test(message)
 }
 
-export async function requireCommunityMember(): Promise<CommunitySession> {
+export const requireCommunityMember = cache(async (): Promise<CommunitySession> => {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
@@ -122,7 +123,7 @@ export async function requireCommunityMember(): Promise<CommunitySession> {
     fullName: profile?.full_name || null,
     phone: typeof meta.phone === 'string' ? meta.phone : null,
   }
-}
+})
 
 export async function loadCommunitySnapshot(session: CommunitySession): Promise<CommunitySnapshot> {
   const empty: CommunitySnapshot = {
@@ -137,7 +138,7 @@ export async function loadCommunitySnapshot(session: CommunitySession): Promise<
   const [home, household, privacy, visits] = await Promise.all([
     admin.from('community_home_doctors').select('doctor_id').eq('profile_id', session.userId).maybeSingle(),
     admin.from('community_households').select('id').eq('owner_profile_id', session.userId).maybeSingle(),
-    admin.from('community_privacy').select('*').eq('profile_id', session.userId).maybeSingle(),
+    admin.from('community_privacy').select('share_name_with_home_doctor, share_email_with_home_doctor, share_phone_with_home_doctor, share_family_first_names_with_home_doctor, share_home_clinic_with_other_doctors').eq('profile_id', session.userId).maybeSingle(),
     admin.from('community_visit_requests')
       .select('id, doctor_id, status, created_at, preferred_window, note, shared_first_name, for_first_name, shared_email, shared_family_names, callback_phone')
       .eq('profile_id', session.userId)

@@ -1,4 +1,5 @@
 import MessagingSystem from "@/components/messaging/MessagingSystem";
+import { getInboxPage } from "@/app/actions/messaging-actions";
 import { DoctorBand } from "@/components/doctor/chrome";
 import { MessagesIcon } from "@/components/doctor/icons";
 import { getPortalContext } from "@/lib/portal/context";
@@ -9,7 +10,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function MessagesPage({ searchParams }: { searchParams: Promise<{ to?: string; c?: string }> }) {
   const done = portalTimer("messages");
-  const [{ to, c }, ctx] = await Promise.all([searchParams, getPortalContext()]);
+  const [{ to, c }, ctx, inbox] = await Promise.all([
+    searchParams,
+    getPortalContext(),
+    getInboxPage().catch(() => null),
+  ]);
   done();
 
   if (!ctx) {
@@ -31,6 +36,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
         userRole={ctx.role || "doctor"}
         initialOtherUserId={to}
         initialConversationId={c}
+        initialInbox={inbox}
         emptyMessage="This inbox is for community members, doctors, and students. Start a conversation, or reply when someone writes to you."
       />
     </div>

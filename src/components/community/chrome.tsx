@@ -63,7 +63,7 @@ export function BackHeading({
       className={`nc-band ${bleed} rounded-b-[26px] px-5 pb-[18px] pt-3 text-white lg:rounded-none lg:px-10 lg:pb-7 lg:pt-6`}
       style={{ ['--c' as string]: tone.color, ['--d' as string]: tone.dark }}
     >
-      <Link href={href} className="nc-ui inline-flex min-h-11 items-center gap-0.5 rounded-full bg-white/20 py-1.5 pl-2 pr-3.5 text-[15px] font-extrabold text-white">
+      <Link prefetch href={href} className="nc-ui inline-flex min-h-11 items-center gap-0.5 rounded-full bg-white/20 py-1.5 pl-2 pr-3.5 text-[15px] font-extrabold text-white">
         <BackIcon />
         {label}
       </Link>

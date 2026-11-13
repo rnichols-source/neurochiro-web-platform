@@ -91,7 +91,7 @@ export default function PortalShell({ children, banner }: { children: React.Reac
                   );
                 }
                 return (
-                  <Link key={item.key} href={item.href} className={className} title={item.subtitle} onClick={() => setOpen(false)}>
+                  <Link prefetch key={item.key} href={item.href} className={className} title={item.subtitle} onClick={() => setOpen(false)}>
                     {body}
                   </Link>
                 );
@@ -100,7 +100,7 @@ export default function PortalShell({ children, banner }: { children: React.Reac
           );
         })}
         {ctx.comingSoonCount > 0 ? (
-          <Link href="/doctor/coming-soon" className="min-h-11 px-3 rounded-lg flex items-center text-sm text-white/70 hover:bg-portal-sidebar-active" onClick={() => setOpen(false)}>
+          <Link prefetch href="/doctor/coming-soon" className="min-h-11 px-3 rounded-lg flex items-center text-sm text-white/70 hover:bg-portal-sidebar-active" onClick={() => setOpen(false)}>
             Coming soon
           </Link>
         ) : null}
@@ -139,7 +139,7 @@ export default function PortalShell({ children, banner }: { children: React.Reac
           <span className="hidden md:block" />
           <div className="flex items-center gap-1">
             <NotificationBell unreadOverride={ctx.unreadNotifications} includeAnnouncements={false} variant="light" viewAllHref="/doctor/notifications" />
-            <Link href="/doctor/profile" className="hidden md:inline-flex w-11 h-11 rounded-lg bg-portal-surface items-center justify-center text-sm font-bold" aria-label="My profile" title="My profile">
+            <Link prefetch href="/doctor/profile" className="hidden md:inline-flex w-11 h-11 rounded-lg bg-portal-surface items-center justify-center text-sm font-bold" aria-label="My profile" title="My profile">
               {ctx.initials}
             </Link>
           </div>
@@ -154,7 +154,7 @@ export default function PortalShell({ children, banner }: { children: React.Reac
           {ctx.membership.tier === 'free' ? (
             <div className="shrink-0 bg-portal-accent-50 border-b border-portal-border px-4 py-3 flex items-center justify-between gap-3">
               <p className="text-sm text-portal-ink">Activate Pro to unlock patient requests and results.</p>
-              <Link href="/doctor/billing" className="min-h-11 px-4 inline-flex items-center bg-portal-accent text-white text-sm font-bold rounded-lg">Activate Pro</Link>
+              <Link prefetch href="/doctor/billing" className="min-h-11 px-4 inline-flex items-center bg-portal-accent text-white text-sm font-bold rounded-lg">Activate Pro</Link>
             </div>
           ) : null}
           <div className={fullHeight ? 'flex-1 min-h-0 flex flex-col p-0 md:p-6 max-w-6xl mx-auto w-full' : 'p-4 md:p-8 max-w-6xl mx-auto w-full'}>{children}</div>
@@ -165,7 +165,7 @@ export default function PortalShell({ children, banner }: { children: React.Reac
           const active = itemActive(item.href);
           const badge = badgeText(item.badge);
           return (
-            <Link key={item.name} href={item.href} className={`flex-1 min-h-11 py-2 flex flex-col items-center justify-center text-xs ${active ? 'text-portal-accent' : 'text-white/70'}`}>
+            <Link prefetch key={item.name} href={item.href} className={`flex-1 min-h-11 py-2 flex flex-col items-center justify-center text-xs ${active ? 'text-portal-accent' : 'text-white/70'}`}>
               <span className="relative">
                 <item.icon className="w-5 h-5" aria-hidden />
                 {badge ? <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 rounded-full bg-portal-accent text-white text-xs font-bold inline-flex items-center justify-center" {...(item.name === 'Messages' ? { 'data-messages-badge': item.badge || 0 } : {})}>{badge}</span> : null}
@@ -185,7 +185,7 @@ export default function PortalShell({ children, banner }: { children: React.Reac
             <h2 id="locked-title" className="text-lg font-bold text-portal-ink">{locked.label}</h2>
             <p className="mt-2 text-sm text-portal-ink-2">This is part of Pro. Activate Pro to open {locked.label.toLowerCase()}.</p>
             <div className="mt-4 flex gap-2">
-              <Link href="/doctor/billing" className="min-h-11 px-4 inline-flex items-center rounded-lg bg-portal-accent text-white text-sm font-bold" onClick={() => setLocked(null)}>Upgrade</Link>
+              <Link prefetch href="/doctor/billing" className="min-h-11 px-4 inline-flex items-center rounded-lg bg-portal-accent text-white text-sm font-bold" onClick={() => setLocked(null)}>Upgrade</Link>
               <button type="button" className="min-h-11 px-4 rounded-lg border border-portal-border text-sm font-bold" onClick={() => setLocked(null)}>Close</button>
             </div>
           </div>

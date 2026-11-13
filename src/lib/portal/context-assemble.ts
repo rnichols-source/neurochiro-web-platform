@@ -24,6 +24,10 @@ export type PortalContextDeps = {
   hasPurchase: (userId: string) => Promise<boolean>;
   loadCycles: () => Promise<{ ranking_opens_at?: string | null; ranking_closes_at?: string | null }[]>;
   unreadReferrals: (doctorId: string | null) => Promise<number>;
+  countWaiting?: (doctorId: string | null) => Promise<number>;
+  lookupStaff?: (userId: string) => Promise<boolean>;
+  loadGate?: (doctorId: string) => Promise<string | null>;
+  loadSaved?: (userId: string) => Promise<Record<string, unknown> | null>;
   now?: () => number;
 };
 
@@ -51,11 +55,15 @@ export async function assemblePortalContext(deps: PortalContextDeps): Promise<Po
   const user = await deps.getUser();
   if (!user) return null;
   const shell = await deps.loadShell(user);
-  const [unread, hasPurchase, cycles, unreadReferrals] = await Promise.all([
+  const [unread, hasPurchase, cycles, unreadReferrals, waitingVisits, staffOffice, applicationGate, savedItems] = await Promise.all([
     deps.countUnread(user.id),
     deps.hasPurchase(user.id),
     deps.loadCycles(),
     deps.unreadReferrals(shell.doctor?.id || null),
+    deps.countWaiting ? deps.countWaiting(shell.doctor?.id || null) : Promise.resolve(0),
+    !shell.doctor && deps.lookupStaff ? deps.lookupStaff(user.id) : Promise.resolve(false),
+    shell.doctor?.id && deps.loadGate ? deps.loadGate(shell.doctor.id) : Promise.resolve(null),
+    deps.loadSaved ? deps.loadSaved(user.id) : Promise.resolve(null),
   ]);
   const hasStripeCustomer = Boolean(shell.stripeCustomerId);
   const membership = deriveMembership({
@@ -87,6 +95,10 @@ export async function assemblePortalContext(deps: PortalContextDeps): Promise<Po
     unreadNotifications: unread.notificationsExcludingMessages,
     unreadMessages: unread.messages,
     unreadReferrals,
+    waitingVisits,
+    staffOffice,
+    applicationGate,
+    savedItems,
     hasPurchase,
     chiroMatchOpen: navContext.chiroMatchOpen,
     nav: navFor(navContext),

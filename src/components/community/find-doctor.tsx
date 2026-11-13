@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { setHomeDoctor } from '@/lib/community/actions'
 import { FieldLabel, FormError, fieldClass } from '@/components/community/ui'
@@ -85,13 +86,9 @@ export function FindDoctor({ initialQuery = '' }: { initialQuery?: string }) {
               >
                 Home doctor
               </button>
-              <button
-                type="button"
-                className="whitespace-nowrap text-[12px] font-semibold text-neuro-navy"
-                onClick={() => router.push(`/portal/visit?doctor=${doctor.id}`)}
-              >
+              <Link href={`/portal/visit?doctor=${doctor.id}`} prefetch className="whitespace-nowrap text-[12px] font-semibold text-neuro-navy">
                 Request
-              </button>
+              </Link>
             </div>
           </li>
         ))}

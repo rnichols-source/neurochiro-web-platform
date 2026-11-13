@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { PlaceHeader } from '@/components/founder/header'
+import { AdminRouteSkeleton } from '@/components/loading/route-skeletons'
 import { Card, FunnelList, Tag, ToolLinks } from '@/components/founder/bits'
 import { formatMoney } from '@/lib/founder/format'
 import { buildFunnel, roiCard } from '@/lib/founder/model'
@@ -12,11 +14,6 @@ export const dynamic = 'force-dynamic'
 
 export default async function FunnelPage() {
   await requireAdminPage()
-  const roster = await loadFounderRoster()
-  const settings = await loadFounderSettings()
-  const roi = roiCard(roster)
-  const steps = buildFunnel(roster)
-
   return (
     <div>
       <PlaceHeader
@@ -29,6 +26,20 @@ export default async function FunnelPage() {
           { label: 'Doctor referrals', href: '/admin/doctor-referrals', on: false },
         ]}
       />
+      <Suspense fallback={<AdminRouteSkeleton />}>
+        <FunnelBody />
+      </Suspense>
+    </div>
+  )
+}
+
+async function FunnelBody() {
+  const [roster, settings] = await Promise.all([loadFounderRoster(), loadFounderSettings()])
+  const roi = roiCard(roster)
+  const steps = buildFunnel(roster)
+
+  return (
+    <>
       <div className="grid gap-4 px-4 py-4 xl:grid-cols-[1fr_360px] xl:px-8">
         <Card>
           <div className="mb-3 flex items-center justify-between">
@@ -86,7 +97,7 @@ export default async function FunnelPage() {
         </div>
       </div>
       <div className="px-4 pb-6 xl:px-8"><ToolLinks links={GROWTH_TOOLS} /></div>
-    </div>
+    </>
   )
 }
 

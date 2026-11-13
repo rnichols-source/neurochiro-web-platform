@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const TABS = [
@@ -20,9 +21,10 @@ export default function TabNav() {
   return (
     <div className="flex items-center gap-1 bg-[#1a2744] rounded-xl p-1">
       {TABS.map((tab) => (
-        <a
+        <Link
           key={tab.href}
           href={tab.href}
+          prefetch
           className={`flex-1 text-center py-2.5 rounded-lg text-sm font-medium transition ${
             isActive(tab.href)
               ? 'bg-[#D66829] text-white'
@@ -30,7 +32,7 @@ export default function TabNav() {
           }`}
         >
           {tab.label}
-        </a>
+        </Link>
       ))}
     </div>
   )

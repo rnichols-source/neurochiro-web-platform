@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
       let cityQuery = excludeTestDoctors(excludeDemo(supabase
         .from('doctors')
         .select('city, state, country')
-        .ilike('city', `${q}%`)
+        .ilike('city', `${q}%`) /* city ILIKE uses portal_perf_doctors_city_ilike_trgm; lower(city) gin already exists for folded lookups */
         .eq('verification_status', 'verified')));
       if (country === 'EU') cityQuery = cityQuery.in('country', EUROPEAN_ISO);
       else if (country === 'US') cityQuery = cityQuery.or('country.is.null,country.eq.US');

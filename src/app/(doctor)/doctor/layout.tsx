@@ -10,13 +10,12 @@ import { PortalProvider } from '@/components/portal/PortalProvider';
 import { getPortalContext } from '@/lib/portal/context';
 import { recordPortalLogin } from '@/lib/portal/login-ping';
 import { firstName } from '@/lib/portal/greeting';
-import { isApplicationFlowEnabled } from '@/lib/applications/flag';
-import { loadApplicationGate } from '@/lib/applications/gate';
-import { lookupStaffOffice } from './kpi/actions';
+import { SavedItemsSeed } from '@/components/portal/saved-seed';
+import type { ApplicationGate } from '@/lib/applications/gate';
 import StaffScorecardFrame from './StaffScorecardFrame';
-import { countWaitingVisits } from '@/lib/doctor/portal-data';
 
 export const dynamic = 'force-dynamic'
+export const preferredRegion = 'pdx1'
 
 export default async function DoctorLayout({ children }: { children: React.ReactNode }) {
   const headerStore = await headers();
@@ -38,7 +37,7 @@ export default async function DoctorLayout({ children }: { children: React.React
     });
   });
 
-  const staffOnly = !ctx.doctor && await lookupStaffOffice(ctx.userId);
+  const staffOnly = !ctx.doctor && ctx.staffOffice;
   if (staffOnly) {
     return (
       <AuthProvider>
@@ -50,9 +49,7 @@ export default async function DoctorLayout({ children }: { children: React.React
   }
 
   const callStatus = ctx.doctor?.onboarding_call_status || 'not_booked';
-  const applicationGate = isApplicationFlowEnabled() && ctx.doctor?.id
-    ? await loadApplicationGate(ctx.doctor.id)
-    : null;
+  const applicationGate = ctx.applicationGate;
   const needsCall = !applicationGate && !ctx.doctor?.is_founding_member && ctx.doctor?.is_approved !== true && callStatus !== 'completed';
 
   if (applicationGate === 'finish' && path && !applying) redirect('/doctor/apply');
@@ -76,9 +73,10 @@ export default async function DoctorLayout({ children }: { children: React.React
     <AuthProvider>
       <div className="portal min-h-dvh" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
         <PortalProvider value={ctx}>
+          <SavedItemsSeed items={ctx.savedItems} />
           <ReferralProvider>
-            <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName} applicationGate={applicationGate}>
-              <DoctorShell waiting={ctx.doctor ? await countWaitingVisits(ctx.doctor.id) : 0}>
+            <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName} applicationGate={applicationGate as ApplicationGate | null}>
+              <DoctorShell waiting={ctx.waitingVisits}>
                 {children}
               </DoctorShell>
             </OnboardingGate>

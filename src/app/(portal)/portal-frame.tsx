@@ -141,7 +141,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
       >
         {/* Logo */}
         <div className="px-6 pt-7 pb-8 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+          <Link prefetch href="/" className="flex items-center gap-3">
             <img src="/logo-white.png" alt="NeuroChiro" className="w-7 h-7 object-contain opacity-80" />
             <div className="flex flex-col">
               <span className="text-[14px] font-heading font-bold tracking-tight text-white/90 leading-none">
@@ -171,7 +171,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
                 {section.items.map((item) => {
                   const isActive = pathname === item.href || (item.href !== "/directory" && item.href !== "/contact" && item.href !== "/seminars" && pathname.startsWith(item.href));
                   return (
-                    <Link
+                    <Link prefetch
                       key={item.name}
                       href={item.href}
                       onClick={() => setSidebarOpen(false)}
@@ -194,7 +194,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
         {/* Upgrade to Premium */}
         {!isPremium && (
           <div className="px-3 py-3">
-            <Link
+            <Link prefetch
               href="/portal/dashboard#premium"
               onClick={async (e) => {
                 e.preventDefault();
@@ -249,7 +249,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             <NotificationBell />
-            <Link
+            <Link prefetch
               href="/portal/settings"
               className="hidden md:flex w-8 h-8 rounded-lg bg-white/[0.06] items-center justify-center text-white/60 font-medium text-[11px] hover:bg-white/[0.1] hover:text-white transition-all"
             >
@@ -273,11 +273,11 @@ function PortalShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function PortalLayout({ children }: { children: React.ReactNode }) {
+export default function PortalLayout({ children, memberName }: { children: React.ReactNode; memberName?: string | null }) {
   const pathname = usePathname();
   return (
     <AuthProvider>
-      {isCommunityPath(pathname) ? <CommunityShell>{children}</CommunityShell> : <PortalShell>{children}</PortalShell>}
+      {isCommunityPath(pathname) ? <CommunityShell initialName={memberName}>{children}</CommunityShell> : <PortalShell>{children}</PortalShell>}
     </AuthProvider>
   );
 }

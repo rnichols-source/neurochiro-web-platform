@@ -2,6 +2,7 @@
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { createDoctorProductCheckout } from "../purchase-actions";
 import {
@@ -316,7 +317,7 @@ function ScreeningsContent() {
           <p className="text-sm font-bold text-white">Need screening supplies or equipment?</p>
           <p className="text-xs text-white/30 mt-0.5">Browse trusted vendors in the NeuroChiro marketplace.</p>
         </div>
-        <a href="/marketplace" className="px-4 py-2 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors whitespace-nowrap">Browse Vendors</a>
+        <Link href="/marketplace" prefetch className="px-4 py-2 bg-neuro-navy text-white text-xs font-bold rounded-xl hover:bg-neuro-navy/90 transition-colors whitespace-nowrap">Browse Vendors</Link>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
@@ -63,9 +64,9 @@ export function AdminShell({
 
   const sidebar = (
     <aside className="flex h-full w-[250px] flex-col bg-white px-3 py-5">
-      <Link href="/admin" className="mb-4 flex items-center gap-2.5 px-2">
+      <Link prefetch href="/admin" className="mb-4 flex items-center gap-2.5 px-2">
         <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#F5F3EF]">
-          <img src="/logo.png" alt="" className="h-8 w-8 object-contain" />
+          <Image src="/logo-mark.png" alt="" width={32} height={32} sizes="32px" className="h-8 w-8 object-contain" />
         </span>
         <span>
           <span className="fd-ui block text-[13px] font-black tracking-[0.12em] text-[#15202B]">NEUROCHIRO</span>
@@ -77,7 +78,7 @@ export function AdminShell({
           const on = placeForPath(pathname) === place.id
           const Icon = ICONS[place.id]
           return (
-            <Link
+            <Link prefetch
               key={place.id}
               href={place.href}
               aria-current={on ? 'page' : undefined}
@@ -100,7 +101,7 @@ export function AdminShell({
       <p className="fd-ui mb-1 mt-5 px-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#8a95a1]">More</p>
       <div className="flex flex-col">
         {MORE.map((item) => (
-          <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`flex min-h-11 items-center rounded-xl px-3 text-[14px] font-bold ${pathname === item.href ? 'bg-[#F5F3EF] text-[#15202B]' : 'text-[#5b6773]'}`}>
+          <Link prefetch key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`flex min-h-11 items-center rounded-xl px-3 text-[14px] font-bold ${pathname === item.href ? 'bg-[#F5F3EF] text-[#15202B]' : 'text-[#5b6773]'}`}>
             {item.label}
           </Link>
         ))}
@@ -134,7 +135,7 @@ export function AdminShell({
                 const on = placeForPath(pathname) === place.id
                 const Icon = ICONS[place.id]
                 return (
-                  <Link key={place.id} href={place.href} className="relative flex min-h-11 flex-1 flex-col items-center gap-0.5" style={{ color: on ? place.ink : '#5b6773' }}>
+                  <Link prefetch key={place.id} href={place.href} className="relative flex min-h-11 flex-1 flex-col items-center gap-0.5" style={{ color: on ? place.ink : '#5b6773' }}>
                     {on ? <span className="absolute -top-1 h-1 w-8 rounded-b" style={{ background: place.color }} /> : null}
                     <span className="grid h-8 w-12 place-items-center rounded-2xl" style={on ? { background: place.tint } : undefined}>
                       <Icon className="h-5 w-5" aria-hidden />
@@ -165,7 +166,7 @@ export function AdminShell({
           <Menu className="h-5 w-5" />
         </button>
         <p className="fd-ui min-w-0 flex-1 truncate text-[18px] font-extrabold">{titleFor(path)}</p>
-        <Link href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[13px] font-extrabold text-[#5C3473]">
+        <Link prefetch href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[13px] font-extrabold text-[#5C3473]">
           <Megaphone className="h-4 w-4" aria-hidden /> Reach anyone
         </Link>
       </header>
@@ -213,7 +214,6 @@ function FindPalette() {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [hits, setHits] = useState<{ title: string; subtitle: string; href: string }[]>([])
-  const router = useRouter()
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -258,10 +258,10 @@ function FindPalette() {
             </div>
             <div className="mt-2 max-h-80 overflow-y-auto">
               {hits.length === 0 ? <p className="px-2 py-3 text-[13px] text-[#6b7785]">Type two letters. Doctors, community members, students, subscribers, and applications.</p> : hits.map((hit) => (
-                <button key={hit.href + hit.title} type="button" className="flex min-h-11 w-full flex-col items-start rounded-xl px-2 py-2 text-left hover:bg-[#F5F3EF]" onClick={() => { setOpen(false); router.push(hit.href) }}>
+                <Link key={hit.href + hit.title} href={hit.href} prefetch onClick={() => setOpen(false)} className="flex min-h-11 w-full flex-col items-start rounded-xl px-2 py-2 text-left hover:bg-[#F5F3EF]">
                   <span className="fd-ui text-[14px] font-extrabold">{hit.title}</span>
                   <span className="text-[12px] text-[#6b7785]">{hit.subtitle}</span>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -283,9 +283,9 @@ export function AlertBell() {
       {open ? (
         <div className="absolute right-0 z-30 mt-2 w-72 rounded-2xl bg-white p-3 text-[#15202B] shadow-xl">
           {alerts.length === 0 ? <p className="text-[13px] text-[#6b7785]">Nothing is waiting.</p> : alerts.map((alert) => (
-            <Link key={alert.id} href={alert.href} onClick={() => setOpen(false)} className="block min-h-11 rounded-xl px-2 py-2 text-[13px] font-bold hover:bg-[#F5F3EF]">{alert.title}</Link>
+            <Link prefetch key={alert.id} href={alert.href} onClick={() => setOpen(false)} className="block min-h-11 rounded-xl px-2 py-2 text-[13px] font-bold hover:bg-[#F5F3EF]">{alert.title}</Link>
           ))}
-          <Link href="/admin/notifications" className="mt-1 block text-[12px] font-bold text-[#5b6773]">All notifications</Link>
+          <Link prefetch href="/admin/notifications" className="mt-1 block text-[12px] font-bold text-[#5b6773]">All notifications</Link>
         </div>
       ) : null}
     </div>
@@ -294,7 +294,7 @@ export function AlertBell() {
 
 export function ReachLink() {
   return (
-    <Link href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[14px] font-extrabold text-[#5C3473] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.4)]">
+    <Link prefetch href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[14px] font-extrabold text-[#5C3473] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.4)]">
       <Megaphone className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Reach anyone</span>
     </Link>
   )

@@ -1,11 +1,13 @@
 import 'server-only'
 
+import { unstable_cache } from 'next/cache'
+import { cache } from 'react'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { daysUntil, FOUNDING_END } from './format'
 
 export type ShellAlert = { id: string; title: string; href: string }
 
-export async function loadShellAlerts(): Promise<ShellAlert[]> {
+async function loadShellAlertsFresh(): Promise<ShellAlert[]> {
   const admin = createAdminClient() as any
   const cutoff = new Date(Date.now() - 48 * 3_600_000).toISOString()
   const [waiting, review, drafts, gaps, founding] = await Promise.all([
@@ -30,3 +32,7 @@ export async function loadShellAlerts(): Promise<ShellAlert[]> {
   if (days > 0) alerts.push({ id: 'founding', title: `Founding rate ends in ${days} days · ${founding.count || 0} members`, href: '/admin/money#heads-up' })
   return alerts
 }
+
+const loadShellAlertsCached = unstable_cache(loadShellAlertsFresh, ['founder-shell-alerts-v1'], { revalidate: 60 })
+
+export const loadShellAlerts = cache(loadShellAlertsCached)

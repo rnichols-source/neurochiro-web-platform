@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { isAudience, type AudienceKey, type Channel } from '@/lib/founder/audience'
 import { deliverBroadcast, nudgeWaitingDoctors, rerouteWaiting, sendMondayDigest } from '@/lib/founder/send'
@@ -11,10 +11,15 @@ function clean(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function refreshRoster() {
+  revalidateTag('founder-roster', { expire: 0 })
+}
+
 export async function nudgeWaitingAction(expected: number): Promise<{ ok: boolean; message: string }> {
   const user = await checkAdminAuth()
   const result = await nudgeWaitingDoctors(user.id, expected)
   revalidatePath('/admin')
+  refreshRoster()
   return { ok: result.ok, message: result.ok ? result.detail : result.error }
 }
 
@@ -22,6 +27,7 @@ export async function rerouteWaitingAction(doctorId: string, expected: number): 
   const user = await checkAdminAuth()
   const result = await rerouteWaiting(user.id, doctorId, expected)
   revalidatePath('/admin/people')
+  refreshRoster()
   return { ok: result.ok, message: result.ok ? result.detail : result.error }
 }
 
@@ -43,12 +49,14 @@ export async function saveSettingsAction(formData: FormData): Promise<{ ok: bool
   await writeAudit({ actorId: user.id, action: 'settings_saved', summary: 'Updated founder figures and automation switches' })
   revalidatePath('/admin/settings')
   revalidatePath('/admin/card')
+  refreshRoster()
   return { ok: true, message: 'Saved.' }
 }
 
 export async function sendDigestNowAction(): Promise<{ ok: boolean; message: string }> {
   await checkAdminAuth()
   const result = await sendMondayDigest('manual')
+  refreshRoster()
   return { ok: result.ok, message: result.ok ? result.detail : result.error }
 }
 
@@ -83,6 +91,7 @@ export async function sendBroadcastAction(input: {
   })
   revalidatePath('/admin/broadcast')
   revalidatePath('/admin/audit')
+  refreshRoster()
   return { ok: result.ok, message: result.ok ? result.detail : result.error }
 }
 
@@ -110,4 +119,5 @@ export async function recordDoctorPreview(doctorId: string, name: string): Promi
     targetType: 'doctor',
     targetId: doctorId,
   })
+  refreshRoster()
 }

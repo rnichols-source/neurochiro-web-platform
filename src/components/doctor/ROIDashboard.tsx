@@ -444,7 +444,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
               </p>
             </div>
 
-            <Link 
+            <Link prefetch 
               href="/doctor/profile#video"
               className={cn(
                 "w-full py-4 font-black rounded-2xl transition-all text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 shadow-sm border",
@@ -472,7 +472,7 @@ export default function ROIDashboard({ tier, data, onUpgrade }: ROIDashboardProp
                 <p className="text-xs text-white/90 mb-8 leading-relaxed font-bold">
                   Identify exactly which patient sources are driving your highest quality leads.
                 </p>
-                <Link 
+                <Link prefetch 
                   href="/pricing?upgrade=pro"
                   className="w-full py-4 bg-white text-neuro-orange font-black rounded-2xl hover:bg-white/95 transition-all text-[10px] uppercase tracking-widest shadow-2xl active:scale-95 flex items-center justify-center gap-2"
                 >

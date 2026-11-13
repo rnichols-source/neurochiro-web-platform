@@ -18,7 +18,7 @@ export function ToolLinks({ links }: { links: { label: string; href: string }[] 
   return (
     <div className="flex flex-wrap gap-2">
       {links.map((link) => (
-        <Link key={link.href} href={link.href} className="fd-ui inline-flex min-h-11 items-center rounded-full bg-white px-3 text-[13px] font-bold text-[#3d4a57] shadow-sm">
+        <Link prefetch key={link.href} href={link.href} className="fd-ui inline-flex min-h-11 items-center rounded-full bg-white px-3 text-[13px] font-bold text-[#3d4a57] shadow-sm">
           {link.label}
         </Link>
       ))}

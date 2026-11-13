@@ -3,6 +3,12 @@ import { LEGACY_STORE_PRODUCT_IDS } from "./src/lib/legacy-store-ids";
 import { JOB_REDIRECTS } from "./src/lib/jobs/redirects";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+      static: 30,
+    },
+  },
   typescript: {
     ignoreBuildErrors: false,
   },

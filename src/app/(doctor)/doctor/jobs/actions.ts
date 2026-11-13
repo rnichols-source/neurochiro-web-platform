@@ -58,15 +58,16 @@ export async function getJobPostings() {
 
   // Get public application counts separately (no FK constraint for join count)
   const jobIds = (data || []).map((j: any) => j.id);
-  let publicCounts: Record<string, number> = {};
+  const publicCounts: Record<string, number> = {};
   if (jobIds.length > 0) {
-    for (const jid of jobIds) {
+    const counts = await Promise.all(jobIds.map(async (jid: string) => {
       const { count } = await (supabase as any)
         .from('job_applications')
-        .select('*', { count: 'exact', head: true })
+        .select('id', { count: 'exact', head: true })
         .eq('job_id', jid);
-      publicCounts[jid] = count || 0;
-    }
+      return [jid, count || 0] as const;
+    }));
+    for (const [jid, count] of counts) publicCounts[jid] = count;
   }
 
   // Merge counts from both tables

@@ -16,6 +16,8 @@ const montserrat = Montserrat({
   display: 'swap',
 });
 
+export const preferredRegion = 'pdx1'
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.neurochiro.co"),
   title: "NeuroChiro | Find a Nervous System Chiropractor Near You",
@@ -23,11 +25,11 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/logo.png", sizes: "32x32", type: "image/png" },
-      { url: "/logo.png", sizes: "16x16", type: "image/png" },
+      { url: "/logo-mark.png", sizes: "32x32", type: "image/png" },
+      { url: "/logo-mark.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [
-      { url: "/logo.png", sizes: "180x180", type: "image/png" },
+      { url: "/logo-mark.png", sizes: "64x64", type: "image/png" },
     ],
   },
   openGraph: {

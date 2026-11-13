@@ -1,5 +1,7 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { PlaceHeader } from '@/components/founder/header'
+import { AdminRouteSkeleton } from '@/components/loading/route-skeletons'
 import { Card, Tag, ToolLinks } from '@/components/founder/bits'
 import { daysUntil, formatMoney, formatNumber, FOUNDING_END } from '@/lib/founder/format'
 import { loadDoctorBilling } from '@/lib/founder/money'
@@ -11,19 +13,25 @@ export const dynamic = 'force-dynamic'
 
 export default async function MoneyPage() {
   await requireAdminPage()
+  return (
+    <div>
+      <PlaceHeader place="money" title="Money" subtitle="What comes in, what’s at risk, and what changes on Dec 1." />
+      <Suspense fallback={<AdminRouteSkeleton />}>
+        <MoneyBody />
+      </Suspense>
+    </div>
+  )
+}
+
+async function MoneyBody() {
   const now = new Date()
-  const [roster, billing] = await Promise.all([
-    loadFounderRoster(),
-    loadDoctorBilling(),
-  ])
+  const [roster, billing] = await Promise.all([loadFounderRoster(), loadDoctorBilling()])
   const founding = roster.doctors.filter((doctor) => doctor.founding)
   const live = roster.doctors.filter((doctor) => doctor.verified).length
   const days = daysUntil(now, FOUNDING_END)
   const maxPlan = Math.max(1, ...billing.plans.map((plan) => plan.n))
 
   return (
-    <div>
-      <PlaceHeader place="money" title="Money" subtitle="What comes in, what’s at risk, and what changes on Dec 1." />
       <div className="space-y-4 px-4 py-4 lg:px-8">
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <Tile label="MRR" value={billing.mrrUsd == null ? '—' : formatMoney(billing.mrrUsd)} detail={billing.stripeOk ? 'Doctor memberships only' : 'Stripe unavailable'} kind={billing.mrrUsd == null ? 'tracking' : 'live'} />
@@ -76,7 +84,6 @@ export default async function MoneyPage() {
         </div>
         <ToolLinks links={MONEY_TOOLS} />
       </div>
-    </div>
   )
 }
 

@@ -58,9 +58,9 @@ export default function NotificationBell({
     if (!user) return;
 
     // Fetch individual notifications
-    const { data: notifs, error } = await supabase
+    const { data: notifs } = await supabase
       .from('notifications')
-      .select('*')
+      .select('id, user_id, title, body, type, priority, link, read_at, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(20);
@@ -80,12 +80,12 @@ export default function NotificationBell({
     }
 
     // Fetch global announcements not dismissed
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
     const role = profile?.role || 'patient';
 
     const anncsResult = await supabase
       .from('announcements')
-      .select('*')
+      .select('id, title, body, audience_type, priority, created_at')
       .or(`audience_type.eq.all,audience_type.eq.${role}`)
       .lte('starts_at', new Date().toISOString())
       .or('expires_at.is.null,expires_at.gt.' + new Date().toISOString())
@@ -120,6 +120,10 @@ export default function NotificationBell({
   }, [supabase, includeAnnouncements, unreadOverride]);
 
   useEffect(() => {
+    if (typeof unreadOverride === 'number' && !isOpen) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let poll: ReturnType<typeof setInterval> | null = null;
@@ -166,7 +170,7 @@ export default function NotificationBell({
       stopPoll();
       if (channel) supabase.removeChannel(channel);
     };
-  }, [fetchNotifications, supabase]);
+  }, [fetchNotifications, supabase, unreadOverride, isOpen]);
 
   const markAsRead = async (id: string) => {
     const { data: { user } } = await supabase.auth.getUser();

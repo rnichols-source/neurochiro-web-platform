@@ -43,9 +43,9 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
   return (
     <div className="doctor-portal flex h-dvh min-h-0 bg-[#F5F3EF] text-[#15202B]" data-portal-notifications={ctx.unreadNotifications}>
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col overflow-hidden border-r border-[#ECE8E1] bg-white px-4 py-6 lg:flex">
-        <Link href="/doctor" className="mb-3 flex items-center gap-2.5 px-2">
+        <Link prefetch href="/doctor" className="mb-3 flex items-center gap-2.5 px-2">
           <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#F5F3EF]">
-            <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
+            <img src="/logo-mark.png" alt="" className="h-[30px] w-[30px] object-contain" />
           </span>
           <span className="min-w-0">
             <span className="dp-ui block text-[14px] font-extrabold tracking-[0.08em] text-[#15202B]">NEUROCHIRO</span>
@@ -57,7 +57,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
             {DOCTOR_PLACE_LIST.map((item) => {
               const on = nav === item.id
               return (
-                <Link
+                <Link prefetch
                   key={item.id}
                   href={item.href}
                   aria-current={on ? 'page' : undefined}
@@ -79,7 +79,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
               )
             })}
             <div className="my-2 border-t border-[#EFECE7]" />
-            <Link
+            <Link prefetch
               href="/doctor/messages"
               aria-current={nav === 'messages' ? 'page' : undefined}
               className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold"
@@ -93,7 +93,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
                 <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#D66829] px-1.5 text-[12px] font-extrabold text-white" data-messages-badge={ctx.unreadMessages}>{messageBadge}</span>
               ) : null}
             </Link>
-            <Link
+            <Link prefetch
               href="/doctor/coming-soon"
               aria-current={nav === 'soon' ? 'page' : undefined}
               className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold text-[#3d4a57]"
@@ -104,7 +104,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
               </span>
             Coming soon
           </Link>
-            <Link
+            <Link prefetch
               href="/doctor/profile"
               aria-current={pathname === '/doctor/profile' ? 'page' : undefined}
               className="mt-1 flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-extrabold"
@@ -128,7 +128,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
                   {links.map((link) => {
                     const on = pathname === link.href || pathname.startsWith(`${link.href}/`)
                     return (
-                      <Link
+                      <Link prefetch
                         key={link.href}
                         href={link.href}
                         aria-current={on ? 'page' : undefined}
@@ -146,7 +146,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
           </div>
         </nav>
         <div className="mt-4 flex items-center gap-2.5 border-t border-[#EFECE7] px-1 pt-3">
-          <Link href="/doctor/practice" aria-label="Practice" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#D66829] dp-ui text-[14px] font-extrabold text-white">
+          <Link prefetch href="/doctor/practice" aria-label="Practice" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#D66829] dp-ui text-[14px] font-extrabold text-white">
             {ctx.initials || 'DR'}
           </Link>
           <div className="min-w-0 flex-1">
@@ -162,7 +162,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
         {ctx.membership.tier === 'free' ? (
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#E7E2D8] bg-[#FCEBDF] px-4 py-3">
             <p className="text-[14px] text-[#15202B]">Activate Pro to open visit requests and results.</p>
-            <Link href="/doctor/billing" className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">Activate Pro</Link>
+            <Link prefetch href="/doctor/billing" className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">Activate Pro</Link>
           </div>
         ) : null}
         <main
@@ -187,7 +187,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
           {DOCTOR_PLACE_LIST.map((item) => {
             const on = nav === item.id
             return (
-              <Link
+              <Link prefetch
                 key={item.id}
                 href={item.href}
                 aria-current={on ? 'page' : undefined}

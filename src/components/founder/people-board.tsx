@@ -115,10 +115,10 @@ export function PeopleBoard({
             <Stat n={doctor.views} label="profile views" />
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <Link href={`/admin/inbox`} className="fd-ui flex min-h-11 items-center justify-center rounded-xl border-2 border-[#D7DEE6] text-[13px] font-extrabold">Message</Link>
+            <Link prefetch href={`/admin/inbox`} className="fd-ui flex min-h-11 items-center justify-center rounded-xl border-2 border-[#D7DEE6] text-[13px] font-extrabold">Message</Link>
             {doctor.email ? <a href={`mailto:${doctor.email}`} className="fd-ui flex min-h-11 items-center justify-center rounded-xl border-2 border-[#D7DEE6] text-[13px] font-extrabold">Email</a> : <span className="flex min-h-11 items-center justify-center text-[12px] text-[#8a95a1]">No email</span>}
             {doctor.phone ? <a href={`tel:${doctor.phone}`} className="fd-ui flex min-h-11 items-center justify-center rounded-xl border-2 border-[#D7DEE6] text-[13px] font-extrabold">Text</a> : <span className="flex min-h-11 items-center justify-center text-[12px] text-[#8a95a1]">No phone</span>}
-            <Link href={`/admin/people/preview/${doctor.id}`} className="fd-ui flex min-h-11 items-center justify-center rounded-xl border-2 border-[#D7DEE6] text-[13px] font-extrabold">View as doctor</Link>
+            <Link prefetch href={`/admin/people/preview/${doctor.id}`} className="fd-ui flex min-h-11 items-center justify-center rounded-xl border-2 border-[#D7DEE6] text-[13px] font-extrabold">View as doctor</Link>
           </div>
           {doctor.waiting > 0 ? (
             <button
@@ -142,7 +142,7 @@ export function PeopleBoard({
             <p className="fd-ui text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#8a95a1]">Timeline</p>
             {doctor.timeline.map((line) => <p key={line} className="py-1 text-[13px] text-[#4a5865]">{line}</p>)}
           </div>
-          <Link href={`/admin/members?q=${encodeURIComponent(doctor.name.replace(/^Dr\.\s*/, ''))}`} className="mt-3 inline-flex min-h-11 items-center text-[13px] font-bold text-[#0A6159]">Open the full member editor</Link>
+          <Link prefetch href={`/admin/members?q=${encodeURIComponent(doctor.name.replace(/^Dr\.\s*/, ''))}`} className="mt-3 inline-flex min-h-11 items-center text-[13px] font-bold text-[#0A6159]">Open the full member editor</Link>
         </aside>
       ) : (
         <aside className="rounded-[22px] bg-white p-5 text-[14px] text-[#5b6773]">
@@ -162,7 +162,7 @@ function SimpleList({ rows }: { rows: { id: string; title: string; detail: strin
   return (
     <div className="max-h-[640px] overflow-y-auto">
       {rows.slice(0, 200).map((row) => (
-        <Link key={row.id} href={row.href} className="flex min-h-12 items-center justify-between gap-3 border-b border-[#F3F1EC] py-2">
+        <Link prefetch key={row.id} href={row.href} className="flex min-h-12 items-center justify-between gap-3 border-b border-[#F3F1EC] py-2">
           <span>
             <span className="fd-ui block text-[14px] font-extrabold">{row.title}</span>
             <span className="text-[12px] text-[#6b7785]">{row.detail}</span>

@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { unstable_cache } from 'next/cache'
 import { cache } from 'react'
 import { normalizeCountry, normalizeState } from '@/lib/admin/geo-normalize'
 import { fetchAllRows, createAdminClient } from '@/lib/supabase-admin'
@@ -156,16 +157,79 @@ function topCounts(map: Map<string, number>, limit: number): CountRow[] {
   return [...map.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, limit).map(([label, n]) => ({ label, n }))
 }
 
-export const loadFounderRoster = cache(async (): Promise<FounderRoster> => {
-  const admin = createAdminClient() as any
-  const officeProbe = await admin.from('contact_requests').select('office_visit_response, office_visit_sent_at').limit(1)
-  const officeReady = !officeProbe.error
-  const requestColumns = officeReady ? `${REQUEST_COLUMNS}, office_visit_response, office_visit_sent_at` : REQUEST_COLUMNS
+function bundleRows(value: unknown): any[] {
+  return Array.isArray(value) ? value : []
+}
 
-  const [mentionRows, doctorRows, requestRows, profileRows, applicationRows, subscriberRows, searches, profileViews, bookTaps, callTaps] = await Promise.all([
+async function rosterFromBundle(payload: any): Promise<FounderRoster | null> {
+  if (!payload || typeof payload !== 'object') return null
+  const mentionRows = bundleRows(payload.mentions)
+  const doctorRows = bundleRows(payload.doctors)
+  const requestRows = bundleRows(payload.requests)
+  const profileRows = bundleRows(payload.profiles)
+  const applicationRows = bundleRows(payload.applications)
+  const subscriberRows = bundleRows(payload.subscribers)
+  const doctors = doctorRows.map(mapDoctor)
+  const testDoctors = new Set(doctors.filter((doctor) => doctor.test).map((doctor) => doctor.id))
+  const requests = requestRows.map(mapRequest).filter((row) => !row.doctorId || !testDoctors.has(row.doctorId))
+  const demand = summarizeMentions(mentionRows)
+  const officeReady = payload.officeReady !== false
+  let office: OfficeTracking = { ready: false, yes: 0, no: 0, sent: 0 }
+  if (officeReady) {
+    for (const row of requests) {
+      if (row.officeSent) office.sent += 1
+      if (row.officeResponse === 'yes') office.yes += 1
+      if (row.officeResponse === 'no') office.no += 1
+    }
+    office.ready = true
+  }
+  const mentionCount = Number(payload.mentionCount)
+  return {
+    generatedAt: new Date().toISOString(),
+    mentionsOk: mentionRows.length > 0 || mentionCount === 0,
+    demandCount: demand.demandCount,
+    points: demand.points,
+    clusters: demand.clusters,
+    cities: demand.cities,
+    countries: demand.countries,
+    countryCount: demand.countryCount,
+    states: demand.states,
+    gaps: demand.gaps,
+    gapAsks: demand.gapAsks,
+    unmeasured: demand.unmeasured,
+    sources: demand.sources,
+    posts: demand.posts,
+    doctors: doctors.filter((doctor) => !doctor.test),
+    requests,
+    people: profileRows.map(mapPerson).filter((person) => !person.test),
+    applications: applicationRows.map(mapApplication),
+    subscribers: subscriberRows.map(mapSubscriber).filter((row) => row.email),
+    searches: payload.searches == null ? null : Number(payload.searches),
+    profileViews: payload.profileViews == null ? null : Number(payload.profileViews),
+    bookTaps: payload.bookTaps == null ? null : Number(payload.bookTaps),
+    callTaps: payload.callTaps == null ? null : Number(payload.callTaps),
+    communityVisits: payload.communityVisits == null ? null : Number(payload.communityVisits),
+    office,
+  }
+}
+
+async function loadFounderRosterFresh(): Promise<FounderRoster> {
+  const admin = createAdminClient() as any
+  const bundled = await admin.rpc('founder_roster_bundle')
+  if (!bundled.error && bundled.data) {
+    const mapped = await rosterFromBundle(bundled.data)
+    if (mapped) return mapped
+  }
+  const officeProbePromise = admin.from('contact_requests').select('office_visit_response, office_visit_sent_at').limit(1)
+  const requestRowsPromise = officeProbePromise.then((probe: { error: { message?: string; code?: string } | null }) => {
+    const columns = probe.error ? REQUEST_COLUMNS : `${REQUEST_COLUMNS}, office_visit_response, office_visit_sent_at`
+    return fetchAllRows(admin, 'contact_requests', columns).catch(() => [])
+  })
+  const [officeProbe, requestRows, mentionRows, doctorRows, profileRows, applicationRows, subscriberRows, searches, profileViews, bookTaps, callTaps, visitCount, mentionHead] = await Promise.all([
+    officeProbePromise,
+    requestRowsPromise,
     fetchAllRows(admin, 'demand_mentions', MENTION_COLUMNS).catch(() => []),
     fetchAllRows(admin, 'doctors', DOCTOR_COLUMNS).catch(() => []),
-    fetchAllRows(admin, 'contact_requests', requestColumns).catch(() => []),
     fetchAllRows(admin, 'profiles', 'id, full_name, email, role, is_test, last_sign_in_at, created_at').catch(() => []),
     fetchAllRows(admin, 'doctor_applications', 'id, user_id, status, city, state, country, created_at, step_reached, plan, price_label').catch(() => []),
     fetchAllRows(admin, 'subscribers', 'id, email, status, state, country, latitude, longitude, sms_consent, sms_phone').catch(() => []),
@@ -173,12 +237,12 @@ export const loadFounderRoster = cache(async (): Promise<FounderRoster> => {
     headCount('site_activity', 'event_type', 'profile_view'),
     headCount('conversion_events', 'event_type', 'book'),
     headCount('conversion_events', 'event_type', 'call'),
+    admin.from('community_visit_requests').select('id', { count: 'exact', head: true }),
+    admin.from('demand_mentions').select('id', { count: 'exact', head: true }),
   ])
-  let communityVisits: number | null = null
-  const visitCount = await admin.from('community_visit_requests').select('id', { count: 'exact', head: true })
-  communityVisits = visitCount.error ? null : visitCount.count ?? 0
-
-  const mentionsOk = mentionRows.length > 0 || (await admin.from('demand_mentions').select('id', { count: 'exact', head: true })).count === 0
+  const officeReady = !officeProbe.error
+  const communityVisits = visitCount.error ? null : visitCount.count ?? 0
+  const mentionsOk = mentionRows.length > 0 || mentionHead.count === 0
   const doctors = (doctorRows as any[]).map(mapDoctor)
   const testDoctors = new Set(doctors.filter((doctor) => doctor.test).map((doctor) => doctor.id))
   const requests = (requestRows as any[]).map(mapRequest).filter((row) => !row.doctorId || !testDoctors.has(row.doctorId))
@@ -223,7 +287,15 @@ export const loadFounderRoster = cache(async (): Promise<FounderRoster> => {
     communityVisits,
     office,
   }
+}
+
+const loadFounderRosterCached = unstable_cache(loadFounderRosterFresh, ['founder-roster-v3'], {
+  revalidate: 60,
+  tags: ['founder-roster'],
 })
+
+/** Shared roster for the founder admin. Cached 60 seconds so tab switches do not rebuild it. */
+export const loadFounderRoster = cache(loadFounderRosterCached)
 
 function mapDoctor(row: any): DoctorRecord {
   const phones = Array.isArray(row.lead_alert_phones) ? row.lead_alert_phones.filter((item: unknown) => typeof item === 'string' && item) : []

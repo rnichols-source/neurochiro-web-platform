@@ -3,6 +3,9 @@ import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
+import { countWaitingVisits } from '@/lib/doctor/portal-data';
+import { loadApplicationGate } from '@/lib/applications/gate';
+import { isApplicationFlowEnabled } from '@/lib/applications/flag';
 import { countUnread } from '@/lib/messaging/db';
 import { assemblePortalContext, type ShellUser } from '@/lib/portal/context-assemble';
 import { loadShell } from '@/lib/portal/shell';
@@ -45,6 +48,21 @@ async function hasCoursePurchase(userId: string): Promise<boolean> {
   return (purchases.count || 0) > 0;
 }
 
+async function lookupStaffOffice(userId: string): Promise<boolean> {
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return false;
+  const admin = createAdminClient() as any;
+  const result = await admin.from('kpi_office_members').select('id').eq('member_user_id', userId).eq('status', 'active').limit(1);
+  return !result.error && Array.isArray(result.data) && result.data.length > 0;
+}
+
+async function loadSavedItems(userId: string): Promise<Record<string, unknown> | null> {
+  const admin = createAdminClient() as any;
+  const row = await admin.from('doctor_tool_data').select('data').eq('user_id', userId).eq('tool', 'saved_items').maybeSingle();
+  if (row.error) return null;
+  if (!row.data?.data || typeof row.data.data !== 'object') return {};
+  return row.data.data as Record<string, unknown>;
+}
+
 async function countWaitingReferrals(doctorId: string | null): Promise<number> {
   if (!doctorId) return 0;
   const supabase = createServerSupabase() as any;
@@ -73,6 +91,13 @@ export const getPortalContext = cache(async (): Promise<PortalContext | null> =>
       hasPurchase: hasCoursePurchase,
       loadCycles: loadMatchCycles,
       unreadReferrals: countWaitingReferrals,
+      countWaiting: countWaitingVisits,
+      lookupStaff: lookupStaffOffice,
+      loadGate: async (doctorId: string) => {
+        if (!doctorId || !isApplicationFlowEnabled()) return null;
+        return loadApplicationGate(doctorId);
+      },
+      loadSaved: loadSavedItems,
     });
   } finally {
     done();

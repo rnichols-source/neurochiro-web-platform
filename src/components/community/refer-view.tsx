@@ -23,7 +23,7 @@ export function ReferView({ trip, invites }: { trip: ReferTrip | null; invites: 
   return (
     <div>
       <AreaBand area="refer" title="Find & Refer" subtitle="Care for you on the road. Care for the people you love." />
-      <Link href="/portal/passport" className="mt-4 flex min-h-[88px] items-center gap-3.5 rounded-[22px] border-2 bg-white px-4 py-[18px]" style={{ borderColor: refer.tint }}>
+      <Link prefetch href="/portal/passport" className="mt-4 flex min-h-[88px] items-center gap-3.5 rounded-[22px] border-2 bg-white px-4 py-[18px]" style={{ borderColor: refer.tint }}>
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[18px]" style={{ background: refer.tint, color: refer.ink }}>
           <PlaneIcon />
         </span>
@@ -33,7 +33,7 @@ export function ReferView({ trip, invites }: { trip: ReferTrip | null; invites: 
         </span>
         <ChevronIcon className="text-[#1F4F8C]" />
       </Link>
-      <Link href="/portal/care/invite" className="mt-3 flex min-h-[88px] items-center gap-3.5 rounded-[22px] px-4 py-[18px] text-white" style={{ background: refer.color }}>
+      <Link prefetch href="/portal/care/invite" className="mt-3 flex min-h-[88px] items-center gap-3.5 rounded-[22px] px-4 py-[18px] text-white" style={{ background: refer.color }}>
         <span className="grid h-14 w-14 shrink-0 place-items-center rounded-[18px] bg-white/20 text-white">
           <SendIcon />
         </span>
@@ -47,7 +47,7 @@ export function ReferView({ trip, invites }: { trip: ReferTrip | null; invites: 
       {trip ? (
         <section className="mt-5">
           <SectionLabel>Your next trip</SectionLabel>
-          <Link href={trip.href} className="mt-2.5 flex min-h-[72px] items-center justify-between gap-3 rounded-[18px] bg-white p-3.5">
+          <Link prefetch href={trip.href} className="mt-2.5 flex min-h-[72px] items-center justify-between gap-3 rounded-[18px] bg-white p-3.5">
             <span className="flex items-center gap-3">
               <span className="grid h-10 w-10 place-items-center rounded-xl" style={{ background: refer.tint, color: refer.ink }}>
                 <PinIcon />

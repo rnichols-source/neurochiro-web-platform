@@ -2,6 +2,7 @@
 import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase";
 import { createDoctorProductCheckout } from "../purchase-actions";
 import {
@@ -759,9 +760,9 @@ function WorkshopsContent() {
 
       {/* Cross-links */}
       <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-        <a href="/marketplace" className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Browse Vendor Marketplace</a>
-        <a href="/doctor/screenings" className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Screening Events</a>
-        <a href="/doctor/seminars" className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Host a Seminar</a>
+        <Link href="/marketplace" prefetch className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Browse Vendor Marketplace</Link>
+        <Link href="/doctor/screenings" prefetch className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Screening Events</Link>
+        <Link href="/doctor/seminars" prefetch className="px-4 py-2 bg-white border border-gray-200 text-xs font-bold text-neuro-navy rounded-xl hover:border-neuro-orange/30 hover:bg-neuro-orange/5 transition-all">Host a Seminar</Link>
       </div>
 
       {/* Bottom note */}

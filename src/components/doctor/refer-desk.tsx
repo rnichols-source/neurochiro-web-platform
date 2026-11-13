@@ -120,7 +120,7 @@ export function ReferDesk({
                 {doctor.unavailable ? <span className="block text-[13px] text-[#B4501A]">{doctor.unavailable}</span> : null}
               </span>
               {doctor.unavailable ? (
-                <Link href={`/doctor/referrals`} className="dp-ui inline-flex min-h-11 items-center rounded-xl border border-[#D7DEE6] px-3 text-[13px] font-extrabold text-[#3d4a57]">View</Link>
+                <Link prefetch href={`/doctor/referrals`} className="dp-ui inline-flex min-h-11 items-center rounded-xl border border-[#D7DEE6] px-3 text-[13px] font-extrabold text-[#3d4a57]">View</Link>
               ) : (
                 <button type="button" disabled={pending || !consent} onClick={() => send(doctor.id)} className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#7A4A94] px-3 text-[13px] font-extrabold text-white disabled:opacity-50">
                   Send warm intro
@@ -143,19 +143,19 @@ export function ReferDesk({
               <p className="text-[13px] text-[#5b6773]">{row.detail}</p>
               <div className="mt-2 flex items-center justify-between gap-2">
                 <span className="dp-ui rounded-full bg-[#DCF1EE] px-2 py-1 text-[12px] font-extrabold text-[#0A6159]">{row.status}</span>
-                <Link href={row.href} className="dp-ui text-[13px] font-extrabold text-[#5C3473]">Open</Link>
+                <Link prefetch href={row.href} className="dp-ui text-[13px] font-extrabold text-[#5C3473]">Open</Link>
               </div>
             </li>
           ))}
         </ul>
-        <Link href="/doctor/referral-network" className="flex items-center justify-between rounded-2xl bg-[#EFE5F5] px-4 py-3 text-[#5C3473]">
+        <Link prefetch href="/doctor/referral-network" className="flex items-center justify-between rounded-2xl bg-[#EFE5F5] px-4 py-3 text-[#5C3473]">
           <span>
             <span className="dp-ui block text-[15px] font-extrabold">Your referral network</span>
             <span className="text-[13px]">{trusted} {trusted === 1 ? 'doctor' : 'doctors'} you trust</span>
           </span>
           <span aria-hidden="true">›</span>
         </Link>
-        <Link href="/doctor/referrals" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Full referral history</Link>
+        <Link prefetch href="/doctor/referrals" className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#5C3473]">Full referral history</Link>
       </aside>
     </div>
   )

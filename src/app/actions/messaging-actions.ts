@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase-admin'
 import {
   countUnread,
@@ -134,7 +135,9 @@ export async function blockUser(blockedId: string) {
 export async function unblockUser(blockedId: string) {
   const userId = await currentUserId()
   if (!userId) return { ok: false as const, error: 'Not authenticated', code: 'auth', userMessage: 'Not authenticated' }
-  return setBlock(userId, blockedId, false)
+  const result = await setBlock(userId, blockedId, false)
+  revalidatePath('/doctor/settings')
+  return result
 }
 
 export async function muteConversation(conversationId: string) {
@@ -169,7 +172,9 @@ export async function saveNotificationPrefs(input: {
 }) {
   const userId = await currentUserId()
   if (!userId) return { ok: false as const, error: 'Not authenticated' }
-  return savePrefs(userId, input)
+  const result = await savePrefs(userId, input)
+  revalidatePath('/doctor/settings')
+  return result
 }
 
 async function requireAdmin() {

@@ -130,13 +130,13 @@ export function PeopleDesk({ people, ready, initialFilter }: { people: PersonCar
             ) : null}
             <div className="mt-5 flex flex-wrap gap-2">
               {selected.profileId && selected.canMessage ? (
-                <Link href={`/doctor/messages?to=${selected.profileId}`} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#2C6BB4] px-5 text-[15px] font-extrabold text-white">Message</Link>
+                <Link prefetch href={`/doctor/messages?to=${selected.profileId}`} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#2C6BB4] px-5 text-[15px] font-extrabold text-white">Message</Link>
               ) : null}
               {selected.href ? (
-                <Link href={selected.href} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#E2ECF8] px-5 text-[15px] font-extrabold text-[#1F4F8C]">Open</Link>
+                <Link prefetch href={selected.href} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#E2ECF8] px-5 text-[15px] font-extrabold text-[#1F4F8C]">Open</Link>
               ) : null}
               {selected.kind === 'member' || selected.kind === 'care' ? (
-                <Link href={selected.profileId ? `/doctor/care-sets?member=${selected.profileId}` : '/doctor/care-sets'} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#DCF1EE] px-5 text-[15px] font-extrabold text-[#0A6159]">Send a care set</Link>
+                <Link prefetch href={selected.profileId ? `/doctor/care-sets?member=${selected.profileId}` : '/doctor/care-sets'} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#DCF1EE] px-5 text-[15px] font-extrabold text-[#0A6159]">Send a care set</Link>
               ) : null}
               {selected.leadId ? (
                 <button type="button" disabled={pending} onClick={() => start(async () => { const result = await updateLeadStage(selected.leadId || '', 'contacted', selected.leadType); setNote(result?.error || 'Marked contacted.') })} className="dp-ui inline-flex h-[52px] items-center rounded-2xl border border-[#D7DEE6] bg-white px-5 text-[15px] font-extrabold text-[#3d4a57]">Mark contacted</button>
