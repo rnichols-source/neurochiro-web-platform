@@ -56,8 +56,8 @@ async function DashboardBody() {
     timeZone,
   });
   const requestCount = displayCount(stats.patientRequests ? stats.patientRequests.total : null, PATIENT_REQUESTS_HINT);
-  const sentCount = displayCount(stats.referralsSent, 'Referrals sent: patients you sent to another doctor this month.');
-  const receivedCount = displayCount(stats.referralsReceived, 'Referrals received: patients other doctors sent you this month.');
+  const sentCount = displayCount(stats.referralsSent, 'Referrals sent: community members you sent to another doctor this month.');
+  const receivedCount = displayCount(stats.referralsReceived, 'Referrals received: community members other doctors sent you this month.');
   const lives = getFeature('lives');
   const showLives = lives && lives.state !== 'hidden' && lives.state !== 'coming_soon';
   const plan = ctx.membership.isFounder

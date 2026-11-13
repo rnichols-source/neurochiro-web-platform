@@ -1,9 +1,23 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { listStudentDirectory } from '@/lib/doctor/student-directory'
 import { getMembership } from '@/lib/portal/membership-load'
 
-const STUDENT_FIELDS = 'id, user_id, full_name, school, graduation_year, interests, skills, is_looking_for_mentorship, location_city, latitude, longitude, created_at'
+function asSearchRow(student: Awaited<ReturnType<typeof listStudentDirectory>>[number]) {
+  return {
+    id: student.id,
+    user_id: student.userId,
+    full_name: student.name,
+    name: student.name,
+    school: student.school,
+    graduation_year: student.graduationYear,
+    interests: student.interests,
+    location_city: student.location,
+    bio: '',
+    is_looking_for_mentorship: student.bucket === 'mentoring',
+  }
+}
 
 export async function searchStudents(query?: string) {
   const supabase = createServerSupabase()
@@ -12,23 +26,13 @@ export async function searchStudents(query?: string) {
   const membership = await getMembership(user.id)
   if (membership.tier === 'free') return []
 
-  const base = () => supabase.from('students').select(STUDENT_FIELDS).order('created_at', { ascending: false }).limit(50)
-  if (!query?.trim()) {
-    const { data, error } = await base()
-    if (error) return []
-    return (data || []).map((row) => ({ ...row, name: row.full_name || 'Student' }))
-  }
-
-  const safe = query.trim().replace(/[%_,()]/g, '').slice(0, 80)
-  if (!safe) return []
-  const [byName, bySchool, byCity] = await Promise.all([
-    base().ilike('full_name', `%${safe}%`),
-    base().ilike('school', `%${safe}%`),
-    base().ilike('location_city', `%${safe}%`),
-  ])
-  const merged = new Map<string, { full_name?: string | null }>()
-  for (const result of [byName, bySchool, byCity]) {
-    for (const row of result.data || []) merged.set(row.id, row)
-  }
-  return [...merged.values()].map((row) => ({ ...row, name: row.full_name || 'Student' }))
+  const students = await listStudentDirectory()
+  const safe = (query || '').trim().replace(/[%_,()]/g, '').slice(0, 80).toLowerCase()
+  const matched = safe
+    ? students.filter((student) => {
+      const blob = [student.name, student.school, student.location, ...student.interests].join(' ').toLowerCase()
+      return blob.includes(safe)
+    })
+    : students
+  return matched.map(asSearchRow)
 }

@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase-admin";
 import { excludeDemo } from "@/lib/directory/exclude-demo";
+import { excludeTestDoctors } from "@/lib/directory/visibility";
 import { getPublicDirectoryCounts } from "@/lib/directory/public-counts";
 import { doctorJoinMenuLabel } from "@/lib/applications/flag";
 import { homepageFaqs } from "@/lib/content/faq";
@@ -82,7 +83,7 @@ const ACTIVE_HERO = "B" as const;
 async function getTrustFaces() {
   try {
     const supabase = createAdminClient();
-    const { data } = await excludeDemo(
+    const { data } = await excludeTestDoctors(excludeDemo(
       supabase
         .from("doctors")
         .select("first_name, last_name, photo_url, clinic_name, listing_format")
@@ -90,7 +91,7 @@ async function getTrustFaces() {
         .not("photo_url", "is", null)
         .order("accepting_new_patients", { ascending: false })
         .limit(12),
-    );
+    ));
     return (data || [])
       .filter((row) => row.photo_url && !isPracticeListing(row))
       .slice(0, 3)

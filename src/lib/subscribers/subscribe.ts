@@ -4,6 +4,7 @@ import { zipToState } from '@/lib/zip-to-state'
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email'
 import { getThresholds } from '@/lib/thresholds'
 import { detectPostalCode, isPostalOptional } from '@/lib/detect-postal'
+import { excludeTestDoctors } from '@/lib/directory/visibility'
 import { isPracticeListing, listingCardCopy, listingPhotos } from '@/lib/listing-display'
 
 const SOURCE_ALLOWLIST = [
@@ -202,13 +203,13 @@ export async function subscribeEmail(input: SubscribeEmailInput): Promise<Subscr
         const lat = latitude
         const lng = longitude
 
-        let docQuery = supabase
+        let docQuery = excludeTestDoctors(supabase
           .from('doctors')
           .select('id, first_name, last_name, clinic_name, slug, city, state, latitude, longitude, photo_url, booking_url, phone, listing_format, co_owners')
           .eq('verification_status', 'verified')
           .not('latitude', 'eq', 0)
           .not('latitude', 'is', null)
-          .not('longitude', 'is', null)
+          .not('longitude', 'is', null))
         if (detectedCountry === 'US') {
           docQuery = docQuery.or('country.is.null,country.eq.US')
         } else {

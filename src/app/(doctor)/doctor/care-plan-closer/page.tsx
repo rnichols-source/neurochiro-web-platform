@@ -12,12 +12,12 @@ const BENEFITS = [
   {
     icon: DollarSign,
     title: "Pricing and Scripts Done for You",
-    description: "Your fee schedules, payment options, and patient presentation scripts are built during the calls. You walk away ready to present care plans confidently.",
+    description: "Your fee schedules, payment options, and the scripts you use with community members are built during the calls. You walk away ready to present care plans confidently.",
   },
   {
     icon: Shield,
-    title: "Use It with Patients Immediately",
-    description: "After the two setup calls, your Care Plan Closer is live. Pull it up during a report of findings and walk patients through their plan on screen.",
+    title: "Use it with community members right away",
+    description: "After the two setup calls, your Care Plan Closer is live. Pull it up during a report of findings and walk community members through their plan on screen.",
   },
   {
     icon: Clock,
@@ -29,7 +29,7 @@ const BENEFITS = [
 const HOW_IT_WORKS = [
   { step: "1", title: "Book Your Setup Calls", description: "Two 45-minute calls with Dr. Ray to build your care plans." },
   { step: "2", title: "We Build Everything", description: "Your care plans, pricing, scripts, and presentation flow are built during the calls." },
-  { step: "3", title: "Start Using It", description: "Pull it up during report of findings. Walk patients through their plan on screen." },
+  { step: "3", title: "Start Using It", description: "Pull it up during report of findings. Walk community members through their plan on screen." },
 ];
 
 export default function CarePlanCloserPage() {
@@ -54,7 +54,7 @@ export default function CarePlanCloserPage() {
             <p className="text-neuro-orange text-xs font-bold tracking-[0.2em] mb-2">Done for You</p>
             <h2 className="text-xl font-bold text-white mb-2">Dr. Ray Builds Your Care Plans</h2>
             <p className="text-white/50 text-sm leading-relaxed">
-              Two 45-minute calls. Your specific plans, pricing, and scripts. Built and ready to use with patients.
+              Two 45-minute calls. Your specific plans, pricing, and scripts. Built and ready to use with community members.
             </p>
             <div className="flex items-center gap-4 mt-4">
               <div className="flex items-center gap-2">

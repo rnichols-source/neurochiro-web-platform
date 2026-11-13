@@ -63,7 +63,7 @@ export default function LeadTextAlerts() {
   if (ready === null) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 tracking-wide">Text alerts for new patient requests</h2>
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide">Text alerts for new community member requests</h2>
         <p className="text-sm text-gray-500 mt-3">Loading...</p>
       </div>
     )
@@ -72,7 +72,7 @@ export default function LeadTextAlerts() {
   if (!ready) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h2 className="text-sm font-bold text-gray-400 tracking-wide">Text alerts for new patient requests</h2>
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide">Text alerts for new community member requests</h2>
         <p className="text-sm text-neuro-navy mt-3">Text alerts are coming soon</p>
       </div>
     )
@@ -81,7 +81,7 @@ export default function LeadTextAlerts() {
   return (
     <form onSubmit={onSave} className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
       <div>
-        <h2 className="text-sm font-bold text-gray-400 tracking-wide">Text alerts for new patient requests</h2>
+        <h2 className="text-sm font-bold text-gray-400 tracking-wide">Text alerts for new community member requests</h2>
         <p className="text-xs text-gray-500 mt-2">Add up to 3 mobiles. The office line on your profile is not texted.</p>
       </div>
       {LABELS.map((label, index) => (
@@ -105,7 +105,7 @@ export default function LeadTextAlerts() {
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-neuro-navy">Text alerts</p>
-          <p className="text-xs text-gray-400">Turn off to stop new-patient texts.</p>
+          <p className="text-xs text-gray-400">Turn off to stop texts about new community members.</p>
         </div>
         <button
           type="button"

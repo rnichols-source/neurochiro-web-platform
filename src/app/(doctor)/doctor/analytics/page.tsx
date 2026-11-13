@@ -35,13 +35,13 @@ export default async function DoctorAnalytics() {
     ...(stats.requestSources || []).filter((row) => row.count > 0).map((row) => ({
       label: row.label,
       value: String(row.count),
-      hint: 'Patient requests from this source in the last 30 days. Each person is counted once.',
+      hint: 'Community member requests from this source in the last 30 days. Each person is counted once.',
     })),
     ...(introductions != null && introductions > 0
-      ? [{ label: 'Directory introductions', value: String(introductions), hint: 'Introductions the directory sent, separate from a patient request.' }]
+      ? [{ label: 'Directory introductions', value: String(introductions), hint: 'Introductions the directory sent, separate from a community member request.' }]
       : []),
     ...(referrals != null && referrals > 0
-      ? [{ label: 'Referrals from doctors', value: String(referrals), hint: 'Patients other doctors referred to you in the last 30 days.' }]
+      ? [{ label: 'Referrals from doctors', value: String(referrals), hint: 'Community members other doctors referred to you in the last 30 days.' }]
       : []),
   ];
   const empty = profileViews === 0 && patientRequests === 0 && profileClicks === 0 && (introductions === 0 || introductions == null) && (referrals === 0 || referrals == null) && foundRows.length === 0;
@@ -53,33 +53,33 @@ export default async function DoctorAnalytics() {
   );
   const requestRow = displayCount(patientRequests, PATIENT_REQUESTS_HINT);
   const clickRow = displayCount(profileClicks, 'Profile clicks: times someone clicked through to your profile in the last 30 days.');
-  const introRow = displayCount(introductions, 'Patients the directory sent you: introductions from the directory in the last 30 days. This is separate from doctor-to-doctor referrals.');
+  const introRow = displayCount(introductions, 'Community members the directory sent you: introductions from the directory in the last 30 days. This is separate from doctor-to-doctor referrals.');
 
   return (
     <div className="max-w-3xl space-y-6">
-      <PageHeader title="Results" description="How patients find you, over the last 30 days." />
+      <PageHeader title="Results" description="How community members find you, over the last 30 days." />
       {empty ? (
         <EmptyState
           icon={BarChart3}
           title="No results yet"
-          sentence="When patients open your profile or ask to book, the counts show up here."
+          sentence="When community members open your profile or ask to book, the counts show up here."
         />
       ) : (
         <StatList
           title="Last 30 days"
           rows={[
             { label: 'Profile views', value: viewRow.value, hint: viewRow.hint },
-            { label: 'Patient requests', value: requestRow.value, hint: requestRow.hint },
+            { label: 'Community member requests', value: requestRow.value, hint: requestRow.hint },
             { label: 'Profile clicks', value: clickRow.value, hint: clickRow.hint },
-            { label: 'Patients the directory sent you', value: introRow.value, hint: introRow.hint },
+            { label: 'Community members the directory sent you', value: introRow.value, hint: introRow.hint },
           ]}
         />
       )}
       {foundRows.length > 0 ? (
         <div className="space-y-2">
-          <StatList title="How patients found you · last 30 days" rows={foundRows} />
+          <StatList title="How community members found you · last 30 days" rows={foundRows} />
           {patientRequests != null && stats.requestSources && sourceSum !== patientRequests ? (
-            <p className="text-sm text-portal-ink-2">These sources do not add up to patient requests because some people were counted once.</p>
+            <p className="text-sm text-portal-ink-2">These sources do not add up to community member requests because some people were counted once.</p>
           ) : null}
         </div>
       ) : null}

@@ -5,7 +5,7 @@ import { EMPTY_METROS, cityToSlug } from '@/lib/city-data';
 import { getProducts } from '@/lib/shopify';
 import { EUROPEAN_ISO, toDirectoryCountry } from '@/lib/directory-countries';
 import { excludeDemo } from '@/lib/directory/exclude-demo';
-import { applyPublicListing } from '@/lib/directory/visibility';
+import { applyPublicListing, excludeTestDoctors } from '@/lib/directory/visibility';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,10 +122,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // City pages: every city with a doctor + empty metros
   const doctorCitySlugs = new Set<string>();
-  const allDoctors = (await excludeDemo(supabase
+  const allDoctors = (await excludeTestDoctors(excludeDemo(supabase
     .from('doctors')
     .select('city, state')
-    .eq('verification_status', 'verified'))).data || [];
+    .eq('verification_status', 'verified')))).data || [];
   for (const d of allDoctors) {
     if (d.city && d.state && d.state.length === 2) {
       doctorCitySlugs.add(cityToSlug(d.city, d.state));

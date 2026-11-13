@@ -23,7 +23,7 @@ export type PortalStats = {
 };
 
 export const PATIENT_REQUESTS_HINT =
-  'Patient requests: people who asked to book with you through NeuroChiro. The same person is counted once.';
+  'Community member requests: people who asked to book with you through NeuroChiro. The same person is counted once.';
 
 export const UNAVAILABLE_HINT = 'Not available yet.';
 

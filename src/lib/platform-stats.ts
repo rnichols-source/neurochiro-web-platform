@@ -15,7 +15,7 @@ import { looseFrom } from '@/lib/admin/loose-query'
 import { normalizeCountry, normalizeState } from '@/lib/admin/geo-normalize'
 import { isMissingColumn } from '@/lib/leads/schema'
 import { createAdminClient, fetchAllRows } from '@/lib/supabase-admin'
-import { applyPublicListing } from '@/lib/directory/visibility'
+import { applyPublicListing, PUBLIC_LISTING_OR } from '@/lib/directory/visibility'
 
 export interface DoctorCounts {
   active: number         // verified + valid coords + US
@@ -64,7 +64,7 @@ export async function getDoctorCounts(): Promise<DoctorCounts> {
     .eq('is_test', 'false'))
     .range(0, 0)
   const rows = probe.error && isMissingColumn(probe.error)
-    ? await fetchAllRows(supabase, 'doctors', base, (query) => applyPublicListing(query.in('verification_status', ['verified', 'pending'])))
+    ? await fetchAllRows(supabase, 'doctors', base, (query) => query.in('verification_status', ['verified', 'pending']).or(PUBLIC_LISTING_OR))
     : await fetchAllRows(
       supabase,
       'doctors',

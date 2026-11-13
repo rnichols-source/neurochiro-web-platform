@@ -5,6 +5,7 @@ import { getDoctorCounts, getSubscriberCounts, getDemandMentionCount } from '@/l
 import { haversineDistance } from '@/lib/geo'
 import { rateLimit, getIP } from '@/lib/rate-limit'
 import { headers } from 'next/headers'
+import { excludeTestDoctors } from '@/lib/directory/visibility'
 import { getThresholds } from '@/lib/thresholds'
 
 // ── Types ──
@@ -102,12 +103,12 @@ export async function getDemandMapData(): Promise<{ doctors: MapDoctor[]; demand
   const supabase = createAdminClient()
 
   // All verified doctors with valid coords (no PII, just location + country)
-  const { data: docs } = await supabase
+  const { data: docs } = await excludeTestDoctors(supabase
     .from('doctors')
     .select('latitude, longitude, country')
     .eq('verification_status', 'verified')
     .not('latitude', 'eq', 0)
-    .not('longitude', 'eq', 0)
+    .not('longitude', 'eq', 0))
 
   const doctors: MapDoctor[] = (docs || [])
     .filter(d => d.latitude != null && d.longitude != null)
@@ -273,9 +274,9 @@ export async function checkDemandNearby(query: string, country: string = 'US'): 
   }
 
   // Count doctors within 50mi, scoped to country
-  let docQuery = supabase.from('doctors').select('latitude, longitude')
+  let docQuery = excludeTestDoctors(supabase.from('doctors').select('latitude, longitude')
     .eq('verification_status', 'verified')
-    .not('latitude', 'eq', 0).not('longitude', 'eq', 0)
+    .not('latitude', 'eq', 0).not('longitude', 'eq', 0))
   if (resolveCountry === 'US') {
     docQuery = docQuery.or('country.is.null,country.eq.US')
   } else {

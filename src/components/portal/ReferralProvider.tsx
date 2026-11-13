@@ -66,7 +66,7 @@ export function OpenReferralFromQuery() {
 }
 
 export function ReferButton({
-  label = 'Refer a patient',
+  label = 'Refer a community member',
   className,
   doctorId,
   userId,

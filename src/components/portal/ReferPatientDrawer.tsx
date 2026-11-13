@@ -11,6 +11,7 @@ import {
   sendPatientReferral,
   starReferralDoctor,
 } from '@/app/(doctor)/doctor/referrals/actions';
+import { communityMemberCopy } from '@/lib/doctor/places';
 import { formatDistance, referralCountry } from '@/lib/referrals/pure';
 import type { ReferableDoctor } from '@/lib/referrals/search';
 
@@ -119,8 +120,8 @@ export default function ReferPatientDrawer({
     }
     setChoices(result.choices);
     setDoctors(result.doctors);
-    setNote(result.note || '');
-    if (!result.doctors.length && !result.choices?.length && result.label) setNote(result.note || result.label);
+    setNote(communityMemberCopy(result.note || ''));
+    if (!result.doctors.length && !result.choices?.length && result.label) setNote(communityMemberCopy(result.note || result.label));
   }
 
   async function star(id: string) {
@@ -152,7 +153,7 @@ export default function ReferPatientDrawer({
     });
     setBusy(false);
     if (!result.success || !result.referralId) {
-      setError(result.error || 'Could not send.');
+      setError(communityMemberCopy(result.error || 'Could not send.'));
       setSentName('');
       return;
     }
@@ -160,14 +161,14 @@ export default function ReferPatientDrawer({
   }
 
   const receiver = selected ? doctorTitle(selected) : 'the doctor';
-  const patient = form.first.trim() || 'The patient';
+  const patient = form.first.trim() || 'This community member';
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <button type="button" className="absolute inset-0 bg-black/40" aria-label="Close referral" title="Close" onClick={onClose} />
       <aside className="relative h-full w-full md:max-w-md bg-portal-canvas shadow-xl overflow-y-auto p-4">
         <div className="flex items-center justify-between gap-3 mb-4">
-          <h2 className="text-lg font-bold text-portal-ink">Refer a patient</h2>
+          <h2 className="text-lg font-bold text-portal-ink">Refer a community member</h2>
           <button type="button" onClick={onClose} className="min-h-11 min-w-11 text-sm font-bold text-portal-ink" aria-label="Close" title="Close">Close</button>
         </div>
         {sentName ? (
@@ -232,7 +233,7 @@ export default function ReferPatientDrawer({
             <div className="flex flex-wrap gap-2">
               <label className="min-h-11 inline-flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={acceptingOnly} onChange={(event) => setAcceptingOnly(event.target.checked)} />
-                Accepting patients
+                Accepting community members
               </label>
               <input
                 value={specialty}
