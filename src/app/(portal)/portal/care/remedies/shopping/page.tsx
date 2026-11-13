@@ -16,7 +16,7 @@ export default async function ShoppingPage() {
 
   return (
     <div>
-      <BackHeading title={guide.shopping.title} href="/portal/care/remedies" />
+      <BackHeading title="Shopping list" href="/portal/care#remedies" label="Care" crumb="Care › Shopping list" area="care" />
       <p className="mb-2 text-[13.5px] leading-snug text-[#3d4a57]">{guide.shopping.intro}</p>
       <p className="mb-4 text-[13px] leading-snug text-[#3d4a57]">{LIBRARY_COPY.shoppingIntro}</p>
       {account.ready ? (

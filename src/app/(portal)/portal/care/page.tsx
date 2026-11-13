@@ -1,87 +1,87 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { BackHeading, Card, Kicker } from '@/components/community/ui'
+import { CareView, type CarePlan } from '@/components/community/care-view'
 import { loadCommunitySnapshot, requireCommunityMember } from '@/lib/community/data'
-import { LIBRARY_COPY } from '@/lib/community/library-model'
-import { loadPhaseHome } from '@/lib/community/phase-data'
+import { remedyGuide } from '@/lib/community/library-content'
+import { assignedByLine, countDone } from '@/lib/community/library-model'
+import { loadExercises } from '@/lib/community/phase-data'
+import { firstOpenPhase, splitPhaseName } from '@/lib/community/today'
 
-export const metadata: Metadata = { title: 'Your care · Your NeuroChiro' }
+export const metadata: Metadata = { title: 'Care · Your NeuroChiro' }
 export const dynamic = 'force-dynamic'
+
+const CHIPS = [
+  { label: 'Sore Throat', href: '/portal/care/remedies/sore-throat' },
+  { label: 'Fever', href: '/portal/care/remedies/fever' },
+  { label: 'Cough', href: '/portal/care/remedies/cough' },
+  { label: 'Congestion', href: '/portal/care/remedies/congestion' },
+  { label: 'Kids', href: '/portal/care/remedies/kids' },
+]
 
 export default async function CarePage() {
   const session = await requireCommunityMember()
-  const [snapshot, phase] = await Promise.all([
+  const [snapshot, exercises] = await Promise.all([
     loadCommunitySnapshot(session),
-    loadPhaseHome(session.userId),
+    loadExercises(session.userId),
   ])
   const doctor = snapshot.homeDoctor
+  const guide = remedyGuide()
   return (
-    <div>
-      <BackHeading title="Your care" />
-      <Card>
-        <Kicker>Home doctor</Kicker>
-        {doctor ? (
-          <>
-            <h2 className="font-heading text-[16px] font-bold text-neuro-navy">{doctor.title}</h2>
-            <p className="mt-1 text-[13.5px] leading-snug text-[#3d4a57]">
-              {doctor.practice ? <>{doctor.practice}<br /></> : null}
-              {doctor.place}
-            </p>
-            <div className="mt-3 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
-              {doctor.listed ? <Link href={`/portal/visit?doctor=${doctor.id}`}>Request a visit</Link> : null}
-              <Link href="/portal/find">Change</Link>
-              {doctor.profileHref ? <Link href={doctor.profileHref}>Profile</Link> : null}
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="text-[13.5px] leading-snug text-[#3d4a57]">You do not have a home doctor yet.</p>
-            <Link href="/portal/find" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Find one in the directory →</Link>
-          </>
-        )}
-      </Card>
-      <Card>
-        <Kicker>Household</Kicker>
-        <p className="text-[13.5px] leading-snug text-[#3d4a57]">
-          {snapshot.family.length === 0
-            ? 'Just you, for now.'
-            : snapshot.family.map((person) => person.firstName).join(', ')}
-        </p>
-        <Link href="/portal/family" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Edit household →</Link>
-      </Card>
-      <Card>
-        <Kicker>Visit requests</Kicker>
-        {snapshot.requests.length === 0 ? (
-          <p className="text-[13.5px] text-[#3d4a57]">None yet.</p>
-        ) : (
-          <ul className="space-y-2">
-            {snapshot.requests.slice(0, 5).map((request) => (
-              <li key={request.id} className="text-[13.5px] text-[#3d4a57]">
-                <span className="font-semibold text-neuro-navy">{request.doctorTitle || 'Doctor'}</span>
-                {' · '}{request.status}
-                {request.sharedFirstName ? '' : ' · name not shared'}
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
-      <Card>
-        <Kicker>Send someone you love</Kicker>
-        <p className="text-[13.5px] leading-snug text-[#3d4a57]">A private link for a friend or family member, in this city or another country.</p>
-        <Link href="/portal/care/invite" className="mt-2 inline-block text-[13px] font-semibold text-[#B4501A]">Open →</Link>
-      </Card>
-      <Card>
-        <Kicker>Exercises and remedies</Kicker>
-        <p className="text-[13.5px] leading-snug text-[#3d4a57]">{phase.careLine || LIBRARY_COPY.careCard}</p>
-        <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
-          <Link href="/portal/care/exercises">Exercises</Link>
-          <Link href="/portal/care/remedies">Remedies</Link>
-        </div>
-      </Card>
-      <div id="message" className="rounded-2xl bg-[#fdf1ea] px-3.5 py-3">
-        <strong className="mb-1 block font-heading text-[13px] font-bold text-neuro-navy">Message</strong>
-        <p className="text-[12.5px] leading-snug text-[#3d4a57]">Messages with your home doctor are not open yet. A visit request is how you reach the office, and they only receive what you check.</p>
-      </div>
-    </div>
+    <CareView
+      doctor={doctor ? {
+        id: doctor.id,
+        title: doctor.title,
+        meta: doctorMeta(doctor.place),
+        initials: doctor.initials,
+        photoUrl: doctor.photoUrl,
+        listed: doctor.listed,
+      } : null}
+      plan={planCard(exercises.assignments)}
+      chips={CHIPS}
+      contacts={guide.emergency}
+      requests={snapshot.requests.slice(0, 5).map((request) => ({
+        id: request.id,
+        label: `${request.doctorTitle || 'Doctor'} · ${request.status}${request.sharedFirstName ? '' : ' · name not shared'}`,
+      }))}
+    />
   )
+}
+
+function doctorMeta(place: string): string {
+  const city = place.replace(/\s*· your home doctor$/, '').trim()
+  if (!city || city === 'Your home doctor') return 'Your home doctor'
+  return `Your home doctor · ${city}`
+}
+
+function planCard(assignments: Awaited<ReturnType<typeof loadExercises>>['assignments']): CarePlan | null {
+  const library = assignments.find((assignment) => assignment.kind === 'library' && assignment.library && assignment.status !== 'done')
+  if (!library?.library) {
+    const custom = assignments.find((assignment) => assignment.kind === 'custom' && assignment.status !== 'done')
+    if (!custom) return null
+    const finished = custom.steps.filter((step) => step.done).length
+    return {
+      title: custom.title,
+      assignedBy: assignedByLine(custom.doctorName),
+      phases: [],
+      meta: `${finished} of ${custom.steps.length} done today`,
+    }
+  }
+  const done = new Set(library.doneKeys)
+  const stats = library.library.phases.map((phase) => {
+    const progress = countDone(phase.exercises.map((exercise) => exercise.key), done)
+    return { done: progress.finished, total: progress.total }
+  })
+  const index = firstOpenPhase(stats)
+  const phase = library.library.phases[index]
+  const stat = stats[index]
+  if (!phase || !stat) return null
+  const parts = splitPhaseName(phase.name)
+  return {
+    title: library.title,
+    assignedBy: assignedByLine(library.doctorName),
+    phases: library.library.phases.map((item, itemIndex) => ({
+      label: splitPhaseName(item.name).short,
+      on: itemIndex === index,
+    })),
+    meta: `${parts.rest || phase.name} · ${phase.week} · ${stat.done} of ${stat.total} done today`,
+  }
 }

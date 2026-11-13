@@ -42,7 +42,7 @@ export default async function RemediesPage({
 
   return (
     <div>
-      <BackHeading title={LIBRARY_COPY.remediesTitle} href="/portal/care" />
+      <BackHeading title="Home remedy guide" href="/portal/care" label="Care" crumb="Care › Remedy guide" area="care" />
       <p className="mb-3 text-[13.5px] leading-snug text-[#3d4a57]">{LIBRARY_COPY.remediesIntro}</p>
       <p className="mb-4 text-[13px] leading-snug text-[#3d4a57]">{guide.urgent}</p>
       <div className="mb-4 flex flex-wrap gap-3 text-[13px] font-semibold text-[#B4501A]">

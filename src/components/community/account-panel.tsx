@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { FieldLabel, FormError, fieldClass } from '@/components/community/ui'
 
-export function AccountPanel({ name, email }: { name: string; email: string }) {
+export function AccountPanel({ name, email, hideSignOut = false }: { name: string; email: string; hideSignOut?: boolean }) {
   const router = useRouter()
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -70,9 +70,11 @@ export function AccountPanel({ name, email }: { name: string; email: string }) {
           {pending ? 'Saving…' : 'Update password'}
         </button>
       </form>
-      <button type="button" onClick={signOut} className="min-h-11 w-full rounded-[11px] border border-[#d9dfe5] text-[13.5px] font-semibold text-neuro-navy">
-        Sign out
-      </button>
+      {hideSignOut ? null : (
+        <button type="button" onClick={signOut} className="min-h-11 w-full rounded-[11px] border border-[#d9dfe5] text-[13.5px] font-semibold text-neuro-navy">
+          Sign out
+        </button>
+      )}
     </div>
   )
 }

@@ -1,5 +1,7 @@
 import Link from 'next/link'
 
+export { BackHeading } from '@/components/community/chrome'
+
 export function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
     <section className={`mb-[11px] rounded-[18px] border border-[rgba(30,45,59,0.08)] bg-white px-[15px] pb-[15px] pt-[14px] shadow-[0_1px_2px_rgba(21,32,43,0.04)] ${className}`}>
@@ -10,19 +12,6 @@ export function Card({ children, className = '' }: { children: React.ReactNode; 
 
 export function Kicker({ children }: { children: React.ReactNode }) {
   return <p className="mb-2 text-[11.5px] font-semibold text-[#6b7785]">{children}</p>
-}
-
-export function BackHeading({ title, href = '/portal' }: { title: string; href?: string }) {
-  return (
-    <div className="mb-3 flex items-center gap-2 pt-2">
-      <Link href={href} aria-label="Back to home" className="inline-flex h-9 w-9 items-center justify-center text-neuro-navy">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-          <path d="M15 5l-8 7 8 7" />
-        </svg>
-      </Link>
-      <h1 className="font-heading text-[22px] font-bold tracking-[-0.03em] text-neuro-navy">{title}</h1>
-    </div>
-  )
 }
 
 export function PrimaryLink({ href, children }: { href: string; children: React.ReactNode }) {

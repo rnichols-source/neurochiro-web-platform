@@ -1,145 +1,161 @@
 import Link from 'next/link'
-import { WeekCheckIn } from '@/components/community/week-check-in'
-import { Card, GhostLink, Kicker, PrimaryLink } from '@/components/community/ui'
-import { householdLine, type HomeDoctorCard } from '@/lib/community/logic'
-import type { Feeling } from '@/lib/community/phases'
+import { AREAS } from '@/components/community/areas'
+import { bleed } from '@/components/community/chrome'
+import { AreaIcon, ChevronIcon, DumbbellIcon } from '@/components/community/icons'
+import type { TodayFocus } from '@/lib/community/today'
 
-export type HomePhase = {
-  ready: boolean
-  feeling: Feeling | null
-  showLabel: string
-  showTonight: boolean
-  reminderTitle: string | null
-  careLine: string
-  tripLine: string | null
-  workLine: string | null
-}
+const TILES = [
+  { id: 'care' as const, href: '/portal/care', title: 'Care', line: 'Exercises & remedies' },
+  { id: 'week' as const, href: '/portal/week', title: 'This Week', line: 'Live Thu 8 PM ET' },
+  { id: 'refer' as const, href: '/portal/refer', title: 'Find & Refer', line: 'Travel · invite family' },
+  { id: 'me' as const, href: '/portal/me', title: 'Me', line: 'Household · doctor' },
+]
 
-export type HomeViewProps = {
+export function HomeView({
+  greeting,
+  name,
+  initial,
+  focus,
+}: {
   greeting: string
+  name: string | null
   initial: string
-  doctor: HomeDoctorCard | null
-  familyNames: string[]
-  ready: boolean
-  phase: HomePhase
-}
-
-export function HomeView({ greeting, initial, doctor, familyNames, ready, phase }: HomeViewProps) {
+  focus: TodayFocus
+}) {
+  const hello = name ? `${greeting},` : greeting
+  const action = focusAction(focus)
   return (
     <div>
-      <div className="mb-3.5 flex items-center justify-between">
-        <Link href="/portal" className="flex items-center gap-2">
-          <img src="/logo.png" alt="" className="h-7 w-7 object-contain" />
-          <span className="font-heading text-[13px] font-black tracking-[0.04em] text-neuro-navy">NEUROCHIRO</span>
-        </Link>
-        <Link href="/portal/you" aria-label="You" className="flex h-[34px] w-[34px] items-center justify-center rounded-full bg-neuro-navy font-heading text-[13px] font-bold text-white">
-          {initial}
-        </Link>
-      </div>
-      <h1 className="mb-2 font-heading text-[26px] font-bold leading-[1.15] tracking-[-0.03em] text-neuro-navy">{greeting}</h1>
-      <p className="mb-4 inline-block rounded-full border border-[#d9dfe5] bg-white px-[9px] py-1 text-[11.5px] font-semibold text-neuro-navy">Community member</p>
+      <header className={`nc-band ${bleed} rounded-b-[30px] px-[22px] pb-14 pt-4 text-white`} style={{ ['--c' as string]: AREAS.home.color, ['--d' as string]: AREAS.home.dark }}>
+        <div className="flex items-center gap-2.5">
+          <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-white">
+            <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
+          </span>
+          <span className="nc-ui flex-1 text-[19px] font-black tracking-[0.08em] text-white">NEUROCHIRO</span>
+          <Link href="/portal/me" aria-label="Me" className="grid h-11 w-11 place-items-center rounded-full border-2 border-white/60 bg-white/20 nc-ui text-[16px] font-extrabold text-white">
+            {initial}
+          </Link>
+        </div>
+        <p className="mt-5 text-[20px] font-bold leading-snug text-white">{hello}</p>
+        {name ? <h1 className="nc-ui text-[40px] font-extrabold leading-none tracking-[-0.03em] text-white">{name}</h1> : <h1 className="sr-only">Your NeuroChiro</h1>}
+        <p className="nc-ui mt-6 text-[19px] font-extrabold uppercase tracking-[0.1em] text-white">
+          Your one thing today
+        </p>
+      </header>
 
-      {!ready ? (
-        <Card>
-          <Kicker>Almost ready</Kicker>
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">Your home doctor, household, and privacy choices save with the latest database update. The screen is here. The save step is not on this environment yet.</p>
-        </Card>
-      ) : null}
-
-      <Card>
-        <Kicker>Your care</Kicker>
-        {doctor ? (
-          <>
-            <div className="flex items-center gap-3">
-              {doctor.photoUrl ? (
-                <img src={doctor.photoUrl} alt="" className="h-[52px] w-[52px] shrink-0 rounded-full object-cover" />
-              ) : (
-                <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-full bg-[#e8eef3] font-heading text-[16px] font-bold text-neuro-navy">{doctor.initials}</div>
-              )}
-              <div className="min-w-0">
-                <h2 className="font-heading text-[16px] font-bold tracking-[-0.02em] text-neuro-navy">{doctor.title}</h2>
-                <p className="mt-0.5 text-[12.5px] leading-snug text-[#3d4a57]">
-                  {doctor.practice ? <>{doctor.practice}<br /></> : null}
-                  {doctor.place}
-                </p>
+      <div className="relative z-[1] -mt-10">
+        <article className="rounded-3xl bg-white p-[18px] shadow-[0_14px_30px_-12px_rgba(21,32,43,0.25)]">
+          <div className="flex items-center gap-3.5">
+            <span className="grid h-[52px] w-[52px] shrink-0 place-items-center rounded-2xl" style={{ background: action.tint, color: action.ink }}>
+              <action.Icon size={26} />
+            </span>
+            <div className="min-w-0">
+              <p className="nc-ui text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-[#15202B]">{action.title}</p>
+              <p className="mt-0.5 text-[14px] leading-snug text-[#5b6773]">{action.detail}</p>
+            </div>
+          </div>
+          {action.progress ? (
+            <>
+              <div className="mt-4 h-2 overflow-hidden rounded bg-[#ECEAE5]" aria-hidden="true">
+                <div className="h-full rounded" style={{ width: `${action.progress.pct}%`, background: action.color }} />
               </div>
-            </div>
-            <div className="mt-3 flex gap-2">
-              {doctor.listed ? <PrimaryLink href={`/portal/visit?doctor=${doctor.id}`}>Request a visit</PrimaryLink> : <PrimaryLink href="/portal/find">Find a doctor</PrimaryLink>}
-              <GhostLink href="/portal/care#message">Message</GhostLink>
-            </div>
-            <p className="mt-3 text-[13px] leading-snug text-[#3d4a57]">{phase.careLine}</p>
-            <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
-              <Link href="/portal/care/exercises">Exercises</Link>
-              <Link href="/portal/care/remedies">Remedies</Link>
-            </div>
-            <Link href="/portal/care/invite" className="mt-3 inline-block text-[13px] font-semibold text-[#B4501A]">Send someone you love →</Link>
-            {!doctor.listed ? <p className="mt-2 text-[12.5px] text-[#6b7785]">This office is not currently listed. You can choose another home doctor.</p> : null}
-          </>
-        ) : (
-          <>
-            <h2 className="font-heading text-[16px] font-bold tracking-[-0.02em] text-neuro-navy">Find your home doctor</h2>
-            <p className="mt-1 text-[13.5px] leading-snug text-[#3d4a57]">Choose a listed nervous system chiropractor. They stay on this card, and you can ask them for a visit.</p>
-            <div className="mt-3 flex gap-2">
-              <PrimaryLink href="/portal/find">Find a doctor</PrimaryLink>
-              <GhostLink href="/directory">Directory</GhostLink>
-            </div>
-            <p className="mt-3 text-[13px] leading-snug text-[#3d4a57]">{phase.careLine}</p>
-            <div className="mt-2 flex gap-3 text-[13px] font-semibold text-[#B4501A]">
-              <Link href="/portal/care/exercises">Exercises</Link>
-              <Link href="/portal/care/remedies">Remedies</Link>
-            </div>
-            <Link href="/portal/care/invite" className="mt-3 inline-block text-[13px] font-semibold text-[#B4501A]">Send someone you love →</Link>
-          </>
-        )}
-      </Card>
+              <p className="mt-1.5 text-[13px] font-bold text-[#5b6773]">{action.progress.label}</p>
+            </>
+          ) : null}
+          <Link
+            href={action.href}
+            className="nc-ui mt-3.5 flex h-[52px] items-center justify-center gap-2 rounded-2xl text-[16px] font-extrabold text-white"
+            style={{ background: action.color }}
+          >
+            {action.button}
+            <ChevronIcon size={18} />
+          </Link>
+        </article>
+      </div>
 
-      <Card>
-        <Kicker>Your household</Kicker>
-        <div className="flex items-center justify-between gap-2.5">
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">{householdLine(familyNames)}</p>
-          <Link href="/portal/family" className="whitespace-nowrap text-[13px] font-semibold text-[#B4501A]">Open →</Link>
-        </div>
-      </Card>
-
-      <Card>
-        <Kicker>This week</Kicker>
-        <p className="mb-2 font-heading text-[15px] font-bold tracking-[-0.02em] text-neuro-navy">How is your family’s nervous system this week?</p>
-        {phase.ready ? <WeekCheckIn initial={phase.feeling} /> : (
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">The check-in saves with the latest database update.</p>
-        )}
-        <Link href="/portal/week" className="mt-3 flex items-center gap-3">
-          <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] text-[9px] font-bold text-white ${phase.showTonight ? 'bg-[#B4501A]' : 'bg-neuro-navy'}`}>
-            {phase.showTonight ? 'LIVE' : 'SHOW'}
-          </span>
-          <span>
-            <span className="block font-heading text-[14px] font-bold text-neuro-navy">The Weekly Adjustment</span>
-            <span className="block text-[12.5px] text-[#3d4a57]">{phase.showLabel}</span>
-          </span>
-        </Link>
-        {phase.reminderTitle ? <p className="mt-2 text-[12.5px] leading-snug text-[#3d4a57]">{phase.reminderTitle}</p> : null}
-      </Card>
-
-      <Card>
-        <Kicker>Your passport</Kicker>
-        <div className="flex items-center justify-between gap-2.5">
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">{phase.tripLine || 'When you travel, your care can travel with you.'}</p>
-          <Link href="/portal/passport" className="whitespace-nowrap text-[13px] font-semibold text-[#B4501A]">Open →</Link>
-        </div>
-      </Card>
-
-      <Card className="mb-0">
-        <Kicker>Work in this field</Kicker>
-        <div className="flex items-center justify-between gap-2.5">
-          <p className="text-[13.5px] leading-snug text-[#3d4a57]">{phase.workLine || 'Raise a hand for CA, front desk, or a student path.'}</p>
-          <Link href="/portal/work" className="whitespace-nowrap text-[13px] font-semibold text-[#B4501A]">See openings →</Link>
-        </div>
-      </Card>
-
-      <Link href="/portal/privacy" className="mt-3 block rounded-2xl bg-[#fdf1ea] px-3.5 py-3">
-        <strong className="mb-1 block font-heading text-[13px] font-bold text-neuro-navy">You’re in control of what’s shared</strong>
-        <p className="text-[12.5px] leading-snug text-[#3d4a57]">A doctor only sees what you choose. Nothing else goes over until you say so.</p>
-      </Link>
+      <SectionGo />
     </div>
   )
+}
+
+function SectionGo() {
+  return (
+    <section>
+      <h2 className="nc-ui mb-2.5 mt-[22px] text-[12px] font-extrabold uppercase tracking-[0.12em] text-[#5b6773]">Go to</h2>
+      <div className="grid grid-cols-2 gap-3">
+        {TILES.map((tile) => {
+          const tone = AREAS[tile.id]
+          return (
+            <Link
+              key={tile.id}
+              href={tile.href}
+              className="relative flex h-32 flex-col justify-end overflow-hidden rounded-[22px] p-4 text-white"
+              style={{ background: tone.color }}
+            >
+              <span className="pointer-events-none absolute -right-8 -top-8 h-[110px] w-[110px] rounded-full bg-white/10" aria-hidden="true" />
+              <span className="absolute left-4 top-4 grid h-11 w-11 place-items-center rounded-[14px] bg-white/20">
+                <AreaIcon id={tile.id} size={26} />
+              </span>
+              <span className="nc-ui text-[18px] font-extrabold tracking-[-0.02em]">{tile.title}</span>
+              <span className="text-[13px] text-white/95">{tile.line}</span>
+            </Link>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function focusAction(focus: TodayFocus) {
+  if (focus.kind === 'plan') {
+    const pct = focus.plan.total > 0 ? Math.round((focus.plan.done / focus.plan.total) * 100) : 0
+    return {
+      title: "Do today's exercises",
+      detail: `${focus.plan.title} · ${focus.plan.detail}`,
+      href: focus.plan.href,
+      button: focus.plan.done >= focus.plan.total ? 'Open my plan' : 'Continue',
+      color: AREAS.care.color,
+      ink: AREAS.care.ink,
+      tint: AREAS.care.tint,
+      Icon: DumbbellIcon,
+      progress: { pct, label: `${focus.plan.done} of ${focus.plan.total} done` },
+    }
+  }
+  if (focus.kind === 'doctor') {
+    return {
+      title: 'Choose a home doctor',
+      detail: 'A listed nervous system chiropractor stays on Care.',
+      href: '/portal/find',
+      button: 'Find a doctor',
+      color: AREAS.care.color,
+      ink: AREAS.care.ink,
+      tint: AREAS.care.tint,
+      Icon: () => <AreaIcon id="care" size={26} />,
+      progress: null,
+    }
+  }
+  if (focus.kind === 'checkin') {
+    return {
+      title: "Do this week's check-in",
+      detail: "How is your family's nervous system this week?",
+      href: '/portal/week',
+      button: 'Check in',
+      color: AREAS.week.color,
+      ink: AREAS.week.ink,
+      tint: AREAS.week.tint,
+      Icon: () => <AreaIcon id="week" size={26} />,
+      progress: null,
+    }
+  }
+  return {
+    title: 'The Weekly Adjustment',
+    detail: 'Thursday · 8 PM ET live Q&A',
+    href: '/portal/week',
+    button: 'Open This Week',
+    color: AREAS.week.color,
+    ink: AREAS.week.ink,
+    tint: AREAS.week.tint,
+    Icon: () => <AreaIcon id="week" size={26} />,
+    progress: null,
+  }
 }

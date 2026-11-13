@@ -47,6 +47,8 @@ function refresh() {
     '/portal/care/invite',
     '/portal/passport',
     '/portal/work',
+    '/portal/refer',
+    '/portal/me',
     '/doctor/care-sets',
     '/doctor/introductions',
     '/doctor/community-interest',

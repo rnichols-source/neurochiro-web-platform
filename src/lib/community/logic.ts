@@ -74,12 +74,16 @@ const COMMUNITY_PREFIXES = [
   '/portal/week',
   '/portal/work',
   '/portal/passport',
+  '/portal/refer',
   '/portal/you',
+  '/portal/me',
   '/portal/family',
   '/portal/privacy',
   '/portal/find',
   '/portal/visit',
 ]
+
+export type CommunityNavId = 'home' | 'care' | 'week' | 'refer' | 'me'
 
 export function isCommunityPath(path: string | null | undefined): boolean {
   if (!path) return false
@@ -88,17 +92,25 @@ export function isCommunityPath(path: string | null | undefined): boolean {
   return COMMUNITY_PREFIXES.some((prefix) => clean === prefix || clean.startsWith(`${prefix}/`))
 }
 
-export function communityNavId(path: string | null | undefined): 'home' | 'care' | 'week' | 'work' | 'you' {
+export function communityNavId(path: string | null | undefined): CommunityNavId {
   const clean = (path || '').split('?')[0]
-  if (clean.startsWith('/portal/you') || clean.startsWith('/portal/privacy')) return 'you'
+  if (
+    clean.startsWith('/portal/you') ||
+    clean.startsWith('/portal/me') ||
+    clean.startsWith('/portal/privacy') ||
+    clean.startsWith('/portal/family') ||
+    clean.startsWith('/portal/work')
+  ) return 'me'
   if (clean.startsWith('/portal/week')) return 'week'
-  if (clean.startsWith('/portal/work')) return 'work'
+  if (
+    clean.startsWith('/portal/refer') ||
+    clean.startsWith('/portal/passport') ||
+    clean.startsWith('/portal/care/invite')
+  ) return 'refer'
   if (
     clean.startsWith('/portal/care') ||
     clean.startsWith('/portal/find') ||
-    clean.startsWith('/portal/visit') ||
-    clean.startsWith('/portal/family') ||
-    clean.startsWith('/portal/passport')
+    clean.startsWith('/portal/visit')
   ) return 'care'
   return 'home'
 }
