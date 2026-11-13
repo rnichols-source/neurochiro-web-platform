@@ -12,6 +12,7 @@ export type ThreadScroller = {
 function roleLabel(role: string) {
   if (role === 'doctor') return 'Doctor';
   if (role === 'student') return 'Student';
+  if (role === 'patient' || role === 'member') return 'Community member';
   if (role === 'admin' || role === 'super_admin' || role === 'founder' || role === 'regional_admin') return 'NeuroChiro team';
   return '';
 }

@@ -27,7 +27,7 @@ import { useMessagingRealtime } from './useMessagingRealtime';
 
 const CANNED: Record<string, string[]> = {
   doctor: [
-    'Yes, we are currently accepting new patients.',
+    'Yes, we are currently accepting new community members.',
     'Please call our office to schedule.',
     "I'd be happy to discuss further. What times work?",
     'Thank you for reaching out!',

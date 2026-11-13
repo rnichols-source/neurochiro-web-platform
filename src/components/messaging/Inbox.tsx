@@ -3,11 +3,12 @@
 import { Loader2, MessageSquare, Plus, Search } from 'lucide-react';
 import type { InboxItem } from './types';
 
-const TABS = ['All', 'Doctors', 'Students', 'Team'] as const;
+const TABS = ['All', 'Members', 'Doctors', 'Students', 'Team'] as const;
 export type InboxTab = (typeof TABS)[number];
 
 const ROLE: Record<InboxTab, string | null> = {
   All: null,
+  Members: 'patient',
   Doctors: 'doctor',
   Students: 'student',
   Team: 'admin',
@@ -64,7 +65,7 @@ export function Inbox(props: {
         ) : visible.length === 0 ? (
           <div className="px-4 py-10 text-center">
             <MessageSquare className="w-6 h-6 text-portal-muted mx-auto mb-3" />
-            <p className="text-sm text-portal-ink-2">{props.emptyMessage || 'Your inbox is where conversations live. When you accept a patient referral, your conversation with that doctor starts here automatically. You can also message any doctor in the network directly.'}</p>
+            <p className="text-sm text-portal-ink-2">{props.emptyMessage || 'This inbox is for community members, doctors, and students. When you accept a referral, the conversation with that doctor starts here.'}</p>
             <button type="button" onClick={props.onCompose} className="mt-3 min-h-11 px-4 rounded-full bg-portal-accent text-white text-sm font-bold">Start a conversation</button>
           </div>
         ) : visible.map((item) => (

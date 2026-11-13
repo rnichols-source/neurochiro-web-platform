@@ -1,0 +1,32 @@
+/* Doctor portal. Body is Lato. Headings, buttons, and nav labels are Montserrat. */
+.doctor-portal {
+  font-family: var(--font-lato), system-ui, sans-serif;
+  color: #15202b;
+  background: #f5f3ef;
+}
+
+.portal .doctor-portal :is(h1, h2, h3, h4, h5, h6) {
+  color: inherit;
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.portal .doctor-portal :is(button, .dp-ui) {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.doctor-portal .dp-band {
+  background: linear-gradient(160deg, var(--c), var(--d));
+  color: #fff;
+}
+
+.doctor-portal .dp-bleed {
+  margin-left: -18px;
+  margin-right: -18px;
+}
+
+@media (min-width: 1024px) {
+  .doctor-portal .dp-bleed {
+    margin-left: -40px;
+    margin-right: -40px;
+  }
+}

@@ -21,10 +21,10 @@ export type PortalFeature = {
 };
 
 export const PORTAL_FEATURES: PortalFeature[] = [
-  { key: 'dashboard', label: 'Home', href: '/doctor/dashboard', group: 'main', subtitle: 'Your day at a glance', state: 'live', icon: 'LayoutDashboard' },
-  { key: 'leads', label: 'Patient requests', href: '/doctor/leads', group: 'main', subtitle: 'New patients asking to book', state: 'live', requires: 'pro', icon: 'Target' },
-  { key: 'messages', label: 'Messages', href: '/doctor/messages', group: 'main', subtitle: 'Conversations with patients and doctors', state: 'live', icon: 'MessageSquare' },
-  { key: 'profile', label: 'My profile', href: '/doctor/profile', group: 'main', subtitle: 'What patients see', state: 'live', icon: 'User' },
+  { key: 'dashboard', label: 'Today', href: '/doctor', group: 'main', subtitle: 'Your next step', state: 'live', icon: 'LayoutDashboard', match: ['/doctor/dashboard'] },
+  { key: 'leads', label: 'Directory requests', href: '/doctor/leads', group: 'main', subtitle: 'People who asked to book from the directory', state: 'live', requires: 'pro', icon: 'Target' },
+  { key: 'messages', label: 'Messages', href: '/doctor/messages', group: 'main', subtitle: 'One inbox for community members, doctors, and students', state: 'live', icon: 'MessageSquare' },
+  { key: 'profile', label: 'My profile', href: '/doctor/profile', group: 'main', subtitle: 'What community members see', state: 'live', icon: 'User' },
   { key: 'analytics', label: 'Results', href: '/doctor/analytics', group: 'grow', subtitle: 'Views, requests, where they came from', state: 'live', requires: 'pro', icon: 'BarChart3' },
   { key: 'seminars', label: 'Seminars', href: '/doctor/seminars', group: 'grow', subtitle: 'Host or find a seminar', state: 'live', icon: 'Calendar' },
   { key: 'hiring', label: 'Hiring', href: '/doctor/jobs', group: 'grow', subtitle: 'Jobs, students, and ChiroMatch', state: 'live', icon: 'Briefcase' },
@@ -33,8 +33,10 @@ export const PORTAL_FEATURES: PortalFeature[] = [
   { key: 'chiromatch', label: 'ChiroMatch', href: '/doctor/match', group: 'grow', subtitle: 'You and a student both say yes', state: 'hidden', requires: 'pro', comingSoonBlurb: 'Matching is always on. Open it from Hiring.', icon: 'Shuffle' },
   // RAYMOND: confirm the show is running; else coming_soon
   { key: 'lives', label: 'The Weekly Adjustment', href: '/doctor/lives', group: 'grow', subtitle: 'Live show every Thursday 8 PM ET', state: 'beta', icon: 'Video' },
-  { key: 'referrals', label: 'Referrals', href: '/doctor/referrals', group: 'grow', subtitle: 'Refer a patient to another doctor', state: 'live', requires: 'pro', icon: 'Users' },
-  { key: 'community', label: 'Community', href: '/doctor/community', group: 'grow', subtitle: 'Private doctor community', state: 'coming_soon', comingSoonBlurb: 'A private place for doctors in the network. We will tell you when it opens.', icon: 'Users' },
+  { key: 'referrals', label: 'Referrals', href: '/doctor/network', group: 'grow', subtitle: 'Refer a community member to another doctor', state: 'live', requires: 'pro', icon: 'Users', match: ['/doctor/referrals'] },
+  { key: 'community', label: 'The Network feed', href: '/doctor/community', group: 'grow', subtitle: 'Announcements and spotlights', state: 'coming_soon', comingSoonBlurb: 'Announcements and member spotlights. We will tell you when the feed is ready.', icon: 'Users' },
+  { key: 'synapse_deals', label: 'Synapse', href: '/doctor/coming-soon', group: 'grow', subtitle: 'Member deals from founding partners', state: 'coming_soon', comingSoonBlurb: 'Member deals from founding partners. Tell us what you want deals on.', icon: 'ShoppingBag' },
+  { key: 'shadow_requests', label: 'Shadow requests', href: '/doctor/coming-soon', group: 'grow', subtitle: 'Students ask to shadow you', state: 'coming_soon', comingSoonBlurb: 'Students ask to shadow you, right from Network.', icon: 'GraduationCap' },
   { key: 'marketplace', label: 'Marketplace', href: '/doctor/marketplace', group: 'grow', subtitle: 'Vetted vendors with member deals', state: 'beta', icon: 'ShoppingBag' },
   { key: 'practice_tools', label: 'Practice tools', href: '/doctor/tools', group: 'tools', subtitle: 'Care plan, scan reports, KPIs, P&L, CE, billing guide', state: 'live', requires: 'practice_tools', icon: 'Wrench', match: ['/doctor/care-plan', '/doctor/scan-report', '/doctor/kpi', '/doctor/pl-analyzer', '/doctor/ce-tracker', '/doctor/billing-guide'] },
   { key: 'care_plan_closer', label: 'Services from Dr. Ray', href: '/doctor/care-plan-closer', group: 'tools', subtitle: 'Done-for-you care plan setup', state: 'live', icon: 'Calculator' },
