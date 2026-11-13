@@ -35,6 +35,7 @@ type Draft = {
 
 function finish(draft: Draft, input: {
   requestId: string
+  contactRequestId: string | null
   doctorId: string
   now: Date
   quietSendAfter: string
@@ -75,6 +76,7 @@ function finish(draft: Draft, input: {
     kind: draft.kind,
     audience: draft.audience,
     requestId: input.requestId,
+    contactRequestId: input.contactRequestId,
     doctorId: input.doctorId,
     realPhone: draft.e164,
     toPhone,
@@ -93,11 +95,15 @@ export function planLeadTexts(input: {
   patient: PatientAlertTarget
   now?: Date
   runtime: Pick<SmsRuntime, 'enabled' | 'testPhone' | 'testRedirect'>
+  /** When set, the office text uses this body and is not tied to a contact request. */
+  officeBody?: string | null
 }): PlannedText[] {
   const now = input.now ?? new Date()
   const quiet = doctorQuietWindow(input.doctor, now)
+  const officeBody = (input.officeBody || '').trim()
   const shared = {
     requestId: input.requestId,
+    contactRequestId: officeBody ? null : input.requestId,
     doctorId: input.doctor.id,
     now,
     quietSendAfter: quiet.sendAfter.toISOString(),
@@ -105,8 +111,9 @@ export function planLeadTexts(input: {
     runtime: input.runtime,
   }
   const drafts: Draft[] = []
+  const prefix = officeBody ? 'visit' : 'lead'
 
-  if (input.smsConsentSaved) {
+  if (input.smsConsentSaved && !officeBody) {
     const e164 = toE164(input.patient.smsPhone)
     drafts.push({
       dedupeKey: `lead:${input.requestId}:patient_confirm`,
@@ -127,12 +134,12 @@ export function planLeadTexts(input: {
     alertPhones(input.doctor.leadAlertPhones || []).forEach((phone, index) => {
       drafts.push({
         dedupeKey: phone.e164
-          ? `lead:${input.requestId}:doctor:${phone.e164}`
-          : `lead:${input.requestId}:doctor:invalid:${index}`,
+          ? `${prefix}:${input.requestId}:doctor:${phone.e164}`
+          : `${prefix}:${input.requestId}:doctor:invalid:${index}`,
         kind: 'doctor_new_lead',
         audience: 'doctor',
         e164: phone.e164,
-        body: doctorNewLead({
+        body: officeBody || doctorNewLead({
           patientName: input.patient.name,
           patientPhone: input.patient.phone || '',
           patientEmail: input.patient.email || '',

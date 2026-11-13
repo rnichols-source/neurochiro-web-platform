@@ -22,8 +22,9 @@ function defaultSleep(ms: number): Promise<void> {
 }
 
 async function notify(store: SmsStore, plan: PlannedText, status: string, messageId: string | null, error: string | null): Promise<void> {
+  if (!plan.contactRequestId) return
   const wrote = await store.notify({
-    contact_request_id: plan.requestId,
+    contact_request_id: plan.contactRequestId,
     kind: plan.kind,
     recipient: last4(plan.realPhone) || 'none',
     status,
@@ -87,7 +88,7 @@ async function deliverPlanned(input: {
       dedupe_key: plan.dedupeKey,
       kind: plan.kind,
       audience: plan.audience,
-      contact_request_id: plan.requestId,
+      contact_request_id: plan.contactRequestId,
       doctor_id: plan.doctorId,
       to_phone: plan.toPhone,
       body: plan.body,
@@ -131,6 +132,7 @@ export async function sendLeadTexts(input: {
   fetchImpl?: FetchLike
   sleep?: (ms: number) => Promise<void>
   timeoutMs?: number
+  officeBody?: string | null
 }): Promise<void> {
   try {
     const now = input.now ?? new Date()
@@ -141,6 +143,7 @@ export async function sendLeadTexts(input: {
       patient: input.patient,
       now,
       runtime: input.runtime,
+      officeBody: input.officeBody,
     })
     await deliverPlanned({
       plans,
@@ -185,6 +188,7 @@ export async function releaseHeld(input: {
         kind: row.kind === 'doctor_new_lead' ? 'doctor_new_lead' : 'patient_request_confirm',
         audience: row.audience === 'doctor' ? 'doctor' : 'patient',
         requestId: row.contact_request_id || '',
+        contactRequestId: row.contact_request_id,
         doctorId: row.doctor_id,
         realPhone: row.to_phone,
         toPhone: row.to_phone,

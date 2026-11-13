@@ -48,6 +48,8 @@ export type PlannedText = {
   kind: SmsKind
   audience: SmsAudience
   requestId: string
+  /** Null when this text is not a public contact_requests row. */
+  contactRequestId: string | null
   doctorId: string | null
   realPhone: string | null
   toPhone: string
@@ -81,7 +83,7 @@ export type SmsInsert = {
   dedupe_key: string
   kind: string
   audience: string
-  contact_request_id: string
+  contact_request_id: string | null
   doctor_id: string | null
   to_phone: string
   body: string

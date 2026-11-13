@@ -20,8 +20,9 @@ import {
   type Relationship,
 } from '@/lib/community/logic'
 import { isPlausibleEmail } from '@/lib/leads/validate'
+import { deliverVisitOfficeAlert } from '@/lib/community/visit-delivery'
 
-export type ActionResult = { ok: true; notified?: boolean; claimed?: boolean } | { ok: false; error: string }
+export type ActionResult = { ok: true; notified?: boolean; claimed?: boolean; emailed?: boolean; texted?: boolean; textHeld?: boolean } | { ok: false; error: string }
 
 function fail(error: string): ActionResult {
   return { ok: false, error }
@@ -197,8 +198,14 @@ export async function requestVisit(input: {
     notified = !note.error
   }
 
+  const office = await deliverVisitOfficeAlert({
+    visitId: inserted.data.id,
+    doctorId: doctor.id,
+    share,
+  })
+
   revalidateCommunity()
-  return { ok: true, notified, claimed: Boolean(doctor.user_id) }
+  return { ok: true, notified: notified || office.emailed || office.texted || office.textHeld, claimed: Boolean(doctor.user_id), emailed: office.emailed, texted: office.texted, textHeld: office.textHeld }
 }
 
 export async function markVisitSeen(formData: FormData): Promise<void> {

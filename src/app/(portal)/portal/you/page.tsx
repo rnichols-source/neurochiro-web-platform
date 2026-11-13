@@ -18,7 +18,7 @@ export default async function YouPage() {
       <AccountPanel name={name} email={session.email || ''} />
       <Link href="/portal/privacy" className="mt-4 block rounded-2xl bg-[#fdf1ea] px-3.5 py-3">
         <strong className="mb-1 block font-heading text-[13px] font-bold text-neuro-navy">Privacy</strong>
-        <p className="text-[12.5px] leading-snug text-[#3d4a57]">Choose what a home doctor, your household, or a future passport may see.</p>
+        <p className="text-[12.5px] leading-snug text-[#3d4a57]">Choose what a home doctor, your household, or a passport introduction may see.</p>
       </Link>
     </div>
   )

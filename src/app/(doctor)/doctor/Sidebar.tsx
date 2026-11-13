@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, User, Briefcase, GraduationCap, Calendar,
   MessageSquare, BarChart3, Bell, CreditCard, LogOut, X, Settings, Calculator, TrendingUp, Activity, Receipt, DollarSign, Target, ChevronDown,
-  Lock, ShoppingBag, Shuffle, Award, Users, ShieldCheck, Video,
+  Lock, ShoppingBag, Shuffle, Award, Users, ShieldCheck, Video, Heart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,6 +37,8 @@ const coreNavSections = [
     items: [
       { name: "Patient Leads", href: "/doctor/leads", icon: Target, tier: "pro" as const },
       { name: "Visit requests", href: "/doctor/visit-requests", icon: Calendar },
+      { name: "Care sets", href: "/doctor/care-sets", icon: Activity },
+      { name: "Introductions", href: "/doctor/introductions", icon: Heart },
     ],
   },
   {
@@ -44,6 +46,7 @@ const coreNavSections = [
     items: [
       { name: "The Weekly Adjustment", href: "/doctor/lives", icon: Video },
       { name: "Jobs & Hiring", href: "/doctor/jobs", icon: Briefcase },
+      { name: "Community interest", href: "/doctor/community-interest", icon: Users },
       { name: "ChiroMatch", href: "/doctor/chiromatch", icon: Shuffle, tier: "pro" as const },
       { name: "Students", href: "/doctor/students", icon: GraduationCap, tier: "pro" as const },
       { name: "Seminars", href: "/doctor/seminars", icon: Calendar },
