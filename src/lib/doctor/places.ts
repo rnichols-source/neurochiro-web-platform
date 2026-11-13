@@ -319,6 +319,37 @@ export function buildNextSteps(input: {
   return steps
 }
 
+const CPT_VISIT = /\b(?:New|Established) Patient\b/g
+
+/** Doctor-facing sentences. CPT visit names such as "New Patient" stay, because those are the code titles. */
+export function visibleCommunityCopy(text: string, keepCptVisits = true): string {
+  const held: string[] = []
+  const source = keepCptVisits
+    ? text.replace(CPT_VISIT, (match) => {
+      held.push(match)
+      return `\u0000${held.length - 1}\u0000`
+    })
+    : text.replace(/\bNew Patient\b/g, 'New community member')
+  const replaced = source
+    .replace(/\bPatients'\b/g, "Community members'")
+    .replace(/\bpatients'\b/g, "community members'")
+    .replace(/\bPatient's\b/g, "Community member's")
+    .replace(/\bpatient's\b/g, "community member's")
+    .replace(/\bPatients\b/g, 'Community members')
+    .replace(/\bpatients\b/g, 'community members')
+    .replace(/\bPatient\b/g, 'Community member')
+    .replace(/\bpatient\b/g, 'community member')
+  return replaced.replace(/\u0000(\d+)\u0000/g, (_match, index) => held[Number(index)] ?? '')
+}
+
+const BILLING_FORM_TYPES = new Set(['script', 'letter', 'template', 'checklist'])
+
+export function billingGuideCopy(type: string, text: string, field: 'title' | 'content' | 'description'): string {
+  if (field === 'content' && BILLING_FORM_TYPES.has(type)) return text
+  const keepCpt = field !== 'description' && (type === 'code' || type === 'modifier' || type === 'payer' || /^E\/M /.test(text))
+  return visibleCommunityCopy(text, keepCpt)
+}
+
 export function communityMemberCopy(error: string): string {
   return error
     .replace(/Patient consent is required\./g, 'Consent is required.')

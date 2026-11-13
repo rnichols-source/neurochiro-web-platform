@@ -77,7 +77,7 @@ export function PeopleDesk({ waiting, members, ready }: { waiting: PersonCard[];
             </div>
           </article>
         ) : (
-          <EmptyNote title="Pick someone" sentence="The list on the left is everyone waiting, and the people who chose your office." />
+          <EmptyNote title="Pick someone" sentence="Everyone waiting is listed here, along with the people who chose your office." />
         )}
       </div>
     </div>

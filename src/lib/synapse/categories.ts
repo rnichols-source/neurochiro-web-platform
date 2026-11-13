@@ -13,7 +13,7 @@ export const SYNAPSE_CATEGORIES: SynapseCategory[] = [
   { key: 'instruments', label: 'Adjusting Instruments', class: 'core', aliases: [] },
   { key: 'supplements', label: 'Professional Supplements', class: 'core', aliases: ['Supplements', 'Supplements & Nutrition'] },
   { key: 'software', label: 'Practice Software & EHR', class: 'core', aliases: ['EHR & Software', 'Practice Management Software'] },
-  { key: 'patient-engagement', label: 'Patient Engagement', class: 'standard', aliases: ['Patient Engagement'] },
+  { key: 'patient-engagement', label: 'Community member engagement', class: 'standard', aliases: ['Patient Engagement', 'Community member engagement'] },
   { key: 'marketing', label: 'Marketing & Branding', class: 'standard', aliases: ['Marketing', 'Marketing & Branding'] },
   { key: 'education', label: 'Education & Coaching', class: 'standard', aliases: ['Education & Coaching', 'Education & Training'] },
   { key: 'billing', label: 'Billing & Collections', class: 'standard', aliases: ['Billing & Collections', 'Billing & Insurance'] },

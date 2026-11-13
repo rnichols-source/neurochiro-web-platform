@@ -480,7 +480,6 @@ function ProfileEditor() {
             </div>
           )}
 
-          <StudentOptIn />
           <div className="sticky top-0 z-30 -mx-[18px] mb-4 bg-[#F5F3EF] px-[18px] py-2 lg:-mx-10 lg:px-10">
             <div role="tablist" aria-label="Profile sections" className="flex gap-1 overflow-x-auto rounded-2xl bg-white p-1">
               {TABS.map((item) => {
@@ -917,7 +916,8 @@ function ProfileEditor() {
             </div>
           </form>
 
-          <div className="mt-8">
+          <div className="mt-8 space-y-4">
+            <StudentOptIn />
             <VerifiedBadge
               doctorSlug={profile?.slug || ""}
               doctorName={profile?.first_name && profile?.last_name ? `Dr. ${profile.first_name} ${profile.last_name}` : ""}

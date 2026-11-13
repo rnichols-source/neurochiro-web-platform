@@ -8,8 +8,10 @@ import {
   doctorNavId,
   DOCTOR_TOOL_LINKS,
   mobileClicks,
+  billingGuideCopy,
   profileChecklist,
   usesOwnChrome,
+  visibleCommunityCopy,
 } from './places.ts'
 
 test('nav keeps today, people, care, network, and practice apart', () => {
@@ -153,6 +155,15 @@ test('the next step is the profile until it is finished or skipped', () => {
     unread: 0,
   })
   assert.equal(clear[0].id, 'clear')
+})
+
+test('billing guide copy says community member and leaves the forms and CPT visit names', () => {
+  assert.equal(visibleCommunityCopy('Patients drop their city.'), 'Community members drop their city.')
+  assert.equal(visibleCommunityCopy('E/M New Patient Level 2'), 'E/M New Patient Level 2')
+  assert.equal(billingGuideCopy('letter', 'The patient presented on Monday.', 'content'), 'The patient presented on Monday.')
+  assert.equal(billingGuideCopy('code', 'Do NOT use for new patients.', 'content'), 'Do NOT use for new community members.')
+  assert.equal(billingGuideCopy('code', 'CPT 99202 -- Office Visit, New Patient, Level 2', 'content').includes('New Patient'), true)
+  assert.equal(billingGuideCopy('script', 'New Patient Verification Call Script', 'title'), 'New community member Verification Call Script')
 })
 
 test('referral errors say community member', () => {
