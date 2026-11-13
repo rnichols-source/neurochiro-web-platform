@@ -33,6 +33,10 @@ export function Inbox(props: {
     const role = ROLE[props.tab];
     return !role || item.otherUser.role === role;
   });
+  const countFor = (tab: InboxTab) => props.items.filter((item) => {
+    const role = ROLE[tab];
+    return !role || item.otherUser.role === role;
+  }).length;
 
   return (
     <div className="flex h-full min-h-0 w-full shrink-0 flex-col border-r border-[#E7E2D8] bg-white md:w-80">
@@ -54,7 +58,7 @@ export function Inbox(props: {
         <div className="flex gap-1 flex-wrap">
           {TABS.map((tab) => (
             <button key={tab} type="button" onClick={() => props.onTab(tab)} className={`min-h-11 rounded-full px-3 text-sm font-bold ${props.tab === tab ? 'bg-[#1E2D3B] text-white' : 'bg-[#F5F3EF] text-[#5b6773]'}`}>
-              {tab}
+              {tab} {countFor(tab)}
             </button>
           ))}
         </div>
@@ -69,17 +73,19 @@ export function Inbox(props: {
             <button type="button" onClick={props.onCompose} className="mt-3 min-h-11 px-4 rounded-full bg-portal-accent text-white text-sm font-bold">Start a conversation</button>
           </div>
         ) : visible.map((item) => (
-          <button key={item.id} type="button" onClick={() => props.onSelect(item)} className={`w-full min-h-11 px-4 py-3 flex items-center gap-3 text-left border-l-4 ${props.selectedId === item.id ? 'bg-portal-accent-50 border-portal-accent' : 'border-transparent'}`}>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className={`truncate text-sm ${item.unreadCount > 0 ? 'font-bold text-portal-ink' : 'text-portal-ink'}`}>{item.otherUser.full_name || 'Former member'}</span>
-                {item.unreadCount > 0 ? <span className="text-xs font-bold text-portal-accent">{item.unreadCount}</span> : null}
-              </div>
-              <p className="text-xs text-portal-muted truncate">
-                {item.contextType === 'referral' ? 'Referral · ' : ''}
-                {item.lastMessagePreview || 'No messages yet'}
-              </p>
-            </div>
+          <button key={item.id} type="button" onClick={() => props.onSelect(item)} className={`m-2 flex min-h-[72px] w-[calc(100%-1rem)] items-center gap-3 rounded-2xl px-3 py-3 text-left ${props.selectedId === item.id ? 'bg-[#E5E9EE] outline outline-2 outline-[#1E2D3B]' : 'bg-[#F7F6F3]'}`}>
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#1E2D3B] text-[13px] font-extrabold text-white">{(item.otherUser.full_name || 'NC').slice(0, 2).toUpperCase()}</span>
+            <span className="min-w-0 flex-1">
+              <span className="flex items-center justify-between gap-2">
+                <span className={`truncate text-sm ${item.unreadCount > 0 ? 'font-extrabold text-[#15202B]' : 'font-bold text-[#15202B]'}`}>{item.otherUser.full_name || 'Former member'}</span>
+                <span className="shrink-0 text-[11px] text-[#6b7785]">{item.last_message_at ? new Date(item.last_message_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''}</span>
+              </span>
+              <span className="mt-1 flex items-center gap-2">
+                <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold text-[#1E2D3B]">{item.otherUser.role === 'patient' ? 'Community member' : item.otherUser.role || 'Member'}</span>
+                {item.contextType === 'referral' ? <span className="rounded-full bg-[#EFE5F5] px-2 py-0.5 text-[11px] font-bold text-[#5C3473]">About your referral</span> : null}
+              </span>
+              <span className="mt-1 block truncate text-xs text-[#5b6773]">{item.lastMessagePreview || 'No messages yet'}</span>
+            </span>
           </button>
         ))}
         {props.messageHits.length > 0 ? (

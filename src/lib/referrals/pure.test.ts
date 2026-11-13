@@ -9,6 +9,7 @@ import {
   interpretLocation,
   isOpenDuplicate,
   looksLikePostal,
+  nameMatchSkipsPlace,
   nameNeedles,
   searchCountryForQuery,
   planReminders,
@@ -19,6 +20,16 @@ import {
   validPhone,
   validateReferralDraft,
 } from './pure.ts';
+
+test('a person or clinic name is not sent to the map, and a city still is', () => {
+  const bruni = { firstName: 'Leanne', lastName: 'Bruni', clinicName: 'Whitby Chiropractic' }
+  assert.equal(nameMatchSkipsPlace('Bruni', [bruni]), true)
+  assert.equal(nameMatchSkipsPlace('Leanne Bruni', [bruni]), true)
+  assert.equal(nameMatchSkipsPlace('Whitby Chiropractic', [bruni]), true)
+  assert.equal(nameMatchSkipsPlace('Sydney', [bruni]), false)
+  assert.equal(nameMatchSkipsPlace('London', [{ firstName: 'London', lastName: 'Smith', clinicName: null }]), false)
+  assert.equal(nameMatchSkipsPlace('Toronto', [{ firstName: 'Ada', lastName: 'Toronto', clinicName: null }]), false)
+})
 
 test('Austin, TX stays in Texas and a bare Austin is a choice', () => {
   const exact = interpretLocation({

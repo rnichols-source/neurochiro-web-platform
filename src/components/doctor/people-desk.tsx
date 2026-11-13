@@ -18,6 +18,28 @@ const FILTERS = [
 
 type FilterId = (typeof FILTERS)[number]['id']
 
+function friendlyStatus(status: string) {
+  const labels: Record<string, string> = {
+    active: 'Care set sent',
+    home: 'Your community member',
+    new: 'New',
+    contacted: 'Contacted',
+    scheduled: 'Booked',
+    converted: 'Booked',
+    requested: 'New request',
+    sent: 'Sent',
+    pending: 'Sent',
+    viewed: 'Seen',
+    accepted: 'Accepted',
+    declined: 'Declined',
+  }
+  return labels[status] || status.replace(/_/g, ' ')
+}
+
+function personKey(row: PersonCard) {
+  return (row.profileId || row.name || row.id).trim().toLowerCase()
+}
+
 function matches(row: PersonCard, filter: FilterId) {
   if (filter === 'all') return true
   if (filter === 'requests') return row.kind === 'visit' || row.kind === 'request' || row.kind === 'member'
@@ -29,7 +51,25 @@ function matches(row: PersonCard, filter: FilterId) {
 export function PeopleDesk({ people, ready, initialFilter }: { people: PersonCard[]; ready: boolean; initialFilter?: string }) {
   const starting = FILTERS.some((item) => item.id === initialFilter) ? initialFilter as FilterId : 'all'
   const [filter, setFilter] = useState<FilterId>(starting)
-  const rows = useMemo(() => people.filter((row) => matches(row, filter)), [people, filter])
+  const grouped = useMemo(() => {
+    const order: PersonCard[] = []
+    const byPerson = new Map<string, PersonCard & { history: string[] }>()
+    for (const row of people.filter((item) => matches(item, filter))) {
+      const key = personKey(row)
+      const existing = byPerson.get(key)
+      const line = `${friendlyStatus(row.status)} · ${row.detail}`
+      if (!existing) {
+        const next = { ...row, status: friendlyStatus(row.status), rawStatus: row.status, history: [line] }
+        byPerson.set(key, next)
+        order.push(next)
+      } else {
+        existing.history.push(line)
+        existing.detail = `${existing.history.length} updates`
+      }
+    }
+    return order.map((row) => byPerson.get(personKey(row)) || row)
+  }, [people, filter])
+  const rows = grouped
   const [selectedId, setSelectedId] = useState(rows[0]?.id || '')
   const selected = rows.find((row) => row.id === selectedId) || rows[0] || null
   const [pending, start] = useTransition()
@@ -82,6 +122,11 @@ export function PeopleDesk({ people, ready, initialFilter }: { people: PersonCar
             <p className="mt-1 text-[14px] text-[#5b6773]">{selected.detail}</p>
             <p className="mt-2 text-[13px] font-bold text-[#15202B]">Status: {selected.status}</p>
             {selected.note ? <p className="mt-4 rounded-2xl bg-[#F5F3EF] px-4 py-3 text-[15px] text-[#3d4a57]">{selected.note}</p> : null}
+            {'history' in selected && Array.isArray((selected as { history?: string[] }).history) ? (
+              <ul className="mt-4 space-y-1">
+                {((selected as { history: string[] }).history).map((line) => <li key={line} className="text-[13px] text-[#5b6773]">{line}</li>)}
+              </ul>
+            ) : null}
             <div className="mt-5 flex flex-wrap gap-2">
               {selected.profileId ? (
                 <Link href={`/doctor/messages?to=${selected.profileId}`} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#2C6BB4] px-5 text-[15px] font-extrabold text-white">Message</Link>
@@ -95,7 +140,7 @@ export function PeopleDesk({ people, ready, initialFilter }: { people: PersonCar
               {selected.leadId ? (
                 <button type="button" disabled={pending} onClick={() => start(async () => { const result = await updateLeadStage(selected.leadId || '', 'contacted', selected.leadType); setNote(result?.error || 'Marked contacted.') })} className="dp-ui inline-flex h-[52px] items-center rounded-2xl border border-[#D7DEE6] bg-white px-5 text-[15px] font-extrabold text-[#3d4a57]">Mark contacted</button>
               ) : null}
-              {selected.kind === 'visit' && selected.status === 'requested' ? (
+              {selected.kind === 'visit' && (selected as { rawStatus?: string }).rawStatus === 'requested' ? (
                 <form action={markVisitSeen}>
                   <input type="hidden" name="id" value={selected.id} />
                   <button type="submit" className="dp-ui inline-flex h-[52px] items-center rounded-2xl border border-[#D7DEE6] bg-white px-5 text-[15px] font-extrabold text-[#3d4a57]">Mark seen</button>

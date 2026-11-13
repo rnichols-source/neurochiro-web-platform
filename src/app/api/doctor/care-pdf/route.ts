@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { NextResponse } from 'next/server'
 import { getPortalContext } from '@/lib/portal/context'
 import { libraryPlans } from '@/lib/community/library-content'
@@ -12,25 +14,19 @@ export async function GET(request: Request) {
   const slug = new URL(request.url).searchParams.get('slug') || ''
   const plan = planBySlug(libraryPlans(), slug)
   if (!plan) return NextResponse.json({ error: 'That care set was not found.' }, { status: 404 })
-  const doctor = [ctx.doctor.clinic_name, ctx.fullName].filter(Boolean).join(' · ')
-  const lines = [
-    'NeuroChiro',
-    plan.name,
-    doctor || 'Your doctor',
-    plan.objective,
-    '',
-  ]
-  plan.phases.forEach((phase) => {
-    lines.push(phase.name)
-    phase.exercises.forEach((exercise, index) => {
-      lines.push(`${index + 1}. ${exercise.name}`)
-      if (exercise.rx) lines.push(`   ${exercise.rx}`)
-      if (exercise.description) lines.push(`   ${exercise.description}`)
-    })
-    lines.push('')
+  const logo = await readFile(path.join(process.cwd(), 'public/logo-white.png')).catch(() => undefined)
+  const pdf = await careSetPdf({
+    doctorName: ctx.fullName || 'Your doctor',
+    clinicName: ctx.doctor.clinic_name || '',
+    title: plan.name,
+    objective: plan.objective,
+    logoPng: logo,
+    exercises: plan.phases.flatMap((phase) => phase.exercises.map((exercise) => ({
+      phase: phase.name,
+      name: exercise.name,
+      steps: [exercise.rx, exercise.description].filter(Boolean),
+    }))),
   })
-  lines.push('neurochiro.co')
-  const pdf = careSetPdf(lines)
   return new NextResponse(Buffer.from(pdf), {
     headers: {
       'Content-Type': 'application/pdf',

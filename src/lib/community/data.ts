@@ -1,5 +1,7 @@
 import 'server-only'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
+import { loginPathWithReturn } from '@/lib/auth/safe-return-path'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import {
@@ -57,6 +59,33 @@ export type CommunitySnapshot = {
 
 type DbError = { message?: string; code?: string } | null
 
+async function claimPendingCareInvites(userId: string, email: string | null) {
+  if (!email) return
+  const admin = createAdminClient() as any
+  const invites = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note').ilike('email', email).is('claimed_profile_id', null)
+  if (invites.error || !invites.data?.length) return
+  const home = await admin.from('community_home_doctors').select('doctor_id').eq('profile_id', userId).maybeSingle()
+  let homeDoctor = home.data?.doctor_id || null
+  for (const invite of invites.data) {
+    const existing = await admin.from('community_exercise_assignments').select('id').eq('profile_id', userId).eq('library_plan_slug', invite.plan_slug).eq('status', 'active').maybeSingle()
+    if (!existing.data?.id) {
+      await admin.from('community_exercise_assignments').insert({
+        profile_id: userId,
+        set_id: null,
+        library_plan_slug: invite.plan_slug,
+        doctor_id: invite.doctor_id,
+        doctor_note: invite.note,
+        status: 'active',
+      })
+    }
+    if (!homeDoctor) {
+      const inserted = await admin.from('community_home_doctors').insert({ profile_id: userId, doctor_id: invite.doctor_id }).select('doctor_id').maybeSingle()
+      homeDoctor = inserted.data?.doctor_id || invite.doctor_id
+    }
+    await admin.from('community_doctor_care_invites').update({ claimed_profile_id: userId, claimed_at: new Date().toISOString() }).eq('id', invite.id)
+  }
+}
+
 function missingRelation(error: DbError): boolean {
   if (!error) return false
   const message = error.message || ''
@@ -66,13 +95,19 @@ function missingRelation(error: DbError): boolean {
 export async function requireCommunityMember(): Promise<CommunitySession> {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) {
+    const headerStore = await headers()
+    const path = `${headerStore.get('x-pathname') || '/portal'}${headerStore.get('x-search') || ''}`
+    redirect(loginPathWithReturn(path))
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
     .select('full_name, role')
     .eq('id', user.id)
     .maybeSingle()
+
+  await claimPendingCareInvites(user.id, user.email || null)
 
   const role = profile?.role || ''
   if (!isStoredCommunityRole(role)) {

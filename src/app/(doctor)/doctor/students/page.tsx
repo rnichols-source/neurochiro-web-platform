@@ -33,7 +33,7 @@ function StudentsContent() {
           id: s.id,
           user_id: s.user_id || s.id,
           name: s.name || s.full_name || "Student",
-          school: s.school || "",
+          school: /grandfathered \(pre-verification\)/i.test(s.school || "") ? "" : (s.school || ""),
           gradYear: s.graduation_year ? String(s.graduation_year) : "",
           interests: s.interests || [],
           location: s.location_city || "",
@@ -51,7 +51,7 @@ function StudentsContent() {
   return (
     <div className="space-y-6">
       <HiringTabs />
-      <PageHeader title="Students" description="Browse students looking for a practice." primary={{ label: "Post a job", href: "/doctor/jobs" }} />
+      <PageHeader title="Students" description="Browse students looking for a practice." />
 
       {/* Search + Filters */}
       <div className="space-y-3">

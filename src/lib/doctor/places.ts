@@ -80,6 +80,8 @@ export const PARKED_TOOL_PREFIXES = [
   '/doctor/match',
   '/doctor/jobs',
   '/doctor/seminars',
+  '/doctor/lives',
+  '/doctor/marketplace',
 ] as const
 
 const ONE_CLICK_DESKTOP = new Set<string>([

@@ -134,6 +134,13 @@ export async function sendCareSetInvite(input: { email: string; slug: string; no
 }
 
 export async function claimCareSetInvite(token: string): Promise<Result> {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    const { loginPathWithReturn } = await import('@/lib/auth/safe-return-path')
+    const { redirect } = await import('next/navigation')
+    redirect(loginPathWithReturn(`/portal/care/from-doctor?token=${encodeURIComponent(token)}`))
+  }
   const session = await requireCommunityMember()
   const admin = createAdminClient() as any
   const invite = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note, claimed_profile_id, email').eq('token', token).maybeSingle()
@@ -145,16 +152,22 @@ export async function claimCareSetInvite(token: string): Promise<Result> {
     return fail('Sign in with the email address this invite was sent to.')
   }
   if (!invite.data.claimed_profile_id) {
-    const assignment = await admin.from('community_exercise_assignments').insert({
-      profile_id: session.userId,
-      set_id: null,
-      library_plan_slug: invite.data.plan_slug,
-      doctor_id: invite.data.doctor_id,
-      doctor_note: invite.data.note,
-      status: 'active',
-    }).select('id').maybeSingle()
-    if (!assignment.data?.id) return fail('We could not add that care set to your account.')
-    await admin.from('community_home_doctors').upsert({ profile_id: session.userId, doctor_id: invite.data.doctor_id }, { onConflict: 'profile_id' })
+    const existing = await admin.from('community_exercise_assignments').select('id').eq('profile_id', session.userId).eq('library_plan_slug', invite.data.plan_slug).eq('status', 'active').maybeSingle()
+    if (!existing.data?.id) {
+      const assignment = await admin.from('community_exercise_assignments').insert({
+        profile_id: session.userId,
+        set_id: null,
+        library_plan_slug: invite.data.plan_slug,
+        doctor_id: invite.data.doctor_id,
+        doctor_note: invite.data.note,
+        status: 'active',
+      }).select('id').maybeSingle()
+      if (!assignment.data?.id && !existing.data?.id) return fail('We could not add that care set to your account.')
+    }
+    const home = await admin.from('community_home_doctors').select('doctor_id').eq('profile_id', session.userId).maybeSingle()
+    if (!home.data?.doctor_id) {
+      await admin.from('community_home_doctors').insert({ profile_id: session.userId, doctor_id: invite.data.doctor_id })
+    }
     await admin.from('community_doctor_care_invites').update({ claimed_profile_id: session.userId, claimed_at: new Date().toISOString() }).eq('id', invite.data.id)
   }
   refresh()

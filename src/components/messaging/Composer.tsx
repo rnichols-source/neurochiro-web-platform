@@ -50,10 +50,10 @@ export function Composer(props: {
             }
           }}
           placeholder="Type a message"
-          className="flex-1 bg-portal-surface border border-portal-border rounded-xl px-4 py-3 text-base text-portal-ink resize-none"
+          className="flex-1 resize-none rounded-2xl border border-[#E7E2D8] bg-[#F5F3EF] px-4 py-3 text-base text-[#15202B]"
           style={{ fontSize: 16 }}
         />
-        <button type="button" onClick={props.onSend} disabled={props.sending || !props.value.trim()} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-xl text-white bg-portal-accent disabled:opacity-40" aria-label="Send message" title="Send message" data-send>
+        <button type="button" onClick={props.onSend} disabled={props.sending || !props.value.trim()} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl bg-[#1E2D3B] text-white disabled:opacity-40" aria-label="Send message" title="Send message" data-send>
           <Send className="w-4 h-4" />
         </button>
       </div>

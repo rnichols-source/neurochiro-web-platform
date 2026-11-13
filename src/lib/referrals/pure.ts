@@ -214,6 +214,31 @@ export function validEmail(email: string | null | undefined): string | null {
   return trimmed;
 }
 
+const ALWAYS_A_PLACE = new Set([
+  'sydney', 'melbourne', 'brisbane', 'perth', 'adelaide', 'london', 'toronto', 'vancouver',
+  'montreal', 'calgary', 'ottawa', 'auckland', 'wellington', 'dublin', 'paris', 'berlin',
+])
+
+/** A person or clinic hit is the result. A city name still goes to the map. */
+export function nameMatchSkipsPlace(
+  query: string,
+  rows: { firstName: string; lastName: string; clinicName: string | null }[],
+): boolean {
+  const q = query.trim().toLowerCase().replace(/^dr\s+/, '')
+  if (!q || !rows.length || ALWAYS_A_PLACE.has(q)) return false
+  const parts = q.split(/\s+/).filter(Boolean)
+  if (parts.length >= 2) {
+    const first = parts[0]
+    const last = parts[parts.length - 1]
+    return rows.some((row) => {
+      const clinic = (row.clinicName || '').toLowerCase()
+      const person = row.firstName.toLowerCase().includes(first) && row.lastName.toLowerCase().includes(last)
+      return person || clinic.includes(q)
+    })
+  }
+  return rows.some((row) => row.lastName.toLowerCase() === q || row.firstName.toLowerCase() === q)
+}
+
 export function nameNeedles(query: string): { full: string; first?: string; last?: string } {
   const cleaned = query.replace(/[%_,().:*\\"]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
   const withoutTitle = cleaned.replace(/^dr\s+/i, '');

@@ -73,7 +73,7 @@ export function PracticeView({
       <Link href="/doctor/coming-soon" className="flex items-center justify-between rounded-[20px] border border-dashed border-[#E3C27A] bg-[#FFF8F1] px-4 py-4">
         <span>
           <span className="dp-ui block text-[16px] font-extrabold text-[#B4501A]">Coming soon</span>
-          <span className="text-[13px] text-[#5b6773]">Synapse, the Network feed, and shadow requests</span>
+          <span className="text-[13px] text-[#5b6773]">ChiroMatch, hiring, seminars, CE, and screening kits</span>
         </span>
         <span aria-hidden="true">›</span>
       </Link>

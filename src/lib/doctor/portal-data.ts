@@ -1,6 +1,7 @@
 import 'server-only'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { LIBRARY_PLAN_COUNT } from '@/lib/community/library-model'
+import { LIBRARY_PLAN_COUNT, planBySlug } from '@/lib/community/library-model'
+import { libraryPlans } from '@/lib/community/library-content'
 import { loadHomeDoctorMembers, schemaNotReady } from '@/lib/community/phase-data'
 import { weekStartKey } from '@/lib/community/phases'
 import { getDoctorTimezone } from '@/lib/doctor-timezone'
@@ -271,7 +272,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     id: `care-${row.id}`,
     profileId: row.profile_id,
     name: careNames.get(String(row.profile_id)) || 'Care set',
-    detail: [row.library_plan_slug, agoLabel(String(row.created_at || ''))].filter(Boolean).join(' · '),
+    detail: [planBySlug(libraryPlans(), String(row.library_plan_slug || ''))?.name || 'Care set', agoLabel(String(row.created_at || ''))].filter(Boolean).join(' · '),
     note: null,
     status: String(row.status || 'active'),
     kind: 'care' as const,

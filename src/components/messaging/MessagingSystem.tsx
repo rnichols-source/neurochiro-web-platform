@@ -386,7 +386,7 @@ export default function MessagingSystem({
           emptyMessage={emptyMessage}
         />
       </div>
-      <div className={showList ? 'hidden md:flex flex-1 min-h-0 flex-col' : 'flex flex-1 min-w-0 min-h-0 flex-col'}>
+      <div className={showList ? 'hidden md:flex md:min-h-0 md:flex-1 md:flex-col' : 'fixed inset-0 z-[80] flex min-h-0 flex-col bg-[#F5F3EF] md:static md:inset-auto md:z-auto md:flex-1 md:bg-transparent'}>
         {selected ? (
           <div className="flex flex-1 flex-col min-w-0">
             <Thread
@@ -408,6 +408,7 @@ export default function MessagingSystem({
               }}
               onRetry={(message) => { void submit(message.client_message_id || undefined); }}
               onRefer={referral && selected.otherUser.role === 'doctor' ? () => referral.openReferral({ userId: selected.otherUser.id }) : undefined}
+              viewerRole={userRole}
               showMenu={showMenu}
               onToggleMenu={() => setShowMenu((value) => !value)}
               muted={muted}
