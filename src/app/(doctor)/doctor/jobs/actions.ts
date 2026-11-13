@@ -183,7 +183,7 @@ export async function createJobPosting(formData: any) {
 
         if (isMatch) {
           try {
-            await supabase.from('notifications').insert({
+            await createAdminClient().from('notifications').insert({
               user_id: s.id,
               title: `New Position: ${jobTitle}`,
               body: `${clinicName} just posted a ${jobTitle} position${matchReason ? ` ${matchReason}` : ''}. Check it out.`,
