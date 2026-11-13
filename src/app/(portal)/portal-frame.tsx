@@ -25,12 +25,14 @@ import {
 } from "lucide-react";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import NotificationBell from "@/components/layout/NotificationBell";
+import CommunityShell from "@/components/community/shell";
+import { isCommunityPath } from "@/lib/community/logic";
 
 const navSections = [
   {
     label: "Health",
     items: [
-      { name: "Dashboard", href: "/portal/dashboard", icon: LayoutDashboard },
+      { name: "Home", href: "/portal", icon: LayoutDashboard },
       { name: "Health Tracker", href: "/portal/track", icon: Activity },
       { name: "My Progress", href: "/portal/journey", icon: TrendingUp },
       { name: "Exercises", href: "/portal/exercises", icon: Dumbbell },
@@ -63,7 +65,7 @@ const navSections = [
 const allNavItems = navSections.flatMap((s) => s.items);
 
 const mobileNavItems = [
-  { name: "Home", href: "/portal/dashboard", icon: LayoutDashboard },
+  { name: "Home", href: "/portal", icon: LayoutDashboard },
   { name: "Check-In", href: "/portal/track", icon: Activity },
   { name: "Search", href: "/directory", icon: Search },
   { name: "Learn", href: "/portal/learn", icon: BookOpen },
@@ -272,9 +274,10 @@ function PortalShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   return (
     <AuthProvider>
-      <PortalShell>{children}</PortalShell>
+      {isCommunityPath(pathname) ? <CommunityShell>{children}</CommunityShell> : <PortalShell>{children}</PortalShell>}
     </AuthProvider>
   );
 }

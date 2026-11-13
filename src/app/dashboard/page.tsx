@@ -46,7 +46,7 @@ export default async function DashboardRedirect() {
     // Free students get dashboard access — no subscription required
     redirect('/student/dashboard');
   }
-  if (role === 'patient') redirect('/portal/dashboard');
+  if (role === 'patient') redirect('/portal');
   if (role === 'vendor') redirect('/vendor/dashboard');
 
   // Fallback

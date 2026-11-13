@@ -17,7 +17,7 @@ export default function PricingShell({
   const pathname = usePathname();
 
   const tabs = [
-    { name: "Patients", href: "/pricing/patients" },
+    { name: "Community", href: "/pricing/patients" },
     { name: "Students", href: "/pricing/students" },
     { name: "Doctors", href: "/pricing/doctors" },
   ];
@@ -31,7 +31,7 @@ export default function PricingShell({
           <span className="text-neuro-orange font-black uppercase tracking-[0.4em] text-xs">Simple, Transparent Pricing</span>
           <h1 className="text-5xl md:text-5xl font-heading font-black text-neuro-navy">Plans That <span className="text-neuro-orange">Grow With You.</span></h1>
           <p className="text-gray-500 text-xl max-w-2xl mx-auto font-medium">
-            Choose the plan that fits your practice. Patients are always free.
+            Choose the plan that fits your practice. Community membership is free.
           </p>
         </div>
 

@@ -8,7 +8,7 @@ import Link from "next/link";
 function SuccessContent() {
   const searchParams = useSearchParams();
   const role = searchParams.get("role") || "doctor";
-  const dashboard = role === "student" ? "/student/dashboard" : role === "patient" ? "/portal/dashboard" : "/doctor/dashboard";
+  const dashboard = role === "student" ? "/student/dashboard" : role === "patient" ? "/portal" : "/doctor/dashboard";
 
   return (
     <div className="min-h-dvh bg-neuro-cream flex items-center justify-center p-6">

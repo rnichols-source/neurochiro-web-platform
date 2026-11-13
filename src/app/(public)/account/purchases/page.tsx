@@ -42,7 +42,7 @@ function getAccessLink(productId: string): { href: string; label: string } | nul
     "content-library": { href: "/doctor/content-library", label: "Open Content Library" },
     "screening-mastery": { href: "/doctor/screenings", label: "Open Screening Kit" },
     // Patient tools
-    "patient-premium": { href: "/portal/dashboard", label: "Go to Patient Portal" },
+    "patient-premium": { href: "/portal", label: "Open Your NeuroChiro" },
     "patient-supplement-guide": { href: "/portal/supplements", label: "Open Supplement Guide" },
     "patient-ns-guide": { href: "/portal/learn", label: "Open Health Guide" },
     "patient-family-guide": { href: "/portal/learn", label: "Open Family Guide" },
@@ -56,7 +56,7 @@ function getAccessLink(productId: string): { href: string; label: string } | nul
   if (productId.startsWith("course-")) return { href: "/student/academy", label: "Go to Academy" };
   if (productId.startsWith("workshop-")) return { href: "/doctor/workshops", label: "Open Workshop Kit" };
   if (productId.startsWith("contract-")) return { href: "/student/contract-lab", label: "Open Contract Lab" };
-  if (productId.startsWith("patient-")) return { href: "/portal/dashboard", label: "Go to Patient Portal" };
+  if (productId.startsWith("patient-")) return { href: "/portal", label: "Open Your NeuroChiro" };
   if (productId.startsWith("weekend-")) return { href: "/account/command-center", label: "Open Command Center" };
 
   return null;

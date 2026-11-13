@@ -71,7 +71,10 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   const storedRole = ((profile as { role?: string | null } | null)?.role ?? '') as string
   let role = storedRole || 'doctor'
 
-  // Patient or a blank role becomes doctor only when this user already has a doctors row.
+  // A community member stays a community member. The stored role is `patient`.
+  // An email that looks like a clinic is not a reason to become a doctor.
+  // A blank role, or a patient row that already owns a doctors record, is the
+  // existing correction for a claimed doctor profile.
   if (storedRole === 'patient' || storedRole === '') {
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const admin = createAdminClient()
@@ -123,7 +126,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     'regional_admin': '/admin/dashboard',
     'doctor': '/doctor/dashboard',
     'student': '/student/dashboard',
-    'patient': '/portal/dashboard',
+    'patient': '/portal',
   }
 
   // Route to the correct dashboard based on role
@@ -262,7 +265,7 @@ export async function createAccountAction(formData: FormData, role: string, _tie
     try {
       const discordUrl = process.env.DISCORD_WEBHOOK_URL;
       if (discordUrl) {
-        const roleLabel = role === 'doctor' ? 'DOCTOR' : role === 'student' ? 'STUDENT' : 'PATIENT';
+        const roleLabel = role === 'doctor' ? 'DOCTOR' : role === 'student' ? 'STUDENT' : 'COMMUNITY MEMBER';
         const approachLabels: Record<string, string> = {
           nervous_system: '🧠 Nervous System Focused',
           structural: '🦴 Structural / Manual',
@@ -272,11 +275,20 @@ export async function createAccountAction(formData: FormData, role: string, _tie
           other: '❓ Other',
         };
         const approachLine = chiropracticApproach ? `\n**Approach:** ${approachLabels[chiropracticApproach] || chiropracticApproach}` : '';
+        const who = cleanDoctorName(name).firstName || (role === 'patient' ? 'New community member' : 'New doctor');
+        const headline = role === 'patient'
+          ? `🆕 **NEW COMMUNITY MEMBER**`
+          : `🆕 **NEW ${roleLabel} SIGNUP${flow ? ' — APPLICATION' : ' — PENDING APPROVAL'}**`;
+        const footer = role === 'patient'
+          ? 'Free community membership. No approval step.'
+          : flow
+            ? 'Review at: https://neurochiro.co/admin/applications'
+            : '⏳ Approve at: https://neurochiro.co/admin/moderation';
         await fetch(discordUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            content: `🆕 **NEW ${roleLabel} SIGNUP${flow ? ' — APPLICATION' : ' — PENDING APPROVAL'}**\n\n**Name:** ${cleanDoctorName(name).firstName || 'New doctor'}${approachLine}\n\n${flow ? 'Review at: https://neurochiro.co/admin/applications' : '⏳ Approve at: https://neurochiro.co/admin/moderation'}`,
+            content: `${headline}\n\n**Name:** ${who}${approachLine}\n\n${footer}`,
           }),
         }).catch(() => {});
       }
