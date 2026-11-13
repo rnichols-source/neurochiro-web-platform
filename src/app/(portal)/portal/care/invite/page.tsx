@@ -20,7 +20,7 @@ export default async function InvitePage() {
 
   return (
     <div>
-      <BackHeading title="Send someone you love" href="/portal/care" />
+      <BackHeading title="Send someone you love" href="/portal/refer" label="Find & Refer" crumb="Find & Refer › Send someone you love" area="refer" />
       <p className="mb-4 text-[13.5px] leading-snug text-[#3d4a57]">A private note for someone you care about, in this city or another country. It is not a post, and it is not a referral contest.</p>
       {!invitations.ready ? (
         <Card>

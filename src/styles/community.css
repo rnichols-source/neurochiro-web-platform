@@ -1,0 +1,15 @@
+/* Your NeuroChiro. Body is Lato. Headings, buttons, and nav labels are Montserrat. */
+.community {
+  font-family: var(--font-lato), system-ui, sans-serif;
+  color: #15202b;
+  background: #f5f3ef;
+}
+
+.community :is(h1, h2, h3, button, .nc-ui) {
+  font-family: var(--font-montserrat), sans-serif;
+}
+
+.community .nc-band {
+  background: linear-gradient(160deg, var(--c), var(--d));
+  color: #fff;
+}

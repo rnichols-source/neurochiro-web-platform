@@ -11,7 +11,7 @@ export default async function FindPage({ searchParams }: { searchParams: Promise
   const params = await searchParams
   return (
     <div>
-      <BackHeading title="Find a doctor" href="/portal/care" />
+      <BackHeading title="Choose a home doctor" href="/portal/care" label="Care" crumb="Care › Choose a home doctor" area="care" />
       <p className="mb-3 text-[13.5px] leading-snug text-[#3d4a57]">Search the same directory as neurochiro.co. Only a listed doctor can be your home doctor.</p>
       <FindDoctor initialQuery={params.q || ''} />
     </div>

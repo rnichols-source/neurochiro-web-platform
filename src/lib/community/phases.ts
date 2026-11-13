@@ -171,6 +171,40 @@ export function weeklyShowLine(now: Date): { dateKey: string; label: string; ton
   return { dateKey: show.dateKey, label: show.label, tonight: show.label.startsWith('Tonight') }
 }
 
+/** Minutes until Thursday 8:00 PM America/New_York. In-app display only. */
+export function showCountdown(now: Date): { days: number; hours: number; minutes: number } {
+  const { dateKey } = nextWeeklyShow(now)
+  const target = wallTimeUtc(dateKey, 20, 0, 'America/New_York')
+  const ms = Math.max(0, target.getTime() - now.getTime())
+  const total = Math.floor(ms / 60000)
+  const days = Math.floor(total / 1440)
+  const hours = Math.floor((total % 1440) / 60)
+  return { days, hours, minutes: total % 60 }
+}
+
+function wallTimeUtc(dateKey: string, hour: number, minute: number, timeZone: string): Date {
+  const [year, month, day] = dateKey.split('-').map(Number)
+  let utc = Date.UTC(year, month - 1, day, hour, minute)
+  const format = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  for (let pass = 0; pass < 4; pass += 1) {
+    const parts = format.formatToParts(new Date(utc))
+    const read = (type: string) => Number(parts.find((part) => part.type === type)?.value)
+    const got = Date.UTC(read('year'), read('month') - 1, read('day'), read('hour'), read('minute'))
+    const want = Date.UTC(year, month - 1, day, hour, minute)
+    if (want === got) break
+    utc += want - got
+  }
+  return new Date(utc)
+}
+
 export function prepareLiveQuestion(raw: string): { body: string } | { error: string } {
   const body = raw.trim().replace(/\s+/g, ' ')
   if (body.length < 8) return { error: 'Write a short question, at least a few words.' }

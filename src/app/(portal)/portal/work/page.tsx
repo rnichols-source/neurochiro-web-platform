@@ -19,7 +19,7 @@ export default async function WorkPage() {
 
   return (
     <div>
-      <BackHeading title="Work in this field" />
+      <BackHeading title="Work in this field" href="/portal/me" label="Me" crumb="Me › Work" area="me" />
       <p className="mb-4 text-[13.5px] leading-snug text-[#3d4a57]">Raise a hand for CA, front desk, or a student path. Offices in the community can see that interest and connect. This is not a job board profile.</p>
       {!work.ready ? (
         <Card>

@@ -22,6 +22,7 @@ import {
   reminderLine,
   validateTripDates,
   weekStartKey,
+  showCountdown,
   weeklyShowLine,
   workConnectNotice,
 } from './phases.ts'
@@ -34,6 +35,10 @@ test('this week starts on Monday in Eastern time', () => {
   const show = weeklyShowLine(now)
   assert.match(show.label, /8 PM ET/)
   assert.equal(show.dateKey, '2026-11-19')
+  const left = showCountdown(now)
+  assert.equal(left.days, 6)
+  assert.equal(left.hours, 10)
+  assert.equal(left.minutes, 0)
 })
 
 test('a live question is short and is not stored as a chart', () => {

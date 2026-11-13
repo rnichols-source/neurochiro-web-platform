@@ -32,6 +32,8 @@ function refresh(extra: string[] = []) {
     '/portal/care',
     '/portal/care/exercises',
     '/portal/care/remedies',
+    '/portal/refer',
+    '/portal/me',
     '/doctor/care-sets',
     ...extra,
   ]) revalidatePath(path)
@@ -87,6 +89,42 @@ export async function assignLibraryPlan(input: { profileId: string; slug: string
     link: '/portal/care/exercises',
   })
   refresh([`/doctor/care-sets/${plan.slug}`])
+  return { ok: true }
+}
+
+export async function markLibraryPhaseDone(assignmentId: string, phaseKey: string): Promise<Result> {
+  const session = await requireCommunityMember()
+  const admin = createAdminClient() as any
+  const owned = await admin
+    .from('community_exercise_assignments')
+    .select('id, library_plan_slug')
+    .eq('id', assignmentId)
+    .eq('profile_id', session.userId)
+    .maybeSingle()
+  if (schemaNotReady(owned.error)) return fail(LIBRARY_COPY.libraryReadyNote)
+  const slug = owned.data?.library_plan_slug as string | undefined
+  if (!owned.data?.id || !slug) return fail('That plan is not on your account.')
+  const plan = planBySlug(libraryPlans(), slug)
+  const phase = plan?.phases.find((item) => item.key === phaseKey)
+  if (!plan || !phase) return fail('That phase is not on this plan.')
+  const stamp = new Date().toISOString()
+  const saved = await admin.from('community_library_exercise_done').upsert(
+    phase.exercises.map((exercise) => ({
+      assignment_id: assignmentId,
+      exercise_key: exercise.key,
+      completed_at: stamp,
+    })),
+    { onConflict: 'assignment_id,exercise_key' },
+  )
+  if (schemaNotReady(saved.error)) return fail(LIBRARY_COPY.libraryReadyNote)
+  const finished = await admin.from('community_library_exercise_done').select('exercise_key').eq('assignment_id', assignmentId)
+  const keys = new Set((finished.data || []).map((row: { exercise_key: string }) => row.exercise_key))
+  const allDone = planExerciseKeys(plan).every((key) => keys.has(key))
+  await admin.from('community_exercise_assignments').update({
+    status: allDone ? 'done' : 'active',
+    updated_at: stamp,
+  }).eq('id', assignmentId).eq('profile_id', session.userId)
+  refresh()
   return { ok: true }
 }
 

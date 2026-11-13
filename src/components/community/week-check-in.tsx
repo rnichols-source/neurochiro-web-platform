@@ -15,15 +15,15 @@ export function WeekCheckIn({ initial }: { initial: Feeling | null }) {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex gap-2">
         {ORDER.map((feeling) => {
           const on = current === feeling
-          const resting = feeling === 'doing_well' ? 'bg-[#e7f6ee] text-[#1f8a4c]' : 'bg-[#f3f0ea] text-neuro-navy'
           return (
             <button
               key={feeling}
               type="button"
               disabled={pending}
+              aria-pressed={on}
               onClick={() => start(async () => {
                 const result = await saveCheckIn(feeling)
                 if (!result.ok) {
@@ -34,16 +34,16 @@ export function WeekCheckIn({ initial }: { initial: Feeling | null }) {
                 setCurrent(feeling)
                 router.refresh()
               })}
-              className={`min-h-11 rounded-full px-3 text-[13px] font-semibold disabled:opacity-60 ${on ? 'bg-[#1f8a4c] text-white' : resting}`}
+              className={`nc-ui min-h-[54px] flex-1 rounded-[14px] border-2 px-1 text-center text-[13.5px] font-extrabold leading-tight disabled:opacity-60 ${on ? 'border-[#7A4A94] bg-[#7A4A94] text-white' : 'border-[#E3D6EB] bg-white text-[#5C3473]'}`}
             >
               {FEELING_LABELS[feeling]}
             </button>
           )
         })}
       </div>
-      {error ? <p className="mt-2 text-[12.5px] text-[#B4501A]" role="alert">{error}</p> : null}
+      {error ? <p className="mt-2 text-[13px] text-[#B4501A]" role="alert">{error}</p> : null}
       {current === 'want_to_talk' ? (
-        <p className="mt-2 text-[12.5px] leading-snug text-[#3d4a57]">This stays on your account. It is not sent to a doctor. A visit request is how you ask the office to reach out.</p>
+        <p className="mt-2 text-[13px] leading-snug text-[#3d4a57]">This stays on your account. It is not sent to a doctor. A visit request is how you ask the office to reach out.</p>
       ) : null}
     </div>
   )
