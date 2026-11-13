@@ -42,7 +42,7 @@ export default function IntentGateway() {
             }`}
           >
             <User className={activeTab === "patient" ? "w-6 h-6" : "w-5 h-5"} />
-            I'm a Patient
+            Community member
           </button>
         </div>
 
@@ -61,7 +61,7 @@ export default function IntentGateway() {
                 className="flex flex-col md:flex-row gap-8 items-center"
               >
                 <div className="flex-1 space-y-4">
-                  <h3 className="text-2xl font-heading font-bold text-neuro-navy">Find relief tailored to your nervous system.</h3>
+                  <h3 className="text-2xl font-heading font-bold text-neuro-navy">Find a nervous system chiropractor. Community membership is free.</h3>
                   <div className="flex gap-3 flex-wrap">
                     {["Migraines", "Anxiety", "Sleep", "Regulation", "Wellness"].map((tag) => (
                       <Link 
@@ -90,6 +90,9 @@ export default function IntentGateway() {
                     className="w-full py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-orange-600 transition-colors shadow-lg shadow-neuro-orange/20"
                    >
                      Find a Chiropractor <ArrowRight className="w-5 h-5" />
+                   </Link>
+                   <Link href="/register?role=patient" className="w-full py-3 text-center text-sm font-bold text-neuro-navy">
+                     Create a free account
                    </Link>
                 </div>
               </motion.div>

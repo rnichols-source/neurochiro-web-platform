@@ -19,10 +19,10 @@ const roleConfig: Record<string, { message: string; action: string; actionHref: 
     dashboard: "/student/dashboard",
   },
   patient: {
-    message: "Let's find you a nervous system specialist.",
-    action: "Find a Doctor",
-    actionHref: "/directory",
-    dashboard: "/portal/dashboard",
+    message: "Your NeuroChiro is ready. Community membership is free.",
+    action: "Open Your NeuroChiro",
+    actionHref: "/portal",
+    dashboard: "/portal",
   },
 };
 

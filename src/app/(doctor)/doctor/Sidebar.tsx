@@ -36,6 +36,7 @@ const coreNavSections = [
     label: "PATIENTS",
     items: [
       { name: "Patient Leads", href: "/doctor/leads", icon: Target, tier: "pro" as const },
+      { name: "Visit requests", href: "/doctor/visit-requests", icon: Calendar },
     ],
   },
   {

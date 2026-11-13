@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { messageThreadUrl, settingsUrl, shouldSendUnreadEmail, unreadEmailHtml } from '@/lib/messaging/email';
 import { getNotificationPrefs } from '@/lib/messaging/prefs';
 import { recordThreadNotification } from '@/lib/messaging/thread-notification';
+import { communityWelcome } from '@/lib/community/logic';
 
 /**
  * LAZY RESEND LOADER
@@ -305,17 +306,23 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
       case 'welcome_email':
         // 🛡️ PHASE 2: In-App Notification
         if (payload.userId) {
+          const community = payload.role === 'patient';
           await insertNotification(
             payload.userId, 
-            'Welcome to NeuroChiro! 🧠', 
-            'Your account is active. Complete your profile to get the most out of the platform.',
+            community ? 'Your NeuroChiro is ready' : 'Welcome to NeuroChiro! 🧠', 
+            community
+              ? 'Community membership is free. You decide what is shared.'
+              : 'Your account is active. Complete your profile to get the most out of the platform.',
             'system',
-            '/settings'
+            community ? '/portal' : '/settings'
           );
         }
 
         // Notify Admins via Discord
-        await sendDiscordNotification(`🆕 New ${payload.role} joined the network: **${payload.name || payload.full_name || 'Anonymous'}** (${payload.email})`);
+        {
+          const joinedAs = payload.role === 'patient' ? 'community member' : payload.role;
+          await sendDiscordNotification(`🆕 New ${joinedAs} joined the network: **${payload.name || payload.full_name || 'Anonymous'}** (${payload.email})`);
+        }
 
         if (emailEnabled && payload.email) {
           if (payload.role === 'doctor') {
@@ -378,22 +385,15 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
             await enqueue('vendor_profile_reminder', payload, 24 * 60); // 24 hours later
             await enqueue('vendor_optimization_tips', payload, 3 * 24 * 60); // 3 days later
           } else if (payload.role === 'patient') {
-            // Patient only — NOT the default fallback for unknown roles
+            // Community member only — stored role stays `patient`. Not the fallback for unknown roles.
+            const welcome = communityWelcome(payload.name || payload.full_name);
             await sendPremiumEmail({
               to: payload.email,
-              subject: 'Your Journey to True Healing Starts Here 🌱',
-              title: 'Account Activated',
-              body: `<h1>Welcome to NeuroChiro, ${payload.name || payload.full_name || 'there'}.</h1>
-                    <p>Understanding your nervous system is the first step to true healing. You now have access to a global network of elite, nervous-system-first chiropractors.</p>
-                    <p>Inside your patient portal, you can:</p>
-                    <ul>
-                      <li>Search the global network for verified specialists near you.</li>
-                      <li>Access educational resources about nervous system regulation.</li>
-                      <li>Track your health journey and clinical progress.</li>
-                    </ul>
-                    <p>Your next step is to find a practitioner who can help you reach your goals.</p>`,
-              ctaText: 'Find a Doctor Now',
-              ctaUrl: 'https://neurochiro.co/directory'
+              subject: welcome.subject,
+              title: welcome.title,
+              body: welcome.html,
+              ctaText: welcome.ctaText,
+              ctaUrl: welcome.ctaUrl,
             });
 
             // Enqueue Patient Onboarding Sequence

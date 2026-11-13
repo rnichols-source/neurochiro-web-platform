@@ -84,7 +84,7 @@ function RegisterForm({ applicationFlow }: { applicationFlow: boolean }) {
 
     // Patient: redirect immediately (free, no verification needed)
     if (role === "patient") {
-      router.push("/portal/dashboard");
+      router.push("/portal");
       return;
     }
 
@@ -130,7 +130,7 @@ function RegisterForm({ applicationFlow }: { applicationFlow: boolean }) {
     <div className="min-h-dvh flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
         <h1 className="text-2xl font-bold text-gray-900 text-center mb-2">
-          {claimId ? "Claim Your Profile" : roleFromUrl ? `Join as a ${role === 'doctor' ? 'Doctor' : role === 'student' ? 'Student' : 'Patient'}` : "Create your account"}
+          {claimId ? "Claim Your Profile" : roleFromUrl ? `Join as a ${role === 'doctor' ? 'Doctor' : role === 'student' ? 'Student' : 'Community member'}` : "Create your account"}
         </h1>
         {claimId ? (
           <p className="text-center text-gray-500 text-sm mb-6">Three fields. Takes 15 seconds. Your profile links automatically.</p>
@@ -168,11 +168,11 @@ function RegisterForm({ applicationFlow }: { applicationFlow: boolean }) {
               </button>
               <button type="button" onClick={() => setRole("patient")}
                 className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "patient" ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/20" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"}`}>
-                👤 Patient
+                Community member
               </button>
             </div>
             {role === "patient" && (
-              <p className="text-xs text-amber-600 mt-2 font-medium">Are you a chiropractor? Select &quot;Doctor&quot; instead to access the full doctor portal.</p>
+              <p className="text-xs text-amber-600 mt-2 font-medium">Community membership is free. Are you a chiropractor? Select &quot;Doctor&quot; instead.</p>
             )}
           </div>
           )}

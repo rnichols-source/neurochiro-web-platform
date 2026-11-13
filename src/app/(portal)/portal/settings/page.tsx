@@ -91,7 +91,7 @@ export default function SettingsPage() {
             <span className="text-sm font-medium text-white" id="patient-email">Loading...</span>
           </div>
         </div>
-        <p className="text-xs text-white/35 mt-3">To update your name or email, contact <a href="mailto:support@neurochirodirectory.com" className="text-[#D66829] hover:underline">support@neurochirodirectory.com</a></p>
+        <p className="text-xs text-white/35 mt-3">To update your name or email, use <a href="https://neurochiro.co/contact" className="text-[#D66829] hover:underline">neurochiro.co/contact</a></p>
       </div>
 
       {/* Notifications */}

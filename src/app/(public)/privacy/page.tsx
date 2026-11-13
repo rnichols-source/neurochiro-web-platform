@@ -20,9 +20,9 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-bold text-neuro-navy mb-3">1. Information We Collect</h2>
               <p className="text-gray-600 mb-3">We collect information you provide directly:</p>
               <ul className="list-disc pl-5 space-y-1 text-gray-600 text-sm">
-                <li><strong>Account information:</strong> Name, email, password, phone number, role (doctor/student/patient)</li>
+                <li><strong>Account information:</strong> Name, email, password, phone number, role (doctor/student/community member)</li>
                 <li><strong>Doctor profiles:</strong> Clinic name, address, specialties, bio, license information, photos</li>
-                <li><strong>Health tracking data:</strong> Daily log entries (energy, pain, sleep levels) submitted by patients</li>
+                <li><strong>Health tracking data:</strong> Daily log entries (energy, pain, sleep levels) submitted by community members</li>
                 <li><strong>Contact form submissions:</strong> Name, email, and message content</li>
                 <li><strong>Payment information:</strong> Processed securely through Stripe. We do not store credit card numbers.</li>
               </ul>
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-xl font-bold text-neuro-navy mb-3">2. How We Use Your Data</h2>
               <ul className="list-disc pl-5 space-y-1 text-gray-600 text-sm">
-                <li>To operate the directory and connect patients with doctors</li>
+                <li>To operate the directory and connect community members with doctors</li>
                 <li>To display doctor profiles publicly in search results</li>
                 <li>To process payments and manage subscriptions</li>
                 <li>To send account-related notifications (email, SMS with consent)</li>
@@ -49,14 +49,14 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-xl font-bold text-neuro-navy mb-3">3. Health Data Protection</h2>
               <p className="text-gray-600 mb-3">
-                NeuroChiro takes the protection of health-related data seriously. Patient daily log data (energy, pain, and sleep tracking) is:
+                NeuroChiro takes the protection of health-related data seriously. Community member daily log data (energy, pain, and sleep tracking) is:
               </p>
               <ul className="list-disc pl-5 space-y-1 text-gray-600 text-sm">
                 <li><strong>Encrypted in transit</strong> using TLS/SSL encryption</li>
                 <li><strong>Stored securely</strong> in our database with row-level security policies</li>
-                <li><strong>Visible only to the patient</strong> who created it &mdash; no doctors, admins, or third parties can access individual patient health logs</li>
+                <li><strong>Visible only to the community member</strong> who created it &mdash; no doctors, admins, or third parties can access individual health logs</li>
                 <li><strong>Never sold</strong> to advertisers, data brokers, or any third party</li>
-                <li><strong>Deletable</strong> at any time by the patient through their account settings</li>
+                <li><strong>Deletable</strong> at any time by the community member through their account settings</li>
               </ul>
               <p className="text-gray-600 mt-3">
                 <strong>HIPAA Compliance Note:</strong> NeuroChiro is a directory and wellness tracking platform, not a healthcare provider. We do not create, receive, or maintain protected health information (PHI) as defined by HIPAA. However, we apply HIPAA-aligned security practices to all health-related data as a matter of principle, including encryption, access controls, and audit logging.
@@ -82,7 +82,7 @@ export default function PrivacyPage() {
                 <li><strong>Active accounts:</strong> Data is retained for as long as your account is active</li>
                 <li><strong>Deleted accounts:</strong> Personal data is removed within 30 days of account deletion</li>
                 <li><strong>Doctor profiles:</strong> Removed from the public directory immediately upon cancellation</li>
-                <li><strong>Health logs:</strong> Deleted when the patient deletes their account or requests deletion</li>
+                <li><strong>Health logs:</strong> Deleted when the community member deletes their account or requests deletion</li>
                 <li><strong>Email leads:</strong> Retained for up to 12 months, then automatically purged</li>
               </ul>
             </div>
