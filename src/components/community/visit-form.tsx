@@ -51,6 +51,7 @@ export function VisitForm({
         event.preventDefault()
         setError(null)
         start(async () => {
+          const params = new URLSearchParams(window.location.search)
           const result = await requestVisit({
             doctorId,
             shareFirstName,
@@ -62,6 +63,10 @@ export function VisitForm({
             phone,
             note,
             preferredWindow: windowChoice,
+            source: params.get('source'),
+            utmSource: params.get('utm_source'),
+            utmCampaign: params.get('utm_campaign'),
+            utmContent: params.get('utm_content'),
           })
           if (!result.ok) {
             setError(result.error)

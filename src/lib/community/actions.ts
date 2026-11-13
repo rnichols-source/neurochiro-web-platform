@@ -139,6 +139,10 @@ export async function requestVisit(input: {
   phone: string
   note: string
   preferredWindow: string
+  source?: string | null
+  utmSource?: string | null
+  utmCampaign?: string | null
+  utmContent?: string | null
 }): Promise<ActionResult> {
   const session = await requireCommunityMember()
   const doctor = await loadListedDoctor(input.doctorId)
@@ -183,6 +187,14 @@ export async function requestVisit(input: {
     status: 'requested',
   }).select('id').maybeSingle()
   if (inserted.error || !inserted.data?.id) return fail('We could not save the visit request.')
+  if (input.source || input.utmSource || input.utmCampaign || input.utmContent) {
+    await admin.from('community_visit_requests').update({
+      source: input.source || null,
+      utm_source: input.utmSource || null,
+      utm_campaign: input.utmCampaign || null,
+      utm_content: input.utmContent || null,
+    }).eq('id', inserted.data.id)
+  }
 
   let notified = false
   if (doctor.user_id) {

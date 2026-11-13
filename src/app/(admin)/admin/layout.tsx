@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { checkAdminAuth } from '@/lib/admin-auth'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { countAttention } from '@/lib/leads/attention-count'
+import { loadShellAlerts } from '@/lib/founder/alerts'
 import { AdminShell } from './admin-shell'
 
 export const dynamic = 'force-dynamic'
@@ -21,19 +21,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq('id', user.id)
     .maybeSingle()
 
-  let leadAttention: number | null = null
-  try {
-    leadAttention = await countAttention()
-  } catch (err) {
-    console.error('admin lead badge', err instanceof Error ? err.name : 'error')
-    leadAttention = null
-  }
-
   const role = profile?.role || ''
   const name = profile?.full_name || user.email || 'Admin'
 
+  const alerts = await loadShellAlerts().catch(() => [])
+
   return (
-    <AdminShell role={role} name={name} leadAttention={leadAttention}>
+    <AdminShell role={role} name={name} alerts={alerts}>
       {children}
     </AdminShell>
   )

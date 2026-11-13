@@ -363,7 +363,7 @@ export default function RecommendationsClient() {
                         <thead>
                           <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Time (ET)</th>
-                            <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Patient City</th>
+                            <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Community member city</th>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>State</th>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Doctor</th>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Doctor City</th>
@@ -398,7 +398,7 @@ export default function RecommendationsClient() {
                         <thead>
                           <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Time (ET)</th>
-                            <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Patient City</th>
+                            <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Community member city</th>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>State</th>
                             <th style={{ textAlign: 'left', padding: '6px 8px', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>Type</th>
                           </tr>

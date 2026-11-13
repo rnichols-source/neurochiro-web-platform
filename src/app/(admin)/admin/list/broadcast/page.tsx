@@ -119,7 +119,7 @@ export default function BroadcastPage() {
             href="/admin/list"
             className="px-6 py-3 bg-white/10 text-white font-bold rounded-xl text-sm hover:bg-white/15 transition-colors"
           >
-            Back to Patient List
+            Back to community member list
           </Link>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function BroadcastPage() {
             <Mail className="w-6 h-6 text-neuro-orange" />
             Compose Broadcast
           </h1>
-          <p className="text-gray-400 text-sm mt-1">Send to the patient email list</p>
+          <p className="text-gray-400 text-sm mt-1">Send to the community member email list</p>
         </div>
       </div>
 

@@ -97,7 +97,7 @@ export default function ReferralsClient({ data }: {
 
         {/* 1.1b — Patient Actions (separate from outreach) */}
         <div>
-          <p className="text-[10px] text-white/30 uppercase font-bold tracking-wider mb-2">Patient Actions</p>
+          <p className="text-[10px] text-white/30 uppercase font-bold tracking-wider mb-2">Community member actions</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             <StatCard label="Appointment Requests" value={stats.appointmentRequests} sub="From the directory" color="text-emerald-400" />
             <StatCard label="Contact Requests" value={stats.contactRequests} sub="Asked to be called" color="text-purple-400" />
@@ -216,7 +216,7 @@ export default function ReferralsClient({ data }: {
                 <option value="doctor_dm">DM</option>
                 <option value="doctor_comment_far">Comment (far)</option>
                 <option value="doctor_dm_far">DM (far)</option>
-                <option value="sent_to_patient">Sent to patient</option>
+                <option value="sent_to_patient">Sent to community member</option>
                 <option value="waitlist_dm">Waitlist DM</option>
                 <option value="waitlist_comment">Waitlist comment</option>
               </select>

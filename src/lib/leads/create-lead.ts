@@ -30,6 +30,9 @@ export type CreateLeadInput = {
   ip?: string | null
   smsConsent?: boolean
   smsPhone?: string | null
+  utmSource?: string | null
+  utmCampaign?: string | null
+  utmContent?: string | null
 }
 
 export type CreateLeadResult = {
@@ -211,6 +214,16 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   if (inserted.error) {
     console.error('[LEADS] contact_requests insert failed, retrying once:', inserted.error.message)
     inserted = await db.from('contact_requests').insert(baseRow).select('id').single()
+  }
+  if (inserted.data?.id && (input.utmSource || input.utmCampaign || input.utmContent)) {
+    const attribution = await db.from('contact_requests').update({
+      utm_source: input.utmSource || null,
+      utm_campaign: input.utmCampaign || null,
+      utm_content: input.utmContent || null,
+    }).eq('id', inserted.data.id)
+    if (attribution.error && !isMissingColumn(attribution.error)) {
+      console.error('[LEADS] utm update failed:', attribution.error.message)
+    }
   }
 
   const mailBase: LeadMail = {

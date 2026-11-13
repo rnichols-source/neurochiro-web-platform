@@ -103,7 +103,7 @@ export default function ContactRequestsPage() {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Patient, doctor, city, state, or ZIP"
+            placeholder="Community member, doctor, city, state, or ZIP"
             className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-normal text-white"
             aria-label="Search contact requests"
           />
@@ -141,14 +141,14 @@ export default function ContactRequestsPage() {
                     <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300">{row.status}</span>
                     {row.needsAttention ? <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> Attention</span> : null}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">{row.source || "unknown source"} · {row.hours_elapsed}h · {row.contact_outcome || "no outcome"}{row.patient_checkin_response ? ` · patient said ${row.patient_checkin_response}` : ""}</p>
+                  <p className="text-xs text-gray-400 mt-1">{row.source || "unknown source"} · {row.hours_elapsed}h · {row.contact_outcome || "no outcome"}{row.patient_checkin_response ? ` · community member said ${row.patient_checkin_response}` : ""}</p>
                 </div>
                 <p className="text-xs text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" /> {formatEt(row.created_at)} ET</p>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-3 mt-3 text-sm">
                 <div>
-                  <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Patient</p>
+                  <p className="text-[10px] font-bold tracking-wide text-gray-500 mb-1">Community member</p>
                   {row.phone ? <a className="flex items-center gap-1 text-neuro-orange font-bold" href={`tel:${row.phone}`}><Phone className="w-3 h-3" /> {row.phone}</a> : <p className="text-gray-500">No phone</p>}
                   {row.email ? <a className="flex items-center gap-1 text-neuro-orange" href={`mailto:${row.email}`}><Mail className="w-3 h-3" /> {row.email}</a> : null}
                   {row.preferred_time ? <p className="text-gray-400 text-xs mt-1">Best time: {row.preferred_time}</p> : null}

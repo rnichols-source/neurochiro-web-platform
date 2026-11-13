@@ -41,7 +41,7 @@ export default async function LeadsPage({
     <div className="space-y-4 px-4 py-6">
       <PageHeader
         title="Leads"
-        description="Requests, the patient waitlist, introductions, matching, and the older captured-leads list."
+        description="Requests, the community-member waitlist, introductions, matching, and the older captured-leads list."
       />
       <Tabs
         active={active}

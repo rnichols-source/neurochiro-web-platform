@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { rateLimit, getIP } from '@/lib/rate-limit'
 import { createLead } from '@/lib/leads/create-lead'
+import { cleanUtm } from '@/lib/founder/format'
 import { requiredPhoneError } from '@/lib/leads/validate'
 
 export const maxDuration = 30
@@ -47,6 +48,9 @@ export async function POST(req: NextRequest) {
     ip,
     smsConsent,
     smsPhone: smsConsent && typeof body.smsPhone === 'string' ? body.smsPhone : null,
+    utmSource: cleanUtm(body.utm_source),
+    utmCampaign: cleanUtm(body.utm_campaign),
+    utmContent: cleanUtm(body.utm_content),
   })
 
   if (!result.ok) {
