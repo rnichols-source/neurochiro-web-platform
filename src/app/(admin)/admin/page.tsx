@@ -58,12 +58,30 @@ async function PulseKpis({ nowIso }: { nowIso: string }) {
 
 async function PayingKpi() {
   const billing = await loadDoctorBilling()
-  return <Kpi label="Paying doctors" value={billing.paying == null ? '—' : formatNumber(billing.paying)} detail="Doctor memberships only" />
+  const customers = billing.payingCustomers == null ? null : formatNumber(billing.payingCustomers)
+  return (
+    <Kpi
+      label="Paying doctors"
+      value={billing.paying == null ? '—' : formatNumber(billing.paying)}
+      detail={billing.stripeOk ? `${customers} customers` : 'Stripe unavailable'}
+      live={billing.stripeOk}
+    />
+  )
 }
 
 async function MrrKpi() {
   const billing = await loadDoctorBilling()
-  return <Kpi label="MRR" value={billing.mrrUsd == null ? '—' : formatMoney(billing.mrrUsd)} detail={billing.stripeOk ? 'Doctor memberships only · $99, $990, CA$139, $199' : 'Stripe unavailable'} />
+  const paying = billing.paying == null ? '—' : formatNumber(billing.paying)
+  const past = billing.pastDueUsd == null ? '—' : formatMoney(billing.pastDueUsd)
+  return (
+    <Kpi
+      label="MRR"
+      value={billing.mrrUsd == null ? '—' : formatMoney(billing.mrrUsd)}
+      detail={billing.stripeOk ? `${paying} paying · ${past} past due` : 'Stripe unavailable'}
+      tag={billing.stripeOk ? 'Live from Stripe' : 'Unavailable'}
+      live={billing.stripeOk}
+    />
+  )
 }
 
 async function PulseBody({ nowIso }: { nowIso: string }) {
@@ -166,13 +184,15 @@ function BodySkeleton() {
   )
 }
 
-function Kpi({ label, value, detail, estimate = false }: { label: string; value: string; detail: string; estimate?: boolean }) {
+function Kpi({ label, value, detail, estimate = false, tag, live = true }: { label: string; value: string; detail: string; estimate?: boolean; tag?: string; live?: boolean }) {
+  const kind = estimate ? 'estimate' : live ? 'live' : 'tracking'
+  const text = estimate ? 'Estimate' : tag || (live ? 'Live data' : 'Unavailable')
   return (
     <div className="rounded-[18px] border-t-[5px] border-[#D66829] bg-white px-4 py-3 text-[#15202B]">
       <p className="fd-ui text-[11px] font-extrabold uppercase tracking-wide text-[#D66829]">{label}</p>
       <p className="fd-ui text-[32px] font-extrabold leading-none">{value}</p>
       <p className="mt-1 text-[13px] text-[#5b6773]">{detail}</p>
-      {estimate ? <Tag kind="estimate">Estimate</Tag> : <Tag kind="live">Live data</Tag>}
+      <Tag kind={kind}>{text}</Tag>
     </div>
   )
 }
