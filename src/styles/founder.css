@@ -1,0 +1,9 @@
+.founder {
+  font-family: var(--font-lato), system-ui, sans-serif;
+  color: #15202b;
+  background: #f5f3ef;
+}
+
+.founder :is(h1, h2, h3, button, .fd-ui) {
+  font-family: var(--font-montserrat), sans-serif;
+}

@@ -92,6 +92,14 @@
     {
       "path": "/api/cron/sms-release",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/founder-monday",
+      "schedule": "0 12 * * 1"
+    },
+    {
+      "path": "/api/cron/founder-followup",
+      "schedule": "30 13 * * *"
     }
   ],
   "redirects": [
