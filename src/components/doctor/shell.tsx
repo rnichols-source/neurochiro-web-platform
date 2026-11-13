@@ -45,7 +45,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
       <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col overflow-hidden border-r border-[#ECE8E1] bg-white px-4 py-6 lg:flex">
         <Link prefetch href="/doctor" className="mb-3 flex items-center gap-2.5 px-2">
           <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#F5F3EF]">
-            <img src="/logo.png" alt="" className="h-[30px] w-[30px] object-contain" />
+            <img src="/logo-mark.png" alt="" className="h-[30px] w-[30px] object-contain" />
           </span>
           <span className="min-w-0">
             <span className="dp-ui block text-[14px] font-extrabold tracking-[0.08em] text-[#15202B]">NEUROCHIRO</span>
