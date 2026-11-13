@@ -22,6 +22,26 @@ interface UserPreferencesContextType {
 
 const EMPTY_SAVED: SavedItems = { doctors: [], jobs: [], vendors: [], seminars: [], articles: [] };
 const LS_KEY = "nc_saved_items";
+const SAVED_KEYS = ["doctors", "jobs", "vendors", "seminars", "articles"] as const;
+
+function stringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function normalizeSaved(value: Partial<SavedItems> | null | undefined): SavedItems {
+  return {
+    doctors: stringList(value?.doctors),
+    jobs: stringList(value?.jobs),
+    vendors: stringList(value?.vendors),
+    seminars: stringList(value?.seminars),
+    articles: stringList(value?.articles),
+  };
+}
+
+function sameSaved(a: SavedItems, b: SavedItems): boolean {
+  return SAVED_KEYS.every((key) => a[key].length === b[key].length && a[key].every((id, index) => id === b[key][index]));
+}
 
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
 
@@ -31,13 +51,14 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loaded = useRef(false);
   const seeded = useRef(false);
-  const skipRemoteWrite = useRef(false);
+  const acknowledged = useRef<SavedItems>(EMPTY_SAVED);
 
   const seedSaved = useCallback((items: SavedItems) => {
+    const next = normalizeSaved(items);
+    acknowledged.current = next;
     seeded.current = true;
     loaded.current = true;
-    skipRemoteWrite.current = true;
-    setSaved({ ...EMPTY_SAVED, ...items });
+    setSaved(next);
   }, []);
 
   // Server layouts seed this before the effect below, so the browser does not
@@ -52,7 +73,11 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
       // Try localStorage first for instant display
       try {
         const local = localStorage.getItem(LS_KEY);
-        if (local) setSaved({ ...EMPTY_SAVED, ...JSON.parse(local) });
+        if (local) {
+          const next = normalizeSaved(JSON.parse(local));
+          acknowledged.current = next;
+          setSaved(next);
+        }
       } catch {}
 
       // Then try Supabase for authoritative data
@@ -67,7 +92,8 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
             .eq('tool', 'saved_items')
             .maybeSingle();
           if (data?.data) {
-            const cloud = { ...EMPTY_SAVED, ...data.data };
+            const cloud = normalizeSaved(data.data);
+            acknowledged.current = cloud;
             setSaved(cloud);
             // Sync cloud to localStorage
             try { localStorage.setItem(LS_KEY, JSON.stringify(cloud)); } catch {}
@@ -85,16 +111,12 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
   // Save to Supabase + localStorage (debounced)
   useEffect(() => {
     if (!loaded.current) return;
-    if (skipRemoteWrite.current) {
-      skipRemoteWrite.current = false;
-      try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
-      return;
-    }
+    if (sameSaved(saved, acknowledged.current)) return;
+    const snapshot = normalizeSaved(saved);
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
-      // localStorage (always)
-      try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
-      // Supabase (if authenticated)
+      acknowledged.current = snapshot;
+      try { localStorage.setItem(LS_KEY, JSON.stringify(snapshot)); } catch {}
       const supabase = createClient();
       supabase.auth.getUser().then(({ data: { user } }) => {
         if (user) {
@@ -103,7 +125,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
             .upsert({
               user_id: user.id,
               tool: 'saved_items',
-              data: saved,
+              data: snapshot,
               updated_at: new Date().toISOString(),
             }, { onConflict: 'user_id,tool' })
             .then(() => {});

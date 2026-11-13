@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import PageHeader from '@/components/portal/PageHeader';
 import StatusPill from '@/components/portal/StatusPill';
-import { getBillingData } from './actions';
+import { getBillingData, invalidateCurrentDoctorStripe } from './actions';
 import { ActivateProButtons, ManageBillingButton } from './BillingButtons';
 import { getPortalContext } from '@/lib/portal/context';
 import { PRO_PRICE_LABEL, type Membership } from '@/lib/portal/membership';
@@ -9,9 +9,10 @@ import { billingView } from '@/lib/portal/billing-view';
 import { redirect } from 'next/navigation';
 import { portalTimer } from '@/lib/portal/timing';
 
-export default async function BillingPage() {
-  const ctx = await getPortalContext();
+export default async function BillingPage({ searchParams }: { searchParams: Promise<{ billing?: string }> }) {
+  const [ctx, params] = await Promise.all([getPortalContext(), searchParams]);
   if (!ctx) redirect('/login');
+  if (params.billing === 'refresh') await invalidateCurrentDoctorStripe();
   return (
     <Suspense fallback={<BillingSkeleton />}>
       <BillingLoaded membership={ctx.membership} />
@@ -32,7 +33,7 @@ async function BillingLoaded({ membership }: { membership: Membership }) {
         ? `Your plan: Pro ${membership.priceLabel || PRO_PRICE_LABEL}. ${membership.status === 'canceled' ? 'Ends' : 'Renews'} ${renews || 'on your Stripe date'}.`
         : view === 'error'
           ? "We couldn't load your billing details right now."
-          : 'Your plan: Free. Activate Pro when you want patients to reach you.';
+          : 'Your plan: Free. Activate Pro when you want community members to reach you.';
   const showStripe = view === 'stripe' || view === 'included_with_stripe';
 
   return (

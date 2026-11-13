@@ -11,6 +11,7 @@ import { noteSynapsePaymentFailed, synapseUpdateShouldLapse } from "@/lib/synaps
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 import { accessForStripeStatus } from "@/lib/portal/membership";
 import { fulfillDoctorApplicationSetup } from "@/lib/applications/fulfill";
+import { invalidateDoctorStripe } from "@/lib/billing/stripe-cache";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
 import {
@@ -266,6 +267,7 @@ export async function POST(req: Request) {
         }
         const userId = session.metadata?.userId;
         const customer = session.customer as string;
+        if (typeof customer === 'string') invalidateDoctorStripe(customer);
 
         if (userId) {
           // Update profile with Stripe customer ID and activate membership
@@ -1163,6 +1165,7 @@ export async function POST(req: Request) {
         if (!skipMembership) {
           await applyMembershipFromSubscription(supabase, subscription);
         }
+        invalidateDoctorStripe(typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id);
 
         Automations.onSubscriptionUpdated(subscription);
         break;
@@ -1179,6 +1182,7 @@ export async function POST(req: Request) {
           break;
         }
         await applyMembershipFromSubscription(supabase, subscription);
+        invalidateDoctorStripe(typeof subscription.customer === 'string' ? subscription.customer : subscription.customer?.id);
 
         Automations.onSubscriptionCanceled(subscription);
         break;

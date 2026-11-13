@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useRef } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 
 type SettingsChrome = {
   email: string
@@ -11,8 +11,8 @@ type SettingsChrome = {
 const SettingsSeedContext = createContext<SettingsChrome | null>(null)
 
 export function SettingsSeed({ email, prefs, blocked, children }: SettingsChrome & { children: React.ReactNode }) {
-  const value = useRef({ email, prefs, blocked })
-  return <SettingsSeedContext.Provider value={value.current}>{children}</SettingsSeedContext.Provider>
+  const value = useMemo(() => ({ email, prefs, blocked }), [email, prefs, blocked])
+  return <SettingsSeedContext.Provider value={value}>{children}</SettingsSeedContext.Provider>
 }
 
 export function useSettingsSeed() {
