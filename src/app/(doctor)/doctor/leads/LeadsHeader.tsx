@@ -15,7 +15,7 @@ export default function LeadsHeader({
 }) {
   return (
     <p className="text-sm text-portal-ink-2 mb-4" title={PATIENT_REQUESTS_HINT} data-patient-requests={total}>
-      This month: {total} patient requests · {fresh} new · {contacted} contacted · {booked} booked
+      This month: {total} community member requests · {fresh} new · {contacted} contacted · {booked} booked
     </p>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { Camera, Loader2, Plus, Trash2 } from "lucide-react";
+import { ProfileStudio } from "@/components/doctor/profile-studio";
+import { HeaderTools } from "@/components/doctor/header-tools";
 import { Suspense, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -408,14 +410,14 @@ function ProfileEditor() {
   const educationLines = asLines(profile?.education);
   const checks = [
     { done: !!profile?.photo_url, label: "Profile photo", why: "Patients look for a face before they call." },
-    { done: !!(profile?.bio && profile.bio.length >= 20) || !!(profile?.short_intro && profile.short_intro.length >= 20), label: "Bio or intro", why: "Tells patients who you are and what you do." },
+    { done: !!(profile?.bio && profile.bio.length >= 20) || !!(profile?.short_intro && profile.short_intro.length >= 20), label: "Bio or intro", why: "Tells community members who you are and what you do." },
     { done: !!profile?.chiropractic_school, label: "Education", why: "Patients want to know where you trained." },
-    { done: (profile?.specialties || []).length > 0, label: "Specialties", why: "Helps patients find you when searching." },
+    { done: (profile?.specialties || []).length > 0, label: "Specialties", why: "Helps community members find you when searching." },
     { done: !!profile?.hours, label: "Office hours", why: "Patients check hours before calling." },
     { done: !!profile?.first_visit_price || !!profile?.payment_model, label: "Cost and insurance", why: "Patients ask this before they book." },
-    { done: !!profile?.phone, label: "Phone number", why: "Many patients prefer to call." },
+    { done: !!profile?.phone, label: "Phone number", why: "Many community members prefer to call." },
     { done: !!profile?.booking_url, label: "Online booking link", why: "Patients who can book online are more likely to show up." },
-    { done: !!profile?.google_reviews_url, label: "Google Reviews link", why: "Reviews help patients decide." },
+    { done: !!profile?.google_reviews_url, label: "Google Reviews link", why: "Reviews help community members decide." },
   ];
   const doneCount = checks.filter((item) => item.done).length;
   const pct = Math.round((doneCount / checks.length) * 100);
@@ -431,8 +433,8 @@ function ProfileEditor() {
 
       <div ref={headerRef} onClickCapture={openLiveProfile}>
         <PageHeader
-          title="Your profile"
-          description="This is what patients see on neurochiro.co."
+          title="All profile fields"
+          description="This is what community members see on neurochiro.co."
           secondary={profile?.slug ? { label: "View live profile", href: `/directory/${profile.slug}` } : undefined}
         />
       </div>
@@ -584,7 +586,7 @@ function ProfileEditor() {
                     <input type="checkbox" name="accepting_new_patients" value="true" defaultChecked={profile?.accepting_new_patients !== false} className="w-5 h-5 accent-[#d66829]" />
                     {/* After the checkbox so FormData.get keeps "true" when it is checked. */}
                     <input type="hidden" name="accepting_new_patients" value="false" />
-                    Accepting new patients
+                    Accepting new community members
                   </label>
                   <label className="flex items-center gap-3 min-h-11 px-3 rounded-lg bg-portal-surface text-base text-portal-ink">
                     <input type="checkbox" name="offers_telehealth" value="true" defaultChecked={profile?.offers_telehealth === true} className="w-5 h-5 accent-[#d66829]" />
@@ -607,7 +609,7 @@ function ProfileEditor() {
 
             <div id="profile-panel-photos" role="tabpanel" aria-labelledby="profile-tab-photos" hidden={tab !== "photos"} className="space-y-4">
               <p className="text-sm text-portal-ink-2">Your profile photo is at the top of this page.</p>
-              <Section title="Intro video" hint="Add a short intro video so patients can meet you before they call.">
+              <Section title="Intro video" hint="Add a short intro video so community members can meet you before they call.">
                 <div id="video">
                   <Label label="Video URL">
                     <input name="video_url" defaultValue={profile?.video_url || ""} placeholder="YouTube or Vimeo link" className={INPUT} />
@@ -655,7 +657,7 @@ function ProfileEditor() {
             </div>
 
             <div id="profile-panel-about" role="tabpanel" aria-labelledby="profile-tab-about" hidden={tab !== "about"} className="space-y-4">
-              <Section title="About you" hint="This is what patients read first. Keep it personal and direct.">
+              <Section title="About you" hint="This is what community members read first. Keep it personal and direct.">
                 <Label label="Short intro" hint="2-3 sentences about you and your practice. No URLs or phone numbers.">
                   <textarea
                     name="short_intro"
@@ -680,7 +682,7 @@ function ProfileEditor() {
                 </Label>
               </Section>
 
-              <Section title="Why patients choose you" hint="One highlight per line.">
+              <Section title="Why community members choose you" hint="One highlight per line.">
                 <textarea name="highlights" defaultValue={(profile?.highlights || []).join("\n")} placeholder={"Board certified\nFamily-friendly office"} rows={4} className={AREA} />
               </Section>
 
@@ -728,7 +730,7 @@ function ProfileEditor() {
                 </button>
               </Section>
 
-              <Section title="How patients see this office" hint="Lead doctor keeps your name as the page title. Practice-first puts the practice name in the title and shows every co-owner equally. Saving will not rename a practice-first URL back to a doctor slug.">
+              <Section title="How community members see this office" hint="Lead doctor keeps your name as the page title. Practice-first puts the practice name in the title and shows every co-owner equally. Saving will not rename a practice-first URL back to a doctor slug.">
                 <input type="hidden" name="listing_format" value={listingFormat} />
                 <input type="hidden" name="co_owners" value={JSON.stringify(coOwners)} />
                 <label className="block text-sm font-bold text-portal-ink">
@@ -832,7 +834,7 @@ function ProfileEditor() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <label className="flex items-center gap-3 min-h-11 text-base text-portal-ink">
                     <input type="checkbox" name="files_insurance" value="true" defaultChecked={profile?.files_insurance} className="w-5 h-5 accent-[#d66829]" />
-                    Files insurance for patients
+                    Files insurance for community members
                   </label>
                   <label className="flex items-center gap-3 min-h-11 text-base text-portal-ink">
                     <input type="checkbox" name="payment_plans" value="true" defaultChecked={profile?.payment_plans} className="w-5 h-5 accent-[#d66829]" />
@@ -881,13 +883,13 @@ function ProfileEditor() {
                 <Label label="Online booking">
                   <input name="booking_url" defaultValue={profile?.booking_url || ""} placeholder="Jane, ChiroTouch, Fresha, or another booking link" className={INPUT} />
                 </Label>
-                <Label label="Google Reviews" hint="Patients trust reviews more than anything else on this page.">
+                <Label label="Google Reviews" hint="Community members trust reviews more than anything else on this page.">
                   <input name="google_reviews_url" defaultValue={profile?.google_reviews_url || ""} placeholder="https://g.page/your-practice/review" className={INPUT} />
                 </Label>
               </Section>
             </div>
 
-            <div className="fixed z-[160] inset-x-0 bottom-[calc(4rem+env(safe-area-inset-bottom,0px))] md:bottom-0 md:left-72 bg-white border-t border-portal-border px-4 py-3 flex items-center justify-between gap-3">
+            <div className="fixed z-[160] inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:bottom-0 lg:left-64 bg-white border-t border-portal-border px-4 py-3 flex items-center justify-between gap-3">
               <p className="text-sm text-portal-ink-2" aria-live="polite">
                 {saveSuccess ? "Saved" : hasUnsavedChanges ? "Unsaved changes" : ""}
               </p>
@@ -909,10 +911,24 @@ function ProfileEditor() {
   );
 }
 
+function ProfileGate() {
+  const full = useSearchParams().get('full') === '1';
+  if (!full) return <ProfileStudio />;
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <a href="/doctor/profile" className="text-sm font-bold text-portal-accent">Back to the simple editor</a>
+        <HeaderTools onDark={false} />
+      </div>
+      <ProfileEditor />
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   return (
     <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="w-8 h-8 text-portal-accent animate-spin" /></div>}>
-      <ProfileEditor />
+      <ProfileGate />
     </Suspense>
   );
 }

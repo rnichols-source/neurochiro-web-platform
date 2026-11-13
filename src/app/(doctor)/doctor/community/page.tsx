@@ -24,9 +24,9 @@ export default function CommunityPage() {
     <div className="space-y-6 max-w-3xl">
       {/* Header */}
       <div>
-        <p className="text-xs tracking-[0.2em] text-neuro-orange font-semibold mb-1">Community</p>
-        <h1 className="text-2xl font-bold text-white">Network Feed</h1>
-        <p className="text-white/40 text-sm mt-1">Announcements, member spotlights, and updates from Dr. Ray.</p>
+        <p className="text-sm font-semibold text-neuro-orange mb-1">Community</p>
+        <h1 className="text-2xl font-bold text-portal-ink">The Network feed</h1>
+        <p className="text-portal-ink-2 text-sm mt-1">Announcements, member spotlights, and updates from Dr. Ray.</p>
       </div>
 
       {/* Network Stats */}

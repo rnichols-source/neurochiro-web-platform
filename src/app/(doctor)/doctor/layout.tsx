@@ -1,11 +1,10 @@
 import { Suspense } from 'react';
-import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
 import { after } from 'next/server';
 import { AuthProvider } from '@/context/AuthContext';
-import PortalShell from '@/components/portal/PortalShell';
+import DoctorShell from '@/components/doctor/shell';
 import ReferralProvider from '@/components/portal/ReferralProvider';
 import OnboardingGate from '@/components/portal/OnboardingGate';
 import { PortalProvider } from '@/components/portal/PortalProvider';
@@ -18,10 +17,9 @@ import { isApplicationFlowEnabled } from '@/lib/applications/flag';
 import { loadApplicationGate } from '@/lib/applications/gate';
 import { lookupStaffOffice } from './kpi/actions';
 import StaffScorecardFrame from './StaffScorecardFrame';
+import { countWaitingVisits } from '@/lib/doctor/portal-data';
 
 export const dynamic = 'force-dynamic'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 async function ReferralBanner({ doctorId }: { doctorId: string }) {
   const invite = await loadMemberInvite(doctorId);
@@ -53,7 +51,7 @@ export default async function DoctorLayout({ children }: { children: React.React
   if (staffOnly) {
     return (
       <AuthProvider>
-        <div className={`${inter.variable} portal min-h-dvh`}>
+        <div className="portal min-h-dvh" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
           <StaffScorecardFrame>{children}</StaffScorecardFrame>
         </div>
       </AuthProvider>
@@ -74,7 +72,7 @@ export default async function DoctorLayout({ children }: { children: React.React
     if (terminal && !completing) redirect('/doctor/dashboard');
     return (
       <AuthProvider>
-        <div className={`${inter.variable} min-h-dvh bg-neuro-cream`}>
+        <div className="min-h-dvh bg-neuro-cream" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
           <PortalProvider value={ctx}>
             {children}
           </PortalProvider>
@@ -85,11 +83,14 @@ export default async function DoctorLayout({ children }: { children: React.React
 
   return (
     <AuthProvider>
-      <div className={`${inter.variable} portal min-h-dvh`}>
+      <div className="portal min-h-dvh" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
         <PortalProvider value={ctx}>
           <ReferralProvider>
             <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName} applicationGate={applicationGate}>
-              <PortalShell banner={ctx.doctor ? <Suspense fallback={null}><ReferralBanner doctorId={ctx.doctor.id} /></Suspense> : null}>{children}</PortalShell>
+              <DoctorShell waiting={ctx.doctor ? await countWaitingVisits(ctx.doctor.id) : 0}>
+                {ctx.doctor ? <Suspense fallback={null}><ReferralBanner doctorId={ctx.doctor.id} /></Suspense> : null}
+                {children}
+              </DoctorShell>
             </OnboardingGate>
           </ReferralProvider>
         </PortalProvider>

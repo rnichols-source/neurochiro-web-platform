@@ -12,7 +12,7 @@ export default async function LeadsPage() {
   const initial = ctx?.doctor ? await loadLeadPipeline(ctx.doctor.id) : null;
   done();
   return (
-    <UpgradeGate feature="Patient Lead Pipeline" requiredTier="pro" description="Track and manage your patient leads through every stage of the conversion funnel.">
+    <UpgradeGate feature="Directory requests" requiredTier="pro" description="Track people who asked to book, from the first note through a visit.">
       <LeadsBoard initial={initial} timeZone={timeZone} />
     </UpgradeGate>
   );
