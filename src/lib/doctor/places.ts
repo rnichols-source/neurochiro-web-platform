@@ -36,35 +36,51 @@ export const DOCTOR_TOOL_GROUPS: { id: DoctorToolGroup; label: string; place: Do
   { id: 'tools', label: 'Practice tools', place: 'practice' },
 ]
 
-/** Familiar destinations from the old sidebar. Desktop sidebar opens each in one click. */
+/** Tools that stay in the sidebar. Hidden and coming-soon tools are not listed here. */
 export const DOCTOR_TOOL_LINKS: DoctorToolLink[] = [
   { href: '/doctor/visit-requests', label: 'Visit requests', detail: 'People asking to see you', place: 'people', group: 'people' },
-  { href: '/doctor/leads', label: 'Leads', detail: 'Requests from your directory listing', place: 'people', group: 'people' },
   { href: '/doctor/introductions', label: 'Introductions', detail: 'When someone travels with their care', place: 'people', group: 'people' },
   { href: '/doctor/referrals', label: 'Referral network', detail: 'Referrals you have sent and received', place: 'network', group: 'network' },
   { href: '/doctor/students', label: 'Students', chipLabel: 'Browse students', detail: 'Browse students looking for a practice', place: 'network', group: 'network' },
-  { href: '/doctor/jobs', label: 'Jobs & hiring', detail: 'Post a role and read applications', place: 'network', group: 'network' },
-  { href: '/doctor/chiromatch', label: 'ChiroMatch', detail: 'Match with an associate', place: 'network', group: 'network' },
-  { href: '/doctor/match', label: 'Match', detail: 'You and a student both say yes', place: 'network', group: 'network' },
-  { href: '/doctor/seminars', label: 'Seminars', detail: 'Host a seminar or find one', place: 'network', group: 'network' },
-  { href: '/doctor/lives', label: 'The Weekly Adjustment', detail: 'Thursday at 8 PM ET', place: 'network', group: 'network' },
   { href: '/doctor/community', label: 'Community', detail: 'Announcements and spotlights', place: 'network', group: 'network' },
   { href: '/doctor/community-interest', label: 'Community interest', detail: 'People near you raising a hand', place: 'network', group: 'network' },
-  { href: '/doctor/marketplace', label: 'Synapse', detail: 'Member deals', place: 'network', group: 'network' },
   { href: '/doctor/profile', label: 'Profile', detail: 'Edit what community members see', place: 'practice', group: 'account' },
   { href: '/doctor/analytics', label: 'Analytics', detail: 'Views and where they came from', place: 'practice', group: 'account' },
   { href: '/doctor/billing', label: 'Billing', detail: 'Plan, invoices, and payment', place: 'practice', group: 'account' },
   { href: '/doctor/settings', label: 'Settings', detail: 'Notifications and account', place: 'practice', group: 'account' },
   { href: '/doctor/notifications', label: 'Notifications', detail: 'Alerts for your office', place: 'practice', group: 'account' },
-  { href: '/doctor/care-plan-closer', label: 'Care Plan Closer', detail: 'Done-for-you care plan setup', place: 'practice', group: 'account' },
   { href: '/doctor/help', label: 'Help', detail: 'Ask us anything', place: 'practice', group: 'account' },
   { href: '/doctor/care-plan', label: 'Care plan', detail: 'A visit-by-visit plan for your office', place: 'practice', group: 'tools' },
-  { href: '/doctor/scan-report', label: 'Scan reports', detail: 'Turn scan numbers into a report', place: 'practice', group: 'tools' },
   { href: '/doctor/kpi', label: 'KPI tracker', detail: 'Today’s numbers and goals', place: 'practice', group: 'tools' },
   { href: '/doctor/pl-analyzer', label: 'P&L analyzer', detail: 'Where the practice makes and spends money', place: 'practice', group: 'tools' },
-  { href: '/doctor/ce-tracker', label: 'CE tracker', detail: 'Certificates from seminars you attended', place: 'practice', group: 'tools' },
-  { href: '/doctor/billing-guide', label: 'Billing guide', detail: 'Coding notes included with practice tools', place: 'practice', group: 'tools' },
+  { href: '/doctor/billing-guide', label: 'Billing guide', detail: 'Coding notes you can buy or open with practice tools', place: 'practice', group: 'tools' },
+  { href: '/doctor/badges', label: 'Achievements', detail: 'Badges on your account', place: 'practice', group: 'tools' },
+  { href: '/doctor/report', label: 'This month', detail: 'Views, requests, and the earlier day view', place: 'practice', group: 'tools' },
 ]
+
+export const COMING_SOON_TOOLS = [
+  { href: '/doctor/ce-tracker', id: 'ce', title: 'CE tracker', body: 'Certificates from seminars you attended.' },
+  { href: '/doctor/screenings', id: 'screenings', title: 'Screening kits', body: 'Kits for community screenings.' },
+  { href: '/doctor/chiromatch', id: 'chiromatch', title: 'ChiroMatch', body: 'Match with an associate.' },
+  { href: '/doctor/jobs', id: 'hiring', title: 'Hiring', body: 'Post a role and read applications.' },
+  { href: '/doctor/seminars', id: 'seminars', title: 'Seminars', body: 'Host a seminar or find one.' },
+] as const
+
+/** Direct URLs for these tools open Coming soon. The pages stay in the repo. */
+export const PARKED_TOOL_PREFIXES = [
+  '/doctor/scan-report',
+  '/doctor/care-plan-closer',
+  '/doctor/workshops',
+  '/doctor/contracts',
+  '/doctor/purchases',
+  '/doctor/content-library',
+  '/doctor/ce-tracker',
+  '/doctor/screenings',
+  '/doctor/chiromatch',
+  '/doctor/match',
+  '/doctor/jobs',
+  '/doctor/seminars',
+] as const
 
 const ONE_CLICK_DESKTOP = new Set<string>([
   '/doctor',
@@ -121,7 +137,7 @@ export function doctorNavId(pathname: string): DoctorNavId {
   const path = pathOnly(pathname)
   if (path === '/doctor' || path === '/doctor/dashboard') return 'today'
   if (under(path, '/doctor/messages')) return 'messages'
-  if (under(path, '/doctor/coming-soon')) return 'soon'
+  if (under(path, '/doctor/coming-soon') || PARKED_TOOL_PREFIXES.some((prefix) => under(path, prefix))) return 'soon'
   if (under(path, '/doctor/people') || under(path, '/doctor/leads') || under(path, '/doctor/visit-requests') || under(path, '/doctor/introductions')) return 'people'
   if (under(path, '/doctor/care-sets')) return 'care'
   if (NETWORK_PREFIXES.some((prefix) => under(path, prefix))) return 'network'

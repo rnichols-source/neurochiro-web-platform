@@ -21,11 +21,12 @@ test('nav keeps today, people, care, network, and practice apart', () => {
   assert.equal(doctorNavId('/doctor/leads'), 'people')
   assert.equal(doctorNavId('/doctor/care-sets/si-joint'), 'care')
   assert.equal(doctorNavId('/doctor/network/students'), 'network')
-  assert.equal(doctorNavId('/doctor/seminars'), 'network')
+  assert.equal(doctorNavId('/doctor/seminars'), 'soon')
+  assert.equal(doctorNavId('/doctor/scan-report'), 'soon')
   assert.equal(doctorNavId('/doctor/marketplace'), 'network')
   assert.equal(doctorNavId('/doctor/practice'), 'practice')
   assert.equal(doctorNavId('/doctor/kpi'), 'practice')
-  assert.equal(doctorNavId('/doctor/care-plan-closer'), 'practice')
+  assert.equal(doctorNavId('/doctor/care-plan-closer'), 'soon')
   assert.equal(doctorNavId('/doctor/messages'), 'messages')
   assert.equal(doctorNavId('/doctor/coming-soon'), 'soon')
   assert.equal(doctorNavId('/doctor/introductions'), 'people')
@@ -86,28 +87,19 @@ test('old sidebar tools open in one desktop click and two taps on a phone', () =
     '/doctor/messages',
     '/doctor/referral-network',
     '/doctor/notifications',
-    '/doctor/leads',
     '/doctor/visit-requests',
     '/doctor/care-sets',
     '/doctor/introductions',
-    '/doctor/lives',
-    '/doctor/jobs',
     '/doctor/community-interest',
-    '/doctor/chiromatch',
     '/doctor/students',
-    '/doctor/seminars',
     '/doctor/community',
-    '/doctor/marketplace',
-    '/doctor/care-plan-closer',
     '/doctor/analytics',
     '/doctor/settings',
     '/doctor/billing',
     '/doctor/help',
     '/doctor/care-plan',
-    '/doctor/scan-report',
     '/doctor/kpi',
     '/doctor/pl-analyzer',
-    '/doctor/ce-tracker',
     '/doctor/billing-guide',
   ]
   for (const href of oldSidebar) {
@@ -115,7 +107,9 @@ test('old sidebar tools open in one desktop click and two taps on a phone', () =
     assert.ok(mobileClicks(href) <= 2, href)
   }
   assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Profile')?.href, '/doctor/profile')
-  assert.equal(desktopClicks('/doctor/match'), 1)
+  assert.equal(desktopClicks('/doctor/match'), 2)
+  assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/marketplace'), false)
+  assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/lives'), false)
   assert.equal(mobileClicks('/doctor/messages'), 1)
 })
 

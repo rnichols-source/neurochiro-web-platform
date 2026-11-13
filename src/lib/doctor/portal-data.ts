@@ -192,38 +192,102 @@ export type PersonCard = {
   detail: string
   note: string | null
   status: string
-  kind: 'visit' | 'member'
+  kind: 'visit' | 'member' | 'request' | 'referral' | 'care' | 'message'
+  href?: string
+  leadId?: string
+  leadType?: string
 }
 
-export async function loadPeople(doctorId: string): Promise<{ ready: boolean; waiting: PersonCard[]; members: PersonCard[] }> {
+export async function loadPeople(doctorId: string): Promise<{ ready: boolean; waiting: PersonCard[]; members: PersonCard[]; people: PersonCard[] }> {
   const admin = createAdminClient() as any
-  const [visits, members] = await Promise.all([
+  const { loadLeadPipeline } = await import('@/app/(doctor)/doctor/leads/pipeline')
+  const { listMyReferrals } = await import('@/lib/referrals/data')
+  const { createServerSupabase } = await import('@/lib/supabase-server')
+  const { getInbox } = await import('@/lib/messaging/db')
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  const [visits, members, leads, referrals, care, threads] = await Promise.all([
     admin.from('community_visit_requests').select('id, profile_id, created_at, status, shared_first_name, for_first_name, note, preferred_window, shared_email, callback_phone').eq('doctor_id', doctorId).order('created_at', { ascending: false }).limit(40),
     loadHomeDoctorMembers(doctorId),
+    loadLeadPipeline(doctorId).catch(() => null),
+    listMyReferrals().catch(() => null),
+    admin.from('community_exercise_assignments').select('id, profile_id, library_plan_slug, status, created_at').eq('doctor_id', doctorId).order('created_at', { ascending: false }).limit(40),
+    user ? getInbox(user.id, 20).catch(() => []) : Promise.resolve([]),
   ])
-  if (visits.error && schemaNotReady(visits.error)) return { ready: false, waiting: [], members: [] }
+  const ready = !(visits.error && schemaNotReady(visits.error))
   const waiting: PersonCard[] = (visits.data || []).map((row: Record<string, string | null>) => ({
     id: String(row.id),
     profileId: row.profile_id,
     name: row.shared_first_name || 'A community member',
-    detail: [row.for_first_name ? `for ${row.for_first_name}` : null, row.preferred_window, agoLabel(String(row.created_at)), row.status].filter(Boolean).join(' · '),
+    detail: [row.for_first_name ? `for ${row.for_first_name}` : null, row.preferred_window, agoLabel(String(row.created_at))].filter(Boolean).join(' · '),
     note: row.note,
     status: String(row.status || 'requested'),
     kind: 'visit' as const,
   }))
-  return {
-    ready: !visits.error,
-    waiting,
-    members: members.map((member) => ({
-      id: member.id,
-      profileId: member.id,
-      name: member.label,
-      detail: 'Chose you as their home doctor',
+  const home: PersonCard[] = members.map((member) => ({
+    id: member.id,
+    profileId: member.id,
+    name: member.label,
+    detail: 'Chose you as their home doctor',
+    note: null,
+    status: 'home',
+    kind: 'member' as const,
+  }))
+  const requests: PersonCard[] = ((leads && 'leads' in leads ? leads.leads : []) as Array<Record<string, string | null>>).map((lead) => ({
+    id: `lead-${lead.id}`,
+    profileId: null,
+    name: [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Directory request',
+    detail: [lead.source || 'Directory', lead.email, agoLabel(String(lead.created_at || ''))].filter(Boolean).join(' · '),
+    note: lead.notes || lead.message || null,
+    status: String(lead.stage || 'new'),
+    kind: 'request' as const,
+    leadId: String(lead.id),
+    leadType: String(lead._type || 'lead'),
+  }))
+  const referralCards: PersonCard[] = [
+    ...((referrals?.received || []) as unknown as Array<Record<string, string>>).map((row) => ({
+      id: `ref-in-${row.id}`,
+      profileId: null,
+      name: row.patient_first_name || 'Referral in',
+      detail: `From ${row.other_name || 'a doctor'} · ${agoLabel(row.created_at)}`,
       note: null,
-      status: 'home',
-      kind: 'member' as const,
+      status: row.status || 'sent',
+      kind: 'referral' as const,
+      href: `/doctor/referrals/${row.id}`,
     })),
-  }
+    ...((referrals?.sent || []) as unknown as Array<Record<string, string>>).map((row) => ({
+      id: `ref-out-${row.id}`,
+      profileId: null,
+      name: row.patient_first_name || 'Referral out',
+      detail: `To ${row.other_name || 'a doctor'} · ${agoLabel(row.created_at)}`,
+      note: null,
+      status: row.status || 'sent',
+      kind: 'referral' as const,
+      href: `/doctor/referrals/${row.id}`,
+    })),
+  ]
+  const careNames = new Map(members.map((member) => [member.id, member.label]))
+  const careCards: PersonCard[] = ((care.data || []) as Array<Record<string, string | null>>).map((row) => ({
+    id: `care-${row.id}`,
+    profileId: row.profile_id,
+    name: careNames.get(String(row.profile_id)) || 'Care set',
+    detail: [row.library_plan_slug, agoLabel(String(row.created_at || ''))].filter(Boolean).join(' · '),
+    note: null,
+    status: String(row.status || 'active'),
+    kind: 'care' as const,
+    href: '/doctor/care-sets',
+  }))
+  const messageCards: PersonCard[] = (threads || []).map((row) => ({
+    id: `msg-${row.id}`,
+    profileId: row.otherUser?.id || null,
+    name: row.otherUser?.full_name || 'Message',
+    detail: row.lastMessagePreview || 'Conversation',
+    note: null,
+    status: row.unreadCount ? 'new' : 'contacted',
+    kind: 'message' as const,
+    href: `/doctor/messages?c=${row.id}`,
+  }))
+  return { ready, waiting, members: home, people: [...waiting, ...requests, ...referralCards, ...careCards, ...messageCards, ...home] }
 }
 
 export type ReferralCard = {
@@ -271,13 +335,15 @@ export async function loadStudentDesk(city: string | null): Promise<{ students: 
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { students: [], open: false, near: null }
-  const [mine, students, near] = await Promise.all([
+  const [mine, selfProfile, students, near] = await Promise.all([
     admin.from('doctors').select('accepts_student_messages').eq('user_id', user.id).maybeSingle(),
-    listStudentDirectory(),
+    admin.from('profiles').select('is_test').eq('id', user.id).maybeSingle(),
+    listStudentDirectory(false),
     countStudentsNear(city),
   ])
+  const listed = selfProfile.data?.is_test === true ? await listStudentDirectory(true) : students
   return {
-    students: students.map((student) => ({
+    students: listed.map((student) => ({
       id: student.id,
       userId: student.userId,
       name: student.name,

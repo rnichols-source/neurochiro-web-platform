@@ -35,11 +35,11 @@ export function Inbox(props: {
   });
 
   return (
-    <div className="flex w-full md:w-80 shrink-0 flex-col border-r border-portal-border bg-white h-full min-h-0">
+    <div className="flex h-full min-h-0 w-full shrink-0 flex-col border-r border-[#E7E2D8] bg-white md:w-80">
       <div className="p-4 border-b border-portal-border shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-portal-ink">Messages</h2>
-          <button type="button" onClick={props.onCompose} className="min-h-11 min-w-11 inline-flex items-center justify-center rounded-full text-white bg-portal-accent" aria-label="New conversation" title="New conversation">
+          <button type="button" onClick={props.onCompose} className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full bg-[#D66829] text-white" aria-label="New conversation" title="New conversation">
             <Plus className="w-4 h-4" />
           </button>
         </div>
@@ -53,7 +53,7 @@ export function Inbox(props: {
         </div>
         <div className="flex gap-1 flex-wrap">
           {TABS.map((tab) => (
-            <button key={tab} type="button" onClick={() => props.onTab(tab)} className={`min-h-11 px-3 rounded-full text-sm font-bold ${props.tab === tab ? 'bg-portal-accent text-white' : 'bg-portal-surface text-portal-ink-2'}`}>
+            <button key={tab} type="button" onClick={() => props.onTab(tab)} className={`min-h-11 rounded-full px-3 text-sm font-bold ${props.tab === tab ? 'bg-[#1E2D3B] text-white' : 'bg-[#F5F3EF] text-[#5b6773]'}`}>
               {tab}
             </button>
           ))}

@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { parkedLayout } from '@/components/doctor/parked-layout'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  parkedLayout('chiromatch')
   void children;
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">

@@ -165,7 +165,7 @@ function compressImage(file: File, maxWidth: number, quality: number): Promise<F
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className="bg-white border border-portal-border rounded-xl p-4 space-y-4">
+    <section className="rounded-[20px] bg-white p-4 space-y-4">
       <div>
         <h2 className="text-lg font-bold text-portal-ink">{title}</h2>
         {hint ? <p className="mt-1 text-sm text-portal-ink-2">{hint}</p> : null}
@@ -311,6 +311,23 @@ function ProfileEditor() {
     if (result.success) {
       setHasUnsavedChanges(false);
       setSaveSuccess(true);
+      const fresh = await getDoctorProfile();
+      if (fresh && (fresh.slug || fresh.clinic_name || fresh.email)) {
+        const loaded = fresh as DoctorProfile;
+        setProfile(loaded);
+        setCountryCode(storedCountryCode(loaded.country));
+        setFaqItems(Array.isArray(loaded.faq) ? loaded.faq : []);
+        setTeamMembers(Array.isArray(loaded.team_members) ? loaded.team_members : []);
+        setListingFormat(loaded.listing_format === "practice" ? "practice" : "lead");
+        setCoOwners(Array.isArray(loaded.co_owners) ? loaded.co_owners.map((owner) => ({
+          name: owner?.name || "",
+          credentials: owner?.credentials || "",
+          photo_url: owner?.photo_url || "",
+          bio: owner?.bio || "",
+        })) : []);
+        setGalleryUrls(Array.isArray(loaded.gallery_images) ? loaded.gallery_images : []);
+        setAmenitiesSelected(Array.isArray(loaded.amenities) ? loaded.amenities : []);
+      }
       setTimeout(() => setSaveSuccess(false), 3000);
     }
     toast(result.success ? "Profile saved." : (result.error || "Failed to save."), result.success ? "success" : "error");
@@ -480,72 +497,15 @@ function ProfileEditor() {
             </div>
           )}
 
-          <div className="sticky top-0 z-30 -mx-[18px] mb-4 bg-[#F5F3EF] px-[18px] py-2 lg:-mx-10 lg:px-10">
-            <div role="tablist" aria-label="Profile sections" className="flex gap-1 overflow-x-auto rounded-2xl bg-white p-1">
-              {TABS.map((item) => {
-                const selected = tab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="tab"
-                    id={`profile-tab-${item.id}`}
-                    aria-selected={selected}
-                    aria-controls={`profile-panel-${item.id}`}
-                    onClick={() => selectTab(item.id)}
-                    className={`dp-ui shrink-0 min-h-11 rounded-xl px-3 text-sm font-extrabold ${selected ? "bg-[#1E2D3B] text-white" : "text-[#5b6773]"}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
-            <h2 className="text-lg font-bold text-portal-ink">Profile photo</h2>
-            <div className="mt-4 flex items-center gap-4">
-              <div className="relative w-24 h-24 rounded-xl bg-portal-surface overflow-hidden border border-portal-border shrink-0">
-                {profile?.photo_url ? (
-                  <Image src={profile.photo_url} alt="Profile photo" fill className="object-cover" sizes="96px" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-portal-muted"><Camera className="w-8 h-8" /></div>
-                )}
-              </div>
-              <div>
-                <button type="button" onClick={() => fileInputRef.current?.click()} className="min-h-11 px-4 rounded-lg bg-portal-ink text-white text-sm font-bold">
-                  Upload photo
-                </button>
-                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
-                <p className="text-sm text-portal-ink-2 mt-1">JPG, PNG, WebP, or HEIC. Max 5MB.</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="bg-white border border-portal-border rounded-xl p-4 mb-4">
-            <h2 className="text-lg font-bold text-portal-ink">Profile completeness</h2>
-            <div className="flex items-center gap-3 mt-3 mb-3">
-              <div className="flex-1 h-2 bg-portal-surface rounded-full overflow-hidden">
-                <div className="h-full bg-portal-accent rounded-full" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="text-sm font-bold text-portal-accent">{pct}%</span>
-            </div>
-            {missing.length > 0 && (
-              <ul className="space-y-2">
-                {missing.slice(0, 3).map((item) => (
-                  <li key={item.label} className="text-sm text-portal-ink-2">
-                    <span className="font-bold text-portal-ink">{item.label}.</span> {item.why}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
           <form onSubmit={handleSave} onChange={markDirty} className="mt-4 space-y-4">
-            {profile?.bio ? <input type="hidden" name="bio" value={profile.bio} /> : null}
-            {profile?.seo_keywords ? <input type="hidden" name="seo_keywords" value={profile.seo_keywords} /> : null}
-            {educationLines ? <input type="hidden" name="education" value={educationLines} /> : null}
+            <section className="rounded-[20px] bg-white p-4 space-y-4">
+              <h2 className="text-lg font-bold text-portal-ink">Bio</h2>
+              <textarea name="bio" defaultValue={profile?.bio || ""} rows={4} className={AREA} placeholder="What community members should know about you." />
+            </section>
+            <input type="hidden" name="seo_keywords" value={profile?.seo_keywords || ""} />
+            <input type="hidden" name="education" value={educationLines} />
 
-            <div id="profile-panel-basics" role="tabpanel" aria-labelledby="profile-tab-basics" hidden={tab !== "basics"} className="space-y-4">
+            <div id="profile-panel-basics" role="tabpanel" aria-labelledby="profile-tab-basics" className="space-y-4">
               <Section title="Personal info">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Label label="First name">
@@ -624,7 +584,7 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-photos" role="tabpanel" aria-labelledby="profile-tab-photos" hidden={tab !== "photos"} className="space-y-4">
+            <div id="profile-panel-photos" role="tabpanel" aria-labelledby="profile-tab-photos" className="space-y-4">
               <p className="text-sm text-portal-ink-2">Your profile photo is at the top of this page.</p>
               <Section title="Intro video" hint="Add a short intro video so community members can meet you before they call.">
                 <div id="video">
@@ -673,7 +633,7 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-about" role="tabpanel" aria-labelledby="profile-tab-about" hidden={tab !== "about"} className="space-y-4">
+            <div id="profile-panel-about" role="tabpanel" aria-labelledby="profile-tab-about" className="space-y-4">
               <Section title="About you" hint="This is what community members read first. Keep it personal and direct.">
                 <Label label="Short intro" hint="2-3 sentences about you and your practice. No URLs or phone numbers.">
                   <textarea
@@ -807,7 +767,7 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-services" role="tabpanel" aria-labelledby="profile-tab-services" hidden={tab !== "services"} className="space-y-4">
+            <div id="profile-panel-services" role="tabpanel" aria-labelledby="profile-tab-services" className="space-y-4">
               <Section title="Specialties" hint="Comma separated.">
                 <input name="specialties" defaultValue={(profile?.specialties || []).join(", ")} placeholder="Nervous system focused, Pediatric, Upper cervical" className={INPUT} />
               </Section>
@@ -833,7 +793,7 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-insurance" role="tabpanel" aria-labelledby="profile-tab-insurance" hidden={tab !== "insurance"} className="space-y-4">
+            <div id="profile-panel-insurance" role="tabpanel" aria-labelledby="profile-tab-insurance" className="space-y-4">
               <Section title="Insurance and payment" hint="Community members check this before they book. Even “Call for pricing” is better than blank.">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Label label="First visit price" hint='Or "Call for pricing".'>
@@ -879,7 +839,7 @@ function ProfileEditor() {
               </Section>
             </div>
 
-            <div id="profile-panel-links" role="tabpanel" aria-labelledby="profile-tab-links" hidden={tab !== "links"} className="space-y-4">
+            <div id="profile-panel-links" role="tabpanel" aria-labelledby="profile-tab-links" className="space-y-4">
               <Section title="Website and social">
                 <Label label="Website">
                   <input name="website" defaultValue={profile?.website_url || ""} placeholder="https://yourpractice.com" className={INPUT} />

@@ -25,19 +25,21 @@ export function ReferDesk({
   const [reason, setReason] = useState('')
   const [consent, setConsent] = useState(false)
   const [doctors, setDoctors] = useState<DoctorHit[]>([])
+  const [choices, setChoices] = useState<string[]>([])
   const [note, setNote] = useState('')
   const [message, setMessage] = useState('')
   const [tab, setTab] = useState<'sent' | 'received'>('sent')
   const [pending, start] = useTransition()
   const rows = tab === 'sent' ? sent : received
 
-  function search() {
+  function search(nextWhere?: string) {
+    const place = (nextWhere ?? where).trim()
     setMessage('')
     start(async () => {
-      const query = [where, who].filter(Boolean).join(' ')
-      const result = await searchNetworkDoctors(query || where || who)
+      const result = await searchNetworkDoctors(place)
       setDoctors(result.doctors)
-      setNote([result.label, result.note, result.choices.length ? `Did you mean ${result.choices.slice(0, 3).join(', ')}?` : ''].filter(Boolean).join(' '))
+      setChoices(result.choices)
+      setNote([result.label, result.note].filter(Boolean).join(' '))
     })
   }
 
@@ -63,7 +65,7 @@ export function ReferDesk({
       <div>
         <section className="rounded-[24px] bg-[#7A4A94] p-5 text-white">
           <h2 className="dp-ui text-[22px] font-extrabold tracking-[-0.02em]">Refer a community member</h2>
-          <p className="mt-1 text-[14px] leading-snug text-white/90">Pick who, find the doctor, and send a warm intro. Their phone is shared only after that doctor accepts.</p>
+          <p className="mt-1 text-[14px] leading-snug text-white/90">You can refer anywhere in the world. Type a doctor’s name, a city, a state, a country, or a postal code — London, Sydney Australia, Toronto, or 90210. The nearest NeuroChiro doctors come up. Their phone is shared only after that doctor accepts.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block text-[13px] font-bold">
               Who
@@ -76,8 +78,8 @@ export function ReferDesk({
             <label className="block text-[13px] font-bold sm:col-span-2">
               Where
               <span className="mt-1 flex gap-2">
-                <input value={where} onChange={(event) => setWhere(event.target.value)} placeholder="City, or city and country" className="h-12 min-w-0 flex-1 rounded-xl border-0 bg-white px-3 text-[16px] text-[#15202B]" />
-                <button type="button" onClick={search} disabled={pending} className="dp-ui h-12 rounded-xl bg-white px-4 text-[14px] font-extrabold text-[#5C3473] disabled:opacity-60">Find</button>
+                <input value={where} onChange={(event) => setWhere(event.target.value)} placeholder="London, Sydney Australia, Toronto, 90210" className="h-12 min-w-0 flex-1 rounded-xl border-0 bg-white px-3 text-[16px] text-[#15202B]" />
+                <button type="button" onClick={() => search()} disabled={pending} className="dp-ui h-12 rounded-xl bg-white px-4 text-[14px] font-extrabold text-[#5C3473] disabled:opacity-60">Find</button>
               </span>
             </label>
             <label className="block text-[13px] font-bold">
@@ -99,9 +101,16 @@ export function ReferDesk({
           </label>
         </section>
         {note ? <p className="mt-3 text-[14px] text-[#5b6773]">{note}</p> : null}
+        {choices.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {choices.map((choice) => (
+              <button key={choice} type="button" onClick={() => { setWhere(choice); search(choice) }} className="dp-ui min-h-11 rounded-full bg-white px-3 text-[13px] font-extrabold text-[#5C3473]">{choice}</button>
+            ))}
+          </div>
+        ) : null}
         {message ? <p className="mt-3 text-[14px] font-bold text-[#15202B]" role="status">{message}</p> : null}
         <div className="mt-3 space-y-2">
-          {doctors.length === 0 ? <EmptyNote title="Doctors show up here" sentence="Search a city. You can send a warm intro to a doctor anywhere in the network." /> : null}
+          {doctors.length === 0 ? <EmptyNote title="Doctors show up here" sentence="Search a name, city, state, country, or postal code. NeuroChiro doctors anywhere in the world can come up, nearest first." /> : null}
           {doctors.map((doctor) => (
             <article key={doctor.id} className="flex flex-wrap items-center gap-3 rounded-[18px] bg-white px-3 py-3">
               <span className="grid h-11 w-11 place-items-center rounded-full bg-[#EFE5F5] dp-ui text-[13px] font-extrabold text-[#5C3473]">{doctor.name.replace(/[^A-Za-z]/g, '').slice(0, 2).toUpperCase()}</span>

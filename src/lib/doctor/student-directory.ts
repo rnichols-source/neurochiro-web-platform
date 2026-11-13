@@ -17,9 +17,12 @@ function realStudents(admin: ReturnType<typeof createAdminClient>) {
     .or('is_test.eq.false,is_test.is.null')
 }
 
-export async function listStudentDirectory(): Promise<ListedStudent[]> {
+export async function listStudentDirectory(includeTest = false): Promise<ListedStudent[]> {
   const admin = createAdminClient()
-  const profiles = await realStudents(admin).order('created_at', { ascending: false }).limit(80)
+  const profiles = await (includeTest
+    ? (admin as any).from('profiles').select(PROFILE_FIELDS).eq('role', 'student')
+    : realStudents(admin)
+  ).order('created_at', { ascending: false }).limit(80)
   if (profiles.error) {
     console.error('[students] profile query failed', profiles.error.message)
     return []

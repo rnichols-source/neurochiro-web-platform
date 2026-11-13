@@ -28,11 +28,11 @@ export async function searchNetworkDoctors(query: string): Promise<{
     label: result.label,
     note: result.note,
     choices: (result.choices || []).map((place) => placeLabel(place)),
-    doctors: result.doctors.slice(0, 8).map((doctor) => ({
+    doctors: result.doctors.slice(0, 20).map((doctor) => ({
       id: doctor.id,
       name: `Dr. ${doctor.firstName} ${doctor.lastName}`.replace(/\s+/g, ' ').trim(),
       clinic: doctor.clinicName,
-      place: [doctor.city, doctor.state].filter(Boolean).join(', '),
+      place: [doctor.city, doctor.state, doctor.country && doctor.country !== 'US' ? doctor.country : null].filter(Boolean).join(', '),
       miles: doctor.distanceMiles,
       unavailable: doctor.unavailableReason || null,
     })),

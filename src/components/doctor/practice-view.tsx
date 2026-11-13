@@ -2,20 +2,12 @@ import Link from 'next/link'
 import type { ProfileChecklist } from '@/lib/doctor/places'
 
 const TOOLS = [
-  { href: '/doctor/kpi', title: 'KPI tracker', detail: 'Today’s numbers and goals' },
-  { href: '/doctor/pl-analyzer', title: 'P&L analyzer', detail: 'Where the practice makes and spends money' },
-  { href: '/doctor/scan-report', title: 'Scan reports', detail: 'Turn scan numbers into a report' },
-  { href: '/doctor/ce-tracker', title: 'CE tracker', detail: 'Certificates from seminars you attended' },
-  { href: '/doctor/care-plan-closer', title: 'Care Plan Closer', detail: 'Done-for-you care plan setup' },
   { href: '/doctor/care-plan', title: 'Care plan', detail: 'A visit-by-visit plan for your office' },
-  { href: '/doctor/billing-guide', title: 'Billing guide', detail: 'Coding notes included with practice tools' },
-  { href: '/doctor/content-library', title: 'Content library', detail: 'Posts and handouts for your office' },
-  { href: '/doctor/workshops', title: 'Workshops', detail: 'Workshop kits' },
-  { href: '/doctor/screenings', title: 'Screenings', detail: 'Screening kits' },
-  { href: '/doctor/contracts', title: 'Contracts', detail: 'Agreement templates' },
-  { href: '/doctor/report', title: 'This month', detail: 'Views, requests, and the day view you had before' },
-  { href: '/doctor/purchases', title: 'My purchases', detail: 'Kits you have bought' },
+  { href: '/doctor/pl-analyzer', title: 'P&L analyzer', detail: 'Where the practice makes and spends money' },
+  { href: '/doctor/kpi', title: 'KPI tracker', detail: 'Today’s numbers and goals' },
+  { href: '/doctor/billing-guide', title: 'Billing guide', detail: 'Coding notes you can open or buy' },
   { href: '/doctor/badges', title: 'Achievements', detail: 'Badges on your account' },
+  { href: '/doctor/report', title: 'This month', detail: 'Views, requests, and the earlier day view' },
 ]
 
 export function PracticeView({
@@ -54,8 +46,8 @@ export function PracticeView({
       <Row href="/doctor/billing" title="Membership and billing" detail={plan} iconBg="#1E2D3B" />
       <section className="rounded-[20px] bg-white p-4">
         <h2 className="dp-ui text-[16px] font-extrabold text-[#15202B]">Practice tools</h2>
-        <p className="mt-1 text-[13px] text-[#5b6773]">KPI, P&L, scans, CE, and Care Plan Closer.</p>
-        {!hasPracticeTools ? <p className="mt-2 text-[14px] text-[#5b6773]">Founding members and Pro accounts created before July 15, 2026 include the office tools. Care Plan Closer stays open.</p> : null}
+        <p className="mt-1 text-[13px] text-[#5b6773]">Care plan, P&L, KPI, billing guide, achievements, and this month.</p>
+        {!hasPracticeTools ? <p className="mt-2 text-[14px] text-[#5b6773]">Some office tools open fully for founding members and Pro accounts created before July 15, 2026.</p> : null}
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {TOOLS.map((tool) => (
             <li key={tool.href}>

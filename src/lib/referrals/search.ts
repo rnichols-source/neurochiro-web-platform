@@ -19,6 +19,7 @@ import {
 } from '@/lib/referrals/pure';
 import { hiddenTestUserIds } from '@/lib/profiles/test-users';
 import { REFERRAL_DOCTOR_SELECT } from '@/lib/referrals/columns';
+import { resolveGrowthPoint } from '@/lib/founder/geo-search';
 
 export type ReferableDoctor = {
   id: string;
@@ -167,14 +168,38 @@ export async function searchReferableDoctors(input: {
   specialty?: string | null;
   acceptingOnly?: boolean;
   place?: Place | null;
+  /** Test doctors can refer to other test doctors. Public search still hides them. */
+  allowTestDoctors?: boolean;
 }): Promise<ReferralSearchResult> {
   const started = Date.now();
   const admin = createAdminClient() as any;
   const query = input.query.trim();
-  const country = searchCountryForQuery(input.country || 'US', query);
+  let country = searchCountryForQuery(input.country || 'US', query);
   const acceptingOnly = input.acceptingOnly === true;
   let choices: Place[] | null = null;
   let origin: Place | null = input.place || null;
+
+  if (!origin && query && (shouldResolvePlace(query, 'ALL') || looksLikePostal(query, 'ALL') || looksLikePostal(query, country))) {
+    const growth = await resolveGrowthPoint(query).catch(() => null);
+    if (growth?.choices?.length) {
+      return {
+        choices: growth.choices.map((choice) => ({ city: choice.query || choice.label, state: '', lat: 0, lng: 0 })),
+        doctors: [],
+        ms: Date.now() - started,
+        label: growth.message || 'More than one place matches. Pick one.',
+        note: 'You can refer a community member to a NeuroChiro doctor anywhere in the world.',
+      };
+    }
+    if (growth?.resolved) {
+      origin = {
+        city: growth.resolved.city,
+        state: growth.resolved.state,
+        lat: growth.resolved.lat,
+        lng: growth.resolved.lng,
+      };
+      if (growth.resolved.country) country = referralCountry(growth.resolved.country);
+    }
+  }
 
   if (!origin && query && shouldResolvePlace(query, country)) {
     const resolved = await resolveQueryPlace(query, country);
@@ -247,7 +272,7 @@ export async function searchReferableDoctors(input: {
         verificationStatus: row.verification_status,
         membershipTier: membership.tier,
         membershipStatus: membership.status,
-        hidden: Boolean(row.user_id && hidden.has(row.user_id)),
+        hidden: !input.allowTestDoctors && Boolean(row.user_id && hidden.has(row.user_id)),
       });
       if (reason === 'unapproved' || reason === 'inactive' || reason === 'no-account') blocked.push(reason);
       return reason === null;
@@ -287,6 +312,8 @@ export async function receiverBlockReason(admin: any, doctorId: string, selfDoct
   const row = data as DoctorRow;
   const stripeIds = await stripeSet(admin, row.user_id ? [row.user_id] : []);
   const hidden = new Set(await hiddenTestUserIds());
+  const self = await admin.from('doctors').select('user_id').eq('id', selfDoctorId).maybeSingle();
+  const allowTest = Boolean(self.data?.user_id && hidden.has(self.data.user_id));
   const membership = membershipOf(row, stripeIds);
   const reason = referralBlockReason({
     doctorId: row.id,
@@ -295,7 +322,7 @@ export async function receiverBlockReason(admin: any, doctorId: string, selfDoct
     verificationStatus: row.verification_status,
     membershipTier: membership.tier,
     membershipStatus: membership.status,
-    hidden: Boolean(row.user_id && hidden.has(row.user_id)),
+    hidden: !allowTest && Boolean(row.user_id && hidden.has(row.user_id)),
   });
   if (reason === 'self') return 'Pick another doctor. You cannot refer a patient to yourself.';
   if (reason === 'unapproved') return 'That doctor is not approved yet, so they cannot take a referral.';

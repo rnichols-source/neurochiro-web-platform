@@ -120,11 +120,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
             <p className="px-3 pb-2 dp-ui text-[11px] font-extrabold tracking-[0.12em] text-[#8a95a1]">YOUR TOOLS</p>
             {DOCTOR_TOOL_GROUPS.map((group) => {
               const tone = DOCTOR_PLACES[group.place]
-              const links = DOCTOR_TOOL_LINKS.filter((link) => {
-                if (link.group !== group.id || link.href === '/doctor/profile') return false
-                if (!ctx.membership.hasPracticeTools && link.group === 'tools' && link.href !== '/doctor/billing-guide') return false
-                return true
-              })
+              const links = DOCTOR_TOOL_LINKS.filter((link) => link.group === group.id && link.href !== '/doctor/profile')
               if (!links.length) return null
               return (
                 <div key={group.id} className="mb-3">

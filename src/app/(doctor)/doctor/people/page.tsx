@@ -7,7 +7,7 @@ import { loadPeople } from '@/lib/doctor/portal-data'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PeoplePage() {
+export default async function PeoplePage({ searchParams }: { searchParams: Promise<{ filter?: string }> }) {
   const ctx = await getPortalContext()
   if (!ctx) redirect('/login')
   if (!ctx.doctor?.id) {
@@ -19,12 +19,13 @@ export default async function PeoplePage() {
       </div>
     )
   }
+  const filter = (await searchParams).filter
   const data = await loadPeople(ctx.doctor.id)
   return (
     <div>
-      <DoctorBand place="people" title="People" subtitle="Community members who chose you, and people coming your way." />
+      <DoctorBand place="people" title="People" subtitle="Directory requests, referrals, care sets, and messages, in one list." />
       <ToolChips group="people" />
-      <PeopleDesk waiting={data.waiting} members={data.members} ready={data.ready} />
+      <PeopleDesk people={data.people} ready={data.ready} initialFilter={filter} />
     </div>
   )
 }

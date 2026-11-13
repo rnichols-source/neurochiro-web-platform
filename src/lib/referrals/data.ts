@@ -264,6 +264,8 @@ export async function searchForCurrentDoctor(input: {
 }): Promise<ReferralSearchResult | null> {
   const me = await currentDoctor();
   if (!me) return null;
+  const { hiddenTestUserIds } = await import('@/lib/profiles/test-users');
+  const hidden = await hiddenTestUserIds();
   return searchReferableDoctors({
     query: input.query,
     country: referralCountry(input.country || me.country || 'US'),
@@ -271,6 +273,7 @@ export async function searchForCurrentDoctor(input: {
     specialty: input.specialty,
     acceptingOnly: input.acceptingOnly,
     place: input.place,
+    allowTestDoctors: hidden.includes(me.userId),
   });
 }
 
