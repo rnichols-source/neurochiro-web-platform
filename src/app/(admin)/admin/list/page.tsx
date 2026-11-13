@@ -58,7 +58,7 @@ export default function AdminListPage() {
         <div>
           <h1 className="text-2xl font-black text-white flex items-center gap-2">
             <Mail className="w-6 h-6 text-neuro-orange" />
-            Patient Email List
+            Community member email list
           </h1>
           <p className="text-gray-400 text-sm mt-1">
             Subscribers from neurochiro.co/list

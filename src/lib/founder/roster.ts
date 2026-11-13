@@ -102,6 +102,7 @@ export type FounderRoster = {
   clusters: Cluster[]
   cities: number
   countries: CountRow[]
+  countryCount: number
   states: CountRow[]
   gaps: GapCity[]
   gapAsks: number
@@ -203,6 +204,7 @@ export const loadFounderRoster = cache(async (): Promise<FounderRoster> => {
     clusters: demand.clusters,
     cities: demand.cities,
     countries: demand.countries,
+    countryCount: demand.countryCount,
     states: demand.states,
     gaps: demand.gaps,
     gapAsks: demand.gapAsks,
@@ -379,6 +381,7 @@ function summarizeMentions(rows: any[]) {
     clusters: [...grid.values()],
     cities: cities.size,
     countries: topCounts(countryMap, 12),
+    countryCount: countryMap.size,
     states: topCounts(stateMap, 7),
     gaps: [...gapMap.values()].sort((a, b) => b.n - a.n || a.miles - b.miles).slice(0, 24),
     gapAsks,

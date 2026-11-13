@@ -5,10 +5,12 @@ import { roiCard } from '@/lib/founder/model'
 import { formatMoney } from '@/lib/founder/format'
 import { loadFounderRoster } from '@/lib/founder/roster'
 import { loadFounderSettings } from '@/lib/founder/settings'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function StatsCardPage() {
+  await requireAdminPage()
   const [roster, settings] = await Promise.all([loadFounderRoster(), loadFounderSettings()])
   const open = openRequests(roster)
   const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed').length
@@ -25,7 +27,7 @@ export default async function StatsCardPage() {
         followers={settings.figures.followers}
         peopleUsed={settings.figures.peopleUsed}
         approximate={settings.figures.peopleUsedApproximate}
-        countries={roster.countries.length || null}
+        countries={roster.countryCount || null}
         asks={roster.mentionsOk ? roster.demandCount : null}
         doctorsLive={live.length}
         doctorCountries={countries}

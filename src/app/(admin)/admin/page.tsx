@@ -2,12 +2,12 @@ import Link from 'next/link'
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, FunnelList, Tag, ToolLinks } from '@/components/founder/bits'
 import { NudgeButton } from '@/components/founder/nudge-button'
-import { checkAdminAuth } from '@/lib/admin-auth'
 import { greeting, firstName } from '@/lib/portal/greeting'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { requireAdminPage } from '@/lib/founder/guard'
 import { etStamp, formatMoney, formatNumber, median } from '@/lib/founder/format'
 import { buildFunnel, buildNeeds, openRequests, since, waitingRequests, weekSeries } from '@/lib/founder/model'
-import { loadToday } from '@/lib/founder/money'
+import { loadDoctorBilling } from '@/lib/founder/money'
 import { loadFounderRoster } from '@/lib/founder/roster'
 import { PEOPLE_TOOLS } from '@/lib/founder/places'
 
@@ -15,7 +15,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function PulsePage() {
   const now = new Date()
-  const [roster, today] = await Promise.all([loadFounderRoster(), loadToday().catch(() => null)])
+  const user = await requireAdminPage()
+  const [roster, billing] = await Promise.all([loadFounderRoster(), loadDoctorBilling()])
   const open = openRequests(roster, now)
   const repliedHours = open
     .map((row) => row.acknowledgedAt ? (new Date(row.acknowledgedAt).getTime() - new Date(row.createdAt).getTime()) / 3_600_000 : null)
@@ -28,8 +29,7 @@ export default async function PulsePage() {
   const needs = buildNeeds(roster, now)
   const weeks = weekSeries(roster, now)
   const maxWeek = Math.max(1, ...weeks.map((week) => week.n))
-  const countries = roster.countries.length
-  const user = await checkAdminAuth()
+  const countries = roster.countryCount
   const profile = await (createAdminClient() as any).from('profiles').select('full_name').eq('id', user.id).maybeSingle()
   const short = firstName(profile.data?.full_name)
   const helloName = short === 'Raymond' ? 'Ray' : short
@@ -42,8 +42,8 @@ export default async function PulsePage() {
           <Kpi label="Demand" value={roster.mentionsOk ? formatNumber(roster.demandCount) : '—'} detail={`${roster.cities.toLocaleString('en-US')} cities · ${countries} countries`} />
           <Kpi label="Visit requests" value={formatNumber(open.length + (roster.communityVisits || 0))} detail={`${open.filter((row) => since(row.createdAt, now, 30)).length} in the last 30 days`} />
           <Kpi label="Doctors live" value={formatNumber(live)} detail={`${formatNumber(roster.doctors.length)} listed · ${formatNumber(newDoctors)} new in 30 days`} />
-          <Kpi label="Paying doctors" value={today?.paying == null ? '—' : formatNumber(today.paying)} detail="Stripe subscription on file" />
-          <Kpi label="MRR" value={today?.mrrUsd == null ? '—' : formatMoney(today.mrrUsd)} detail={today?.stripeOk ? 'Exact from Stripe' : 'Stripe unavailable'} />
+          <Kpi label="Paying doctors" value={billing.paying == null ? '—' : formatNumber(billing.paying)} detail="Doctor memberships only" />
+          <Kpi label="MRR" value={billing.mrrUsd == null ? '—' : formatMoney(billing.mrrUsd)} detail={billing.stripeOk ? 'Doctor memberships only · $99, $990, CA$139, $199' : 'Stripe unavailable'} />
         </div>
       </PlaceHeader>
       <div className="grid gap-4 px-4 py-4 lg:grid-cols-2 lg:px-8">

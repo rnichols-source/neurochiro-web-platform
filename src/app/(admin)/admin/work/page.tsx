@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { PlaceHeader } from '@/components/founder/header'
 import { CONTENT_TOOLS } from '@/lib/founder/places'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +12,8 @@ const LINKS = [
   ...CONTENT_TOOLS.map((item) => ({ href: item.href, title: item.label, detail: 'Existing admin tool' })),
 ]
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  await requireAdminPage()
   return (
     <div>
       <PlaceHeader place="people" title="Seminars, jobs, and the rest" subtitle="Every tool that used to sit in the old More menu." />

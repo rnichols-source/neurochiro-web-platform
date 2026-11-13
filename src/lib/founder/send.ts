@@ -310,12 +310,16 @@ export async function runOfficeFollowup(): Promise<SendResult> {
   const settings = await loadFounderSettings()
   if (!settings.automations.didYouGetIn) return { ok: true, count: 0, detail: 'Did you get in? is off.' }
   const admin = createAdminClient() as any
+  // Only requests that turned 7 days old in the last week. When the switch is
+  // first turned on, older requests are not swept up in one batch.
   const cutoff = new Date(Date.now() - 7 * 86_400_000).toISOString()
+  const oldest = new Date(Date.now() - 14 * 86_400_000).toISOString()
   const rows = await admin.from('contact_requests')
     .select('id, email, phone, sms_consent, sms_phone, doctor_id, office_visit_sent_at, status')
     .is('office_visit_sent_at', null)
     .neq('status', 'withdrawn')
     .lt('created_at', cutoff)
+    .gte('created_at', oldest)
     .limit(40)
   if (rows.error && isMissingTable(rows.error)) return { ok: true, count: 0, detail: 'Office-visit columns are not in the database yet.' }
   if (rows.error) {

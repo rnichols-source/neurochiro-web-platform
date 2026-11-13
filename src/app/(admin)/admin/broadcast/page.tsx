@@ -5,10 +5,12 @@ import { resolveAudience, type AudienceKey } from '@/lib/founder/audience'
 import { BROADCAST_TOOLS } from '@/lib/founder/places'
 import { waitingRequests } from '@/lib/founder/model'
 import { loadFounderRoster } from '@/lib/founder/roster'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function BroadcastPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdminPage()
   const params = await searchParams
   const audience = typeof params.audience === 'string' ? params.audience : 'founding'
   const roster = await loadFounderRoster()

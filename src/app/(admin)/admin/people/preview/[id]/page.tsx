@@ -5,10 +5,12 @@ import { recordDoctorPreview } from '@/app/(admin)/admin/founder-actions'
 import { doctorRows } from '@/lib/founder/model'
 import { loadFounderRoster } from '@/lib/founder/roster'
 import { siteUrl } from '@/lib/leads/config'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function DoctorPreviewPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminPage()
   const { id } = await params
   const roster = await loadFounderRoster()
   const doctor = doctorRows(roster).find((row) => row.id === id)

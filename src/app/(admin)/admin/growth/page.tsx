@@ -2,16 +2,17 @@ import Link from 'next/link'
 import { DemandMap } from '@/components/founder/demand-map'
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, Tag, ToolLinks } from '@/components/founder/bits'
-import { resolveSearchPoint } from '@/lib/admin/nearby'
+import { resolveGrowthPoint } from '@/lib/founder/geo-search'
 import { demandNear, doctorsNear, liveDoctors } from '@/lib/founder/model'
 import { GROWTH_TOOLS } from '@/lib/founder/places'
 import { formatNumber } from '@/lib/founder/format'
 import { loadFounderRoster } from '@/lib/founder/roster'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function GrowthPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdminPage()
   const params = await searchParams
   const q = typeof params.q === 'string' ? params.q : ''
   const world = params.view === 'world'
@@ -30,12 +31,16 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
   }))
   let focus: { lat: number; lng: number; label: string } | null = null
   let searchNote = ''
+  let choices: { label: string; query: string }[] = []
   let nearby25 = 0
   let nearby50 = 0
   let nearest: { label: string; detail: string; miles: number; href: string }[] = []
   if (q.trim()) {
-    const resolved = await resolveSearchPoint(createAdminClient(), q)
-    if (resolved.resolved) {
+    const resolved = await resolveGrowthPoint(q)
+    if (resolved.choices.length) {
+      choices = resolved.choices
+      searchNote = resolved.message
+    } else if (resolved.resolved) {
       focus = { lat: resolved.resolved.lat, lng: resolved.resolved.lng, label: resolved.resolved.label || q }
       nearby25 = demandNear(roster, focus.lat, focus.lng, 25)
       nearby50 = demandNear(roster, focus.lat, focus.lng, 50)
@@ -75,29 +80,38 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
             <button className="fd-ui min-h-12 rounded-xl bg-[#2C6BB4] px-4 font-extrabold text-white">Center map</button>
             <Link href={world ? '/admin/growth' : '/admin/growth?view=world'} className="fd-ui inline-flex min-h-12 items-center rounded-xl bg-[#E2ECF8] px-4 font-extrabold text-[#1F4F8C]">{world ? 'United States' : 'World'}</Link>
           </form>
+          {searchNote ? <p className="mb-3 text-[14px] text-[#B4501A]">{searchNote}</p> : null}
+          {choices.length ? (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {choices.map((choice) => (
+                <Link key={choice.query} href={`/admin/growth?q=${encodeURIComponent(choice.query)}`} className="fd-ui inline-flex min-h-11 items-center rounded-xl bg-[#E2ECF8] px-3 text-[13px] font-extrabold text-[#1F4F8C]">
+                  {choice.label}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+          {focus ? (
+            <div className="mb-3 rounded-2xl bg-[#E2ECF8] p-4">
+              <h3 className="fd-ui text-[16px] font-extrabold">{focus.label}</h3>
+              <p className="text-[14px]">{formatNumber(nearby25)} asks within 25 miles · {formatNumber(nearby50)} within 50 miles</p>
+              <ul className="mt-2 space-y-1">
+                {nearest.length === 0 ? <li>No live doctor on the map yet.</li> : nearest.map((doctor) => (
+                  <li key={doctor.href}><Link href={doctor.href} className="font-bold text-[#1F4F8C]">{doctor.label}</Link> · {doctor.miles} mi · {doctor.detail}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <DemandMap points={points} doctors={showWorld ? doctors : doctors.filter((doctor) => doctor.lng < -50 && doctor.lat > 14)} gaps={gaps} focus={focus} world={showWorld} />
           <div className="mt-3 flex flex-wrap gap-4 text-[13px] text-[#4a5865]">
             <span>Blue circles: people asking</span>
             <span className="text-[#D66829]">Orange: live doctor</span>
             <span className="text-[#C2413B]">Dashed: measured gap, 50+ miles</span>
           </div>
-          {searchNote ? <p className="mt-3 text-[14px] text-[#B4501A]">{searchNote}</p> : null}
-          {focus ? (
-            <div className="mt-4 rounded-2xl bg-[#E2ECF8] p-4">
-              <h3 className="fd-ui text-[16px] font-extrabold">{focus.label}</h3>
-              <p className="text-[14px]">{formatNumber(nearby25)} asks within 25 miles · {formatNumber(nearby50)} within 50 miles</p>
-              <ul className="mt-2 space-y-1">
-                {nearest.length === 0 ? <li>No live doctor with a pin.</li> : nearest.map((doctor) => (
-                  <li key={doctor.href}><Link href={doctor.href} className="font-bold text-[#1F4F8C]">{doctor.label}</Link> · {doctor.miles} mi · {doctor.detail}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </Card>
         <div className="space-y-4">
           <div className="rounded-[22px] bg-[#2C6BB4] p-5 text-white">
             <b className="fd-ui block text-[40px] leading-none">{roster.mentionsOk ? formatNumber(roster.demandCount) : '—'}</b>
-            <span className="text-[14px]">asks · {formatNumber(roster.cities)} cities · {roster.countries.length} countries</span>
+            <span className="text-[14px]">asks · {formatNumber(roster.cities)} cities · {roster.countryCount} countries</span>
           </div>
           <Card>
             <h2 className="fd-ui mb-2 text-[16px] font-extrabold">Top states</h2>

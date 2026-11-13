@@ -6,10 +6,12 @@ import { buildFunnel, roiCard } from '@/lib/founder/model'
 import { GROWTH_TOOLS } from '@/lib/founder/places'
 import { loadFounderRoster } from '@/lib/founder/roster'
 import { loadFounderSettings } from '@/lib/founder/settings'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function FunnelPage() {
+  await requireAdminPage()
   const roster = await loadFounderRoster()
   const settings = await loadFounderSettings()
   const roi = roiCard(roster)

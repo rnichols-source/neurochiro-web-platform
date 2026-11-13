@@ -2,10 +2,12 @@ import { PlaceHeader } from '@/components/founder/header'
 import { SettingsForm } from '@/components/founder/settings-form'
 import { founderTablesReady } from '@/lib/founder/audit'
 import { loadFounderSettings } from '@/lib/founder/settings'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SettingsPage() {
+  await requireAdminPage()
   const [settings, tables] = await Promise.all([loadFounderSettings(), founderTablesReady()])
   return (
     <div>

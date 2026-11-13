@@ -4,12 +4,14 @@ import { PeopleBoard } from '@/components/founder/people-board'
 import { doctorRows, memberRows, studentRows } from '@/lib/founder/model'
 import { PEOPLE_TOOLS } from '@/lib/founder/places'
 import { loadFounderRoster } from '@/lib/founder/roster'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 const TABS = ['doctors', 'applications', 'members', 'subscribers', 'students'] as const
 
 export default async function PeoplePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  await requireAdminPage()
   const params = await searchParams
   const tab = typeof params.tab === 'string' && TABS.includes(params.tab as typeof TABS[number]) ? params.tab as typeof TABS[number] : 'doctors'
   const id = typeof params.id === 'string' ? params.id : ''

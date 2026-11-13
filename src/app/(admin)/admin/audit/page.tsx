@@ -1,10 +1,12 @@
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, Tag } from '@/components/founder/bits'
 import { listAudit } from '@/lib/founder/audit'
+import { requireAdminPage } from '@/lib/founder/guard'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AuditPage() {
+  await requireAdminPage()
   const audit = await listAudit()
   return (
     <div>
