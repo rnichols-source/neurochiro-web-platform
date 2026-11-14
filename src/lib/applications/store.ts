@@ -548,7 +548,7 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
           },
         }),
         createdAt: text(row.created_at),
-        paymentReceived: mapped.paymentReceived,
+        paymentReceived: mapped.paymentReceived === true,
       }
     }),
     error: null,
