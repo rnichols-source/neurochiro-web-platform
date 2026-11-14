@@ -2,6 +2,8 @@ import Link from 'next/link';
 import FoundingSpots from '@/components/student/FoundingSpots';
 import { STUDENT_CONFIG } from '@/config/students';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Student membership',
   description: 'NeuroChiro student membership is $33 a month or $333 a year.',

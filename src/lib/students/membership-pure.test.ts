@@ -18,7 +18,7 @@ test('annual price is labeled $333/year', () => {
   assert.equal(membership.priceLabel, '$333/year');
 });
 
-test('founding monthly price is a founding seat, including a moved legacy subscription', () => {
+test('founding prices are labeled as the locked founding rate', () => {
   const membership = deriveStudentMembership({ tier: 'student_paid', priceCents: 999 });
   assert.equal(membership.isFounding, true);
   assert.equal(membership.plan, 'monthly');

@@ -4,8 +4,8 @@ Approved by Raymond on Oct 31, 2026. The config in `src/config/students.ts` matc
 
 ## Decided
 
-1. Founding student seats: 50. The public line is `Founding 50`. `founding.maxSeats` is the default. After those 50, membership is $33/month or $333/year.
-2. The original $12/month student subscription is moving onto the founding monthly price. It counts as one of the 50. There is no exclusion for that subscription.
+1. The first 33 paying students get $9.99/month or $99/year, locked until they graduate. Checkout uses that price while fewer than 33 founding subscriptions (active, trialing, or past due) exist. After that, checkout uses $33/month or $333/year. The public line is `Founding 33: X spots left at $9.99/mo`.
+2. Do not change existing subscribers. The original $12/month subscription stays on its current price.
 3. Current free students get 30 days of access after `launchAt`, then $33. `launchAt` is null until Raymond sets it.
 4. No free trial.
 5. Member doctors get 2 active job posts. Featured boost is $49 for 30 days.
@@ -23,12 +23,14 @@ These do not block the build.
 - Academy courses stay inside membership. They are not sold separately.
 - International students pay the same $33 USD.
 
-## Env names (values stay in Vercel, never in git)
+## Env names
 
-- `STRIPE_STUDENT_MEMBERSHIP_MONTHLY_PRICE_ID`
-- `STRIPE_STUDENT_MEMBERSHIP_ANNUAL_PRICE_ID`
-- `STRIPE_STUDENT_FOUNDING_MONTHLY_PRICE_ID`
-- `STRIPE_STUDENT_FOUNDING_ANNUAL_PRICE_ID`
+Set these in Vercel. If one is missing, checkout uses the price ID in `src/config/students.ts`.
+
+- `STRIPE_STUDENT_FOUNDING_MONTHLY_PRICE_ID` — `price_1UbYJUQ4WJOENoxrsDIl4gzE` ($9.99/month)
+- `STRIPE_STUDENT_FOUNDING_ANNUAL_PRICE_ID` — `price_1UbYJUQ4WJOENoxrZLq76Ret` ($99/year)
+- `STRIPE_STUDENT_MEMBERSHIP_MONTHLY_PRICE_ID` — `price_1UWo40Q4WJOENoxrTf8tS6Pt` ($33/month)
+- `STRIPE_STUDENT_MEMBERSHIP_ANNUAL_PRICE_ID` — `price_1UWo46Q4WJOENoxroQmr3XwK` ($333/year)
 - `STRIPE_STUDENT_FOUNDING_PROMO_CODE_ID` (optional)
 - `STRIPE_JOB_FEATURED_PRICE_ID`
 - `STRIPE_JOB_NONMEMBER_PRICE_ID`
