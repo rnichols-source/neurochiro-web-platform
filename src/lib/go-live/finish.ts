@@ -158,6 +158,12 @@ export async function publishDoctorListing(application: StoredApplication, now: 
   await writeDroppingMissing('doctors', 'id', application.doctorId, { go_live_flow_at: now })
   await syncPaidPlan(application.userId, application.stripeCustomerId)
   await notifyDoctorLive(application.doctorId)
+  const { enqueueProfileBuild } = await import('@/lib/profile-build/enqueue')
+  await enqueueProfileBuild({
+    doctorId: application.doctorId,
+    applicationId: application.id,
+    websiteUrl: application.answers.website || '',
+  })
   const { queueInstagramBatch } = await import('@/lib/instagram/queue')
   await queueInstagramBatch(application.doctorId)
 }
