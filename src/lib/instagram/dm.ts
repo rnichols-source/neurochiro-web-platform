@@ -1,5 +1,5 @@
 import { haversineDistance } from '../geo.ts'
-import { waitlistRequestLink } from '../sms/templates.ts'
+import { extractInstagramHandle } from '../instagram.ts'
 
 export type IgImportRow = {
   handle: string
@@ -18,14 +18,42 @@ export type IgWaiter = {
   id: string
   handle: string
   name: string
+  displayName?: string
   city: string
   state: string
   latitude: number
   longitude: number
   notifiedDoctorIds: string[]
+  commentUrl?: string
+  dmThreadUrl?: string
+  lastDoctorSentId?: string | null
+  lastDoctorSentMiles?: number | null
+  flaggedBusiness?: boolean
 }
 
 export type IgMatch = IgWaiter & { miles: number; band: 25 | 50 }
+
+export type IgGoLiveMatch = IgWaiter & { miles: number }
+
+/** People within this many miles of a doctor who just went live. */
+export const IG_GO_LIVE_RADIUS_MILES = 60
+
+/**
+ * A previous doctor farther than this is not "nearby".
+ * Those people are included again when a closer doctor goes live.
+ */
+export const IG_ALREADY_NEAR_MILES = 30
+
+const COMMENT_TEMPLATES = [
+  (who: string, doctorTag: string, place: string, link: string) =>
+    `Hey ${who} — it's Dr. Ray. ${doctorTag} just joined NeuroChiro near ${place}. If you want their office to reach out, request a visit here: ${link}`,
+  (who: string, doctorTag: string, place: string, link: string) =>
+    `${who} ${doctorTag} is now on NeuroChiro near ${place}. Their office can follow up from this request form: ${link}`,
+  (who: string, doctorTag: string, place: string, link: string) =>
+    `Hi ${who}, Dr. Ray here. Tagging ${doctorTag}, who just went live near ${place}. Request a visit: ${link}`,
+  (who: string, doctorTag: string, place: string, link: string) =>
+    `${who} — Dr. Ray. ${doctorTag} just went live near ${place}. Ask their office to reach out with this form: ${link}`,
+]
 
 const HANDLE = /^@?[a-z0-9._]{1,30}$/i
 
@@ -101,6 +129,75 @@ export function parseLocation(raw: string): ParsedPlace {
   return { city, state: stateToken, zip, country: zip || stateToken ? 'US' : '' }
 }
 
+/** Listing request form. The hash opens the appointment form on that doctor's page. */
+export function doctorRequestFormUrl(slugOrProfileUrl: string | null | undefined): string {
+  const raw = (slugOrProfileUrl || '').trim()
+  if (!raw) return 'https://neurochiro.co/directory'
+  let slug = raw
+  if (raw.startsWith('http')) {
+    try {
+      const url = new URL(raw)
+      if (url.protocol === 'https:' && url.hostname === 'neurochiro.co') {
+        slug = url.pathname.replace(/^\/directory\//, '').replace(/\/$/, '')
+      }
+    } catch {
+      slug = raw
+    }
+  }
+  slug = slug.replace(/^\/directory\//, '').replace(/\/$/, '').split('#')[0].toLowerCase()
+  if (!/^[a-z0-9-]{1,80}$/.test(slug)) return 'https://neurochiro.co/directory'
+  return `https://neurochiro.co/directory/${slug}#appointment-form`
+}
+
+/** Handle saved on the doctor listing, without the @. */
+export function listingInstagramHandle(instagramUrl: string | null | undefined, normalized: string | null | undefined): string {
+  const fromUrl = extractInstagramHandle(instagramUrl)
+  const urlHandle = fromUrl ? cleanHandle(fromUrl) : ''
+  if (urlHandle && HANDLE.test(urlHandle)) return urlHandle
+  const stored = cleanHandle(normalized || '')
+  if (stored && HANDLE.test(stored)) return stored
+  return ''
+}
+
+export function instagramPersonLabel(handle: string, name: string): string {
+  const clean = cleanHandle(handle)
+  if (clean && HANDLE.test(clean)) return `@${clean}`
+  return name.trim() || 'there'
+}
+
+export function instagramDoctorTag(handle: string, doctorName: string): string {
+  const clean = cleanHandle(handle)
+  if (clean && HANDLE.test(clean)) return `@${clean}`
+  return doctorName.trim() || 'the new NeuroChiro doctor'
+}
+
+export function commentVariantIndex(seed: string, count = COMMENT_TEMPLATES.length): number {
+  let hash = 2166136261
+  const size = count > 0 ? count : 1
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i)
+    hash = Math.imul(hash, 16777619)
+  }
+  return (hash >>> 0) % size
+}
+
+export function instagramComment(input: {
+  name: string
+  handle: string
+  doctorName: string
+  doctorHandle: string
+  doctorCity: string
+  profileUrl: string
+  variantKey: string
+}): string {
+  const who = instagramPersonLabel(input.handle, input.name)
+  const doctorTag = instagramDoctorTag(input.doctorHandle, input.doctorName)
+  const place = input.doctorCity.trim() || 'you'
+  const link = doctorRequestFormUrl(input.profileUrl)
+  const template = COMMENT_TEMPLATES[commentVariantIndex(input.variantKey)] || COMMENT_TEMPLATES[0]
+  return template(who, doctorTag, place, link)
+}
+
 export function instagramDm(input: {
   name: string
   handle: string
@@ -108,16 +205,71 @@ export function instagramDm(input: {
   doctorCity: string
   profileUrl: string
 }): string {
-  const who = input.name.trim() || input.handle
+  const who = input.name.trim() || instagramPersonLabel(input.handle, '')
   const place = input.doctorCity.trim() || 'your area'
-  const link = waitlistRequestLink(input.profileUrl)
-  return `Hey ${who} — it's Dr. Ray. A new NeuroChiro doctor just joined near you: ${input.doctorName} in ${place}. If you want their office to call, use this link: ${link}`
+  const link = doctorRequestFormUrl(input.profileUrl)
+  return `Hey ${who} — it's Dr. Ray. A new NeuroChiro doctor just joined near you: ${input.doctorName} in ${place}. If you want their office to reach out, use this request form: ${link}`
 }
 
-export function musePaste(rows: { handle: string; message: string }[]): string {
-  return rows
-    .map((row) => `@${cleanHandle(row.handle)}\n${row.message.trim()}`)
-    .join('\n\n')
+export function musePaste(rows: {
+  handle: string
+  message: string
+  displayName?: string
+  comment?: string
+  commentUrl?: string
+  dmUrl?: string
+}[]): string {
+  return rows.map((row) => {
+    const handle = cleanHandle(row.handle)
+    const lines = [handle ? `@${handle}` : (row.displayName?.trim() || 'No name saved')]
+    if (row.commentUrl) lines.push(`Comment: ${row.commentUrl}`)
+    if (row.dmUrl) lines.push(`DM thread: ${row.dmUrl}`)
+    if (row.comment?.trim()) {
+      lines.push('COMMENT')
+      lines.push(row.comment.trim())
+    }
+    if (row.message.trim()) {
+      if (row.comment?.trim()) lines.push('DM')
+      lines.push(row.message.trim())
+    }
+    return lines.join('\n')
+  }).join('\n\n')
+}
+
+function usablePoint(latitude: number, longitude: number): boolean {
+  return Number.isFinite(latitude) && Number.isFinite(longitude) && !(latitude === 0 && longitude === 0)
+}
+
+/**
+ * People this new doctor should be told about.
+ * They are within 60 miles, this doctor is the closest live doctor,
+ * and they were not already sent a doctor within about 30 miles.
+ */
+export function matchClosestIgWaiters(
+  waiters: IgWaiter[],
+  doctor: { id: string; latitude: number; longitude: number },
+  liveDoctors: { id: string; latitude: number; longitude: number }[],
+  limitMiles = IG_GO_LIVE_RADIUS_MILES,
+): IgGoLiveMatch[] {
+  const others = liveDoctors.filter((row) => row.id !== doctor.id && usablePoint(row.latitude, row.longitude))
+  const matches: IgGoLiveMatch[] = []
+  for (const waiter of waiters) {
+    if (waiter.flaggedBusiness) continue
+    if (waiter.notifiedDoctorIds.includes(doctor.id)) continue
+    if (waiter.lastDoctorSentId && waiter.lastDoctorSentId === doctor.id) continue
+    if (!usablePoint(waiter.latitude, waiter.longitude)) continue
+    const milesRaw = haversineDistance(doctor.latitude, doctor.longitude, waiter.latitude, waiter.longitude)
+    if (milesRaw > limitMiles) continue
+    const previous = waiter.lastDoctorSentMiles
+    if (typeof previous === 'number' && Number.isFinite(previous) && previous <= IG_ALREADY_NEAR_MILES) continue
+    const closerLiveDoctor = others.some((other) =>
+      haversineDistance(other.latitude, other.longitude, waiter.latitude, waiter.longitude) < milesRaw,
+    )
+    if (closerLiveDoctor) continue
+    matches.push({ ...waiter, miles: Math.round(milesRaw * 10) / 10 })
+  }
+  matches.sort((a, b) => a.miles - b.miles)
+  return matches
 }
 
 export function matchIgWaiters(
