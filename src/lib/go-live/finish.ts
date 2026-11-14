@@ -28,7 +28,7 @@ function admin() {
   return createAdminClient() as any
 }
 
-function sourceFrom(application: StoredApplication): ListingSource {
+function sourceFrom(application: StoredApplication, currentPhone = ''): ListingSource {
   return {
     firstName: application.firstName,
     lastName: application.lastName,
@@ -41,6 +41,8 @@ function sourceFrom(application: StoredApplication): ListingSource {
     website: application.answers.website,
     instagram: application.answers.instagram,
     phone: application.mobileE164 || '',
+    officePhone: application.answers.officePhone || '',
+    currentPhone,
     clinicName: '',
   }
 }
@@ -129,7 +131,7 @@ async function flagProfile(doctorId: string, source: ListingSource, pinned: bool
     photo: source.photoUrl || '',
     specialties: techniquesToSpecialties(source.techniques),
     hours: source.hours || '',
-    phone: source.phone,
+    phone: (source.currentPhone || '').trim() || (source.officePhone || '').trim(),
     address: source.officeAddress,
     city: source.city,
     bookingUrl: source.bookingUrl || '',
@@ -145,7 +147,9 @@ async function flagProfile(doctorId: string, source: ListingSource, pinned: bool
 }
 
 export async function publishDoctorListing(application: StoredApplication, now: string): Promise<void> {
-  const source = sourceFrom(application)
+  const listed = await admin().from('doctors').select('phone').eq('id', application.doctorId).maybeSingle()
+  const currentPhone = !listed.error && typeof listed.data?.phone === 'string' ? listed.data.phone : ''
+  const source = sourceFrom(application, currentPhone)
   const patch = listingContentPatch(source)
   if (Object.keys(patch).length) await writeDroppingMissing('doctors', 'id', application.doctorId, patch)
   const pinned = await pinDoctor(application.doctorId, source.officeAddress, source.city, source.state, source.country)
@@ -154,6 +158,12 @@ export async function publishDoctorListing(application: StoredApplication, now: 
   await writeDroppingMissing('doctors', 'id', application.doctorId, { go_live_flow_at: now })
   await syncPaidPlan(application.userId, application.stripeCustomerId)
   await notifyDoctorLive(application.doctorId)
+  const { enqueueProfileBuild } = await import('@/lib/profile-build/enqueue')
+  await enqueueProfileBuild({
+    doctorId: application.doctorId,
+    applicationId: application.id,
+    websiteUrl: application.answers.website || '',
+  })
   const { queueInstagramBatch } = await import('@/lib/instagram/queue')
   await queueInstagramBatch(application.doctorId)
 }

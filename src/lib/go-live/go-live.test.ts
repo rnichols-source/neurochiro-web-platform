@@ -4,11 +4,13 @@ import { nudgeCopy } from './messages.ts'
 import { isStopMessage, waitlistTextGate } from '../sms/waitlist-text.ts'
 import {
   canTextNumber,
+  checkoutApplicationContact,
   daysSince,
   duplicateKey,
   formatNewMembers,
   isDoctorMembershipCheckout,
   listingContentPatch,
+  listingPhonesFromCheckout,
   needsProfileFinish,
   nextNudge,
   orderWaitlistTiers,
@@ -26,6 +28,7 @@ import {
   webhookDisposition,
   type CheckoutIdentity,
   type ExistingListing,
+  type ListingSource,
 } from './plan.ts'
 
 const NOW = '2026-11-14T18:00:00.000Z'
@@ -248,28 +251,33 @@ describe('nudge stop conditions', () => {
   })
 })
 
+function practice(overrides: Partial<ListingSource> = {}): ListingSource {
+  return {
+    firstName: 'Ada',
+    lastName: 'Lovelace',
+    practiceApproach: 'We focus on the nervous system and how the body adapts.',
+    techniques: 'Toggle and Blair',
+    officeAddress: '123 Main Street',
+    city: 'Greenville',
+    state: 'SC',
+    country: 'US',
+    website: 'https://example.com',
+    instagram: '@lovelace',
+    phone: '+18645550100',
+    clinicName: 'Lovelace Chiropractic',
+    hours: 'Mon 9-5',
+    bookingUrl: 'https://example.com/book',
+    photoUrl: 'https://example.com/photo.jpg',
+    ...overrides,
+  }
+}
+
 describe('listing build and unpaid hide', () => {
   it('copies practice answers onto the listing and scores what is still missing', () => {
-    const patch = listingContentPatch({
-      firstName: 'Ada',
-      lastName: 'Lovelace',
-      practiceApproach: 'We focus on the nervous system and how the body adapts.',
-      techniques: 'Toggle and Blair',
-      officeAddress: '123 Main Street',
-      city: 'Greenville',
-      state: 'SC',
-      country: 'US',
-      website: 'https://example.com',
-      instagram: '@lovelace',
-      phone: '+18645550100',
-      clinicName: 'Lovelace Chiropractic',
-      hours: 'Mon 9-5',
-      bookingUrl: 'https://example.com/book',
-      photoUrl: 'https://example.com/photo.jpg',
-    })
+    const patch = listingContentPatch(practice())
     assert.equal(patch.clinic_name, 'Lovelace Chiropractic')
     assert.deepEqual(patch.specialties, ['Toggle', 'Blair'])
-    assert.equal(patch.phone, '+18645550100')
+    assert.equal('phone' in patch, false)
     assert.equal(patch.instagram_url, 'https://www.instagram.com/lovelace/')
     const score = profileCompleteness({
       clinicName: '',
@@ -290,6 +298,80 @@ describe('listing build and unpaid hide', () => {
     assert.equal(publishOnPayment('paid'), true)
     assert.equal(publishOnPayment('requires_action'), false)
     assert.equal(publishOnPayment('failed'), false)
+  })
+
+  it('keeps an existing listing phone when the application is approved', () => {
+    const kept = listingContentPatch(practice({
+      phone: '+18645550199',
+      officePhone: '(864) 555-0100',
+      currentPhone: '(864) 555-0142',
+    }))
+    assert.equal('phone' in kept, false)
+
+    const filled = listingContentPatch(practice({
+      phone: '+18645550199',
+      officePhone: '(864) 555-0100',
+      currentPhone: '',
+    }))
+    assert.equal(filled.phone, '(864) 555-0100')
+  })
+
+  it('never puts the checkout cell on the public listing phone', () => {
+    const consented = listingPhonesFromCheckout({ phone: '+18645550100', smsConsent: true })
+    assert.equal(consented.phone, '')
+    assert.equal(consented.alertPhone, '+18645550100')
+
+    const builtIn = listingPhonesFromCheckout({
+      phone: phoneFromCheckout([], '+18645550188'),
+      smsConsent: true,
+    })
+    assert.equal(builtIn.phone, '')
+    assert.equal(builtIn.alertPhone, '+18645550188')
+
+    const customCell = listingPhonesFromCheckout({
+      phone: phoneFromCheckout([{ key: 'mobile', text: { value: '8645550199' } }], '+18645550100'),
+      smsConsent: true,
+    })
+    assert.equal(customCell.phone, '')
+    assert.equal(customCell.alertPhone, '8645550199')
+
+    const noConsent = listingPhonesFromCheckout({ phone: '+18645550100', smsConsent: false })
+    assert.equal(noConsent.phone, '')
+    assert.equal(noConsent.alertPhone, null)
+
+    const unanswered = listingPhonesFromCheckout({ phone: '+18645550100', smsConsent: null })
+    assert.equal(unanswered.phone, '')
+    assert.equal(unanswered.alertPhone, null)
+  })
+
+  it('stores the checkout cell on the application whether or not they consent', () => {
+    const consented = checkoutApplicationContact({
+      phone: phoneFromCheckout([{ key: 'mobile', text: { value: '8645550100' } }], null),
+      smsConsent: true,
+      country: 'US',
+      now: NOW,
+    })
+    assert.equal(consented.listingPhone, '')
+    assert.deepEqual(consented.application, {
+      mobile_e164: '+18645550100',
+      sms_consent: true,
+      sms_consent_at: NOW,
+    })
+    assert.equal(consented.alertPhone, '+18645550100')
+
+    const declined = checkoutApplicationContact({
+      phone: phoneFromCheckout([], '(864) 555-0199'),
+      smsConsent: false,
+      country: 'US',
+      now: NOW,
+    })
+    assert.equal(declined.listingPhone, '')
+    assert.deepEqual(declined.application, {
+      mobile_e164: '+18645550199',
+      sms_consent: false,
+      sms_consent_at: null,
+    })
+    assert.equal(declined.alertPhone, null)
   })
 
   it('hides an unpaid listing after 72 hours and leaves a paid one up', () => {
