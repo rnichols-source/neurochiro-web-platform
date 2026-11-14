@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CheckoutButton from '@/components/student/CheckoutButton';
+import FoundingSpots from '@/components/student/FoundingSpots';
 import PageHeader from '@/components/portal/PageHeader';
 import { STUDENT_CONFIG } from '@/config/students';
 import { getStudentPortal } from '@/lib/students/context';
@@ -25,6 +26,7 @@ export default async function SubscribePage({ searchParams }: { searchParams: Pr
         </article>
       ) : (
         <article className="bg-white border border-portal-border rounded-xl p-6 space-y-4">
+          <FoundingSpots className="text-base font-bold text-portal-ink" />
           <p className="text-base text-portal-ink">${monthly}/month or ${annual}/year. The yearly plan is two months free. Cancel anytime. No free trial.</p>
           <CheckoutButton plan={plan} label={plan === 'annual' ? `Continue with $${annual}/year` : `Continue with $${monthly}/month`} />
           <Link href={plan === 'annual' ? '/student/subscribe?plan=monthly' : '/student/subscribe?plan=annual'} className="inline-flex min-h-11 items-center text-base font-bold text-portal-ink">

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import FoundingSpots from '@/components/student/FoundingSpots';
 import { STUDENT_CONFIG } from '@/config/students';
 
 export const metadata = {
@@ -14,7 +15,8 @@ export default function StudentPricing() {
       <h1 className="text-3xl font-bold text-[#16202a]">Student membership</h1>
       <p className="mt-3 text-base text-[#3d4a57]">{STUDENT_CONFIG.membership.tagline}</p>
       <article className="mt-6 bg-white border border-[#e3e8ed] rounded-xl p-6">
-        <p className="text-3xl font-bold text-[#16202a]">${monthly}/month</p>
+        <FoundingSpots className="text-base font-bold text-[#16202a]" />
+        <p className="mt-2 text-3xl font-bold text-[#16202a]">${monthly}/month</p>
         <p className="mt-1 text-lg text-[#16202a]">${annual}/year</p>
         <p className="mt-2 text-base text-[#3d4a57]">Two months free on the yearly plan. Cancel anytime.</p>
         <Link href="/students" className="mt-4 inline-flex min-h-11 items-center text-base font-bold text-[#d66829]">See what is included</Link>

@@ -4,8 +4,8 @@ Approved by Raymond on Oct 31, 2026. The config in `src/config/students.ts` matc
 
 ## Decided
 
-1. Founding rate: none. `founding.enabled` is false. Everyone pays $33/month or $333/year.
-2. The one existing $12/month student subscriber stays at $12, with full access. Do not touch that subscription.
+1. Founding student seats: 50. The public line is `Founding 50`. `founding.maxSeats` is the default. After those 50, membership is $33/month or $333/year.
+2. The original $12/month student subscription is moving onto the founding monthly price. It counts as one of the 50. There is no exclusion for that subscription.
 3. Current free students get 30 days of access after `launchAt`, then $33. `launchAt` is null until Raymond sets it.
 4. No free trial.
 5. Member doctors get 2 active job posts. Featured boost is $49 for 30 days.
@@ -27,7 +27,9 @@ These do not block the build.
 
 - `STRIPE_STUDENT_MEMBERSHIP_MONTHLY_PRICE_ID`
 - `STRIPE_STUDENT_MEMBERSHIP_ANNUAL_PRICE_ID`
-- `STRIPE_STUDENT_FOUNDING_PROMO_CODE_ID` (optional, unused while founding is off)
+- `STRIPE_STUDENT_FOUNDING_MONTHLY_PRICE_ID`
+- `STRIPE_STUDENT_FOUNDING_ANNUAL_PRICE_ID`
+- `STRIPE_STUDENT_FOUNDING_PROMO_CODE_ID` (optional)
 - `STRIPE_JOB_FEATURED_PRICE_ID`
 - `STRIPE_JOB_NONMEMBER_PRICE_ID`
 - `STUDENT_PRICE_CHANGE_EMAILS` set to `on` only after you approve the draft in `docs/students/price-change-email.md`

@@ -18,7 +18,15 @@ test('annual price is labeled $333/year', () => {
   assert.equal(membership.priceLabel, '$333/year');
 });
 
-test('$12 subscriber stays grandfathered', () => {
+test('founding monthly price is a founding seat, including a moved legacy subscription', () => {
+  const membership = deriveStudentMembership({ tier: 'student_paid', priceCents: 999 });
+  assert.equal(membership.isFounding, true);
+  assert.equal(membership.plan, 'monthly');
+  assert.equal(membership.priceLabel, '$9.99/month');
+  assert.equal(deriveStudentMembership({ subscriptionStatus: 'active', priceCents: 9900 }).priceLabel, '$99/year');
+});
+
+test('$12 subscriber stays grandfathered until the price changes', () => {
   const membership = deriveStudentMembership({ tier: 'student_paid', priceCents: 1200 });
   assert.equal(membership.source, 'grandfathered');
   assert.equal(membership.priceLabel, 'Your plan: $12/month (original rate)');
