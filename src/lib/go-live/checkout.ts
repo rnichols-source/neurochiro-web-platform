@@ -7,9 +7,9 @@ import { finishDecision } from './finish'
 import { loadApplicationById } from '@/lib/applications/store'
 import { approvalSmsFor } from '@/lib/applications/approval-sms'
 import {
+  checkoutApplicationContact,
   countryFromCurrency,
   isDoctorMembershipCheckout,
-  listingPhonesFromCheckout,
   phoneFromCheckout,
   planCheckoutIntake,
   planInvoiceIntake,
@@ -147,7 +147,13 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
 async function createPendingDoctor(identity: CheckoutIdentity): Promise<string | null> {
   const { firstName, lastName } = splitName(identity.name || identity.email)
   const country = countryFromCurrency(identity.currency, identity.country)
-  const phones = listingPhonesFromCheckout({ phone: identity.phone, smsConsent: identity.smsConsent })
+  const now = new Date().toISOString()
+  const contact = checkoutApplicationContact({
+    phone: identity.phone,
+    smsConsent: identity.smsConsent,
+    country,
+    now,
+  })
   const created = await db().auth.admin.createUser({
     email: identity.email,
     email_confirm: true,
@@ -181,12 +187,12 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
     country,
     address: '',
     bio: '',
-    phone: phones.phone,
+    phone: contact.listingPhone,
     specialties: [],
     verification_status: 'hidden',
     membership_tier: 'free',
     is_approved: false,
-    paid_at: new Date().toISOString(),
+    paid_at: now,
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
     region_code: country === 'US' ? 'US' : country,
@@ -198,20 +204,18 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
     status: 'under_review',
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
-    payment_received_at: new Date().toISOString(),
+    payment_received_at: now,
     city: identity.city,
     state: identity.state,
     country,
     plan: (identity.amountTotal || 0) >= 50000 ? 'annual' : 'monthly',
+    ...(contact.application || {}),
   })
-  if (phones.alertPhone) {
+  if (contact.alertPhone) {
     const { saveDoctorAlertPhone } = await import('@/lib/applications/store')
-    const { canTextNumber } = await import('./plan')
-    if (canTextNumber(phones.alertPhone)) {
-      await saveDoctorAlertPhone(doctor.data.id, phones.alertPhone, true, new Date().toISOString())
-    } else {
-      await db().from('doctors').update({ sms_region_note: 'outside_us_canada', sms_prompt_required: false }).eq('id', doctor.data.id)
-    }
+    await saveDoctorAlertPhone(doctor.data.id, contact.alertPhone, true, now)
+  } else if (identity.smsConsent === true && (identity.phone || '').trim()) {
+    await db().from('doctors').update({ sms_region_note: 'outside_us_canada', sms_prompt_required: false }).eq('id', doctor.data.id)
   } else {
     await db().from('doctors').update({ sms_prompt_required: true }).eq('id', doctor.data.id)
   }
@@ -238,8 +242,16 @@ async function markPaymentReceived(doctorId: string, identity: CheckoutIdentity,
     await linkStripeOnly(doctorId, identity)
     return
   }
+  const now = new Date().toISOString()
+  const resolvedCountry = country || countryFromCurrency(identity.currency, identity.country)
+  const contact = checkoutApplicationContact({
+    phone: identity.phone,
+    smsConsent: identity.smsConsent,
+    country: resolvedCountry,
+    now,
+  })
   await db().from('doctors').update({
-    paid_at: new Date().toISOString(),
+    paid_at: now,
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
     verification_status: 'hidden',
@@ -250,14 +262,19 @@ async function markPaymentReceived(doctorId: string, identity: CheckoutIdentity,
     status: 'under_review',
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
-    payment_received_at: new Date().toISOString(),
+    payment_received_at: now,
     city: identity.city,
     state: identity.state,
-    country: country || countryFromCurrency(identity.currency, identity.country),
+    country: resolvedCountry,
     user_id: userId,
+    ...(contact.application || {}),
   }
   if (existing.data?.id) await db().from('doctor_applications').update(patch).eq('id', existing.data.id)
   else await db().from('doctor_applications').insert({ ...patch, doctor_id: doctorId })
+  if (contact.alertPhone) {
+    const { saveDoctorAlertPhone } = await import('@/lib/applications/store')
+    await saveDoctorAlertPhone(doctorId, contact.alertPhone, true, now)
+  }
 }
 
 export async function noteMembershipInvoicePaid(invoice: {

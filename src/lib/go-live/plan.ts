@@ -1,3 +1,4 @@
+import { toApplicationE164 } from '../applications/phone.ts'
 import { toE164 } from '../sms/phone.ts'
 
 export const DOCTOR_PAY_URL = 'https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q'
@@ -375,6 +376,41 @@ export function listingPhonesFromCheckout(input: {
   return {
     phone: '',
     alertPhone: input.smsConsent === true && cell ? cell : null,
+  }
+}
+
+export type CheckoutApplicationContact = {
+  /** Public listing phone. A checkout cell is never written here. */
+  listingPhone: ''
+  application: {
+    mobile_e164: string
+    sms_consent: boolean
+    sms_consent_at: string | null
+  } | null
+  /** Set when they consented and the number can take a US or Canadian text. */
+  alertPhone: string | null
+}
+
+/** Keep the checkout cell on the application, whether or not they agreed to texts. */
+export function checkoutApplicationContact(input: {
+  phone: string | null
+  smsConsent: boolean | null
+  country: string | null
+  now: string
+}): CheckoutApplicationContact {
+  const consent = input.smsConsent === true
+  const country = (input.country || 'US').trim() || 'US'
+  const mobile = toApplicationE164(input.phone, country)
+  return {
+    listingPhone: '',
+    application: mobile
+      ? {
+          mobile_e164: mobile,
+          sms_consent: consent,
+          sms_consent_at: consent ? input.now : null,
+        }
+      : null,
+    alertPhone: consent && mobile && canTextNumber(mobile) ? mobile : null,
   }
 }
 

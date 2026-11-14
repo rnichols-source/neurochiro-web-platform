@@ -4,6 +4,7 @@ import { nudgeCopy } from './messages.ts'
 import { isStopMessage, waitlistTextGate } from '../sms/waitlist-text.ts'
 import {
   canTextNumber,
+  checkoutApplicationContact,
   daysSince,
   duplicateKey,
   formatNewMembers,
@@ -341,6 +342,36 @@ describe('listing build and unpaid hide', () => {
     const unanswered = listingPhonesFromCheckout({ phone: '+18645550100', smsConsent: null })
     assert.equal(unanswered.phone, '')
     assert.equal(unanswered.alertPhone, null)
+  })
+
+  it('stores the checkout cell on the application whether or not they consent', () => {
+    const consented = checkoutApplicationContact({
+      phone: phoneFromCheckout([{ key: 'mobile', text: { value: '8645550100' } }], null),
+      smsConsent: true,
+      country: 'US',
+      now: NOW,
+    })
+    assert.equal(consented.listingPhone, '')
+    assert.deepEqual(consented.application, {
+      mobile_e164: '+18645550100',
+      sms_consent: true,
+      sms_consent_at: NOW,
+    })
+    assert.equal(consented.alertPhone, '+18645550100')
+
+    const declined = checkoutApplicationContact({
+      phone: phoneFromCheckout([], '(864) 555-0199'),
+      smsConsent: false,
+      country: 'US',
+      now: NOW,
+    })
+    assert.equal(declined.listingPhone, '')
+    assert.deepEqual(declined.application, {
+      mobile_e164: '+18645550199',
+      sms_consent: false,
+      sms_consent_at: null,
+    })
+    assert.equal(declined.alertPhone, null)
   })
 
   it('hides an unpaid listing after 72 hours and leaves a paid one up', () => {
