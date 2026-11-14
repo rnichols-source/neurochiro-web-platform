@@ -5,6 +5,7 @@ import { checkAdminAuth } from '@/lib/admin-auth'
 import { normalizeCountry, normalizeState } from '@/lib/admin/geo-normalize'
 import { looseFrom, type LooseFilter, type PostgrestError } from '@/lib/admin/loose-query'
 import { memberBillingSnapshot, stripeCustomerSummary } from '@/lib/admin/member-billing'
+import { loadStartsForDoctor } from '@/lib/founder/patient-starts'
 import {
   cityOrFilter,
   countryOrFilter,
@@ -788,13 +789,17 @@ async function loadDoctorDetail(admin: ReturnType<typeof createAdminClient>, mem
     is_approved: boolOrNull(row.is_approved),
     onboarding_call_status: textOrNull(row.onboarding_call_status),
   })
-  const [contacts, contactCount, introductions, routing, stripeSummary, lastSignIn] = await Promise.all([
+  const [contacts, contactCount, introductions, routing, stripeSummary, lastSignIn, starts] = await Promise.all([
     looseFrom(admin, 'contact_requests').select('id, name, status, created_at').eq('doctor_id', memberId).order('created_at', { ascending: false }).limit(10),
     looseFrom(admin, 'contact_requests').select('id', { count: 'exact', head: true }).eq('doctor_id', memberId),
     getDoctorIntroductions(memberId),
     getDoctorRoutingStatsForOne(memberId),
     customerId ? stripeCustomerSummary(customerId) : Promise.resolve(null),
     lastSignInAt(admin, userId),
+    loadStartsForDoctor(memberId).catch((err) => {
+      console.error('admin member patient starts', err instanceof Error ? err.name : 'error')
+      return { reports: [], patientsStarted: 0, estRevenueUsd: null, valueIsEstimate: false, officialIntroCount: null, membership: { annualUsd: null, amountLabel: null, reason: 'no_amount' as const } }
+    }),
   ])
   const form: DoctorFormValues = {
     first_name: textOrEmpty(row.first_name),
@@ -862,6 +867,23 @@ async function loadDoctorDetail(admin: ReturnType<typeof createAdminClient>, mem
       contactTotal: contactCount.error ? null : contactCount.count || 0,
       introductions: introductions.slice(0, 10),
       introductionTotal: introductions.length,
+      officialIntroCount: starts.officialIntroCount,
+      patientsStarted: starts.patientsStarted,
+      estRevenueUsd: starts.estRevenueUsd,
+      valueIsEstimate: starts.valueIsEstimate,
+      membershipAnnualUsd: starts.membership.annualUsd,
+      membershipCostUnknown: starts.membership.annualUsd == null
+        ? (starts.membership.reason === 'stripe_unavailable' ? 'Stripe is unavailable, so membership cost and ROI are not shown.' : 'Membership cost is not in Stripe yet, so ROI is not shown.')
+        : null,
+      startReports: starts.reports.map((row) => ({
+        id: row.id,
+        patientsStarted: row.patientsStarted,
+        reportedOn: row.reportedOn,
+        carePlanValueUsd: row.carePlanValueUsd,
+        valueIsEstimate: row.valueIsEstimate,
+        estRevenueUsd: row.estRevenueUsd,
+        notes: row.notes,
+      })),
       routing: routingView,
     },
   }
