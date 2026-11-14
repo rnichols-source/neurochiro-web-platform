@@ -14,6 +14,8 @@ export type DiscordApplication = {
   scanTypes: string
   yearsInPractice: number | null
   officeAddress: string
+  /** Public office phone, when the application collected one apart from the alert mobile. */
+  officePhone?: string
   website: string
   instagram: string
   heardAbout: string

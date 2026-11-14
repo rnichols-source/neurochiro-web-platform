@@ -9,6 +9,7 @@ import { approvalSmsFor } from '@/lib/applications/approval-sms'
 import {
   countryFromCurrency,
   isDoctorMembershipCheckout,
+  listingPhonesFromCheckout,
   phoneFromCheckout,
   planCheckoutIntake,
   planInvoiceIntake,
@@ -146,6 +147,7 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
 async function createPendingDoctor(identity: CheckoutIdentity): Promise<string | null> {
   const { firstName, lastName } = splitName(identity.name || identity.email)
   const country = countryFromCurrency(identity.currency, identity.country)
+  const phones = listingPhonesFromCheckout({ phone: identity.phone, smsConsent: identity.smsConsent })
   const created = await db().auth.admin.createUser({
     email: identity.email,
     email_confirm: true,
@@ -179,7 +181,7 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
     country,
     address: '',
     bio: '',
-    phone: identity.phone || '',
+    phone: phones.phone,
     specialties: [],
     verification_status: 'hidden',
     membership_tier: 'free',
@@ -202,11 +204,11 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
     country,
     plan: (identity.amountTotal || 0) >= 50000 ? 'annual' : 'monthly',
   })
-  if (identity.phone && identity.smsConsent === true) {
+  if (phones.alertPhone) {
     const { saveDoctorAlertPhone } = await import('@/lib/applications/store')
     const { canTextNumber } = await import('./plan')
-    if (canTextNumber(identity.phone)) {
-      await saveDoctorAlertPhone(doctor.data.id, identity.phone, true, new Date().toISOString())
+    if (canTextNumber(phones.alertPhone)) {
+      await saveDoctorAlertPhone(doctor.data.id, phones.alertPhone, true, new Date().toISOString())
     } else {
       await db().from('doctors').update({ sms_region_note: 'outside_us_canada', sms_prompt_required: false }).eq('id', doctor.data.id)
     }

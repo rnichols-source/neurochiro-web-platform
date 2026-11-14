@@ -108,6 +108,7 @@ export function mapApplication(row: Row, doctor?: Row | null, profile?: Row | nu
       scanTypes: text(row.scan_types),
       yearsInPractice: typeof row.years_in_practice === 'number' ? row.years_in_practice : null,
       officeAddress: text(row.office_address),
+      officePhone: text(row.office_phone) || text(row.public_phone),
       website: text(row.website),
       instagram: text(row.instagram),
       heardAbout: text(row.heard_about),
