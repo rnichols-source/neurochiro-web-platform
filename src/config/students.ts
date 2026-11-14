@@ -1,10 +1,16 @@
 export const STUDENT_CONFIG = {
   membership: {
-    monthly: { usd: 33, stripePriceEnv: 'STRIPE_STUDENT_MEMBERSHIP_MONTHLY_PRICE_ID', expectCents: 3300, interval: 'month' as const },
-    annual: { usd: 333, stripePriceEnv: 'STRIPE_STUDENT_MEMBERSHIP_ANNUAL_PRICE_ID', expectCents: 33300, interval: 'year' as const },
+    monthly: { usd: 33, stripePriceEnv: 'STRIPE_STUDENT_MEMBERSHIP_MONTHLY_PRICE_ID', priceId: 'price_1UWo40Q4WJOENoxrTf8tS6Pt', expectCents: 3300, interval: 'month' as const },
+    annual: { usd: 333, stripePriceEnv: 'STRIPE_STUDENT_MEMBERSHIP_ANNUAL_PRICE_ID', priceId: 'price_1UWo46Q4WJOENoxroQmr3XwK', expectCents: 33300, interval: 'year' as const },
     tagline: '$33 a month. One for each of the 33 Principles.',
   },
-  founding: { enabled: false, maxSeats: 100, promoCodeEnv: 'STRIPE_STUDENT_FOUNDING_PROMO_CODE_ID' },
+  founding: {
+    enabled: true,
+    maxSeats: 33,
+    promoCodeEnv: 'STRIPE_STUDENT_FOUNDING_PROMO_CODE_ID',
+    monthly: { usd: 9.99, stripePriceEnv: 'STRIPE_STUDENT_FOUNDING_MONTHLY_PRICE_ID', priceId: 'price_1UbYJUQ4WJOENoxrsDIl4gzE', expectCents: 999, interval: 'month' as const },
+    annual: { usd: 99, stripePriceEnv: 'STRIPE_STUDENT_FOUNDING_ANNUAL_PRICE_ID', priceId: 'price_1UbYJUQ4WJOENoxrZLq76Ret', expectCents: 9900, interval: 'year' as const },
+  },
   freeAccessGraceDays: 30,
   launchAt: null as string | null,
   contractLabAiPerDay: 5,

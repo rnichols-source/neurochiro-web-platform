@@ -65,6 +65,26 @@ export function deriveStudentMembership(input: StudentMembershipInput): StudentM
         isFounding: false,
       };
     }
+    if (paid && input.priceCents === STUDENT_CONFIG.founding.monthly.expectCents) {
+      return {
+        status: 'member',
+        source: 'stripe',
+        plan: 'monthly',
+        priceLabel: '$9.99/month',
+        renewsAt: input.renewsAt ?? null,
+        isFounding: true,
+      };
+    }
+    if (paid && input.priceCents === STUDENT_CONFIG.founding.annual.expectCents) {
+      return {
+        status: 'member',
+        source: 'stripe',
+        plan: 'annual',
+        priceLabel: '$99/year',
+        renewsAt: input.renewsAt ?? null,
+        isFounding: true,
+      };
+    }
     if (paid) {
       const plan = input.priceCents === STUDENT_CONFIG.membership.annual.expectCents
         ? 'annual'
