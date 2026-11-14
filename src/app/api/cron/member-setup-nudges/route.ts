@@ -18,9 +18,10 @@ export async function GET(req: NextRequest) {
   const since = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString()
   const { data, error } = await admin
     .from('doctors')
-    .select('id, user_id, email, first_name, last_name, clinic_name, bio, photo_url, specialties, hours, phone, address, city, booking_url, latitude, longitude, sms_alerts_enabled, lead_alert_phones, spotlight_status, live_feature_status, verified_at')
+    .select('id, user_id, email, first_name, last_name, clinic_name, bio, photo_url, specialties, hours, phone, address, city, booking_url, latitude, longitude, sms_alerts_enabled, lead_alert_phones, spotlight_status, live_feature_status, go_live_flow_at')
     .eq('verification_status', 'verified')
-    .gte('verified_at', since)
+    .not('go_live_flow_at', 'is', null)
+    .gte('go_live_flow_at', since)
     .limit(80)
   if (error) return NextResponse.json({ ok: true, sent: 0, detail: 'Nudge table or columns are not ready.' })
   const now = new Date().toISOString()
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       loginActivated = Boolean(user?.data?.user?.last_sign_in_at)
     }
     const plan = nextNudge({
-      daysSinceLive: daysSince(row.verified_at, now),
+      daysSinceLive: daysSince(row.go_live_flow_at, now),
       done: {
         activate_login: loginActivated,
         finish_profile: score.percent >= 70 && Boolean(row.photo_url),

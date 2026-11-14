@@ -12,11 +12,16 @@ import {
   needsProfileFinish,
   nextNudge,
   orderWaitlistTiers,
+  paymentIntentIdFromInvoicePayment,
+  phoneFromCheckout,
+  planCheckoutIntake,
+  planInvoiceIntake,
   planPathB,
   profileCompleteness,
   publishOnPayment,
   readCheckoutContact,
   shouldHideUnpaid,
+  subscriptionIdFromInvoice,
   smsAlertsEnabled,
   webhookDisposition,
   type CheckoutIdentity,
@@ -50,7 +55,7 @@ function identity(overrides: Partial<CheckoutIdentity> = {}): CheckoutIdentity {
   }
 }
 
-function listing(overrides: Partial<ExistingListing> = {}): ExistingListing {
+function listing(overrides: Partial<ExistingListing & { verificationStatus: string | null; isApproved: boolean | null }> = {}): ExistingListing & { verificationStatus?: string | null; isApproved?: boolean | null } {
   return {
     id: 'doc-1',
     email: 'ada@example.com',
@@ -126,6 +131,53 @@ describe('path B auto-create', () => {
       membership: true,
     })
     assert.deepEqual(linked, { action: 'skip', reason: 'account_already_linked' })
+  })
+
+  it('does not hide a live doctor who pays a Payment Link', () => {
+    const live = listing({ verificationStatus: 'verified', isApproved: true })
+    assert.deepEqual(planCheckoutIntake({ membership: true, listings: [live] }), {
+      action: 'link_live',
+      doctorId: 'doc-1',
+    })
+  })
+
+  it('ignores a renewal invoice for a live doctor with no application', () => {
+    const decision = planInvoiceIntake({
+      billingReason: 'subscription_cycle',
+      amountPaid: 9900,
+      applications: [],
+      listings: [{ verificationStatus: 'verified', isApproved: true }],
+    })
+    assert.deepEqual(decision, { action: 'ignore', reason: 'renewal' })
+  })
+
+  it('opens a pending listing only for the first invoice when nobody is already live', () => {
+    const created = planInvoiceIntake({
+      billingReason: 'subscription_create',
+      amountPaid: 9900,
+      applications: [],
+      listings: [],
+    })
+    assert.deepEqual(created, { action: 'create_pending' })
+    const renewal = planInvoiceIntake({
+      billingReason: 'subscription_cycle',
+      amountPaid: 9900,
+      applications: [],
+      listings: [],
+    })
+    assert.deepEqual(renewal, { action: 'ignore', reason: 'renewal' })
+  })
+
+  it('reads the subscription id from the current invoice parent and the built-in phone', () => {
+    assert.equal(subscriptionIdFromInvoice({
+      parent: { subscription_details: { subscription: 'sub_new' } },
+    }), 'sub_new')
+    assert.equal(phoneFromCheckout([], '+18645550100'), '+18645550100')
+    assert.equal(phoneFromCheckout([{ key: 'mobile', text: { value: '8645550199' } }], '+18645550100'), '8645550199')
+    assert.equal(paymentIntentIdFromInvoicePayment({
+      status: 'paid',
+      payment: { type: 'payment_intent', payment_intent: 'pi_123' },
+    }), 'pi_123')
   })
 
   it('reads the phone and consent custom fields', () => {

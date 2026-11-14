@@ -294,7 +294,9 @@ export async function declineApplication(
     ok: true,
     message: refunded
       ? 'Declined. The listing stays hidden, the membership was canceled, and the payment was refunded.'
-      : 'Declined. The listing stays hidden and the card was removed. Nothing new was charged.',
+      : app.paymentReceived
+        ? 'Declined. The listing stays hidden. The refund did not complete, so check Stripe before telling them the money was returned.'
+        : 'Declined. The listing stays hidden and the card was removed. Nothing was charged.',
     doctor: {
       is_approved: false,
       verification_status: 'hidden',
@@ -306,7 +308,9 @@ export async function declineApplication(
       admin_notes: notesOrNull(notes),
       reviewed_at: now,
     },
-    email: app.email.includes('@') ? declinedEmail(app.email, app.firstName, refunded) : null,
+    email: app.email.includes('@')
+      ? declinedEmail(app.email, app.firstName, refunded ? 'refunded' : app.paymentReceived ? 'refund_failed' : 'none')
+      : null,
     sms: null,
     charged: false,
     detached,

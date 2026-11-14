@@ -10,7 +10,8 @@ alter table public.doctors
   add column if not exists listing_exception text,
   add column if not exists sms_prompt_required boolean not null default false,
   add column if not exists sms_region_note text,
-  add column if not exists duplicate_of uuid;
+  add column if not exists duplicate_of uuid,
+  add column if not exists go_live_flow_at timestamptz;
 
 alter table public.doctor_applications
   add column if not exists auto_charge_claimed_at timestamptz,

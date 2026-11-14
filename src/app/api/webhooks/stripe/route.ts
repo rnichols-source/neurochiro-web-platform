@@ -15,6 +15,7 @@ import { invalidateDoctorStripe } from "@/lib/billing/stripe-cache";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
 import { ingestMembershipCheckout, noteMembershipInvoicePaid } from "@/lib/go-live/checkout";
+import { subscriptionIdFromInvoice } from "@/lib/go-live/plan";
 import {
   isUndefinedPaymentIssueColumn,
   planSubscriptionChange,
@@ -1098,7 +1099,7 @@ export async function POST(req: Request) {
         // invoice.payment_succeeded — tier already set, no additional update needed
 
         // Auto-cancel payment plan subscriptions after 3 payments
-        const subscriptionId = invoice.subscription;
+        const subscriptionId = subscriptionIdFromInvoice(invoice);
         if (subscriptionId) {
           try {
             const sub = await stripe.subscriptions.retrieve(subscriptionId as string);
@@ -1132,7 +1133,7 @@ export async function POST(req: Request) {
 
       case "invoice.payment_failed": {
         const invoice = event.data.object;
-        const subscriptionId = readId("subscription" in invoice ? invoice.subscription : null);
+        const subscriptionId = subscriptionIdFromInvoice(invoice) || readId("subscription" in invoice ? invoice.subscription : null);
         const flaggedSynapse = await noteSynapsePaymentFailed(supabase, subscriptionId);
         if (flaggedSynapse) {
           break;

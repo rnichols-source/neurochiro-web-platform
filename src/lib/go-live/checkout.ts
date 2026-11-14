@@ -9,9 +9,13 @@ import { approvalSmsFor } from '@/lib/applications/approval-sms'
 import {
   countryFromCurrency,
   isDoctorMembershipCheckout,
+  phoneFromCheckout,
+  planCheckoutIntake,
+  planInvoiceIntake,
   planPathB,
   readCheckoutContact,
   splitName,
+  subscriptionIdFromInvoice,
   type CheckoutIdentity,
   type ExistingListing,
 } from './plan.ts'
@@ -33,7 +37,7 @@ function identityFromSession(session: Record<string, any>, priceId: string | nul
     subscriptionId: text(session.subscription) || null,
     email: text(details.email) || text(session.customer_email),
     name: text(details.name) || text(session.metadata?.name),
-    phone: contact.phone || text(details.phone) || null,
+    phone: phoneFromCheckout(session.custom_fields, text(details.phone)),
     smsConsent: contact.smsConsent,
     city: contact.city,
     state: contact.state,
@@ -60,20 +64,20 @@ async function priceFromSubscription(subscriptionId: string | null): Promise<str
   }
 }
 
-async function existingListings(email: string, customerId: string | null): Promise<ExistingListing[]> {
-  const rows: ExistingListing[] = []
+async function existingListings(email: string, customerId: string | null): Promise<Array<ExistingListing & { verificationStatus: string | null; isApproved: boolean | null }>> {
+  const rows: Array<ExistingListing & { verificationStatus: string | null; isApproved: boolean | null }> = []
   if (email) {
-    const { data } = await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id').ilike('email', email).limit(5)
+    const { data } = await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved').ilike('email', email).limit(5)
     for (const row of data || []) rows.push(asListing(row))
   }
   if (customerId) {
-    const { data } = await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id').eq('stripe_customer_id', customerId).limit(5)
+    const { data } = await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved').eq('stripe_customer_id', customerId).limit(5)
     for (const row of data || []) rows.push(asListing(row))
   }
   return rows
 }
 
-function asListing(row: Record<string, unknown>): ExistingListing {
+function asListing(row: Record<string, unknown>): ExistingListing & { verificationStatus: string | null; isApproved: boolean | null } {
   return {
     id: text(row.id),
     email: text(row.email) || null,
@@ -82,6 +86,8 @@ function asListing(row: Record<string, unknown>): ExistingListing {
     city: text(row.city),
     userId: text(row.user_id) || null,
     stripeCustomerId: text(row.stripe_customer_id) || null,
+    verificationStatus: text(row.verification_status) || null,
+    isApproved: row.is_approved === true,
   }
 }
 
@@ -111,17 +117,27 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
     const claimed = await claim(identity)
     if (!claimed) return
     const existing = await existingListings(identity.email, identity.customerId)
-    const plan = planPathB({ identity, existing, claimed: false, membership: true })
-    if (plan.action === 'skip') return
-    if (plan.action === 'flag_duplicate') {
-      await db().from('doctors').update({ listing_exception: 'duplicate_name_city', needs_review: true, duplicate_of: plan.doctorId }).eq('id', plan.doctorId)
-      await db().from('doctor_checkout_claims').update({ status: 'duplicate', doctor_id: plan.doctorId, detail: identity.email }).eq('stripe_customer_id', identity.customerId)
+    const intake = planCheckoutIntake({ membership: true, listings: existing })
+    if (intake.action === 'ignore') return
+    if (intake.action === 'link_live') {
+      await linkStripeOnly(intake.doctorId, identity)
+      await db().from('doctor_checkout_claims').update({ status: 'link_live', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
       return
     }
-    const doctorId = plan.action === 'attach' ? plan.doctorId : await createPendingDoctor(identity)
+    if (intake.action === 'attach_pending') {
+      await markPaymentReceived(intake.doctorId, identity)
+      await db().from('doctor_checkout_claims').update({ status: 'attach_pending', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
+      return
+    }
+    const duplicate = planPathB({ identity, existing, claimed: false, membership: true })
+    if (duplicate.action === 'flag_duplicate') {
+      await db().from('doctors').update({ listing_exception: 'duplicate_name_city', needs_review: true }).eq('id', duplicate.doctorId)
+      await db().from('doctor_checkout_claims').update({ status: 'duplicate', doctor_id: duplicate.doctorId, detail: identity.email }).eq('stripe_customer_id', identity.customerId)
+      return
+    }
+    const doctorId = await createPendingDoctor(identity)
     if (!doctorId) return
-    await markPaymentReceived(doctorId, identity)
-    await db().from('doctor_checkout_claims').update({ status: plan.action, doctor_id: doctorId }).eq('stripe_customer_id', identity.customerId)
+    await db().from('doctor_checkout_claims').update({ status: 'create_pending', doctor_id: doctorId }).eq('stripe_customer_id', identity.customerId)
   } catch (error) {
     console.error('[go-live] payment-link intake failed', error instanceof Error ? error.name : 'error')
   }
@@ -207,14 +223,26 @@ async function attachExistingUser(userId: string, identity: CheckoutIdentity, co
   return String(data.id)
 }
 
+async function linkStripeOnly(doctorId: string, identity: CheckoutIdentity): Promise<void> {
+  await db().from('doctors').update({
+    stripe_customer_id: identity.customerId,
+    stripe_subscription_id: identity.subscriptionId,
+  }).eq('id', doctorId)
+}
+
 async function markPaymentReceived(doctorId: string, identity: CheckoutIdentity, userId?: string, country?: string): Promise<void> {
+  const { data } = await db().from('doctors').select('verification_status, is_approved').eq('id', doctorId).maybeSingle()
+  if (data?.verification_status === 'verified' || data?.is_approved === true) {
+    await linkStripeOnly(doctorId, identity)
+    return
+  }
   await db().from('doctors').update({
     paid_at: new Date().toISOString(),
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
     verification_status: 'hidden',
     is_approved: false,
-  }).eq('id', doctorId)
+  }).eq('id', doctorId).neq('verification_status', 'verified')
   const existing = await db().from('doctor_applications').select('id').eq('doctor_id', doctorId).maybeSingle()
   const patch = {
     status: 'under_review',
@@ -230,18 +258,58 @@ async function markPaymentReceived(doctorId: string, identity: CheckoutIdentity,
   else await db().from('doctor_applications').insert({ ...patch, doctor_id: doctorId })
 }
 
-export async function noteMembershipInvoicePaid(invoice: { customer?: unknown; subscription?: unknown; amount_paid?: number | null }): Promise<void> {
+export async function noteMembershipInvoicePaid(invoice: {
+  id?: string
+  customer?: unknown
+  subscription?: unknown
+  amount_paid?: number | null
+  billing_reason?: string | null
+  parent?: { subscription_details?: { subscription?: unknown } | null } | null
+}): Promise<void> {
   try {
-    if (!invoice.amount_paid) return
     const customerId = typeof invoice.customer === 'string' ? invoice.customer : ''
-    const subscriptionId = typeof invoice.subscription === 'string' ? invoice.subscription : ''
+    const subscriptionId = subscriptionIdFromInvoice(invoice) || ''
     if (!customerId) return
-    const { data: application } = await db()
+    const { data: applicationRows } = await db()
       .from('doctor_applications')
-      .select('id, status, reviewed_at, doctor_id')
+      .select('id, status, reviewed_at, doctor_id, created_at')
       .eq('stripe_customer_id', customerId)
-      .maybeSingle()
-    if (application?.status === 'needs_action' && application.reviewed_at) {
+      .order('created_at', { ascending: false })
+      .limit(20)
+    const applications = (applicationRows || []).map((row: Record<string, unknown>) => ({
+      id: text(row.id),
+      status: text(row.status),
+      reviewedAt: text(row.reviewed_at) || null,
+      createdAt: text(row.created_at),
+    }))
+    const listings = await existingListings('', customerId)
+    const intake = planInvoiceIntake({
+      billingReason: invoice.billing_reason || null,
+      amountPaid: Number(invoice.amount_paid || 0),
+      applications,
+      listings,
+    })
+    if (intake.action === 'ignore') return
+    if (intake.action === 'create_pending') {
+      const customer = await stripe.customers.retrieve(customerId)
+      if (customer.deleted) return
+      await ingestMembershipCheckout({
+        id: `invoice-${text(invoice.id) || customerId}`,
+        customer: customerId,
+        subscription: subscriptionId,
+        customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
+        customer_email: customer.email,
+        mode: 'subscription',
+        payment_link: 'invoice',
+        currency: null,
+        amount_total: invoice.amount_paid,
+        metadata: { type: 'doctor_membership' },
+      })
+      return
+    }
+    const application = applications.find((row: { id: string }) => row.id === intake.applicationId)
+    if (!application) return
+    if (application.status === 'needs_action' && application.reviewedAt) {
       const loaded = await loadApplicationById(String(application.id))
       if (!loaded) return
       await finishDecision({
@@ -265,23 +333,7 @@ export async function noteMembershipInvoicePaid(invoice: { customer?: unknown; s
         },
         reviewerId: null,
       })
-      return
     }
-    if (application) return
-    const customer = await stripe.customers.retrieve(customerId)
-    if (customer.deleted) return
-    await ingestMembershipCheckout({
-      id: `invoice-${text((invoice as { id?: string }).id) || customerId}`,
-      customer: customerId,
-      subscription: subscriptionId,
-      customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
-      customer_email: customer.email,
-      mode: 'subscription',
-      payment_link: 'invoice',
-      currency: null,
-      amount_total: invoice.amount_paid,
-      metadata: {},
-    })
   } catch (error) {
     console.error('[go-live] invoice intake failed', error instanceof Error ? error.name : 'error')
   }

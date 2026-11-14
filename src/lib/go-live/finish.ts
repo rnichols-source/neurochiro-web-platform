@@ -151,6 +151,7 @@ export async function publishDoctorListing(application: StoredApplication, now: 
   const pinned = await pinDoctor(application.doctorId, source.officeAddress, source.city, source.state, source.country)
   await flagProfile(application.doctorId, source, pinned)
   await rememberText(application.doctorId, application.mobileE164, application.smsConsent, now)
+  await writeDroppingMissing('doctors', 'id', application.doctorId, { go_live_flow_at: now })
   await syncPaidPlan(application.userId, application.stripeCustomerId)
   await notifyDoctorLive(application.doctorId)
   const { queueInstagramBatch } = await import('@/lib/instagram/queue')

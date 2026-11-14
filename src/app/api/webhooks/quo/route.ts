@@ -18,11 +18,10 @@ function readBody(payload: unknown): { from: string; text: string } | null {
 
 export async function POST(req: Request) {
   const secret = process.env.QUO_WEBHOOK_SECRET || ''
-  if (secret) {
-    const header = req.headers.get('authorization') || req.headers.get('x-quo-signature') || ''
-    if (header !== secret && header !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!secret) return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 401 })
+  const header = req.headers.get('authorization') || req.headers.get('x-quo-signature') || ''
+  if (header !== secret && header !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const payload = await req.json().catch(() => null)
   const message = readBody(payload)

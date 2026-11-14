@@ -165,6 +165,24 @@ export async function GET(req: NextRequest) {
       }
 
       if (subRecord.status !== 'confirmed') {
+        const { error: introDedup } = await (supabase as any)
+          .from('doctor_notifications')
+          .insert({ doctor_id: entry.doctor_id, subscriber_id: sub.id, email_number: 1, queue_id: entry.id })
+        if (introDedup) {
+          await logNotification({
+            queue_id: entry.id,
+            doctor_id: entry.doctor_id,
+            subscriber_id: sub.id,
+            email_number: 1,
+            status: 'suppressed',
+            suppression_reason: 'already_notified',
+            distance_miles: sub.distance_miles,
+            subscriber_city: sub.city,
+            subscriber_state: sub.state,
+          })
+          email1Suppressed++
+          continue
+        }
         const token = crypto.randomBytes(32).toString('hex')
         const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
         await (supabase as any).from('subscribers').update({

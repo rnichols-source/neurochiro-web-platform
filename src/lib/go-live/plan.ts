@@ -270,6 +270,98 @@ export type PathBPlan =
   | { action: 'flag_duplicate'; doctorId: string }
   | { action: 'create' }
 
+export function isPublicLiveListing(row: {
+  verificationStatus?: string | null
+  isApproved?: boolean | null
+}): boolean {
+  return row.verificationStatus === 'verified' || row.isApproved === true
+}
+
+export type CheckoutIntake =
+  | { action: 'ignore'; reason: 'not_membership' }
+  | { action: 'link_live'; doctorId: string }
+  | { action: 'attach_pending'; doctorId: string }
+  | { action: 'create_pending' }
+
+/**
+ * A Payment Link for someone who is already verified or approved only records Stripe ids.
+ * It never hides that listing. A brand-new payer with no listing becomes a pending review row.
+ */
+export function planCheckoutIntake(input: {
+  membership: boolean
+  listings: Array<ExistingListing & { verificationStatus?: string | null; isApproved?: boolean | null }>
+}): CheckoutIntake {
+  if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
+  const live = input.listings.find((row) => isPublicLiveListing(row))
+  if (live) return { action: 'link_live', doctorId: live.id }
+  const pending = input.listings[0]
+  if (pending) return { action: 'attach_pending', doctorId: pending.id }
+  return { action: 'create_pending' }
+}
+
+export type InvoiceApplication = {
+  id: string
+  status: string
+  reviewedAt: string | null
+  createdAt: string
+}
+
+export type InvoiceIntake =
+  | { action: 'ignore'; reason: 'not_paid' | 'renewal' | 'live_listing' | 'already_tracked' }
+  | { action: 'complete_bank'; applicationId: string }
+  | { action: 'create_pending' }
+
+/** Renewals are ignored. Only the first invoice of a new subscription can open a pending listing. */
+export function planInvoiceIntake(input: {
+  billingReason: string | null
+  amountPaid: number
+  applications: InvoiceApplication[]
+  listings: Array<{ verificationStatus?: string | null; isApproved?: boolean | null }>
+}): InvoiceIntake {
+  if (input.amountPaid <= 0) return { action: 'ignore', reason: 'not_paid' }
+  if (input.billingReason !== 'subscription_create') return { action: 'ignore', reason: 'renewal' }
+  const bank = [...input.applications]
+    .filter((row) => row.status === 'needs_action' && row.reviewedAt)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
+  if (bank) return { action: 'complete_bank', applicationId: bank.id }
+  if (input.applications.some((row) => row.status === 'approved' || row.status === 'under_review' || row.status === 'declined')) {
+    return { action: 'ignore', reason: 'already_tracked' }
+  }
+  if (input.listings.some((row) => isPublicLiveListing(row))) return { action: 'ignore', reason: 'live_listing' }
+  return { action: 'create_pending' }
+}
+
+export function subscriptionIdFromInvoice(invoice: {
+  subscription?: unknown
+  parent?: { subscription_details?: { subscription?: unknown } | null } | null
+}): string | null {
+  const nested = invoice.parent?.subscription_details?.subscription
+  if (typeof nested === 'string' && nested) return nested
+  if (nested && typeof nested === 'object' && 'id' in nested) {
+    const id = (nested as { id?: unknown }).id
+    if (typeof id === 'string' && id) return id
+  }
+  return typeof invoice.subscription === 'string' && invoice.subscription ? invoice.subscription : null
+}
+
+export function phoneFromCheckout(customFields: unknown, customerPhone: string | null | undefined): string | null {
+  const custom = readCheckoutContact(customFields).phone
+  if (custom) return custom
+  const builtIn = (customerPhone || '').trim()
+  return builtIn || null
+}
+
+export function paymentIntentIdFromInvoicePayment(payment: {
+  status?: string | null
+  payment?: { type?: string | null; payment_intent?: string | { id?: string | null } | null } | null
+}): string | null {
+  if (payment.status && payment.status !== 'paid') return null
+  const intent = payment.payment?.payment_intent
+  if (typeof intent === 'string' && intent) return intent
+  if (intent && typeof intent === 'object' && typeof intent.id === 'string' && intent.id) return intent.id
+  return null
+}
+
 export function planPathB(input: {
   identity: CheckoutIdentity
   existing: ExistingListing[]

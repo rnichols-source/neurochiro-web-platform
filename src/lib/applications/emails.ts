@@ -119,11 +119,13 @@ export function approvedEmail(
   })
 }
 
-export function declinedEmail(to: string, firstName: string, refunded = false): Mail {
+export function declinedEmail(to: string, firstName: string, moneyState: 'none' | 'refunded' | 'refund_failed' = 'none'): Mail {
   const name = escapeHtml(firstName || 'there')
-  const money = refunded
+  const money = moneyState === 'refunded'
     ? 'The membership is canceled and the payment was refunded. The listing stays off the directory.'
-    : 'Your card was not charged, and the saved card has been removed.'
+    : moneyState === 'refund_failed'
+      ? 'The listing stays off the directory. The payment is still on the card. We will confirm the refund in Stripe before it is returned.'
+      : 'Your card was not charged, and the saved card has been removed.'
   return {
     to,
     subject: 'Your NeuroChiro application',
