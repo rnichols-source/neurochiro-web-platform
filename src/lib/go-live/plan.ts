@@ -1,3 +1,4 @@
+import { toApplicationE164 } from '../applications/phone.ts'
 import { toE164 } from '../sms/phone.ts'
 
 export const DOCTOR_PAY_URL = 'https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q'
@@ -69,7 +70,12 @@ export type ListingSource = {
   country: string
   website: string
   instagram: string
+  /** Private SMS / alert mobile. Text alerts use this. The public listing does not. */
   phone: string
+  /** Office or other public phone, collected separately from the alert mobile. */
+  officePhone?: string
+  /** Phone already on the public listing. Left unchanged when it is set. */
+  currentPhone?: string
   clinicName?: string
   hours?: string
   bookingUrl?: string
@@ -101,7 +107,6 @@ export function listingContentPatch(input: ListingSource): Record<string, unknow
   const country = input.country.trim().toUpperCase()
   const website = input.website.trim()
   const instagram = input.instagram.trim().replace(/^@/, '')
-  const phone = input.phone.trim()
   const hours = (input.hours || '').trim()
   const booking = (input.bookingUrl || '').trim()
   const photo = (input.photoUrl || '').trim()
@@ -114,7 +119,8 @@ export function listingContentPatch(input: ListingSource): Record<string, unknow
   if (country && country !== 'OTHER') patch.country = country.slice(0, 8)
   if (website) patch.website_url = website.slice(0, 300)
   if (instagram) patch.instagram_url = `https://www.instagram.com/${instagram.slice(0, 80)}/`
-  if (phone) patch.phone = phone.slice(0, 40)
+  const publicPhone = publishedListingPhone(input)
+  if (publicPhone) patch.phone = publicPhone
   if (hours) patch.hours = hours.slice(0, 1000)
   if (booking) patch.booking_url = booking.slice(0, 300)
   if (photo) patch.photo_url = photo.slice(0, 500)
@@ -349,6 +355,63 @@ export function phoneFromCheckout(customFields: unknown, customerPhone: string |
   if (custom) return custom
   const builtIn = (customerPhone || '').trim()
   return builtIn || null
+}
+
+/** Office phone to publish when the listing phone is blank. Null leaves the column unchanged. */
+export function publishedListingPhone(input: {
+  currentPhone?: string | null
+  officePhone?: string | null
+}): string | null {
+  if ((input.currentPhone || '').trim()) return null
+  const office = (input.officePhone || '').trim()
+  return office ? office.slice(0, 40) : null
+}
+
+/** Checkout cell, including Stripe's built-in phone, stays on the private text-alert fields. */
+export function listingPhonesFromCheckout(input: {
+  phone: string | null
+  smsConsent: boolean | null
+}): { phone: string; alertPhone: string | null } {
+  const cell = (input.phone || '').trim()
+  return {
+    phone: '',
+    alertPhone: input.smsConsent === true && cell ? cell : null,
+  }
+}
+
+export type CheckoutApplicationContact = {
+  /** Public listing phone. A checkout cell is never written here. */
+  listingPhone: ''
+  application: {
+    mobile_e164: string
+    sms_consent: boolean
+    sms_consent_at: string | null
+  } | null
+  /** Set when they consented and the number can take a US or Canadian text. */
+  alertPhone: string | null
+}
+
+/** Keep the checkout cell on the application, whether or not they agreed to texts. */
+export function checkoutApplicationContact(input: {
+  phone: string | null
+  smsConsent: boolean | null
+  country: string | null
+  now: string
+}): CheckoutApplicationContact {
+  const consent = input.smsConsent === true
+  const country = (input.country || 'US').trim() || 'US'
+  const mobile = toApplicationE164(input.phone, country)
+  return {
+    listingPhone: '',
+    application: mobile
+      ? {
+          mobile_e164: mobile,
+          sms_consent: consent,
+          sms_consent_at: consent ? input.now : null,
+        }
+      : null,
+    alertPhone: consent && mobile && canTextNumber(mobile) ? mobile : null,
+  }
 }
 
 export function paymentIntentIdFromInvoicePayment(payment: {
