@@ -367,6 +367,36 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 22,
     publishedAt: "2026-10-20T12:00:00Z",
   },
+  {
+    id: "ep-023",
+    doctorName: "Dr. Scott Campbell-Lloyd",
+    doctorSlug: "dr-scott-campbell-lloyd",
+    clinicName: "Mt Hawthorn Chiropractic",
+    city: "Mount Hawthorn",
+    state: "WA",
+    videoUrl: "https://www.youtube.com/embed/Sk6lRASsVng",
+    thumbnail: "https://img.youtube.com/vi/Sk6lRASsVng/hqdefault.jpg",
+    quote: "Average isn't okay. Beige sucks. Be better.",
+    description:
+      "Dr. Scott Campbell-Lloyd is the chiropractor behind Mt Hawthorn Chiropractic in Mount Hawthorn, Western Australia, just outside Perth, where he practices the Gonstead approach with families, kids, and babies. He shares how he knew he wanted to be a chiropractor from the age of nine, why he believes chiropractic is specific or it's nothing, why every technique can work and the path can be different, the standard behind his motto \"average isn't okay, beige sucks, be better,\" why tummy time is about more than lifting the head, why chiropractors should be checking babies' movement patterns, and why chiropractic is for everyone even if he isn't everyone's chiropractor.",
+    episodeNumber: 23,
+    publishedAt: "2026-11-13T12:00:00Z",
+  },
+  {
+    id: "ep-024",
+    doctorName: "Dr. Cole Snyder",
+    doctorSlug: "dr-cole-snyder",
+    clinicName: "Envive Chiropractic",
+    city: "Sioux Falls",
+    state: "SD",
+    videoUrl: "https://www.youtube.com/embed/O-jzdKTfHmQ",
+    thumbnail: "https://img.youtube.com/vi/O-jzdKTfHmQ/hqdefault.jpg",
+    quote: "We're healthcare, but why can't we also be hospitality?",
+    description:
+      "Dr. Cole Snyder leads Envive Chiropractic in downtown Sioux Falls, South Dakota, a legacy practice serving the community since 1999. A Palmer College of Chiropractic (Florida) graduate, he took over the clinic from his mentor and leads with what his team calls being a \"compassionate samurai.\" He shares how he decided to become a chiropractor in fifth grade, how shadowing and an internship turned into owning the practice, why he had to stop trying to be his mentor and learn to be himself, why healthcare can also be hospitality, why every business is a family business, and why pain is the worst party guest.",
+    episodeNumber: 24,
+    publishedAt: "2026-11-13T12:00:00Z",
+  },
 ];
 
 /** Patient-facing episodes first. Falls back to the newest episodes. */
