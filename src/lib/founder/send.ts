@@ -268,6 +268,15 @@ export async function rerouteWaiting(actorId: string, doctorId: string, expected
   return { ok: true, count: moved, detail: `${moved} moved to the next live doctor` }
 }
 
+async function newMemberDigestLines(): Promise<string[]> {
+  try {
+    const { loadNewMemberLines } = await import('@/lib/go-live/digest')
+    return await loadNewMemberLines()
+  } catch {
+    return ['New members this week:', '- Could not be read.']
+  }
+}
+
 export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendResult> {
   const settings = await loadFounderSettings()
   if (reason === 'cron' && !settings.automations.mondayDigest) return { ok: true, count: 0, detail: 'Monday digest is off.' }
@@ -296,6 +305,8 @@ export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendR
     '',
     'Funnel:',
     ...buildFunnel(roster).map((step) => `- ${step.label}: ${step.value}`),
+    '',
+    ...(await newMemberDigestLines()),
     '',
     `Open Pulse: ${siteUrl()}/admin`,
   ]

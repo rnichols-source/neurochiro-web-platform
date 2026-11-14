@@ -3,7 +3,7 @@ import { rateLimit, getIP } from '@/lib/rate-limit';
 import { subscribeEmail } from '@/lib/subscribers/subscribe';
 import { getCountryByIso2 } from '@/config/countries';
 import { isPostalOptional, normalizeCountryHint, validatePostalFormat } from '@/lib/detect-postal';
-import { toInternationalE164 } from '@/lib/calling-codes';
+import { toE164 } from '@/lib/sms/phone';
 import { WAITLIST_SMS_CONSENT_V1, WAITLIST_SMS_CONSENT_VERSION } from '@/lib/sms/consent';
 
 const limiter = rateLimit('subscribe', { maxRequests: 5, windowMs: 3600_000 });
@@ -61,9 +61,12 @@ export async function POST(req: NextRequest) {
   const wantsSms = smsConsent === true;
   let smsPhone: string | null = null;
   if (wantsSms) {
-    smsPhone = toInternationalE164(typeof phone === 'string' ? phone : '', subscriberCountry);
+    if (subscriberCountry !== 'US' && subscriberCountry !== 'CA') {
+      return NextResponse.json({ ok: false, error: 'Texts are only available for US and Canadian mobiles. You can still join the email list.' }, { status: 400 });
+    }
+    smsPhone = toE164(typeof phone === 'string' ? phone : '', subscriberCountry);
     if (!smsPhone) {
-      return NextResponse.json({ ok: false, error: 'Enter a mobile number we can text, or leave the text box unchecked.' }, { status: 400 });
+      return NextResponse.json({ ok: false, error: 'Enter a US or Canadian mobile, or leave the text box unchecked.' }, { status: 400 });
     }
   }
 

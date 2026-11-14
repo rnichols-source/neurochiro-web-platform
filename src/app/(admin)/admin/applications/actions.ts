@@ -2,14 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { checkAdminAuth } from '@/lib/admin-auth'
-import { deliverApprovalNotices } from '@/lib/applications/approval-sms'
 import { stripeBilling } from '@/lib/applications/billing'
 import { approveApplication, declineApplication } from '@/lib/applications/decide'
-import { sendApplicationEmail } from '@/lib/applications/notify'
-import { loadApplicationById, persistDecision, saveDoctorAlertPhone } from '@/lib/applications/store'
-import { settleMemberReferral } from '@/lib/member-referrals/settle'
-import { readSmsConfig } from '@/lib/sms/config'
-import { quoSend } from '@/lib/sms/quo'
+import { loadApplicationById } from '@/lib/applications/store'
+import { finishDecision } from '@/lib/go-live/finish'
 
 async function review(id: string, notes: string, kind: 'approve' | 'decline') {
   const reviewer = await checkAdminAuth()
@@ -21,48 +17,15 @@ async function review(id: string, notes: string, kind: 'approve' | 'decline') {
     ? await approveApplication(application, billing, now, notes)
     : await declineApplication(application, billing, now, notes)
 
-  if (decision.application || decision.doctor) {
-    await persistDecision({
-      applicationId: application.id,
-      doctorId: application.doctorId,
-      reviewerId: reviewer.id,
-      application: decision.application,
-      doctor: decision.doctor,
-    })
-  }
-
-  let emailNote = ''
-  if (kind === 'approve' && decision.ok && application.smsConsent && application.mobileE164) {
-    await saveDoctorAlertPhone(application.doctorId, application.mobileE164, true, now)
-  }
-  if (kind === 'approve') {
-    const delivery = await deliverApprovalNotices({
-      email: decision.email,
-      sms: decision.sms,
-      runtime: readSmsConfig(),
-      sendEmail: sendApplicationEmail,
-      sendSms: (message) => quoSend(message),
-    })
-    if (delivery.smsReason !== 'queued' && delivery.smsReason !== 'not_requested') {
-      console.info('[application] approval text not sent', delivery.smsReason)
-    }
-    if (delivery.warnings.length) emailNote = ` ${delivery.warnings.join(' ')}`
-  } else if (decision.email) {
-    const sent = await sendApplicationEmail(decision.email)
-    if (!sent) emailNote = ' The email did not send. Tell them by hand that they were not charged.'
-  }
-
-  const paidApproval = kind === 'approve' && decision.ok && (
-    decision.application?.status === 'approved'
-    || (application.status === 'approved' && decision.charged === false)
-  )
-  if (paidApproval) {
-    await settleMemberReferral({ applicationId: application.id, invoicePaid: true })
-  }
+  const finished = await finishDecision({
+    application,
+    decision,
+    reviewerId: reviewer.id,
+  })
 
   revalidatePath('/admin/applications')
   revalidatePath('/directory')
-  return { ok: decision.ok, message: `${decision.message}${emailNote}`, warning: emailNote.trim() }
+  return { ok: finished.ok, message: finished.message, warning: '' }
 }
 
 export async function approveDoctorApplication(id: string, notes: string) {

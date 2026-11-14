@@ -64,7 +64,7 @@ export async function loadLeadTextAlerts(): Promise<LeadTextSettings | { error: 
   return {
     ready: true,
     phones,
-    enabled: data?.sms_alerts_enabled !== false,
+    enabled: data?.sms_alerts_enabled === true,
     consented: Boolean(data?.sms_alerts_consent_at),
   }
 }

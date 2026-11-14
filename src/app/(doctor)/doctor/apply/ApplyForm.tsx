@@ -279,12 +279,13 @@ export function ApplyForm({
           <label className="flex min-h-11 items-start gap-3 text-sm">
             <input
               type="checkbox"
+              required
               className="mt-1 h-5 w-5"
               checked={values.smsConsent}
               onChange={(event) => set('smsConsent', event.target.checked)}
             />
             <span>
-              <span className="font-bold">Optional. </span>
+              <span className="font-bold">Required. </span>
               {APPLICATION_SMS_CONSENT}
             </span>
           </label>

@@ -89,10 +89,30 @@ export function doctorNewLead(input: {
   return parts.join(' ')
 }
 
+/** Public request-form link for a directory profile. Falls back to the profile, then the site. */
+export function waitlistRequestLink(profileUrl: string): string {
+  try {
+    const url = new URL(profileUrl)
+    if (url.protocol === 'https:' && url.hostname === 'neurochiro.co') {
+      const slug = url.pathname.replace(/^\/directory\//, '').replace(/\/$/, '')
+      if (url.pathname.startsWith('/directory/') && slug && !slug.includes('/')) {
+        return `https://neurochiro.co/contact-request?doctor=${slug}&source=doctor_joined`
+      }
+      if (url.pathname.startsWith('/contact-request')) return url.toString()
+      if (url.pathname === '/directory' || url.pathname.startsWith('/directory/')) {
+        return `https://neurochiro.co${url.pathname}`
+      }
+    }
+  } catch {
+    return 'https://neurochiro.co'
+  }
+  return 'https://neurochiro.co'
+}
+
 /** Waitlist alert when a doctor joins nearby. The link is always neurochiro.co. */
 export function waitlistDoctorJoinedText(doctorName: string, city: string, profileUrl: string): string {
   const name = ascii(doctorName).slice(0, 40) || 'A NeuroChiro doctor'
   const place = ascii(city).slice(0, 32) || 'your area'
-  const link = profileUrl.startsWith('https://neurochiro.co/') ? profileUrl : 'https://neurochiro.co'
-  return `NeuroChiro: Good news! A nervous system chiropractor just joined near you: ${name}, ${place}. See their profile: ${link}. Reply STOP to opt out.`
+  const link = waitlistRequestLink(profileUrl)
+  return `NeuroChiro: New doctor near you: ${name}, ${place}. ${link} Reply STOP to opt out.`
 }

@@ -90,6 +90,23 @@ export function stripeBilling(): BillingPort {
       }
       return result
     },
+    async cancelAndRefund(subscriptionId: string): Promise<void> {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      const invoices = await stripe.invoices.list({ subscription: subscriptionId, status: 'paid', limit: 3 })
+      for (const raw of invoices.data) {
+        const invoice = raw as { id: string; charge?: string | { id?: string } | null; payment_intent?: string | { id?: string } | null }
+        const chargeId = typeof invoice.charge === 'string' ? invoice.charge : invoice.charge?.id
+        const intentId = typeof invoice.payment_intent === 'string' ? invoice.payment_intent : invoice.payment_intent?.id
+        if (chargeId) {
+          await stripe.refunds.create({ charge: chargeId }, { idempotencyKey: `doctor-deny-refund-${invoice.id}` })
+        } else if (intentId) {
+          await stripe.refunds.create({ payment_intent: intentId }, { idempotencyKey: `doctor-deny-refund-${invoice.id}` })
+        }
+      }
+      if (subscription.status !== 'canceled') {
+        await stripe.subscriptions.cancel(subscriptionId, {}, { idempotencyKey: `doctor-deny-cancel-${subscriptionId}` })
+      }
+    },
     async detachPaymentMethod(paymentMethodId: string): Promise<void> {
       try {
         await stripe.paymentMethods.detach(paymentMethodId)

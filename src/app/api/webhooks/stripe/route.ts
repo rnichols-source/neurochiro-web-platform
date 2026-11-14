@@ -14,6 +14,7 @@ import { fulfillDoctorApplicationSetup } from "@/lib/applications/fulfill";
 import { invalidateDoctorStripe } from "@/lib/billing/stripe-cache";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
+import { ingestMembershipCheckout, noteMembershipInvoicePaid } from "@/lib/go-live/checkout";
 import {
   isUndefinedPaymentIssueColumn,
   planSubscriptionChange,
@@ -1057,6 +1058,7 @@ export async function POST(req: Request) {
           }
         }
 
+        if (!userId) await ingestMembershipCheckout(session);
         // Enqueue automations
         Automations.onPaymentSuccess(session);
         break;
@@ -1124,6 +1126,7 @@ export async function POST(req: Request) {
         if (paidCustomer && Number(invoice.amount_paid || 0) > 0) {
           await settleMemberReferral({ customerId: paidCustomer, invoicePaid: true });
         }
+        await noteMembershipInvoicePaid(invoice);
         break;
       }
 

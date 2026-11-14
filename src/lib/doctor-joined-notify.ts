@@ -48,6 +48,7 @@ export interface MatchedSubscriber {
   city: string
   state: string
   distance_miles: number
+  confirmed?: boolean
 }
 
 export interface LogEntry {
@@ -152,12 +153,12 @@ export async function findMatchingSubscribers(
 
   // Load confirmed subscribers with coords, country-isolated.
   // Newer columns (coordinates, SMS consent) are optional until the waitlist migration runs.
-  const subscriberColumns = 'id, email, zip, country, latitude, longitude, sms_phone, sms_consent, sms_opted_out_at'
+  const subscriberColumns = 'id, email, zip, country, status, latitude, longitude, sms_phone, sms_consent, sms_opted_out_at'
   const loadSubscribers = async (columns: string) => {
     let subQuery = (supabase as any)
       .from('subscribers')
       .select(columns)
-      .eq('status', 'confirmed')
+      .in('status', ['confirmed', 'pending'])
       .is('unsubscribed_at', null)
 
     if (doctorCountry === 'US') {
@@ -230,6 +231,7 @@ export async function findMatchingSubscribers(
         city: coord.city,
         state: coord.state,
         distance_miles: Math.round(dist * 10) / 10,
+        confirmed: sub.status === 'confirmed',
       })
     }
   }
@@ -244,7 +246,8 @@ export async function findMatchingSubscribers(
 
 export async function enqueueDoctorNotification(
   doctorId: string,
-  dryRun: boolean = false
+  dryRun: boolean = false,
+  options?: { immediate?: boolean },
 ): Promise<{
   queued: boolean
   queueId?: string
@@ -270,7 +273,9 @@ export async function enqueueDoctorNotification(
   }
 
   const supabase = createAdminClient()
-  const sendAfter = new Date(Date.now() + settings.hold_hours * 60 * 60 * 1000)
+  const sendAfter = options?.immediate
+    ? new Date()
+    : new Date(Date.now() + settings.hold_hours * 60 * 60 * 1000)
 
   // Volume cap: hold if too many matches
   let status = 'pending'

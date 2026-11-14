@@ -69,6 +69,7 @@ export function ApplicationsClient({
             <div><dt className="font-bold">Where they stopped</dt><dd>{row.stoppedAt}</dd></div>
             <div><dt className="font-bold">Mobile</dt><dd>{row.mobile || 'Not given'}</dd></div>
             <div><dt className="font-bold">Text consent</dt><dd>{row.smsConsent}</dd></div>
+            <div><dt className="font-bold">Payment</dt><dd>{row.paymentReceived ? 'Received — Approve will not charge again' : 'Not received'}</dd></div>
             <div><dt className="font-bold">Years in practice</dt><dd>{row.years ?? '—'}</dd></div>
             <div><dt className="font-bold">Scans</dt><dd>{row.scans}</dd></div>
             <div className="sm:col-span-2"><dt className="font-bold">Approach</dt><dd>{row.approach || '—'}</dd></div>

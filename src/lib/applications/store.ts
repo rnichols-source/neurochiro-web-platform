@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase-admin'
+import { pinDoctor } from '@/lib/go-live/pin'
 import { isMissingColumn } from '@/lib/leads/schema'
 import { applicationStopLabel, type ApplicationAnswers } from './answers.ts'
 import type { AdminApplicationRow } from './admin-row.ts'
@@ -89,6 +90,7 @@ export function mapApplication(row: Row, doctor?: Row | null, profile?: Row | nu
     mobileE164: contact.mobileE164 || null,
     smsConsent: contact.smsConsent,
     priceLabel: text(row.price_label) || null,
+    paymentReceived: typeof row.payment_received_at === 'string' && row.payment_received_at.length > 0,
     currency: text(row.currency) || null,
     answers: {
       name: `${firstName} ${lastName}`.trim(),
@@ -260,6 +262,7 @@ export async function saveAnswers(doctorId: string, userId: string, answers: App
     }
   }
   await saveDoctorAlertPhone(doctorId, answers.mobileE164, answers.smsConsent, now)
+  await pinDoctor(doctorId, answers.officeAddress, answers.city, answers.state, answers.country)
   return true
 }
 
@@ -545,6 +548,7 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
           },
         }),
         createdAt: text(row.created_at),
+        paymentReceived: mapped.paymentReceived,
       }
     }),
     error: null,

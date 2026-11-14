@@ -90,6 +90,21 @@ export async function settleMemberReferral(input: {
             .map((item) => toSubscriptionSnapshot(item as unknown as Parameters<typeof toSubscriptionSnapshot>[0]))
             .filter((item): item is SubscriptionSnapshot => !!item)
         },
+        async ensureCustomer(person) {
+          if (!person.email) return null
+          const listed = await stripe.customers.list({ email: person.email, limit: 1 })
+          const found = listed.data[0]
+          const customer = found || await stripe.customers.create({
+            email: person.email,
+            name: person.name,
+            metadata: { doctor_id: person.doctorId, source: 'member_referral' },
+          }, { idempotencyKey: `referrer-customer-${person.doctorId}` })
+          const admin = (await import('@/lib/supabase-admin')).createAdminClient() as unknown as {
+            from: (table: string) => { update: (values: Record<string, unknown>) => { eq: (column: string, value: string) => Promise<unknown> } }
+          }
+          await admin.from('doctors').update({ stripe_customer_id: customer.id }).eq('id', person.doctorId)
+          return customer.id
+        },
         async credit(credit) {
           const existing = await stripe.customers.listBalanceTransactions(credit.customerId, { limit: 100 })
           const prior = existing.data.find((item) => item.metadata?.referred_doctor_id === credit.referredDoctorId && item.metadata?.source === 'member_referral')

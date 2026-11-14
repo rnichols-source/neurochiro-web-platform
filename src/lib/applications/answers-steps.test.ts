@@ -25,7 +25,7 @@ const office = {
   website: '',
   instagram: '',
   mobile: '(864) 555-0100',
-  smsConsent: false,
+  smsConsent: true,
 }
 
 describe('application steps', () => {
@@ -54,7 +54,7 @@ describe('application steps', () => {
     assert.equal(other.ok, true)
     if (other.ok) {
       assert.equal(other.value.heardAbout, 'Other: A colleague')
-      assert.equal(other.value.smsConsent, false)
+      assert.equal(other.value.smsConsent, true)
       assert.equal(other.value.whyJoin, 'hi')
     }
     const missing = validateStep1({
