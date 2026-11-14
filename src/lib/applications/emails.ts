@@ -1,4 +1,6 @@
+import { ONBOARDING_CONFIG } from '../onboarding-config.ts'
 import { escapeHtml } from '../students/html.ts'
+import { PORTAL_LOGIN_URL, REFERRAL_URL, REQUESTS_URL } from '../go-live/plan.ts'
 
 export const ONBOARDING_CALL_URL = 'https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call'
 
@@ -14,6 +16,7 @@ export type ApprovedWelcome = {
   priceLabel: string | null
   amountLabel: string | null
   receiptUrl: string | null
+  activateUrl?: string | null
 }
 
 function button(href: string, label: string): string {
@@ -48,6 +51,7 @@ function receiptLink(value: string | null): string | null {
 export function approvedWelcomeEmail(input: ApprovedWelcome): Mail {
   const name = escapeHtml(input.lastName || 'there')
   const profile = profileLink(input.profileUrl)
+  const activate = input.activateUrl && input.activateUrl.startsWith('https://') ? input.activateUrl : PORTAL_LOGIN_URL
   const amount = input.amountLabel || input.priceLabel || ''
   const cycle = input.plan === 'annual' ? 'annual' : input.plan === 'monthly' ? 'monthly' : ''
   const started = cycle
@@ -63,16 +67,35 @@ export function approvedWelcomeEmail(input: ApprovedWelcome): Mail {
     html: `
       <h1>You're approved.</h1>
       <p>Congratulations, Dr. ${name}.</p>
+      <p>Open your portal first. This link signs you in. You can set a password later in Settings.</p>
+      <p><a href="${escapeHtml(activate)}">Activate your portal</a></p>
       <p>Your profile is live.</p>
       <p><a href="${escapeHtml(profile)}">${escapeHtml(profile)}</a></p>
       <p>${started}${receiptHtml}</p>
-      <p>Next steps:</p>
-      <ol>
-        <li>Book your onboarding call. <a href="${escapeHtml(ONBOARDING_CALL_URL)}">Pick a time with Dr. Ray</a>.</li>
-        <li>After onboarding, you will get links to book your Spotlight interview (20-30 minutes). The full episode goes on YouTube and the NeuroChiro Spotlight podcast. Clips go on Instagram, TikTok, and YouTube. You will also get a link to book your Weekly Adjustment IG Live.</li>
-        <li>Patient requests arrive by text to the mobile number you gave us, and by email.</li>
-      </ol>
+      <p>New community member requests arrive by text and by email as soon as someone asks for your office. Reply to that text or email. Each request includes a one-click link: they came in, or they did not come in. The same list is in your portal: <a href="${escapeHtml(REQUESTS_URL)}">community member requests</a>.</p>
+      <p>Book your onboarding call. <a href="${escapeHtml(ONBOARDING_CALL_URL)}">Pick a time with Dr. Ray</a>.</p>
+      <p>Book your Spotlight interview (20-30 minutes). The full episode goes on YouTube and the NeuroChiro Spotlight podcast. Clips go on Instagram, TikTok, and YouTube. <a href="${escapeHtml(ONBOARDING_CONFIG.CALENDLY_SPOTLIGHT)}">Book your Spotlight interview</a>.</p>
+      <p>Book your Weekly Adjustment IG Live. <a href="${escapeHtml(ONBOARDING_CONFIG.CALENDLY_IG_LIVE)}">Book your IG Live</a>.</p>
+      <p>When a colleague joins from your link, you get a free month. <a href="${escapeHtml(REFERRAL_URL)}">Your referral program</a>.</p>
       <p>Dr. Ray</p>
+    `,
+  }
+}
+
+export function unpaidEmail(to: string, firstName: string, payUrl: string, kind: 'bank' | 'failed'): Mail {
+  const name = escapeHtml(firstName || 'there')
+  const bank = kind === 'bank'
+  return {
+    to,
+    subject: 'One step left to start your NeuroChiro membership',
+    html: `
+      <h1>Welcome, Dr. ${name}.</h1>
+      <p>${bank
+        ? 'Your bank needs one extra confirmation before the membership starts. Use this secure Stripe link. Nothing else is charged until that step is finished.'
+        : 'The card payment did not go through, so the listing is not public. Use this secure Stripe link to start the membership.'}</p>
+      ${button(payUrl, bank ? 'Confirm your card' : 'Pay with Stripe')}
+      <p>Your listing stays off the directory until that payment succeeds. Reply to this email if you need help.</p>
+      ${button(ONBOARDING_CALL_URL, 'Book your onboarding call')}
     `,
   }
 }
@@ -83,22 +106,7 @@ export function approvedEmail(
   hostedInvoiceUrl: string | null,
   welcome?: Omit<ApprovedWelcome, 'to'> | null,
 ): Mail {
-  if (hostedInvoiceUrl) {
-    const name = escapeHtml(firstName || 'there')
-    return {
-      to,
-      subject: 'One step left to start your NeuroChiro membership',
-      html: `
-        <h1>Welcome, Dr. ${name}.</h1>
-        <p>Raymond approved your NeuroChiro application.</p>
-        <p>Your bank needs one extra confirmation before the membership starts. Use this secure Stripe link. Nothing else is charged until that step is finished.</p>
-        ${button(hostedInvoiceUrl, 'Confirm your card')}
-        <p>Book a short onboarding call so he can walk you through the directory and your portal.</p>
-        ${button(ONBOARDING_CALL_URL, 'Book your onboarding call')}
-        <p>Questions go to support@neurochirodirectory.com.</p>
-      `,
-    }
-  }
+  if (hostedInvoiceUrl) return unpaidEmail(to, firstName, hostedInvoiceUrl, 'bank')
   return approvedWelcomeEmail({
     to,
     lastName: welcome?.lastName || firstName,
@@ -107,18 +115,24 @@ export function approvedEmail(
     priceLabel: welcome?.priceLabel || null,
     amountLabel: welcome?.amountLabel || null,
     receiptUrl: welcome?.receiptUrl || null,
+    activateUrl: welcome?.activateUrl || null,
   })
 }
 
-export function declinedEmail(to: string, firstName: string): Mail {
+export function declinedEmail(to: string, firstName: string, moneyState: 'none' | 'refunded' | 'refund_failed' = 'none'): Mail {
   const name = escapeHtml(firstName || 'there')
+  const money = moneyState === 'refunded'
+    ? 'The membership is canceled and the payment was refunded. The listing stays off the directory.'
+    : moneyState === 'refund_failed'
+      ? 'The listing stays off the directory. The payment is still on the card. We will confirm the refund in Stripe before it is returned.'
+      : 'Your card was not charged, and the saved card has been removed.'
   return {
     to,
     subject: 'Your NeuroChiro application',
     html: `
       <h1>Thank you, Dr. ${name}.</h1>
       <p>Thank you for applying to NeuroChiro. We are not able to add the practice to the directory right now.</p>
-      <p>Your card was not charged, and the saved card has been removed.</p>
+      <p>${money}</p>
       <p>If you think this was a mistake, reply to this email and Raymond will take another look.</p>
     `,
   }

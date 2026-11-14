@@ -571,14 +571,16 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            // Check if they already paid/completed
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           if (!profile || profile.tier !== 'pro' && profile.tier !== 'student_paid') {
+           const { data: doctor } = await supabaseAdmin.from('doctors').select('is_approved, verification_status, paid_at').eq('user_id', payload.userId).maybeSingle();
+           const alreadyLive = doctor?.is_approved === true || doctor?.verification_status === 'verified' || Boolean(doctor?.paid_at);
+           if (!alreadyLive && (!profile || profile.tier !== 'pro' && profile.tier !== 'student_paid')) {
               await sendPremiumEmail({
                 to: payload.email,
                 subject: 'Did you forget something? 🌍',
                 title: 'Incomplete Registration',
                 body: `<h1>Dr. ${payload.name || payload.full_name || ''}, your clinic is missing from the map.</h1>
                        <p>You started setting up your NeuroChiro profile, but haven't finalized your membership yet.</p>
-                       <p>Patients and students are actively searching your area. Complete your setup now to secure your spot.</p>`,
+                       <p>Community members and students are actively searching your area. Complete your setup now to secure your spot.</p>`,
                 ctaText: 'Complete Your Profile',
                 ctaUrl: 'https://neurochiro.co/doctor/profile'
               });

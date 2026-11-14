@@ -1,5 +1,6 @@
-import { approvalSmsFor, type ApprovalSms } from './approval-sms.ts'
-import { approvedEmail, declinedEmail, type Mail } from './emails.ts'
+import { approvalSmsFor, paymentSmsFor, type ApprovalSms } from './approval-sms.ts'
+import { approvedEmail, declinedEmail, unpaidEmail, type Mail } from './emails.ts'
+import { DOCTOR_PAY_URL, safePayUrl } from '../go-live/plan.ts'
 
 export type ApplicationStatus = 'draft' | 'under_review' | 'approved' | 'declined' | 'needs_action'
 export type BillingCycle = 'monthly' | 'annual'
@@ -23,6 +24,8 @@ export type ApplicationRecord = {
   mobileE164: string | null
   smsConsent: boolean
   priceLabel: string | null
+  /** Path B already paid on a Stripe link. Approve must not charge again. */
+  paymentReceived?: boolean
 }
 
 export type ChargeResult = {
@@ -44,6 +47,8 @@ export type BillingPort = {
     metadata: Record<string, string>
   }): Promise<ChargeResult>
   detachPaymentMethod(paymentMethodId: string): Promise<void>
+  /** Cancel the membership and refund the latest paid invoice. Used when a paid signup is denied. */
+  cancelAndRefund?(subscriptionId: string): Promise<void>
 }
 
 export type DoctorWrite = {
@@ -118,6 +123,38 @@ export async function approveApplication(
       detached: false,
     }
   }
+  if (app.paymentReceived && app.stripeSubscriptionId) {
+    return {
+      ok: true,
+      message: 'Approved. Payment was already received, so nothing new was charged. The listing is public.',
+      doctor: {
+        is_approved: true,
+        verification_status: 'verified',
+        verified_at: now,
+        stripe_subscription_id: app.stripeSubscriptionId,
+        membership_tier: 'pro',
+        paid_at: now,
+      },
+      application: {
+        status: 'approved',
+        stripe_subscription_id: app.stripeSubscriptionId,
+        admin_notes: notesOrNull(notes),
+        reviewed_at: now,
+      },
+      email: approvedEmail(app.email, app.firstName, null, {
+        lastName: app.lastName || app.firstName,
+        profileUrl: app.profileUrl,
+        plan: app.plan,
+        priceLabel: app.priceLabel,
+        amountLabel: null,
+        receiptUrl: null,
+      }),
+      sms: approvalSmsFor(app),
+      charged: true,
+      detached: false,
+    }
+  }
+
   const blocked = missingCard(app)
   if (blocked || !app.stripeCustomerId || !app.stripePaymentMethodId || !app.stripePriceId) {
     return { ok: false, message: blocked || 'There is no card on file yet.', doctor: null, application: null, email: null, sms: null, charged: false, detached: false }
@@ -152,58 +189,65 @@ export async function approveApplication(
     }
   }
 
-  if (charge.paymentState === 'failed') {
+  if (charge.paymentState !== 'paid') {
+    const payUrl = safePayUrl(charge.hostedInvoiceUrl) || DOCTOR_PAY_URL
+    const bank = charge.paymentState === 'requires_action'
     return {
-      ok: false,
-      message: charge.errorMessage || 'The card was declined. Nothing was published.',
-      doctor: null,
-      application: { status: app.status, charge_attempt: app.chargeAttempt + 1, admin_notes: notesOrNull(notes) },
-      email: null,
-      sms: null,
+      ok: bank,
+      message: bank
+        ? 'Not published. Their bank still needs a confirmation. The email and text include a Stripe link.'
+        : charge.errorMessage || 'The card was declined. Nothing was published. The email and text include a Stripe link.',
+      doctor: {
+        is_approved: false,
+        verification_status: 'hidden',
+        stripe_subscription_id: charge.subscriptionId,
+      },
+      application: {
+        status: 'needs_action',
+        stripe_subscription_id: charge.subscriptionId,
+        admin_notes: notesOrNull(notes),
+        reviewed_at: now,
+        charge_attempt: bank ? app.chargeAttempt : app.chargeAttempt + 1,
+      },
+      email: unpaidEmail(app.email, app.firstName, payUrl, bank ? 'bank' : 'failed'),
+      sms: paymentSmsFor({
+        smsConsent: app.smsConsent,
+        mobileE164: app.mobileE164,
+        lastName: app.lastName,
+        payUrl,
+      }),
       charged: false,
       detached: false,
     }
   }
 
-  const needsAction = charge.paymentState === 'requires_action'
-  const doctor: DoctorWrite = {
-    is_approved: true,
-    verification_status: 'verified',
-    verified_at: now,
-    stripe_subscription_id: charge.subscriptionId,
-  }
-  if (!needsAction) {
-    doctor.membership_tier = 'pro'
-    doctor.paid_at = now
-  }
-
   return {
     ok: true,
-    message: needsAction
-      ? 'Approved. Their bank still needs a confirmation. The email includes a Stripe link.'
-      : 'Approved. Their membership is active and the listing is public.',
-    doctor,
+    message: 'Approved. Their membership is active and the listing is public.',
+    doctor: {
+      is_approved: true,
+      verification_status: 'verified',
+      verified_at: now,
+      stripe_subscription_id: charge.subscriptionId,
+      membership_tier: 'pro',
+      paid_at: now,
+    },
     application: {
-      status: needsAction ? 'needs_action' : 'approved',
+      status: 'approved',
       stripe_subscription_id: charge.subscriptionId,
       admin_notes: notesOrNull(notes),
       reviewed_at: now,
     },
-    email: approvedEmail(
-      app.email,
-      app.firstName,
-      needsAction ? charge.hostedInvoiceUrl : null,
-      needsAction ? null : {
-        lastName: app.lastName || app.firstName,
-        profileUrl: app.profileUrl,
-        plan: app.plan,
-        priceLabel: app.priceLabel,
-        amountLabel: charge.amountLabel || null,
-        receiptUrl: charge.receiptUrl || null,
-      },
-    ),
-    sms: needsAction ? null : approvalSmsFor(app),
-    charged: !needsAction,
+    email: approvedEmail(app.email, app.firstName, null, {
+      lastName: app.lastName || app.firstName,
+      profileUrl: app.profileUrl,
+      plan: app.plan,
+      priceLabel: app.priceLabel,
+      amountLabel: charge.amountLabel || null,
+      receiptUrl: charge.receiptUrl || null,
+    }),
+    sms: approvalSmsFor(app),
+    charged: true,
     detached: false,
   }
 }
@@ -236,10 +280,23 @@ export async function declineApplication(
       detached = false
     }
   }
+  let refunded = false
+  if (app.paymentReceived && app.stripeSubscriptionId && billing.cancelAndRefund) {
+    try {
+      await billing.cancelAndRefund(app.stripeSubscriptionId)
+      refunded = true
+    } catch {
+      refunded = false
+    }
+  }
 
   return {
     ok: true,
-    message: 'Declined. The listing stays hidden and the card was removed. Nothing was charged.',
+    message: refunded
+      ? 'Declined. The listing stays hidden, the membership was canceled, and the payment was refunded.'
+      : app.paymentReceived
+        ? 'Declined. The listing stays hidden. The refund did not complete, so check Stripe before telling them the money was returned.'
+        : 'Declined. The listing stays hidden and the card was removed. Nothing was charged.',
     doctor: {
       is_approved: false,
       verification_status: 'hidden',
@@ -251,7 +308,9 @@ export async function declineApplication(
       admin_notes: notesOrNull(notes),
       reviewed_at: now,
     },
-    email: app.email.includes('@') ? declinedEmail(app.email, app.firstName) : null,
+    email: app.email.includes('@')
+      ? declinedEmail(app.email, app.firstName, refunded ? 'refunded' : app.paymentReceived ? 'refund_failed' : 'none')
+      : null,
     sms: null,
     charged: false,
     detached,

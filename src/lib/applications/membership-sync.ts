@@ -40,9 +40,9 @@ export async function syncDoctorMembershipByCustomer(
     if (row.user_id && tier) {
       await client.from('profiles').update({
         tier: tier === 'pro' ? 'pro' : 'free',
-        subscription_status: stripeStatus,
         stripe_customer_id: customerId,
       }).eq('id', row.user_id)
+      await client.from('profiles').update({ subscription_status: stripeStatus }).eq('id', row.user_id)
     }
   }
 }

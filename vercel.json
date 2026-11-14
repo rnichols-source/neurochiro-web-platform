@@ -101,6 +101,14 @@
     {
       "path": "/api/cron/founder-followup",
       "schedule": "30 13 * * *"
+    },
+    {
+      "path": "/api/cron/member-setup-nudges",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/unpaid-listings",
+      "schedule": "20 * * * *"
     }
   ],
   "redirects": [

@@ -146,6 +146,9 @@ export function validateStep2(input: unknown): { ok: true; value: Step2Answers }
     return { ok: false, error: 'The website should look like a normal link.' }
   }
   if (instagram.length > 80) return { ok: false, error: 'The Instagram name is too long.' }
+  if (source.smsConsent !== true) {
+    return { ok: false, error: 'Check the box so we can text you about new community member requests.' }
+  }
   const mobileE164 = toApplicationE164(text(source.mobile), country)
   if (!mobileE164) {
     return {
@@ -170,7 +173,7 @@ export function validateStep2(input: unknown): { ok: true; value: Step2Answers }
       website: website ? normalizeWebsite(website) : '',
       instagram,
       mobileE164,
-      smsConsent: source.smsConsent === true,
+      smsConsent: true,
     },
   }
 }

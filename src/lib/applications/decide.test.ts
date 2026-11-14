@@ -69,7 +69,7 @@ describe('approve a doctor application', () => {
     assert.deepEqual(calls, ['create:doctor-app-sub-app-1-0:price_usd_monthly'])
   })
 
-  it('publishes and emails a Stripe confirmation link when the bank needs a step', async () => {
+  it('keeps the listing hidden and emails a Stripe confirmation link when the bank needs a step', async () => {
     const { port, calls } = billing({
       subscriptionId: 'sub_sca',
       status: 'incomplete',
@@ -79,12 +79,13 @@ describe('approve a doctor application', () => {
     const decision = await approveApplication(application(), port, NOW, '')
     assert.equal(decision.ok, true)
     assert.equal(decision.charged, false)
-    assert.equal(decision.doctor?.verification_status, 'verified')
-    assert.equal(decision.doctor?.is_approved, true)
+    assert.equal(decision.doctor?.verification_status, 'hidden')
+    assert.equal(decision.doctor?.is_approved, false)
     assert.equal(decision.doctor?.membership_tier, undefined)
     assert.equal(decision.application?.status, 'needs_action')
     assert.match(decision.email?.html || '', /invoice\.stripe\.com/)
     assert.match(decision.email?.html || '', /calendly\.com\/drray-neurochirodirectory\/neurochiro-onboarding-call/)
+    assert.match(decision.sms?.body || '', /invoice\.stripe\.com/)
     assert.equal(calls.length, 1)
   })
 
@@ -98,10 +99,11 @@ describe('approve a doctor application', () => {
     })
     const decision = await approveApplication(application(), port, NOW, '')
     assert.equal(decision.ok, false)
-    assert.equal(decision.doctor, null)
-    assert.equal(decision.email, null)
+    assert.equal(decision.doctor?.verification_status, 'hidden')
+    assert.equal(decision.doctor?.is_approved, false)
+    assert.match(decision.email?.html || '', /buy\.stripe\.com/)
     assert.equal(decision.charged, false)
-    assert.equal(decision.application?.status, 'under_review')
+    assert.equal(decision.application?.status, 'needs_action')
     assert.equal(decision.application?.charge_attempt, 1)
     assert.equal(calls.length, 1)
   })
@@ -120,6 +122,26 @@ describe('approve a doctor application', () => {
     assert.equal(decision.ok, true)
     assert.equal(decision.charged, false)
     assert.equal(decision.doctor, null)
+    assert.deepEqual(calls, [])
+  })
+
+  it('approves a payment-link signup without charging again', async () => {
+    const { port, calls } = billing({
+      subscriptionId: 'sub_should_not_exist',
+      status: 'active',
+      hostedInvoiceUrl: null,
+      paymentState: 'paid',
+    })
+    const decision = await approveApplication(application({
+      paymentReceived: true,
+      stripeSubscriptionId: 'sub_paid',
+      stripePaymentMethodId: null,
+      cardOnFile: false,
+    }), port, NOW, '')
+    assert.equal(decision.ok, true)
+    assert.equal(decision.charged, true)
+    assert.equal(decision.doctor?.verification_status, 'verified')
+    assert.equal(decision.doctor?.paid_at, NOW)
     assert.deepEqual(calls, [])
   })
 

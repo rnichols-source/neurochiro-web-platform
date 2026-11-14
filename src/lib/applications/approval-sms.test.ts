@@ -113,19 +113,20 @@ describe('approval email and text', () => {
     assert.deepEqual(delivery.warnings, [])
   })
 
-  it('does not send the congrats text when the bank still needs a step', async () => {
+  it('texts the Stripe link, not the congrats text, when the bank still needs a step', async () => {
     const decision = await approveApplication(application(), billing({
       subscriptionId: 'sub_sca',
       status: 'incomplete',
       hostedInvoiceUrl: 'https://invoice.stripe.com/i/test',
       paymentState: 'requires_action',
     }), NOW, '')
-    assert.equal(decision.sms, null)
+    assert.match(decision.sms?.body || '', /Stripe confirmation/)
+    assert.equal((decision.sms?.body || '').includes('Congrats'), false)
     assert.match(decision.email?.html || '', /invoice\.stripe\.com/)
     assert.equal(decision.email?.subject.includes(APPROVED_SUBJECT), false)
   })
 
-  it('does not send the congrats text when the card fails', async () => {
+  it('texts a Stripe pay link, not the congrats text, when the card fails', async () => {
     const decision = await approveApplication(application(), billing({
       subscriptionId: 'sub_fail',
       status: 'incomplete',
@@ -133,8 +134,15 @@ describe('approval email and text', () => {
       paymentState: 'failed',
     }), NOW, '')
     assert.equal(decision.ok, false)
-    assert.equal(decision.email, null)
+    assert.match(decision.email?.html || '', /did not go through/)
+    assert.match(decision.sms?.body || '', /buy\.stripe\.com/)
+    assert.equal((decision.sms?.body || '').includes('Congrats'), false)
+  })
+
+  it('does not text a number outside the US and Canada', async () => {
+    const decision = await approveApplication(application({ mobileE164: '+447911123456' }), billing(paid), NOW, '')
     assert.equal(decision.sms, null)
+    assert.equal(decision.email?.subject, APPROVED_SUBJECT)
   })
 
   it('respects the text switch and the test phone, and a failed send does not throw', async () => {

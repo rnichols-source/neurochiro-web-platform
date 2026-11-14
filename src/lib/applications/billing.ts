@@ -2,6 +2,7 @@ import 'server-only'
 
 import type Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
+import { paymentIntentIdFromInvoicePayment } from '@/lib/go-live/plan'
 import { formatStripeAmount } from './prices.ts'
 import type { BillingPort, ChargeResult } from './decide.ts'
 
@@ -89,6 +90,38 @@ export function stripeBilling(): BillingPort {
         }
       }
       return result
+    },
+    async cancelAndRefund(subscriptionId: string): Promise<void> {
+      const invoices = await stripe.invoices.list({
+        subscription: subscriptionId,
+        status: 'paid',
+        limit: 3,
+        expand: ['data.payments'],
+      })
+      const intentIds: string[] = []
+      for (const invoice of invoices.data) {
+        for (const payment of invoice.payments?.data || []) {
+          const intentId = paymentIntentIdFromInvoicePayment(payment)
+          if (intentId && !intentIds.includes(intentId)) intentIds.push(intentId)
+        }
+      }
+      if (intentIds.length === 0) throw new Error('No payment was refunded.')
+      let refunded = 0
+      for (const intentId of intentIds) {
+        try {
+          await stripe.refunds.create({ payment_intent: intentId }, { idempotencyKey: `doctor-deny-refund-${intentId}` })
+          refunded += 1
+        } catch (error) {
+          const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
+          if (code === 'charge_already_refunded') refunded += 1
+          else throw error
+        }
+      }
+      if (refunded === 0) throw new Error('No payment was refunded.')
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+      if (subscription.status !== 'canceled') {
+        await stripe.subscriptions.cancel(subscriptionId, {}, { idempotencyKey: `doctor-deny-cancel-${subscriptionId}` })
+      }
     },
     async detachPaymentMethod(paymentMethodId: string): Promise<void> {
       try {

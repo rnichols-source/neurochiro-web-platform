@@ -104,6 +104,11 @@ async function PulseBody({ nowIso }: { nowIso: string }) {
       <div className="grid gap-4 px-4 py-4 lg:grid-cols-2 lg:px-8">
         <div className="space-y-4">
           <Card>
+            <h2 className="fd-ui text-[17px] font-extrabold">Instagram DMs</h2>
+            <p className="mt-1 text-[13px] text-[#5b6773]">When you approve a doctor, nearby Instagram requests land here for Muse. Nothing is sent automatically.</p>
+            <Link href="/admin/instagram" className="fd-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#15202B] px-3 text-[13px] font-extrabold text-white">Open Instagram DMs</Link>
+          </Card>
+          <Card>
             <h2 className="fd-ui mb-2 text-[17px] font-extrabold text-[#D66829]">Needs you today · {needs.length}</h2>
             {needs.length === 0 ? <p className="text-[14px] text-[#5b6773]">Nothing in this list is waiting.</p> : needs.map((need) => (
               <div key={need.id} className="flex items-center gap-3 border-t border-[#EFECE7] py-3 first:border-0">

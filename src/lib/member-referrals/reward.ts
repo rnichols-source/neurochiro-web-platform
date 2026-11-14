@@ -35,6 +35,7 @@ export type ReferralCase = {
 
 export type StripeRewardPort = {
   listSubscriptions(customerId: string): Promise<SubscriptionSnapshot[]>
+  ensureCustomer?(input: { email: string | null; name: string; doctorId: string }): Promise<string | null>
   credit(input: {
     customerId: string
     amount: number
@@ -161,7 +162,19 @@ export async function fulfillMemberReferral(input: {
   })
   if (!qualified.ok) return { status: 'waiting', reason: qualified.reason }
 
-  const customerId = referralCase.referrer.stripeCustomerId
+  let customerId = referralCase.referrer.stripeCustomerId
+  if (!customerId && input.stripe.ensureCustomer) {
+    try {
+      customerId = await input.stripe.ensureCustomer({
+        email: referralCase.referrer.email,
+        name: `${referralCase.referrer.firstName} ${referralCase.referrer.lastName}`.trim(),
+        doctorId: referralCase.referrer.id,
+      })
+      referralCase.referrer.stripeCustomerId = customerId
+    } catch (error) {
+      return finishFailure(input, existing, errorText(error))
+    }
+  }
   if (!customerId) {
     return finishFailure(input, existing, 'referrer_has_no_subscription')
   }

@@ -286,7 +286,12 @@ function SubscribeListContent() {
               <select
                 id="waitlist-country"
                 value={country}
-                onChange={(e) => { countryTouched.current = true; setCountry(e.target.value); setErrors((p) => ({ ...p, zip: "", phone: "" })); }}
+                onChange={(e) => {
+                  countryTouched.current = true
+                  setCountry(e.target.value)
+                  if (e.target.value !== 'US' && e.target.value !== 'CA') setSmsConsent(false)
+                  setErrors((p) => ({ ...p, zip: "", phone: "" }))
+                }}
                 className="w-full px-3 py-3 rounded-xl border border-gray-200 text-neuro-navy text-base bg-white focus:outline-none focus:ring-2 focus:ring-neuro-orange/30 focus:border-neuro-orange"
               >
                 <optgroup label="Common">
@@ -352,9 +357,11 @@ function SubscribeListContent() {
                 </div>
               </div>
               {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
-              {phone.trim() && !smsConsent && !errors.phone && (
+              {country !== 'US' && country !== 'CA' ? (
+                <p className="text-gray-400 text-xs mt-1">Texts are only available for US and Canadian mobiles. Email still works.</p>
+              ) : phone.trim() && !smsConsent && !errors.phone ? (
                 <p className="text-gray-400 text-xs mt-1">This number is only saved if you opt in to texts below.</p>
-              )}
+              ) : null}
             </div>
 
             {/* Consent */}
@@ -378,6 +385,7 @@ function SubscribeListContent() {
                 <input
                   type="checkbox"
                   checked={smsConsent}
+                  disabled={country !== 'US' && country !== 'CA'}
                   onChange={(e) => { setSmsConsent(e.target.checked); setErrors((p) => ({ ...p, phone: "" })); }}
                   className="mt-0.5 w-4 h-4 rounded border-gray-300 text-neuro-orange focus:ring-neuro-orange"
                 />

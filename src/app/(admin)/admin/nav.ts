@@ -38,6 +38,7 @@ export const primaryNav: AdminNavItem[] = [
 
 export const moreNav: AdminNavItem[] = [
   { name: 'Outreach', href: '/admin/outreach', icon: Mail },
+  { name: 'Instagram DMs', href: '/admin/instagram', icon: MessageSquare },
   { name: 'Reply station', href: '/admin/coverage/reply', icon: MessageSquare },
   { name: 'Mentions', href: '/admin/coverage/mentions', icon: MessageSquare },
   { name: 'Templates', href: '/admin/coverage/templates', icon: FileText },

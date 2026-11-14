@@ -1,4 +1,5 @@
 import { ONBOARDING_CALL_URL } from './emails.ts'
+import { canTextNumber, safePayUrl } from '../go-live/plan.ts'
 import { last4 } from '../sms/phone.ts'
 import type { Mail } from './emails.ts'
 
@@ -56,6 +57,20 @@ export function approvalText(lastName: string, profileUrl: string): string {
   return body
 }
 
+export function paymentLinkText(lastName: string, payUrl: string): string {
+  const cleaned = (lastName || 'there').replace(/\s+/g, ' ').trim() || 'there'
+  const url = safePayUrl(payUrl) || ''
+  const build = (who: string) =>
+    `Dr. ${who}, your NeuroChiro membership needs one Stripe confirmation before it starts: ${url} Reply STOP to opt out.`
+  let name = cleaned
+  let body = build(name)
+  while (body.length > TEXT_LIMIT && name.length > 1) {
+    name = name.slice(0, -1).trim()
+    body = build(name || 'there')
+  }
+  return body
+}
+
 export function approvalSmsFor(input: {
   smsConsent: boolean
   mobileE164: string | null
@@ -64,8 +79,21 @@ export function approvalSmsFor(input: {
 }): ApprovalSms | null {
   if (input.smsConsent !== true) return null
   const to = input.mobileE164 || ''
-  if (!E164.test(to)) return null
+  if (!E164.test(to) || !canTextNumber(to)) return null
   return { to, body: approvalText(input.lastName, input.profileUrl) }
+}
+
+export function paymentSmsFor(input: {
+  smsConsent: boolean
+  mobileE164: string | null
+  lastName: string
+  payUrl: string | null
+}): ApprovalSms | null {
+  if (input.smsConsent !== true) return null
+  const to = input.mobileE164 || ''
+  const url = safePayUrl(input.payUrl)
+  if (!E164.test(to) || !canTextNumber(to) || !url) return null
+  return { to, body: paymentLinkText(input.lastName, url) }
 }
 
 /** Same SMS_ENABLED and SMS_TEST_PHONE rules as lead texts. Does not send. */

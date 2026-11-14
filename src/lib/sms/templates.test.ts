@@ -133,7 +133,7 @@ test('waitlist doctor-joined text points at neurochiro.co and includes STOP', ()
   )
   assert.equal(
     body,
-    'NeuroChiro: Good news! A nervous system chiropractor just joined near you: Dr. Priya Shah, Mumbai. See their profile: https://neurochiro.co/directory/priya-shah. Reply STOP to opt out.',
+    'NeuroChiro: New doctor near you: Dr. Priya Shah, Mumbai. https://neurochiro.co/contact-request?doctor=priya-shah&source=doctor_joined Reply STOP to opt out.',
   )
   assert.equal(body.includes('neurochirodirectory.com'), false)
   const foreign = waitlistDoctorJoinedText('Dr. Priya Shah', 'Mumbai', 'https://example.com/nope')

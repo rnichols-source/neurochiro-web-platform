@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import {
@@ -6,7 +7,8 @@ import {
   type MatchedSubscriber,
 } from '@/lib/doctor-joined-notify'
 import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/marketing-email'
-import { sendWaitlistDoctorJoinedText, waitlistDoctorJoinedText } from '@/lib/sms/waitlist-alert'
+import { textWaitlistOnce } from '@/lib/go-live/waitlist-text-send'
+import { orderWaitlistTiers } from '@/lib/go-live/plan'
 import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/listing-display'
 
 /**
@@ -26,6 +28,7 @@ import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/li
  */
 async function textJoinedSubscriber(
   supabase: ReturnType<typeof createAdminClient>,
+  doctorId: string,
   subscriberId: string,
   doctorName: string,
   city: string | null,
@@ -37,10 +40,17 @@ async function textJoinedSubscriber(
       .select('sms_phone, sms_consent, sms_opted_out_at')
       .eq('id', subscriberId)
       .maybeSingle()
-    if (error || !data?.sms_consent || !data.sms_phone || data.sms_opted_out_at) return
-    const body = waitlistDoctorJoinedText(doctorName, city || '', profileUrl)
-    if (!body.includes('https://neurochiro.co/')) return
-    await sendWaitlistDoctorJoinedText(data.sms_phone, body)
+    if (error || !data) return
+    await textWaitlistOnce({
+      doctorId,
+      subscriberId,
+      phone: data.sms_phone || null,
+      consent: data.sms_consent === true,
+      optedOut: Boolean(data.sms_opted_out_at),
+      doctorName,
+      city: city || '',
+      profileUrl,
+    })
   } catch (err) {
     console.warn('[DOCTOR-JOINED-SEND] Text skipped:', err instanceof Error ? err.message : 'failed')
   }
@@ -63,12 +73,15 @@ export async function GET(req: NextRequest) {
 
   // ── Email 1: Process pending queue entries past hold window ──
 
-  const { data: pendingEntries } = await (supabase as any)
+  const onlyDoctor = req.nextUrl.searchParams.get('doctor')
+  let pendingQuery = (supabase as any)
     .from('doctor_notify_queue')
     .select('*')
     .eq('status', 'pending')
     .lte('send_after', now.toISOString())
     .order('created_at', { ascending: true })
+  if (onlyDoctor) pendingQuery = pendingQuery.eq('doctor_id', onlyDoctor)
+  const { data: pendingEntries } = await pendingQuery
 
   let email1Sent = 0
   let email1Failed = 0
@@ -121,17 +134,21 @@ export async function GET(req: NextRequest) {
 
     // Batch multiple doctors near same subscriber: check if this subscriber
     // has other pending entries. For now, send per-doctor (batching is a future optimization).
-    const subscribers = entry.matched_subscribers as MatchedSubscriber[]
+    const subscribers = orderWaitlistTiers((entry.matched_subscribers as MatchedSubscriber[]).map((sub) => ({
+      ...sub,
+      distanceMiles: sub.distance_miles,
+      confirmed: sub.confirmed !== false,
+    })))
 
     for (const sub of subscribers) {
       // Re-check subscriber status
       const { data: subRecord } = await (supabase as any)
         .from('subscribers')
-        .select('status, unsubscribed_at')
+        .select('status, unsubscribed_at, email')
         .eq('id', sub.id)
         .single()
 
-      if (!subRecord || subRecord.status !== 'confirmed' || subRecord.unsubscribed_at) {
+      if (!subRecord || subRecord.unsubscribed_at) {
         await logNotification({
           queue_id: entry.id,
           doctor_id: entry.doctor_id,
@@ -144,6 +161,48 @@ export async function GET(req: NextRequest) {
           subscriber_state: sub.state,
         })
         email1Suppressed++
+        continue
+      }
+
+      if (subRecord.status !== 'confirmed') {
+        const { error: introDedup } = await (supabase as any)
+          .from('doctor_notifications')
+          .insert({ doctor_id: entry.doctor_id, subscriber_id: sub.id, email_number: 1, queue_id: entry.id })
+        if (introDedup) {
+          await logNotification({
+            queue_id: entry.id,
+            doctor_id: entry.doctor_id,
+            subscriber_id: sub.id,
+            email_number: 1,
+            status: 'suppressed',
+            suppression_reason: 'already_notified',
+            distance_miles: sub.distance_miles,
+            subscriber_city: sub.city,
+            subscriber_state: sub.state,
+          })
+          email1Suppressed++
+          continue
+        }
+        const token = crypto.randomBytes(32).toString('hex')
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+        await (supabase as any).from('subscribers').update({
+          token_hash: tokenHash,
+          token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        }).eq('id', sub.id)
+        const confirmUrl = `https://neurochiro.co/api/confirm?token=${token}`
+        try {
+          const resend = getMarketingResend()
+          await resend.emails.send({
+            from: getMarketingFrom(),
+            to: [sub.email],
+            subject: `${doctorName} just listed near you`,
+            html: wrapMarketingEmail(`<p>Confirm your email and meet ${doctorName}.</p><p><a href="${confirmUrl}">Confirm and see ${doctorName}</a></p><p><a href="${profileUrl}">Profile</a></p><p><a href="${contactUrl}">Have their office call me</a></p>`),
+          })
+          email1Sent++
+        } catch (err) {
+          console.error('[DOCTOR-JOINED-SEND] Confirm intro failed', err instanceof Error ? err.name : 'error')
+        }
+        await textJoinedSubscriber(supabase, entry.doctor_id, sub.id, doctorName, doctor.city, profileUrl)
         continue
       }
 
@@ -214,7 +273,7 @@ export async function GET(req: NextRequest) {
           resend_id: (result as any)?.data?.id || undefined,
         })
         email1Sent++
-        await textJoinedSubscriber(supabase, sub.id, doctorName, doctor.city, profileUrl)
+        await textJoinedSubscriber(supabase, entry.doctor_id, sub.id, doctorName, doctor.city, profileUrl)
       } catch (err) {
         console.error(`[DOCTOR-JOINED-SEND] Email 1 failed for ${sub.email}:`, err)
         // Roll back dedupe on failure
