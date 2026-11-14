@@ -11,6 +11,7 @@ import { buildFunnel, buildNeeds, openRequests, since, waitingRequests, weekSeri
 import { loadDoctorBilling } from '@/lib/founder/money'
 import { loadFounderRoster } from '@/lib/founder/roster'
 import { PEOPLE_TOOLS } from '@/lib/founder/places'
+import { loadProfileBuildBoard } from '@/lib/profile-build/board'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,7 +87,10 @@ async function MrrKpi() {
 
 async function PulseBody({ nowIso }: { nowIso: string }) {
   const now = new Date(nowIso)
-  const roster = await loadFounderRoster()
+  const [roster, builds] = await Promise.all([
+    loadFounderRoster(),
+    loadProfileBuildBoard().catch(() => ({ ready: false, failed: [], retrying: [] })),
+  ])
   const open = openRequests(roster, now)
   const repliedHours = open
     .map((row) => row.acknowledgedAt ? (new Date(row.acknowledgedAt).getTime() - new Date(row.createdAt).getTime()) / 3_600_000 : null)
@@ -108,6 +112,13 @@ async function PulseBody({ nowIso }: { nowIso: string }) {
             <p className="mt-1 text-[13px] text-[#5b6773]">When you approve a doctor, nearby Instagram requests land here for Muse. Nothing is sent automatically.</p>
             <Link href="/admin/instagram" className="fd-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#15202B] px-3 text-[13px] font-extrabold text-white">Open Instagram DMs</Link>
           </Card>
+          {builds.failed.length > 0 ? (
+            <Card>
+              <h2 className="fd-ui text-[17px] font-extrabold text-[#D66829]">Profile research · {builds.failed.length}</h2>
+              <p className="mt-1 text-[13px] text-[#5b6773]">These approved doctors still need a look. Research stopped after 3 tries.</p>
+              <Link href="/admin/profile-builds" className="fd-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-3 text-[13px] font-extrabold text-white">Review failures</Link>
+            </Card>
+          ) : null}
           <Card>
             <h2 className="fd-ui mb-2 text-[17px] font-extrabold text-[#D66829]">Needs you today · {needs.length}</h2>
             {needs.length === 0 ? <p className="text-[14px] text-[#5b6773]">Nothing in this list is waiting.</p> : needs.map((need) => (
