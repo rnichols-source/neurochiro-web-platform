@@ -23,6 +23,9 @@ import { getMarketingResend, getMarketingFrom, wrapMarketingEmail } from '@/lib/
  * Schedule: 0 11,23 * * * (11am and 11pm UTC — 1hr after scan)
  */
 export async function GET(req: NextRequest) {
+  // DISABLED 2026-11-15 — too many drip emails to patient subscribers
+  return NextResponse.json({ skipped: true, reason: 'Doctor-joined-send disabled — too many emails' })
+
   const authHeader = req.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
