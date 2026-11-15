@@ -22,6 +22,9 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * Each episode is only promoted once.
  */
 export async function GET(req: Request) {
+  // DISABLED 2026-11-15 — blasting entire member base with no opt-out
+  return NextResponse.json({ skipped: true, reason: 'Spotlight promoter disabled — too many emails' });
+
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {

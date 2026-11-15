@@ -22,6 +22,9 @@ const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
  * One source of truth: src/lib/profile-completeness.ts
  */
 export async function GET(req: Request) {
+  // DISABLED 2026-11-15 — overwhelming members with repeated nudge emails
+  return NextResponse.json({ skipped: true, reason: 'Profile nudger disabled — too many emails' });
+
   const authHeader = req.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {

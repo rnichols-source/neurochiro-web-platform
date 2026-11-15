@@ -10,6 +10,9 @@ export const dynamic = 'force-dynamic'
  * ?dry_run=true reports the next action and does not send.
  */
 export async function GET(req: NextRequest) {
+  // DISABLED 2026-11-15 — overwhelming doctors with escalation reminder emails
+  return NextResponse.json({ skipped: true, reason: 'Contact escalation disabled — too many emails' })
+
   const authHeader = req.headers.get('authorization')
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -4,6 +4,9 @@ import { runReferralReminders } from '@/lib/referrals/data';
 export const maxDuration = 120;
 
 export async function GET(req: Request) {
+  // DISABLED 2026-11-15 — overwhelming doctors with referral reminder emails
+  return NextResponse.json({ skipped: true, reason: 'Referral reminders disabled — too many emails' });
+
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
