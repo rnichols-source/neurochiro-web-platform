@@ -35,7 +35,7 @@ export default async function FunnelPage() {
 
 async function FunnelBody() {
   const [roster, settings] = await Promise.all([loadFounderRoster(), loadFounderSettings()])
-  const roi = roiCard(roster)
+  const roi = roiCard(roster, new Date(), settings.figures.carePlansStarted, settings.figures.averageCarePlan)
   const steps = buildFunnel(roster)
 
   return (
@@ -63,23 +63,24 @@ async function FunnelBody() {
               <span className="pb-3 text-[14px] font-extrabold text-white/60">vs</span>
               <div><b className="fd-ui block text-[40px] leading-none">{roi.visit == null ? '—' : formatMoney(roi.visit)}</b><span className="text-[13px]">median first visit</span></div>
             </div>
-            <p className="mt-3 text-[15px]">One new community member a month more than pays for NeuroChiro, when the first visit is priced.</p>
+            <p className="mt-3 text-[15px]">{roi.carePlansStarted} care plans started ≈ {formatMoney(roi.carePlanValue)}, vs $99 a month</p>
+            <p className="mt-2 text-[15px]">One new community member a month more than pays for NeuroChiro, when the first visit is priced. Doctors have reported {roi.carePlansStarted} community members who started a care plan.</p>
             <Row label="Doctors who got a request" value={String(roi.doctors)} />
             <Row label="Requests per doctor" value={roi.perDoctor == null ? '—' : String(roi.perDoctor)} />
             <Row label="First-visit value of confirmed contacts" value={roi.sentValue == null ? '—' : formatMoney(roi.sentValue)} />
-            <Row label="Care plans started" value="?" />
+            <Row label="Care plans started" value={String(roi.carePlansStarted)} />
+            <Row label="Average care plan" value={formatMoney(roi.averageCarePlan)} tag="estimate" />
+            <Row label="Care plan value of care plans started" value={formatMoney(roi.carePlanValue)} />
+            <Row label="First-visit value of care plans started" value={roi.carePlanVisitValue == null ? '—' : formatMoney(roi.carePlanVisitValue)} />
             <div className="mt-3 flex flex-wrap gap-2">
               <Tag kind="live">Live data</Tag>
               <Tag kind="estimate">Estimate</Tag>
-              <Tag kind="tracking">Starts tracking now</Tag>
+              <Tag kind="reported">Doctor-reported</Tag>
             </div>
           </div>
           <Card>
             <h2 className="fd-ui text-[15px] font-extrabold">How these are counted</h2>
-            <p className="mt-2 text-[13px] leading-relaxed text-[#5b6773]">
-              $99 is the doctor price. {roi.visit == null ? 'No usable first-visit prices are on file, so the visit value stays blank.' : `${formatMoney(roi.visit)} is the median of ${roi.priceCount} doctors who list a first-visit price. ${roi.sentValue == null ? '' : `${formatMoney(roi.sentValue)} is ${roi.confirmed} confirmed contacts times that median. It is a ceiling until office visits are tracked.`}`}
-              Care plans started from a request are not stored yet.
-            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[#5b6773]">{howCounted(roi)}</p>
           </Card>
           <Card>
             <h2 className="fd-ui text-[15px] font-extrabold">Content attribution</h2>
@@ -101,6 +102,35 @@ async function FunnelBody() {
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return <div className="flex justify-between border-t border-white/15 py-2 text-[14px]"><span>{label}</span><b className="fd-ui">{value}</b></div>
+function howCounted(roi: {
+  visit: number | null
+  priceCount: number
+  sentValue: number | null
+  confirmed: number
+  carePlansStarted: number
+  averageCarePlan: number
+  carePlanValue: number
+  carePlanVisitValue: number | null
+}): string {
+  const sentences = ['$99 is the doctor price.']
+  if (roi.visit != null) {
+    sentences.push(`${formatMoney(roi.visit)} is the median of ${roi.priceCount} doctors who list a first-visit price.`)
+    sentences.push(`${formatMoney(roi.sentValue)} is ${roi.confirmed} confirmed contacts times that median. It is a first-visit ceiling until office visits are tracked.`)
+  }
+  sentences.push(`${roi.carePlansStarted} is the number of community members doctors reported had started a care plan, when asked. It is doctor-reported, not counted from visit-request records. Update it in Settings.`)
+  sentences.push(`${formatMoney(roi.averageCarePlan)} is the average care plan. It is an industry-survey average (Chiropractic Economics 2025) until doctors report their own prices. It is editable in Settings.`)
+  sentences.push(`${formatMoney(roi.carePlanValue)} is ${roi.carePlansStarted} care plans started times that average.`)
+  if (roi.carePlanVisitValue != null) {
+    sentences.push(`${formatMoney(roi.carePlanVisitValue)} is ${roi.carePlansStarted} care plans started times the same median first visit. It is a first-visit value only.`)
+  }
+  return sentences.join(' ')
+}
+
+function Row({ label, value, tag }: { label: string; value: string; tag?: 'estimate' }) {
+  return (
+    <div className="flex items-center justify-between gap-3 border-t border-white/15 py-2 text-[14px]">
+      <span className="flex items-center gap-2">{label}{tag === 'estimate' ? <Tag kind="estimate">Estimate</Tag> : null}</span>
+      <b className="fd-ui">{value}</b>
+    </div>
+  )
 }

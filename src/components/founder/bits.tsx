@@ -1,10 +1,11 @@
 import Link from 'next/link'
 
-export function Tag({ kind, children }: { kind: 'live' | 'estimate' | 'yours' | 'tracking'; children: React.ReactNode }) {
+export function Tag({ kind, children }: { kind: 'live' | 'estimate' | 'yours' | 'tracking' | 'reported'; children: React.ReactNode }) {
   const styles = {
     live: 'bg-[#DDF3E6] text-[#1E7A45]',
     estimate: 'bg-[#E2ECF8] text-[#1F4F8C]',
     yours: 'bg-[#EFE5F5] text-[#5C3473]',
+    reported: 'bg-[#EFE5F5] text-[#5C3473]',
     tracking: 'border border-dashed border-[#E9A77A] bg-[#FFF1E6] text-[#B4501A]',
   }
   return <span className={`fd-ui inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${styles[kind]}`}><span className="h-1.5 w-1.5 rounded-full bg-current" />{children}</span>
