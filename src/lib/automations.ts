@@ -6,6 +6,7 @@ import { messageThreadUrl, settingsUrl, shouldSendUnreadEmail, unreadEmailHtml }
 import { getNotificationPrefs } from '@/lib/messaging/prefs';
 import { recordThreadNotification } from '@/lib/messaging/thread-notification';
 import { communityWelcome } from '@/lib/community/logic';
+import { shouldQueueSignupWelcome, signupWelcomeKind } from '@/lib/signup-welcome';
 
 /**
  * LAZY RESEND LOADER
@@ -233,6 +234,54 @@ const insertNotification = async (userId: string, title: string, body: string, t
   }
 };
 
+type WelcomeQueuePayload = {
+  role?: unknown
+  userId?: unknown
+  user_id?: unknown
+  email?: unknown
+}
+
+function welcomeText(value: unknown): string {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+/**
+ * Profile role, or the auth metadata role when the queue row was written
+ * before the profile upsert. Doctor accounts must not receive the community welcome.
+ */
+async function lookupWelcomeAccountRole(payload: WelcomeQueuePayload): Promise<string | null> {
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) return null;
+    const userId = welcomeText(payload.userId || payload.user_id);
+    if (userId) {
+      const { data } = await supabaseAdmin.from('profiles').select('role').eq('id', userId).maybeSingle();
+      const profileRole = typeof data?.role === 'string' ? data.role : null;
+      if (signupWelcomeKind({ accountRole: profileRole }) === 'skip') return profileRole;
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+      const appRole = userData?.user?.app_metadata?.role;
+      const metaRole = userData?.user?.user_metadata?.role;
+      if (typeof appRole === 'string' && signupWelcomeKind({ accountRole: appRole }) === 'skip') return appRole;
+      if (typeof metaRole === 'string' && signupWelcomeKind({ accountRole: metaRole }) === 'skip') return metaRole;
+      return profileRole;
+    }
+    const email = welcomeText(payload.email);
+    if (!email) return null;
+    const { data } = await supabaseAdmin.from('profiles').select('role').ilike('email', email).limit(5);
+    const roles: string[] = (data || [])
+      .map((row: { role?: string }) => row.role)
+      .filter((role: unknown): role is string => typeof role === 'string');
+    return roles.find((role) => signupWelcomeKind({ accountRole: role }) === 'skip') || roles[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+async function signupWelcomeBlocked(payload: WelcomeQueuePayload): Promise<boolean> {
+  const accountRole = await lookupWelcomeAccountRole(payload);
+  return signupWelcomeKind({ queuedRole: welcomeText(payload.role), accountRole }) === 'skip';
+}
+
 export const executeAutomation = async (queueId: string, eventType: string, payload: Record<string, any>) => {
   try {
     const supabaseAdmin = getSupabaseAdmin();
@@ -304,6 +353,10 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'welcome_email':
+        // Doctors wait for the approval welcome. A membership-checkout user is
+        // queued with role patient when the trigger cannot see app_metadata.
+        if (await signupWelcomeBlocked(payload)) break;
+
         // 🛡️ PHASE 2: In-App Notification
         if (payload.userId) {
           const community = payload.role === 'patient';
@@ -326,6 +379,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
         if (emailEnabled && payload.email) {
           if (payload.role === 'doctor') {
+            // Doctor accounts return above, before this branch. Their welcome is the approval email.
             await sendPremiumEmail({ 
               to: payload.email, 
               subject: 'Welcome to the NeuroChiro Network 🌍', 
@@ -537,6 +591,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
       case 'patient_education_1':
         // Only send to actual patients — not doctors or students
+        if (await signupWelcomeBlocked(payload)) break;
         if (emailEnabled && payload.email && payload.role === 'patient') {
           await sendPremiumEmail({
             to: payload.email,
@@ -553,6 +608,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
       case 'patient_directory_reminder':
         // Only send to actual patients — not doctors or students
+        if (await signupWelcomeBlocked(payload)) break;
         if (emailEnabled && payload.email && payload.role === 'patient') {
           await sendPremiumEmail({
             to: payload.email,
@@ -1125,6 +1181,7 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
 
 export const Automations = {
   onSignup: async (userId: string, email: string, name: string, role: string, phone?: string) => {
+    if (!shouldQueueSignupWelcome(role)) return;
     await enqueue('welcome_email', { userId, email, name, role, phone });
   },
   onMembershipUpgrade: async (userId: string, email: string, tierName: string) => {
