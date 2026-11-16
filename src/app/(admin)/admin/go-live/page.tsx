@@ -51,7 +51,7 @@ export default async function GoLivePage() {
                       </div>
                       <p className="mt-1 text-[13px] text-[#5b6773]">{row?.reason || 'This step has not run.'}</p>
                     </div>
-                    {row?.status === 'failed' ? <RetryStepButton doctorId={doctorId} step={step} /> : null}
+                    {step === 'welcome' || row?.status === 'failed' ? <RetryStepButton doctorId={doctorId} step={step} welcome={step === 'welcome'} /> : null}
                   </li>
                 )
               })}

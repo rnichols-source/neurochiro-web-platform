@@ -7,7 +7,7 @@ import type { GoLiveStep } from '@/lib/go-live/log'
 
 const STEPS: GoLiveStep[] = ['checkout', 'profile', 'portal', 'welcome', 'waitlist', 'instagram', 'summary']
 
-export async function retryGoLiveStep(doctorId: string, step: string): Promise<{ ok: boolean; reason: string }> {
+export async function retryGoLiveStep(doctorId: string, step: string, resendWelcome = false): Promise<{ ok: boolean; reason: string }> {
   if (!doctorId || !STEPS.includes(step as GoLiveStep)) return { ok: false, reason: 'Unknown step.' }
   try {
     await checkAdminAuth()
@@ -16,6 +16,7 @@ export async function retryGoLiveStep(doctorId: string, step: string): Promise<{
       source: 'retry' as GoLiveSource,
       only: [step as GoLiveStep],
       force: true,
+      resendWelcome: step === 'welcome' && resendWelcome === true,
     })
     revalidatePath('/admin/go-live')
     revalidatePath('/admin/profile-builds')

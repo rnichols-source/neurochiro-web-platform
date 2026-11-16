@@ -3,17 +3,20 @@ import 'server-only'
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { doctorPriceIds, studentPriceIds } from '@/lib/member-referrals/catalog'
-import { finishDecision } from './finish'
-import { loadApplicationById } from '@/lib/applications/store'
-import { approvalSmsFor } from '@/lib/applications/approval-sms'
+import { isStudentProduct, type ProductHint } from './products.ts'
+import { goLiveStepAlreadyOk } from './log.ts'
 import {
   checkoutApplicationContact,
   countryFromCurrency,
+  invoiceIsRenewal,
+  invoiceLineProduct,
   isDoctorMembershipCheckout,
   phoneFromCheckout,
   planCheckoutIntake,
   planInvoiceIntake,
+  planLoggedInCheckout,
   planPathB,
+  promotionPlan,
   readCheckoutContact,
   splitName,
   subscriptionIdFromInvoice,
@@ -52,6 +55,26 @@ function identityFromSession(session: Record<string, any>, priceId: string | nul
     userId: text(session.metadata?.userId) || null,
     mode: text(session.mode) || null,
     paymentLinkPresent: Boolean(session.payment_link),
+    allowAmountFallback: session.allow_amount_fallback === true,
+  }
+}
+
+function productHint(product: { id?: string; name?: string; metadata?: Record<string, string> | null; deleted?: boolean } | string | null, priceMetadata: Record<string, string> | null): ProductHint | null {
+  if (!product || typeof product === 'string') return product ? { id: product, name: null, priceMetadata } : null
+  if (product.deleted) return null
+  return { id: product.id || null, name: product.name || null, metadata: product.metadata || null, priceMetadata }
+}
+
+async function productFromPriceId(priceId: string | null): Promise<ProductHint | null> {
+  if (!priceId) return null
+  try {
+    const price = await stripe.prices.retrieve(priceId, { expand: ['product'] })
+    return productHint(
+      price.product as { id?: string; name?: string; metadata?: Record<string, string>; deleted?: boolean } | string,
+      price.metadata && typeof price.metadata === 'object' ? price.metadata : null,
+    )
+  } catch {
+    return null
   }
 }
 
@@ -60,6 +83,19 @@ async function priceFromSubscription(subscriptionId: string | null): Promise<str
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
     return subscription.items.data[0]?.price?.id || null
+  } catch {
+    return null
+  }
+}
+
+async function priceFromSession(session: Record<string, any>): Promise<string | null> {
+  const fromSub = await priceFromSubscription(text(session.subscription) || null)
+  if (fromSub) return fromSub
+  const sessionId = text(session.id)
+  if (!sessionId || sessionId.startsWith('invoice-')) return null
+  try {
+    const items = await stripe.checkout.sessions.listLineItems(sessionId, { limit: 5 })
+    return items.data[0]?.price?.id || null
   } catch {
     return null
   }
@@ -132,7 +168,10 @@ async function resumeClaim(identity: CheckoutIdentity, paid: boolean): Promise<v
   if (!doctorId) {
     const listings = await existingListings(identity.email, identity.customerId)
     const live = listings.find((row) => row.verificationStatus === 'verified' || row.isApproved)
-    if (live) return
+    if (live) {
+      if (!(await priorCheckoutOk(live.id))) await startPaidGoLive(live.id, true)
+      return
+    }
     doctorId = listings[0]?.id || ''
     if (!doctorId) doctorId = (await createPendingDoctor(identity)) || ''
     if (doctorId && identity.customerId) {
@@ -141,22 +180,29 @@ async function resumeClaim(identity: CheckoutIdentity, paid: boolean): Promise<v
   }
   if (!doctorId) return
   const doctor = await db().from('doctors').select('verification_status').eq('id', doctorId).maybeSingle()
-  if (doctor.data?.verification_status === 'verified') return
+  if (doctor.data?.verification_status === 'verified' && await priorCheckoutOk(doctorId)) return
   await startPaidGoLive(doctorId, true)
+}
+
+async function priorCheckoutOk(doctorId: string): Promise<boolean> {
+  return goLiveStepAlreadyOk(doctorId, 'checkout')
 }
 
 export async function ingestMembershipCheckout(session: Record<string, any>): Promise<void> {
   try {
-    if (text(session.metadata?.userId)) return
-    const subscriptionId = text(session.subscription) || null
-    const priceId = await priceFromSubscription(subscriptionId)
+    const priceId = await priceFromSession(session)
+    const product = await productFromPriceId(priceId)
     const identity = identityFromSession(session, priceId)
     const membership = isDoctorMembershipCheckout(identity, {
       priceIds: doctorPriceIds(),
       studentPriceIds: studentPriceIds(),
-    })
-    if (!membership || !identity.email) return
-    const paid = checkoutIsPaid(session)
+    }, product)
+    if (!membership || !identity.email || isStudentProduct(product)) return
+    const paid = checkoutIsPaid(session) || text(session.id).startsWith('invoice-')
+    if (identity.userId) {
+      await ingestLoggedIn(identity, paid)
+      return
+    }
     const claimed = await claim(identity)
     if (claimed === 'duplicate') {
       await resumeClaim(identity, paid)
@@ -164,16 +210,22 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
     }
     if (claimed === 'unavailable') return
     const existing = await existingListings(identity.email, identity.customerId)
-    const intake = planCheckoutIntake({ membership: true, listings: existing })
+    let hasOk = false
+    for (const row of existing) {
+      if (await priorCheckoutOk(row.id)) hasOk = true
+    }
+    const intake = planCheckoutIntake({ membership: true, listings: existing, hasOkGoLive: hasOk })
     if (intake.action === 'ignore') return
     if (intake.action === 'link_live') {
       await linkStripeOnly(intake.doctorId, identity)
       await db().from('doctor_checkout_claims').update({ status: 'link_live', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
       return
     }
-    if (intake.action === 'attach_pending') {
-      await markPaymentReceived(intake.doctorId, identity)
-      await db().from('doctor_checkout_claims').update({ status: 'attach_pending', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
+    if (intake.action === 'go_live') {
+      const live = existing.find((row) => row.id === intake.doctorId)
+      if (live && (live.verificationStatus === 'verified' || live.isApproved)) await linkStripeOnly(intake.doctorId, identity)
+      else await markPaymentReceived(intake.doctorId, identity)
+      await db().from('doctor_checkout_claims').update({ status: 'go_live', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
       await startPaidGoLive(intake.doctorId, paid)
       return
     }
@@ -193,16 +245,64 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
   }
 }
 
+async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promise<void> {
+  const userId = identity.userId || ''
+  const { data: profile } = await db().from('profiles').select('id, role').eq('id', userId).maybeSingle()
+  const role = text(profile?.role) || text(identity.metadataRole) || null
+  const { data: doctor } = await db().from('doctors').select('id').eq('user_id', userId).maybeSingle()
+  const doctorId = text(doctor?.id) || null
+  const hasOk = doctorId ? await priorCheckoutOk(doctorId) : false
+  const plan = planLoggedInCheckout({ membership: true, role, doctorId, hasOkGoLive: hasOk })
+  if (plan.action === 'ignore') {
+    if (plan.reason === 'student' && userId) {
+      await db().from('profiles').update({ tier: 'student_paid' }).eq('id', userId)
+    }
+    return
+  }
+  if (plan.action === 'store_ids' && plan.doctorId) {
+    await linkStripeOnly(plan.doctorId, identity)
+    return
+  }
+  const target = plan.action === 'go_live' && plan.doctorId
+    ? plan.doctorId
+    : await createPendingDoctor({ ...identity, userId })
+  if (!target) return
+  await linkStripeOnly(target, identity)
+  await startPaidGoLive(target, paid)
+}
+
 async function createPendingDoctor(identity: CheckoutIdentity): Promise<string | null> {
-  const { firstName, lastName } = splitName(identity.name || identity.email)
-  const country = countryFromCurrency(identity.currency, identity.country)
-  const now = new Date().toISOString()
-  const contact = checkoutApplicationContact({
-    phone: identity.phone,
-    smsConsent: identity.smsConsent,
-    country,
-    now,
-  })
+  const existingProfile = identity.userId
+    ? await db().from('profiles').select('id, role').eq('id', identity.userId).maybeSingle()
+    : await db().from('profiles').select('id, role').ilike('email', identity.email).maybeSingle()
+  if (existingProfile.data?.id) {
+    const userId = String(existingProfile.data.id)
+    const doctor = await db().from('doctors').select('id').eq('user_id', userId).maybeSingle()
+    const promo = promotionPlan({
+      hasAccount: true,
+      hasDoctor: Boolean(doctor.data?.id),
+      role: text(existingProfile.data.role) || null,
+    })
+    if (promo.action === 'exclude') return null
+    if (promo.action === 'link_existing') {
+      if (promo.promoteRole) {
+        await db().from('profiles').update({ role: 'doctor', tier: 'pro' }).eq('id', userId)
+        try {
+          const current = await db().auth.admin.getUserById(userId)
+          const meta = current.data?.user?.app_metadata
+          const appMetadata = meta && typeof meta === 'object' ? { ...meta, role: 'doctor' } : { role: 'doctor' }
+          await db().auth.admin.updateUserById(userId, { app_metadata: appMetadata })
+        } catch (error) {
+          console.error('[go-live] role update failed', error instanceof Error ? error.name : 'error')
+        }
+      }
+      if (doctor.data?.id) {
+        await markPaymentReceived(String(doctor.data.id), identity, userId)
+        return String(doctor.data.id)
+      }
+      return insertDoctorForUser(userId, identity)
+    }
+  }
   const created = await db().auth.admin.createUser({
     email: identity.email,
     email_confirm: true,
@@ -213,14 +313,27 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
   if (!userId) {
     const { data: profile } = await db().from('profiles').select('id').ilike('email', identity.email).maybeSingle()
     if (!profile?.id) return null
-    return attachExistingUser(String(profile.id), identity, country)
+    return createPendingDoctor({ ...identity, userId: String(profile.id) })
   }
+  return insertDoctorForUser(String(userId), identity)
+}
+
+async function insertDoctorForUser(userId: string, identity: CheckoutIdentity): Promise<string | null> {
+  const { firstName, lastName } = splitName(identity.name || identity.email)
+  const country = countryFromCurrency(identity.currency, identity.country)
+  const now = new Date().toISOString()
+  const contact = checkoutApplicationContact({
+    phone: identity.phone,
+    smsConsent: identity.smsConsent,
+    country,
+    now,
+  })
   await db().from('profiles').upsert({
     id: userId,
     email: identity.email,
     full_name: identity.name || identity.email,
     role: 'doctor',
-    tier: 'standard',
+    tier: 'pro',
     stripe_customer_id: identity.customerId,
   })
   const slug = `${(identity.name || identity.email).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}-${Date.now().toString(36)}`
@@ -263,10 +376,11 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
   if (contact.alertPhone) {
     const { saveDoctorAlertPhone } = await import('@/lib/applications/store')
     await saveDoctorAlertPhone(doctor.data.id, contact.alertPhone, true, now)
-  } else if (identity.smsConsent === true && (identity.phone || '').trim()) {
-    await db().from('doctors').update({ sms_region_note: 'outside_us_canada', sms_prompt_required: false }).eq('id', doctor.data.id)
   } else {
-    await db().from('doctors').update({ sms_prompt_required: true }).eq('id', doctor.data.id)
+    await db().from('doctors').update({
+      sms_prompt_required: true,
+      ...(identity.smsConsent === true && (identity.phone || '').trim() ? { sms_region_note: 'outside_us_canada' } : {}),
+    }).eq('id', doctor.data.id)
   }
   return String(doctor.data.id)
 }
@@ -326,18 +440,63 @@ async function markPaymentReceived(doctorId: string, identity: CheckoutIdentity,
   }
 }
 
+async function invoiceProduct(invoice: {
+  id?: string
+  lines?: { data?: Array<Record<string, unknown>> } | null
+}): Promise<ProductHint | null> {
+  const first = invoice.lines?.data?.[0]
+  let priceId = first ? invoiceLineProduct(first).priceId : null
+  if (!priceId && invoice.id) {
+    try {
+      const full = await stripe.invoices.retrieve(invoice.id, { expand: ['lines.data.price.product'] })
+      const line = full.lines?.data?.[0]
+      if (line) {
+        priceId = invoiceLineProduct(line as unknown as Parameters<typeof invoiceLineProduct>[0]).priceId
+      }
+    } catch {
+      priceId = null
+    }
+  }
+  return productFromPriceId(priceId)
+}
+
 export async function noteMembershipInvoicePaid(invoice: {
   id?: string
   customer?: unknown
   subscription?: unknown
   amount_paid?: number | null
+  currency?: string | null
   billing_reason?: string | null
+  lines?: { data?: Array<Record<string, unknown>> } | null
   parent?: { subscription_details?: { subscription?: unknown } | null } | null
 }): Promise<void> {
   try {
     const customerId = typeof invoice.customer === 'string' ? invoice.customer : ''
     const subscriptionId = subscriptionIdFromInvoice(invoice) || ''
-    if (!customerId) return
+    const amountPaid = Number(invoice.amount_paid || 0)
+    if (!customerId || amountPaid <= 0) return
+    if (invoiceIsRenewal(invoice.billing_reason || null, Boolean(subscriptionId))) return
+    const product = await invoiceProduct(invoice)
+    if (isStudentProduct(product)) return
+    const customer = await stripe.customers.retrieve(customerId)
+    if (customer.deleted) return
+    const identity = identityFromSession({
+      id: `invoice-${text(invoice.id) || customerId}`,
+      customer: customerId,
+      subscription: subscriptionId,
+      customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
+      customer_email: customer.email,
+      mode: subscriptionId ? 'subscription' : 'payment',
+      currency: invoice.currency || null,
+      amount_total: amountPaid,
+      allow_amount_fallback: !product,
+      metadata: {},
+    }, null)
+    const membership = isDoctorMembershipCheckout(identity, {
+      priceIds: doctorPriceIds(),
+      studentPriceIds: studentPriceIds(),
+    }, product)
+    if (!membership) return
     const { data: applicationRows } = await db()
       .from('doctor_applications')
       .select('id, status, reviewed_at, doctor_id, created_at')
@@ -350,57 +509,55 @@ export async function noteMembershipInvoicePaid(invoice: {
       reviewedAt: text(row.reviewed_at) || null,
       createdAt: text(row.created_at),
     }))
-    const listings = await existingListings('', customerId)
+    const listings = await existingListings(text(customer.email), customerId)
+    let hasOk = false
+    for (const row of listings) {
+      if (await priorCheckoutOk(row.id)) hasOk = true
+    }
     const intake = planInvoiceIntake({
       billingReason: invoice.billing_reason || null,
-      amountPaid: Number(invoice.amount_paid || 0),
+      amountPaid,
+      membership: true,
+      hasSubscription: Boolean(subscriptionId),
+      hasOkGoLive: hasOk,
       applications,
       listings,
     })
+    if (intake.action === 'ignore' && intake.reason === 'already_live') {
+      const live = listings[0]
+      if (live) await linkStripeOnly(live.id, identity)
+      return
+    }
     if (intake.action === 'ignore') return
-    if (intake.action === 'create_pending') {
-      const customer = await stripe.customers.retrieve(customerId)
-      if (customer.deleted) return
+    if (intake.action === 'go_live' || intake.action === 'create_and_go_live') {
       await ingestMembershipCheckout({
         id: `invoice-${text(invoice.id) || customerId}`,
         customer: customerId,
         subscription: subscriptionId,
         customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
         customer_email: customer.email,
-        mode: 'subscription',
-        payment_link: 'invoice',
-        payment_status: Number(invoice.amount_paid || 0) > 0 ? 'paid' : 'unpaid',
-        currency: null,
-        amount_total: invoice.amount_paid,
-        metadata: { type: 'doctor_membership' },
+        mode: subscriptionId ? 'subscription' : 'payment',
+        payment_status: 'paid',
+        currency: invoice.currency || null,
+        amount_total: amountPaid,
+        allow_amount_fallback: !product,
+        metadata: product ? {} : {},
       })
       return
     }
-    const application = applications.find((row: { id: string }) => row.id === intake.applicationId)
-    if (!application) return
-    if (application.status === 'needs_action' && application.reviewedAt) {
-      const loaded = await loadApplicationById(String(application.id))
-      if (!loaded) return
-      await finishDecision({
-        application: { ...loaded, paymentReceived: true, stripeSubscriptionId: loaded.stripeSubscriptionId || subscriptionId },
-        decision: {
-          ok: true,
-          message: 'Payment confirmed after the bank step. The listing is public.',
-          charged: true,
-          detached: false,
-          doctor: {
-            is_approved: true,
-            verification_status: 'verified',
-            verified_at: new Date().toISOString(),
-            stripe_subscription_id: subscriptionId || loaded.stripeSubscriptionId || undefined,
-            membership_tier: 'pro',
-            paid_at: new Date().toISOString(),
-          },
-          application: { status: 'approved', stripe_subscription_id: subscriptionId || loaded.stripeSubscriptionId, reviewed_at: new Date().toISOString() },
-          email: { to: loaded.email, subject: 'Welcome', html: '<p>Welcome</p>' },
-          sms: approvalSmsFor(loaded),
-        },
-        reviewerId: null,
+    if (intake.action === 'complete_bank') {
+      await ingestMembershipCheckout({
+        id: `invoice-${text(invoice.id) || customerId}`,
+        customer: customerId,
+        subscription: subscriptionId,
+        customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
+        customer_email: customer.email,
+        mode: subscriptionId ? 'subscription' : 'payment',
+        payment_status: 'paid',
+        currency: invoice.currency || null,
+        amount_total: amountPaid,
+        allow_amount_fallback: !product,
+        metadata: {},
       })
     }
   } catch (error) {

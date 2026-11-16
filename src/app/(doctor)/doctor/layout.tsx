@@ -11,6 +11,7 @@ import { getPortalContext } from '@/lib/portal/context';
 import { recordPortalLogin } from '@/lib/portal/login-ping';
 import { firstName } from '@/lib/portal/greeting';
 import { SavedItemsSeed } from '@/components/portal/saved-seed';
+import { SmsPromptBanner } from '@/components/doctor/SmsPromptBanner';
 import type { ApplicationGate } from '@/lib/applications/gate';
 import StaffScorecardFrame from './StaffScorecardFrame';
 
@@ -77,6 +78,7 @@ export default async function DoctorLayout({ children }: { children: React.React
           <ReferralProvider>
             <OnboardingGate needsCall={needsCall} callStatus={callStatus} doctorName={firstName(ctx.fullName) === 'there' ? ctx.fullName : ctx.fullName} applicationGate={applicationGate as ApplicationGate | null}>
               <DoctorShell waiting={ctx.waitingVisits}>
+                {ctx.doctor?.id ? <SmsPromptBanner doctorId={ctx.doctor.id} /> : null}
                 {children}
               </DoctorShell>
             </OnboardingGate>

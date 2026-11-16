@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { nudgeCopy } from './messages.ts'
+import { isDoctorMembershipProduct } from './products.ts'
 import { isStopMessage, waitlistTextGate } from '../sms/waitlist-text.ts'
 import {
   canTextNumber,
@@ -16,9 +17,16 @@ import {
   orderWaitlistTiers,
   paymentIntentIdFromInvoicePayment,
   phoneFromCheckout,
+  adminGoLiveSummary,
+  minimumProfileGaps,
   planCheckoutIntake,
   planInvoiceIntake,
+  planLoggedInCheckout,
   planPathB,
+  promotionPlan,
+  shouldSendWelcome,
+  smsPromptRequired,
+  stepsToRun,
   profileCompleteness,
   publishOnPayment,
   readCheckoutContact,
@@ -136,9 +144,13 @@ describe('path B auto-create', () => {
     assert.deepEqual(linked, { action: 'skip', reason: 'account_already_linked' })
   })
 
-  it('does not hide a live doctor who pays a Payment Link', () => {
+  it('runs go-live for a verified doctor with no prior run and only stores ids after an ok run', () => {
     const live = listing({ verificationStatus: 'verified', isApproved: true })
-    assert.deepEqual(planCheckoutIntake({ membership: true, listings: [live] }), {
+    assert.deepEqual(planCheckoutIntake({ membership: true, hasOkGoLive: false, listings: [live] }), {
+      action: 'go_live',
+      doctorId: 'doc-1',
+    })
+    assert.deepEqual(planCheckoutIntake({ membership: true, hasOkGoLive: true, listings: [live] }), {
       action: 'link_live',
       doctorId: 'doc-1',
     })
@@ -148,23 +160,29 @@ describe('path B auto-create', () => {
     const decision = planInvoiceIntake({
       billingReason: 'subscription_cycle',
       amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
       applications: [],
-      listings: [{ verificationStatus: 'verified', isApproved: true }],
+      listings: [{ id: 'doc-1', verificationStatus: 'verified', isApproved: true }],
     })
     assert.deepEqual(decision, { action: 'ignore', reason: 'renewal' })
   })
 
-  it('opens a pending listing only for the first invoice when nobody is already live', () => {
+  it('starts go-live on the first subscription invoice and never on a renewal', () => {
     const created = planInvoiceIntake({
       billingReason: 'subscription_create',
       amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
       applications: [],
       listings: [],
     })
-    assert.deepEqual(created, { action: 'create_pending' })
+    assert.deepEqual(created, { action: 'create_and_go_live' })
     const renewal = planInvoiceIntake({
       billingReason: 'subscription_cycle',
       amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
       applications: [],
       listings: [],
     })
@@ -436,5 +454,133 @@ describe('listing build and unpaid hide', () => {
     assert.match(lines.join('\n'), /New members this week/)
     assert.match(lines.join('\n'), /login not activated/)
     assert.match(lines.join('\n'), /needs profile finish/)
+  })
+})
+
+describe('payment go-live paths', () => {
+  const europe = { id: 'prod_VYaJmk3eCkPiUy', name: 'NeuroChiro Europe - Founding Member', metadata: {} }
+  const pro = { id: 'prod_VHErgcWaKV4LZe', name: 'NeuroChiro Pro - Monthly', metadata: {}, priceMetadata: { effective: '2026-12-01' } }
+  const student = { id: 'prod_VXtrG9w7WGWKdW', name: 'NeuroChiro Student Membership', metadata: { kind: 'student_membership' } }
+  const known = { priceIds: ['price_doctor'], studentPriceIds: ['price_student'] }
+
+  it('recognizes a EUR payment link, the $199 price, and a Brave first month by product', () => {
+    assert.equal(isDoctorMembershipCheckout(identity({ currency: 'eur', amountTotal: 7900, priceId: 'price_eur' }), known, europe), true)
+    assert.equal(isDoctorMembershipProduct(europe), true)
+    assert.equal(isDoctorMembershipCheckout(identity({
+      amountTotal: 19900,
+      priceId: 'price_199',
+      paymentLinkPresent: false,
+    }), known, pro), true)
+    assert.equal(isDoctorMembershipCheckout(identity({
+      amountTotal: 19900,
+      currency: 'usd',
+      priceId: null,
+    }), known, null), true)
+    assert.equal(isDoctorMembershipCheckout(identity({
+      mode: 'payment',
+      amountTotal: 4900,
+      priceId: 'price_brave',
+    }), known, { ...pro, priceMetadata: { source: 'brave_practice', offer: '49_first_month' } }), true)
+    assert.equal(isDoctorMembershipCheckout(identity({ priceId: 'price_student_live', paymentLinkPresent: false }), known, student), false)
+  })
+
+  it('starts go-live for a one-off invoice and a dashboard subscription, and not for a renewal', () => {
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'manual',
+      amountPaid: 4900,
+      membership: true,
+      hasSubscription: false,
+      applications: [],
+      listings: [],
+    }), { action: 'create_and_go_live' })
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'subscription_create',
+      amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
+      applications: [],
+      listings: [],
+    }), { action: 'create_and_go_live' })
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'subscription_cycle',
+      amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
+      applications: [],
+      listings: [],
+    }), { action: 'ignore', reason: 'renewal' })
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'manual',
+      amountPaid: 3300,
+      membership: false,
+      hasSubscription: false,
+      applications: [],
+      listings: [],
+    }), { action: 'ignore', reason: 'not_membership' })
+  })
+
+  it('runs go-live for a logged-in doctor who is not live yet and promotes a community member', () => {
+    assert.deepEqual(planLoggedInCheckout({
+      membership: true,
+      role: 'doctor',
+      doctorId: 'doc-1',
+      hasOkGoLive: false,
+    }), { action: 'go_live', doctorId: 'doc-1' })
+    assert.deepEqual(planLoggedInCheckout({
+      membership: true,
+      role: 'doctor',
+      doctorId: 'doc-1',
+      hasOkGoLive: true,
+    }), { action: 'store_ids', doctorId: 'doc-1' })
+    assert.deepEqual(promotionPlan({ hasAccount: true, hasDoctor: false, role: 'patient' }), {
+      action: 'link_existing',
+      promoteRole: true,
+    })
+    assert.deepEqual(planLoggedInCheckout({
+      membership: true,
+      role: 'student',
+      doctorId: null,
+      hasOkGoLive: false,
+    }), { action: 'ignore', reason: 'student' })
+  })
+
+  it('describes a basic profile and a missing mobile, and keeps the welcome on a force retry', () => {
+    assert.deepEqual(minimumProfileGaps({ website: '', photo: '', bio: '' }), ['website', 'photo', 'write-up'])
+    const summary = adminGoLiveSummary({
+      doctorName: 'Dr. Lovelace',
+      email: 'ada@example.com',
+      profileUrl: 'https://neurochiro.co/directory/ada',
+      city: 'Greenville',
+      source: 'payment_link',
+      missing: ['website', 'photo', 'write-up'],
+      textSent: false,
+    })
+    assert.match(summary.text, /Profile went live in basic form: needs website\/photo\/write-up/)
+    assert.match(summary.text, /Missing: website, photo, write-up/)
+    assert.match(summary.text, /No text sent: no mobile on file/)
+    assert.equal(summary.text.includes('patient'), false)
+    assert.equal(smsPromptRequired({ phone: null, consent: false }), true)
+    assert.equal(smsPromptRequired({ phone: '+18645550100', consent: true }), false)
+    assert.equal(shouldSendWelcome({ alreadyOk: true, resendWelcome: false }), false)
+    assert.equal(shouldSendWelcome({ alreadyOk: true, resendWelcome: true }), true)
+    const forced = stepsToRun({
+      completed: [
+        { step: 'checkout', status: 'ok' },
+        { step: 'profile', status: 'ok' },
+        { step: 'portal', status: 'ok' },
+        { step: 'welcome', status: 'ok' },
+        { step: 'waitlist', status: 'ok' },
+        { step: 'instagram', status: 'ok' },
+        { step: 'summary', status: 'ok' },
+      ],
+      force: true,
+      resendWelcome: false,
+    })
+    assert.equal(forced.includes('welcome'), false)
+    assert.equal(stepsToRun({
+      completed: [{ step: 'welcome', status: 'ok' }],
+      force: true,
+      resendWelcome: true,
+    }).includes('welcome'), true)
   })
 })

@@ -1062,7 +1062,7 @@ export async function POST(req: Request) {
           }
         }
 
-        if (!userId) await ingestMembershipCheckout(session);
+        await ingestMembershipCheckout(session);
         // Enqueue automations
         Automations.onPaymentSuccess(session);
         break;
@@ -1074,7 +1074,7 @@ export async function POST(req: Request) {
           await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
           break;
         }
-        if (!session.metadata?.userId) await ingestMembershipCheckout(session);
+        await ingestMembershipCheckout(session);
         break;
       }
 

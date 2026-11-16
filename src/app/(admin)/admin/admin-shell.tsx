@@ -33,7 +33,7 @@ const ICONS = {
 
 function ownsHeader(pathname: string): boolean {
   if (pathname === '/admin' || pathname === '/admin/money' || pathname === '/admin/broadcast') return true
-  if (pathname === '/admin/card' || pathname === '/admin/audit' || pathname === '/admin/health' || pathname === '/admin/settings' || pathname === '/admin/work' || pathname === '/admin/profile-builds') return true
+  if (pathname === '/admin/card' || pathname === '/admin/audit' || pathname === '/admin/health' || pathname === '/admin/settings' || pathname === '/admin/work' || pathname === '/admin/profile-builds' || pathname === '/admin/go-live') return true
   return pathname.startsWith('/admin/growth') || pathname.startsWith('/admin/people')
 }
 
