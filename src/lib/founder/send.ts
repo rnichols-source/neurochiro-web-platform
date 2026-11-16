@@ -277,21 +277,14 @@ async function newMemberDigestLines(): Promise<string[]> {
   }
 }
 
-export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendResult> {
-  const settings = await loadFounderSettings()
-  if (reason === 'cron' && !settings.automations.mondayDigest) return { ok: true, count: 0, detail: 'Monday digest is off.' }
-  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date())
-  const { loadDigestStamp } = await import('./settings')
-  if (reason === 'cron') {
-    const last = await loadDigestStamp()
-    if (last === today) return { ok: true, count: 0, detail: 'Already sent today.' }
-  }
+/** Lines that used to be the standalone Monday Pulse email. */
+export async function mondayPulseLines(): Promise<string[]> {
   const roster = await loadFounderRoster()
   const { buildNeeds, buildFunnel } = await import('./model')
   const { loadNeuroChiroMrr } = await import('./mrr')
   const snap = await loadNeuroChiroMrr().catch(() => null)
   const needs = buildNeeds(roster)
-  const lines = [
+  return [
     'Pulse for this Monday.',
     '',
     `Asks for a doctor: ${roster.demandCount}`,
@@ -310,6 +303,18 @@ export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendR
     '',
     `Open Pulse: ${siteUrl()}/admin`,
   ]
+}
+
+export async function sendMondayDigest(reason: 'cron' | 'manual'): Promise<SendResult> {
+  const settings = await loadFounderSettings()
+  if (reason === 'cron' && !settings.automations.mondayDigest) return { ok: true, count: 0, detail: 'Monday digest is off.' }
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(new Date())
+  const { loadDigestStamp } = await import('./settings')
+  if (reason === 'cron') {
+    const last = await loadDigestStamp()
+    if (last === today) return { ok: true, count: 0, detail: 'Already sent today.' }
+  }
+  const lines = await mondayPulseLines()
   const sent = await sendEmail(DIGEST_TO, 'NeuroChiro Pulse', lines.join('\n'))
   if (!sent) return { ok: false, error: 'The digest email could not be sent.' }
   await saveDigestStamp(today)

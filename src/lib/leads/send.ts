@@ -99,10 +99,39 @@ async function markNotification(
 }
 
 /**
+ * The per-lead founder copy ("New lead: X → office") is off.
+ * The daily digest and escalations still cover the founder. Office mail and
+ * the community-member confirmation use other kinds and still send.
+ * A failed retry row is closed so it does not keep blocking that lead.
+ */
+async function skipAdminCopy(input: SendTrackedInput): Promise<SendTrackedResult> {
+  if (!input.existingId) return { ok: true }
+  try {
+    const db = createAdminClient() as any
+    const { error } = await db.from('lead_notifications').update({
+      status: 'skipped',
+      error: null,
+      updated_at: new Date().toISOString(),
+    }).eq('id', input.existingId)
+    if (error) {
+      console.error('[LEADS] could not close retired admin copy:', error.message)
+      return { ok: false, error: error.message }
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'could not close admin copy'
+    console.error('[LEADS] could not close retired admin copy:', message)
+    return { ok: false, error: message }
+  }
+  return { ok: true }
+}
+
+/**
  * Send one email, log the attempt, and retry with backoff.
  * Never throws. A missing RESEND_API_KEY is a failed attempt the cron can retry.
  */
+
 export async function sendTracked(input: SendTrackedInput): Promise<SendTrackedResult> {
+  if (input.kind === 'admin_copy') return skipAdminCopy(input)
   try {
     const originalTo = asList(input.to)
     const originalCc = asList(input.cc)

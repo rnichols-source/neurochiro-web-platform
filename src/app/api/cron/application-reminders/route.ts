@@ -7,6 +7,7 @@ import { quoSend } from '@/lib/sms/quo'
 export const maxDuration = 60
 
 /**
+ * Unscheduled in vercel.json. A separate process handles stalled applicants.
  * Unfinished doctor applications.
  * About 1 hour after signup, then about 24 hours after.
  * Each note is claimed before it is sent, and only while the application is still a draft with no card.
