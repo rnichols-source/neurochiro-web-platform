@@ -817,18 +817,27 @@ export interface Database {
           id: string
           doctor_id: string
           event_type: string
+          source: string | null
+          metadata: Json | null
+          visitor_key: string | null
           created_at: string
         }
         Insert: {
           id?: string
           doctor_id: string
           event_type: string
+          source?: string | null
+          metadata?: Json | null
+          visitor_key?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           doctor_id?: string
           event_type?: string
+          source?: string | null
+          metadata?: Json | null
+          visitor_key?: string | null
           created_at?: string
         }
         Relationships: []
