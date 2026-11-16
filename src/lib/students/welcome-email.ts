@@ -19,7 +19,7 @@ export async function sendStudentWelcome(to: string, name: string): Promise<void
       <p>Start with three things:</p>
       <ul>
         <li><a href="https://www.neurochiro.co/student/welcome">Add your school and graduation year</a></li>
-        <li><a href="https://www.neurochiro.co/student/roadmap">Open the roadmap</a></li>
+        <li><a href="https://neurochiro.co/student/dashboard">Open your home page</a></li>
         <li><a href="https://www.neurochiro.co/student/mentorship">Check the monthly call</a></li>
       </ul>
       <p>Questions go to support@neurochirodirectory.com.</p>

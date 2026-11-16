@@ -37,10 +37,10 @@ const STAGES = [
   },
   {
     id: "interview", number: 2,
-    title: "Prepare for Interviews",
-    task: "Practice the 20 questions doctors actually ask",
+    title: "See your ChiroMatch",
+    task: "Answer a short questionnaire and see which practices line up",
     icon: ClipboardList,
-    href: "/student/interview-prep",
+    href: "/student/match",
     check: () => false,
   },
   {
@@ -74,12 +74,14 @@ export default function DashboardHome({
   profileData,
   verification,
   jobCount,
+  studentCount,
   steps,
 }: {
   readiness: any;
   profileData: any;
   verification: any;
   jobCount: number | null;
+  studentCount?: number | null;
   steps: NextStep[];
 }) {
   const [expandedStage, setExpandedStage] = useState<string | null>(null);
@@ -110,6 +112,9 @@ export default function DashboardHome({
       {/* Name + graduation countdown */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight mb-1" style={{ color: T.ink }}>{studentName}</h1>
+        {typeof studentCount === "number" ? (
+          <p className="text-sm mb-1" style={{ color: T.inkMuted }}>{studentCount} students on NeuroChiro</p>
+        ) : null}
         {typeof jobCount === "number" ? (
           <p className="text-sm mb-1" style={{ color: T.inkMuted }}>{jobCount} associateships posted</p>
         ) : null}

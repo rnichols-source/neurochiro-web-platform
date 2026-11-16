@@ -67,6 +67,83 @@ export async function requestShadow(input: {
   return {};
 }
 
+export async function requestMentorship(input: { doctorId: string; message: string }): Promise<{ error?: string }> {
+  const portal = await getStudentPortal();
+  if (!portal) return { error: 'Sign in first.' };
+  if (!hasMemberAccess(portal.membership)) return { error: 'Membership is required to ask about mentorship.' };
+  const message = input.message.trim().slice(0, 500);
+  if (message.length < 10) return { error: 'Write a short note about what you want to learn.' };
+  const admin = createAdminClient();
+  const open = await (admin as any).from('mentorship_requests').select('id').eq('student_id', portal.userId).eq('doctor_id', input.doctorId).eq('status', 'requested');
+  if (open.error && missingSchema(open.error)) return { error: 'Mentorship requests are not ready yet. The database update still needs to be applied.' };
+  if ((open.data || []).length) return { error: 'You already have an open request with this doctor.' };
+  const inserted = await (admin as any).from('mentorship_requests').insert({
+    student_id: portal.userId,
+    doctor_id: input.doctorId,
+    message,
+    status: 'requested',
+  }).select('id').single();
+  if (inserted.error) return { error: inserted.error.message || 'Could not send that request.' };
+  const doctor = await (admin as any).from('doctors').select('user_id, clinic_name').eq('id', input.doctorId).maybeSingle();
+  const doctorRow = doctor.data as { user_id?: string; clinic_name?: string | null } | null;
+  if (doctorRow?.user_id) {
+    await admin.from('notifications').insert({
+      user_id: doctorRow.user_id,
+      title: 'A student asked about mentorship',
+      body: `${portal.fullName || 'A student'} wants to learn from your practice.`,
+      type: 'mentorship_request',
+      link: '/doctor/students/shadow',
+    } as any);
+    if (process.env.RESEND_API_KEY) {
+      const profile = await admin.from('profiles').select('email').eq('id', doctorRow.user_id).maybeSingle();
+      const email = (profile.data as { email?: string } | null)?.email;
+      if (email) {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: 'NeuroChiro <support@neurochirodirectory.com>',
+          to: email,
+          subject: 'A student asked about mentorship',
+          html: wrapEmail(`<h1>Mentorship request</h1><p>${escapeHtml(portal.fullName || 'A student')} asked to learn from ${escapeHtml(doctorRow.clinic_name || 'your practice')}.</p><p>${escapeHtml(message)}</p><p><a href="https://neurochiro.co/doctor/students/shadow">Respond in your portal</a></p>`),
+        }).catch(() => undefined);
+      }
+    }
+  }
+  revalidatePath('/student/doctors');
+  return {};
+}
+
+export async function decideMentorship(input: { requestId: string; status: 'accepted' | 'declined'; reply?: string }): Promise<{ error?: string }> {
+  const portal = await getStudentPortal();
+  if (!portal || (portal.role !== 'doctor' && !['admin', 'founder', 'super_admin'].includes(portal.role))) {
+    return { error: 'Only the doctor can answer this.' };
+  }
+  const admin = createAdminClient();
+  const doctor = await (admin as any).from('doctors').select('id').eq('user_id', portal.userId).maybeSingle();
+  const doctorRow = doctor.data as { id: string } | null;
+  if (!doctorRow) return { error: 'No clinic profile found.' };
+  const existing = await (admin as any).from('mentorship_requests').select('id, student_id, status').eq('id', input.requestId).eq('doctor_id', doctorRow.id).maybeSingle();
+  if (existing.error && missingSchema(existing.error)) return { error: 'Mentorship requests are not ready yet.' };
+  const row = existing.data as { id: string; student_id: string; status: string } | null;
+  if (!row || row.status !== 'requested') return { error: 'That request is already closed.' };
+  const updated = await (admin as any).from('mentorship_requests').update({
+    status: input.status,
+    doctor_reply: (input.reply || '').slice(0, 500),
+    decided_at: new Date().toISOString(),
+  }).eq('id', row.id);
+  if (updated.error) return { error: 'Could not save that answer.' };
+  if (input.status === 'accepted') {
+    const conversationId = await ensureContextConversation({
+      participantOne: portal.userId,
+      participantTwo: row.student_id,
+      contextType: 'mentorship',
+      contextId: row.id,
+    });
+    if (conversationId) await postSystemMessage(conversationId, 'Mentorship request accepted. You can write to each other here.');
+  }
+  revalidatePath('/doctor/students/shadow');
+  return {};
+}
+
 export async function decideShadow(input: { requestId: string; status: 'accepted' | 'declined'; date?: string; reply?: string }): Promise<{ error?: string }> {
   const portal = await getStudentPortal();
   if (!portal || portal.role !== 'doctor' && !['admin', 'founder', 'super_admin'].includes(portal.role)) {

@@ -1,6 +1,8 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-admin'
+import { missingSchema } from '@/lib/students/schema'
 import { revalidatePath } from 'next/cache'
 
 export async function getContractsAction() {
@@ -8,13 +10,16 @@ export async function getContractsAction() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error("Unauthorized")
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('contracts')
-    .select('*')
+    .select('id, title, analysis_results, status, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  if (error) throw error
+  if (error) {
+    if (missingSchema(error)) return []
+    return []
+  }
   return data || []
 }
 
@@ -94,18 +99,21 @@ Return ONLY the JSON object, no markdown formatting or code blocks.`
     }
 
     // Save to database
-    const { data, error } = await supabase
+    const saved = await (createAdminClient() as any)
       .from('contracts')
       .insert({
         user_id: user.id,
-        title: `Contract Analysis — ${new Date().toLocaleDateString()}`,
+        title: `Contract review ${new Date().toLocaleDateString('en-US')}`,
+        contract_text: contractText.slice(0, 8000),
         analysis_results: analysis,
-        status: 'reviewed'
+        status: 'reviewed',
       })
-      .select()
+      .select('id')
       .single()
 
-    if (error) console.error("Error saving contract:", error)
+    if (saved.error) {
+      return { success: true, analysis, saveError: missingSchema(saved.error) ? 'The review is ready, and saving starts after the contracts update is applied.' : 'The review is ready, but it could not be saved.' }
+    }
 
     await recordAiUse(user.id, 'contract_lab')
     revalidatePath('/student/contract-lab')

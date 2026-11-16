@@ -341,6 +341,7 @@ export default function JobsPage() {
           <span className="inline-flex flex-wrap items-center justify-center gap-4">
             <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Finish your profile</Link>
             <Link href="/student/doctors" className="text-sm font-bold text-[#1F4F8C] hover:underline">See opted-in doctors</Link>
+            <Link href="/student/interview-prep" className="text-sm font-bold text-[#5C3473] hover:underline">Read the interview playbook</Link>
           </span>
         </div>
       ) : (

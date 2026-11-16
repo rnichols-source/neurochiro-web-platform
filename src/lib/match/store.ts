@@ -15,7 +15,7 @@ import { deriveStudentMembership, hasMemberAccess } from '@/lib/students/members
 import { missingSchema } from '@/lib/students/schema';
 import { allowDecision } from './decide';
 import { canDoctorMatch, canStudentMatch, publicStudentName } from './eligibility';
-import { SCORE_VERSION, WEIGHTS_V1, scoreMatch, type ScoreSide } from './score';
+import { SCORE_VERSION, WEIGHTS_V1, rankableScore, scoreMatch, type ScoreSide } from './score';
 import type { MatchCard, MatchDeskData, MatchRowView } from './view';
 
 const NOT_READY = 'ChiroMatch is not ready yet. The database update has not been run.';
@@ -287,8 +287,7 @@ export async function loadDesk(cursor = 0): Promise<MatchDeskData> {
     nextCursor: null,
   };
   if (side === 'student' && !studentMember) {
-    base.notice = 'Membership is required to use ChiroMatch.';
-    return base;
+    base.notice = 'You can look through matches. Membership is required to say you are interested.';
   }
   if (side === 'doctor' && membership && !isDoctorMember(membership.tier, membership.status)) {
     base.notice = 'This is part of Pro.';
@@ -297,11 +296,6 @@ export async function loadDesk(cursor = 0): Promise<MatchDeskData> {
   if (!complete) return base;
   if (side === 'doctor' && !open) {
     base.empty = DOCTOR_CLOSED;
-    return base;
-  }
-  if (side === 'student' && STUDENT_CONFIG.requireSchoolVerification && !school.verified) {
-    base.notice = 'Verify your school on your home page before practices can see you.';
-    base.empty = base.notice;
     return base;
   }
   const cards = await candidatesFor(me, side, mine as StoredProfile, cursor);
@@ -338,15 +332,15 @@ async function candidatesFor(me: Actor, side: MatchSide, mine: StoredProfile, cu
     if (other === 'doctor') {
       const doctor = doctors.get(profile.user_id);
       if (!doctor || !canDoctorMatch({ member: doctor.member, openToStudents: doctor.open_to_students, completed: true, visible: profile.visible })) continue;
-      const scored = scoreMatch(myScore, toSide(profile.answers, { state: doctor.state, lat: doctor.latitude, lng: doctor.longitude }, 'doctor'));
-      if (scored.excluded) continue;
+      const doctorSide = toSide(profile.answers, { state: doctor.state, lat: doctor.latitude, lng: doctor.longitude }, 'doctor');
+      const scored = rankableScore(myScore, doctorSide);
       ranked.push({
         pct: scored.pct,
         active: profile.updated_at || '',
         card: {
           userId: profile.user_id,
           pct: scored.pct,
-          reason: scored.reasons[0] || 'Your answers line up.',
+          reason: scored.reason,
           title: doctor.name || doctor.clinic_name || 'Practice',
           subtitle: [doctor.clinic_name, doctor.city, doctor.state].filter(Boolean).join(' · '),
           facts: [
@@ -362,15 +356,14 @@ async function candidatesFor(me: Actor, side: MatchSide, mine: StoredProfile, cu
     } else {
       const student = students.get(profile.user_id);
       if (!student?.eligible || !profile.visible) continue;
-      const scored = scoreMatch(toSide(profile.answers, null, 'student'), myScore);
-      if (scored.excluded) continue;
+      const scored = rankableScore(toSide(profile.answers, null, 'student'), myScore);
       ranked.push({
         pct: scored.pct,
         active: profile.updated_at || '',
         card: {
           userId: profile.user_id,
           pct: scored.pct,
-          reason: scored.reasons[0] || 'Your answers line up.',
+          reason: scored.reason,
           title: publicStudentName(student.name),
           subtitle: [student.school, student.year ? String(student.year) : null].filter(Boolean).join(' · '),
           facts: [
@@ -427,9 +420,6 @@ export async function saveProfile(raw: unknown, visible: boolean): Promise<{ err
   if (!(await schemaReady())) return { error: NOT_READY };
   const cleaned = cleanAnswers(raw);
   if (!cleaned.ok) return { error: cleaned.error };
-  if (side === 'student' && !hasMemberAccess(await getStudentMembership(me.id))) {
-    return { error: 'Membership is required to use ChiroMatch.' };
-  }
   if (side === 'doctor') {
     const membership = await getMembership(me.id);
     if (!isDoctorMember(membership.tier, membership.status)) return { error: 'This is part of Pro.' };
@@ -463,17 +453,19 @@ async function eligiblePair(me: Actor, otherId: string): Promise<{ studentId: st
   if (!canDoctorMatch({ member: doctor.member, openToStudents: doctor.open_to_students, completed: true, visible: true })) return null;
   const studentProfile = studentId === me.id ? mine : theirs;
   const doctorProfile = doctorId === me.id ? mine : theirs;
-  const scored = scoreMatch(
-    toSide(studentProfile.answers, null, 'student'),
-    toSide(doctorProfile.answers, { state: doctor.state, lat: doctor.latitude, lng: doctor.longitude }, 'doctor'),
-  );
-  if (scored.excluded) return null;
+  const studentSide = toSide(studentProfile.answers, null, 'student');
+  const doctorSide = toSide(doctorProfile.answers, { state: doctor.state, lat: doctor.latitude, lng: doctor.longitude }, 'doctor');
+  const ranked = rankableScore(studentSide, doctorSide);
+  const scored = { ...scoreMatch(studentSide, doctorSide), pct: ranked.pct, reasons: [ranked.reason] };
   return { studentId, doctorId, scored };
 }
 
 export async function decide(otherUserId: string, decision: 'interested' | 'not_now'): Promise<{ error?: string; ok?: boolean; matched?: boolean; conversationId?: string | null; pct?: number; reason?: string }> {
   const me = await actor();
   if (!me || !sideOf(me.role)) return { error: 'Sign in first.' };
+  if (sideOf(me.role) === 'student' && !hasMemberAccess(await getStudentMembership(me.id))) {
+    return { error: 'Membership is required to say you are interested.' };
+  }
   if (!isUuid(otherUserId) || otherUserId === me.id) return { error: UNAVAILABLE };
   if (decision !== 'interested' && decision !== 'not_now') return { error: UNAVAILABLE };
   if (!(await schemaReady())) return { error: NOT_READY };

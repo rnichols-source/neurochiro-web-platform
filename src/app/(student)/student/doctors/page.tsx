@@ -4,10 +4,12 @@ import { createAdminClient } from '@/lib/supabase-admin';
 import { getStudentPortal } from '@/lib/students/context';
 import { hasMemberAccess } from '@/lib/students/membership-pure';
 import { missingSchema } from '@/lib/students/schema';
+import MentorshipForm from './MentorshipForm';
 import ShadowForm from './ShadowForm';
 
 type DoctorCard = {
   id: string;
+  user_id: string | null;
   slug: string | null;
   first_name: string | null;
   last_name: string | null;
@@ -19,6 +21,7 @@ type DoctorCard = {
   student_note: string | null;
   offers_shadowing: boolean | null;
   accepts_interns: boolean | null;
+  accepts_student_messages: boolean | null;
   is_hiring: boolean | null;
   is_mentoring: boolean | null;
 };
@@ -28,7 +31,7 @@ export default async function StudentDoctorsPage({ searchParams }: { searchParam
   const portal = await getStudentPortal();
   const member = portal ? hasMemberAccess(portal.membership) : false;
   const admin = createAdminClient();
-  const columns = 'id, slug, first_name, last_name, clinic_name, city, state, photo_url, specialties, student_note, offers_shadowing, accepts_interns, is_hiring, is_mentoring, open_to_students';
+  const columns = 'id, user_id, slug, first_name, last_name, clinic_name, city, state, photo_url, specialties, student_note, offers_shadowing, accepts_interns, accepts_student_messages, is_hiring, is_mentoring, open_to_students';
   let query = await (admin as any).from('doctors').select(columns).eq('open_to_students', true).limit(60);
   let usedFallback = false;
   if (query.error && missingSchema(query.error)) {
@@ -94,9 +97,15 @@ export default async function StudentDoctorsPage({ searchParams }: { searchParam
               </div>
               {badges.length ? <p className="mt-2 text-sm text-portal-ink">{badges.join(' · ')}</p> : null}
               {doctor.student_note ? <p className="mt-2 text-base text-portal-ink">{doctor.student_note}</p> : null}
-              {doctor.slug ? <Link href={`/directory/${doctor.slug}`} className="mt-2 inline-flex min-h-11 items-center text-base font-bold text-portal-accent">View profile</Link> : null}
-              {member && (doctor.offers_shadowing || usedFallback) ? <ShadowForm doctorId={doctor.id} /> : null}
-              {!member ? <p className="mt-2 text-sm text-portal-ink-2">Membership is required to request a shadow day.</p> : null}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {doctor.slug ? <Link href={`https://neurochiro.co/directory/${doctor.slug}`} className="inline-flex min-h-11 items-center text-base font-bold text-portal-accent">View profile</Link> : null}
+                {doctor.accepts_student_messages && doctor.user_id ? (
+                  <Link href={`/student/messages?to=${doctor.user_id}`} className="inline-flex min-h-11 items-center rounded-lg bg-[#2C6BB4] px-4 text-sm font-extrabold text-white">Message</Link>
+                ) : null}
+              </div>
+              {member ? <MentorshipForm doctorId={doctor.id} /> : null}
+              {member && doctor.offers_shadowing ? <ShadowForm doctorId={doctor.id} /> : null}
+              {!member ? <p className="mt-2 text-sm text-portal-ink-2">Membership is required to ask about mentorship or request a shadow day.</p> : null}
             </article>
           );
         })}

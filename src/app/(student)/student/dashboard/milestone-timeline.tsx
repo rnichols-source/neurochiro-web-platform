@@ -20,12 +20,12 @@ interface MilestoneTimelineProps {
 
 const MILESTONES = [
   { key: "profileComplete", label: "Profile completed", href: "/student/profile" },
-  { key: "firstCourseStarted", label: "First course started", href: "/student/academy" },
-  { key: "firstCourseCompleted", label: "First course finished", href: "/student/academy" },
+  { key: "firstCourseStarted", label: "Technique quiz started", href: "/student/techniques" },
+  { key: "firstCourseCompleted", label: "Technique quiz finished", href: "/student/techniques" },
   { key: "firstJobApp", label: "First application sent", href: "/student/jobs" },
   { key: "contractReviewed", label: "Contract reviewed", href: "/student/contract-lab" },
   { key: "financialPlanCreated", label: "Financial plan created", href: "/student/financial-planner" },
-  { key: "allCoursesComplete", label: "All courses completed", href: "/student/academy" },
+  { key: "allCoursesComplete", label: "ChiroMatch questionnaire done", href: "/student/match" },
 ] as const;
 
 export default function MilestoneTimeline({ milestones }: MilestoneTimelineProps) {

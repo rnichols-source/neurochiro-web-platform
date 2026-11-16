@@ -10,7 +10,7 @@ const NEXT = [
 ];
 
 export default function PlaceGrid() {
-  const tools = STUDENT_TOOL_LINKS.filter((link) => ['/student/philosophy', '/student/techniques', '/student/contract-lab', '/student/seminars', '/student/community'].includes(link.href));
+  const tools = STUDENT_TOOL_LINKS.filter((link) => ['/student/philosophy', '/student/techniques', '/student/contract-lab', '/student/seminars', '/student/financial-planner', '/student/match'].includes(link.href));
   return (
     <section className="mb-6 space-y-4">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">

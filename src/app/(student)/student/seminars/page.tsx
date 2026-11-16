@@ -108,13 +108,20 @@ export default function SeminarsPage() {
                     </span>
                   )}
                 </div>
-                <div className="mt-auto pt-4">
+                <div className="mt-auto pt-4 flex flex-wrap gap-3">
                   <Link
-                    href={`/seminars/${sem.id}`}
-                    className="inline-block px-6 py-3 bg-[#D66829] text-white font-bold rounded-xl text-xs tracking-widest hover:bg-[#e8834a] shadow-lg shadow-[#D66829]/20 transition-colors"
+                    href={`https://neurochiro.co/seminars/${sem.id}`}
+                    className="inline-flex min-h-11 items-center px-5 rounded-xl bg-[#D66829] text-white text-sm font-bold"
                   >
-                    Learn More
+                    Event page
                   </Link>
+                  {sem.registration_link ? (
+                    <a href={sem.registration_link} className="inline-flex min-h-11 items-center px-5 rounded-xl border border-[#ECE8E1] text-sm font-bold text-[#15202B]">
+                      Register
+                    </a>
+                  ) : (
+                    <span className="inline-flex min-h-11 items-center text-sm text-[#5b6773]">Registration is on the event page.</span>
+                  )}
                 </div>
               </div>
             );
@@ -129,7 +136,7 @@ export default function SeminarsPage() {
           <p className="text-xs text-portal-ink-2">Check your career pipeline for what to do next.</p>
         </div>
         <Link
-          href="/student/roadmap"
+          href="/student/jobs"
           className="w-full sm:w-auto px-5 py-2.5 bg-[#f7f8fa] text-portal-ink-2 rounded-lg hover:text-portal-ink hover:bg-[#f7f8fa] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />

@@ -55,6 +55,11 @@ test('a student can message a doctor only when that doctor accepts student messa
   assert.equal(open.allowed, true);
 });
 
+test('an existing student and doctor thread can always be answered', () => {
+  assert.equal(decideAccess(student('s'), doctor('d'), { blocked: false, existingThread: true }).allowed, true);
+  assert.equal(decideAccess(doctor('d'), student('s'), { blocked: false, existingThread: true }).allowed, true);
+});
+
 test('a block in either direction refuses with the public sentence', () => {
   const decision = decideAccess(doctor('a'), doctor('b'), { blocked: true, existingThread: true });
   assert.equal(decision.allowed, false);

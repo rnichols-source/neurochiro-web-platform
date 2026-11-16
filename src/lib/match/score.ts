@@ -217,3 +217,23 @@ export function scoreMatch(student: ScoreSide, doctor: ScoreSide, weights: Weigh
   const line = reasonSentence(top, student, doctor);
   return { pct, factors, reasons: line ? [line] : [] };
 }
+
+/** Show a pair even when state or timeline is not a perfect fit, with the reason in the open. */
+export function rankableScore(student: ScoreSide, doctor: ScoreSide, weights: Weights = WEIGHTS_V1): { pct: number; reason: string } {
+  const scored = scoreMatch(student, doctor, weights);
+  if (!scored.excluded) return { pct: scored.pct, reason: scored.reasons[0] || 'Your answers line up.' };
+  const relaxed = scoreMatch(
+    {
+      ...student,
+      relocateAnywhere: true,
+      lookingFor: doctor.offers.length ? doctor.offers : student.lookingFor,
+    },
+    doctor,
+    weights,
+  );
+  const note = scored.excluded === 'location'
+    ? 'You are not in the same state.'
+    : 'The timing does not match yet.';
+  const detail = relaxed.reasons[0] || '';
+  return { pct: Math.round((relaxed.pct || 0) * 0.55), reason: [note, detail].filter(Boolean).join(' ') };
+}
