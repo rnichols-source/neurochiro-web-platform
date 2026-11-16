@@ -449,10 +449,6 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
               ctaText: welcome.ctaText,
               ctaUrl: welcome.ctaUrl,
             });
-
-            // Enqueue Patient Onboarding Sequence
-            await enqueue('patient_education_1', { ...payload, role: 'patient' }, 24 * 60);
-            await enqueue('patient_directory_reminder', { ...payload, role: 'patient' }, 3 * 24 * 60);
           } else {
             // Unknown role — send a generic welcome, no follow-up sequence
             await sendPremiumEmail({
@@ -590,37 +586,8 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         break;
 
       case 'patient_education_1':
-        // Only send to actual patients — not doctors or students
-        if (await signupWelcomeBlocked(payload)) break;
-        if (emailEnabled && payload.email && payload.role === 'patient') {
-          await sendPremiumEmail({
-            to: payload.email,
-            subject: 'Why the Nervous System Matters 🧠',
-            title: 'NeuroChiro Education',
-            body: `<h1>Hi ${payload.name || payload.full_name || 'there'}, let's talk about the master controller.</h1>
-                   <p>Most people think chiropractic is just for back pain. But your spine protects your nervous system—the system that controls every cell, organ, and function in your body.</p>
-                   <p>We've put together a quick guide to help you understand how nervous-system-focused care can unlock true health.</p>`,
-            ctaText: 'Read the Guide',
-            ctaUrl: 'https://neurochiro.co/learn'
-          });
-        }
-        break;
-
       case 'patient_directory_reminder':
-        // Only send to actual patients — not doctors or students
-        if (await signupWelcomeBlocked(payload)) break;
-        if (emailEnabled && payload.email && payload.role === 'patient') {
-          await sendPremiumEmail({
-            to: payload.email,
-            subject: 'Find your clinical partner today 📍',
-            title: 'Directory Match',
-            body: `<h1>${payload.name || payload.full_name || 'Hi'}, are you ready to take the next step?</h1>
-                   <p>Our global network is filled with rigorously vetted, nervous-system-first practitioners.</p>
-                   <p>You can search by city, condition, or clinical specialty. Don't wait to start your healing journey.</p>`,
-            ctaText: 'Find a Doctor',
-            ctaUrl: 'https://neurochiro.co/directory'
-          });
-        }
+        // Retired. Close anything still queued without sending.
         break;
 
       case 'doctor_profile_reminder':

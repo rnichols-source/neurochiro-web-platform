@@ -5,6 +5,7 @@ import { getSupabaseSecretKey } from '@/lib/supabase-secret';
 import { SUPABASE_URL } from '@/lib/supabase-env';
 import { Resend } from 'resend';
 import { getNudgeTarget } from '@/lib/profile-completeness';
+import { isPaidActiveNudgeDoctor } from '@/lib/profile-nudge-audience';
 
 export const maxDuration = 300;
 
@@ -32,11 +33,12 @@ export async function GET(req: Request) {
     const supabase = getSupabase();
     const resend = getResend();
 
-    // Get all verified doctors with accounts — include all fields the completeness check needs
+    // Verified accounts only. Legacy listings have no user_id. Paid/active is checked per row.
     const { data: doctors } = await supabase
       .from('doctors')
-      .select('user_id, first_name, last_name, photo_url, bio, short_intro, specialties, slug, city, chiropractic_school, hours, first_visit_price, payment_model, phone, booking_url, google_reviews_url')
+      .select('user_id, first_name, last_name, photo_url, bio, short_intro, specialties, slug, city, chiropractic_school, hours, first_visit_price, payment_model, phone, booking_url, google_reviews_url, verification_status, membership_tier, is_founding_member, neuros_tier, created_at, is_test')
       .eq('verification_status', 'verified')
+      .eq('is_test', false)
       .not('user_id', 'is', null);
 
     if (!doctors || doctors.length === 0) {
@@ -47,10 +49,10 @@ export async function GET(req: Request) {
     const userIds = doctors.map(d => d.user_id).filter(Boolean);
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, email, full_name')
+      .select('id, email, full_name, tier')
       .in('id', userIds);
 
-    const emailMap = new Map((profiles || []).map(p => [p.id, { email: p.email, name: p.full_name }]));
+    const emailMap = new Map((profiles || []).map(p => [p.id, { email: p.email, name: p.full_name, tier: p.tier }]));
 
     // Check existing nudges to avoid spamming (7 day window)
     const { data: existingNudges } = await supabase
@@ -70,6 +72,16 @@ export async function GET(req: Request) {
     for (const doc of doctors) {
       const profile = emailMap.get(doc.user_id);
       if (!profile?.email) continue;
+      if (!isPaidActiveNudgeDoctor({
+        user_id: doc.user_id,
+        verification_status: doc.verification_status,
+        is_test: doc.is_test,
+        membership_tier: doc.membership_tier,
+        is_founding_member: doc.is_founding_member,
+        neuros_tier: doc.neuros_tier,
+        created_at: doc.created_at,
+        profile_tier: profile.tier,
+      })) continue;
 
       // Use the shared completeness function — same as the profile editor widget
       const nudgeTarget = getNudgeTarget(doc);

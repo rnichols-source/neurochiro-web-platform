@@ -34,8 +34,20 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: true, processed: 0, message: 'No pending items' });
     }
 
+    // Retired community drips: close them even if scheduled_for is still in the
+    // future, so they cannot send and cannot fill this batch.
+    const retiredDrips = new Set(['patient_education_1', 'patient_directory_reminder']);
+    const retiredItems = queueItems.filter((item: any) => retiredDrips.has(item.event_type));
+    const keptItems = queueItems.filter((item: any) => !retiredDrips.has(item.event_type));
+    if (retiredItems.length > 0) {
+      await supabase
+        .from('automation_queue')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .in('id', retiredItems.map((item: any) => item.id));
+    }
+
     // Filter out scheduled items that haven't reached their scheduled time yet
-    const readyItems = queueItems.filter((item: any) => {
+    const readyItems = keptItems.filter((item: any) => {
       if (item.status === 'scheduled' && item.payload?.scheduled_for) {
         return new Date(item.payload.scheduled_for) <= new Date();
       }
@@ -43,7 +55,7 @@ export async function GET(req: Request) {
     });
 
     if (readyItems.length === 0) {
-      return NextResponse.json({ success: true, processed: 0, message: 'No ready items' });
+      return NextResponse.json({ success: true, processed: 0, skipped: retiredItems.length, message: 'No ready items' });
     }
 
     // 3. Mark them as processing immediately to prevent race conditions
@@ -78,7 +90,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ 
       success: true,
-      processed: readyItems.length
+      processed: readyItems.length,
+      skipped: retiredItems.length,
     });
 
   } catch (error: any) {

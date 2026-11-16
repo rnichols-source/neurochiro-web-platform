@@ -1,4 +1,5 @@
 import { wrapEmail } from '@/lib/email-template';
+import { mondayPulseLines } from '@/lib/founder/send';
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseSecretKey } from '@/lib/supabase-secret';
@@ -15,11 +16,18 @@ const getSupabase = () => createClient(
 
 const getResend = () => new Resend(process.env.RESEND_API_KEY || '');
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 /**
  * ANALYTICS COMPILER — Runs every Monday at 7 AM EST
  * Compiles a weekly platform report and emails it to the founder.
  * Shows: total doctors, students, patients, new signups this week,
- * outreach stats, profile completeness, revenue metrics.
+ * outreach stats, profile completeness, revenue metrics, and Pulse.
  */
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -121,6 +129,14 @@ export async function GET(req: Request) {
 
     const freeDoctors = freeDoctorAccounts || 0;
 
+    let pulseHtml = '<p style="font-size: 14px; color: #9CA3AF;">Pulse could not be read this week.</p>';
+    try {
+      const lines = await mondayPulseLines();
+      pulseHtml = `<div style="font-size: 14px; line-height: 1.6; color: #1E2D3B;">${lines.map((line) => escapeHtml(line) || '&nbsp;').join('<br>')}</div>`;
+    } catch (pulseError) {
+      console.error('[ANALYTICS COMPILER] pulse section', pulseError);
+    }
+
     // Build the email
     const founderEmail = 'drray@neurochirodirectory.com';
 
@@ -180,6 +196,9 @@ export async function GET(req: Request) {
         ${stat('Missing Photo', missingPhoto)}
         ${stat('Missing Bio', missingBio)}
       </div>
+
+      <h3 style="font-size: 16px; color: #1E2D3B; margin: 24px 0 12px;">Pulse</h3>
+      ${pulseHtml}
 
       <p style="font-size: 13px; color: #9CA3AF; margin-top: 24px;">Generated automatically by the NeuroChiro Analytics Agent.</p>
     `;
