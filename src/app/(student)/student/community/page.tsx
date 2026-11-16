@@ -91,6 +91,14 @@ export default function CommunityPage() {
       </div>
 
       {/* Schools */}
+      {schools.length === 0 ? (
+        <section className="rounded-2xl bg-white p-6" style={{ boxShadow: "inset 0 0 0 1px #ECE8E1" }}>
+          <h2 className="text-lg font-bold text-portal-ink">Schools show up after students add them</h2>
+          <p className="mt-2 text-sm text-portal-ink-2">Add your school, city, and techniques on your profile. The list stays grouped so names are not shown here.</p>
+          <Link href="/student/profile" className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-[#D66829]">Add your school</Link>
+        </section>
+      ) : null}
+
       {schools.length > 0 && (
         <section>
           <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Schools</h2>
@@ -175,10 +183,10 @@ export default function CommunityPage() {
           <p className="text-xs text-portal-ink-2">Connect with doctors who are ready to help you grow.</p>
         </div>
         <Link
-          href="/student/mentors"
+          href="/student/doctors"
           className="w-full sm:w-auto px-5 py-2.5 bg-[#f7f8fa] text-portal-ink-2 rounded-lg hover:text-portal-ink hover:bg-[#f7f8fa] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
-          Find Mentors <ArrowRight className="w-3.5 h-3.5" />
+          See opted-in doctors <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
     </div>

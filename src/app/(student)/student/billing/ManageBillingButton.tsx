@@ -13,7 +13,7 @@ export default function ManageBillingButton() {
       window.location.href = data.url;
       return;
     }
-    setError('Billing portal is not available yet. Email support@neurochirodirectory.com.');
+    setError('Billing portal is not available yet. Contact NeuroChiro at https://neurochiro.co/contact.');
   }
 
   return (

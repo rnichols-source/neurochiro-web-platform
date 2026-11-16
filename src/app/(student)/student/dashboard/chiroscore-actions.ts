@@ -3,6 +3,7 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { computeChiroScore, type ChiroScoreResult } from '@/lib/chiroscore'
 import { applicationTotals } from '@/lib/jobs/posting-pure'
+import { loadStudentProfile } from '@/lib/students/save-student-profile'
 
 export async function getChiroScore(): Promise<ChiroScoreResult | null> {
   const supabase = createServerSupabase()
@@ -27,8 +28,7 @@ export async function getChiroScore(): Promise<ChiroScoreResult | null> {
     ] = await Promise.all([
       // Profile (avatar)
       supabase.from('profiles').select('avatar_url').eq('id', user.id).single(),
-      // Student data
-      supabase.from('students').select('full_name, school, graduation_year, location_city, interests, skills, resume_url').eq('id', user.id).maybeSingle(),
+      loadStudentProfile(user.id),
       // Certifications
       sb.from('student_certifications').select('id, verified').eq('student_id', user.id),
       // Course progress
@@ -79,23 +79,23 @@ export async function getChiroScore(): Promise<ChiroScoreResult | null> {
 
     const feedbackData = feedbackRes.data || [];
     const avgRating = feedbackData.length > 0
-      ? feedbackData.reduce((sum: number, f: any) => sum + (f.rating || 0), 0) / feedbackData.length
+      ? feedbackData.reduce((sum: number, row: { rating?: number | null }) => sum + (row.rating || 0), 0) / feedbackData.length
       : 0;
 
     const result = computeChiroScore({
       profile: {
-        fullName: student?.full_name || null,
+        fullName: student?.fullName || null,
         school: student?.school || null,
-        graduationYear: student?.graduation_year || null,
-        locationCity: student?.location_city || null,
-        interests: student?.interests || null,
-        skills: student?.skills || null,
-        resumeUrl: student?.resume_url || null,
+        graduationYear: student?.graduationYear || null,
+        locationCity: student?.city || null,
+        interests: student?.techniques || null,
+        skills: student?.techniques || null,
+        resumeUrl: null,
         avatarUrl: profile?.avatar_url || null,
       },
       certifications: {
         count: certs.length,
-        verifiedCount: certs.filter((c: any) => c.verified).length,
+        verifiedCount: certs.filter((row: { verified?: boolean | null }) => row.verified).length,
       },
       academy: {
         completedModules: totalModulesCompleted,

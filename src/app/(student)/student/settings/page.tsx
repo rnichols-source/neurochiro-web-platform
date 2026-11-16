@@ -78,7 +78,7 @@ export default function StudentSettingsPage() {
       <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] shadow-lg shadow-black/20 p-6">
         <h2 className="text-xs font-semibold tracking-[0.15em] text-[#D66829] mb-4">Email</h2>
         <p className="text-sm text-portal-ink font-medium" id="student-email">Loading...</p>
-        <p className="text-xs text-portal-ink-2 mt-1">To change your email, contact <a href="mailto:support@neurochirodirectory.com" className="text-[#D66829] hover:underline">support@neurochirodirectory.com</a></p>
+        <p className="text-xs text-portal-ink-2 mt-1">To change your email, <a href="https://neurochiro.co/contact" className="text-[#D66829] hover:underline">contact NeuroChiro</a>.</p>
       </div>
 
       <div className="bg-white border border-[#e3e8ed] rounded-2xl border border-[#e3e8ed] shadow-lg shadow-black/20 p-6">

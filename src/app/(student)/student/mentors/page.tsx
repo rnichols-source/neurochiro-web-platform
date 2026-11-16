@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, MapPin, Star, Heart, Briefcase, MessageSquare, ArrowRight, Filter, ChevronDown, Users } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { getJobMatchProfile } from "@/app/(student)/student/jobs/actions";
 
 interface Mentor {
   id: string;
@@ -87,17 +88,13 @@ export default function MentorDiscoveryPage() {
     // Fetch student profile
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
-      const { data: student } = await supabase
-        .from("students")
-        .select("location_city, region_code, interests")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (student) {
+      const match = await getJobMatchProfile();
+      if (match) {
         setProfile({
-          city: (student as any).location_city || null,
-          state: null,
-          region_code: (student as any).region_code || null,
-          interests: (student as any).interests || [],
+          city: match.city,
+          state: match.state,
+          region_code: match.state,
+          interests: match.interests,
         });
       }
     });

@@ -1,4 +1,3 @@
-import { Inter } from 'next/font/google';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AuthProvider } from '@/context/AuthContext';
@@ -9,8 +8,6 @@ import { featureForPath } from '@/config/student-features';
 import { getStudentPortal, isStaffRole } from '@/lib/students/context';
 import { hasMemberAccess } from '@/lib/students/membership-pure';
 import { studentProfileComplete } from '@/lib/students/onboarding-fields';
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
 const WELCOME_EXEMPT = ['/student/welcome', '/student/subscribe', '/student/billing', '/student/settings'];
 
@@ -57,7 +54,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <AuthProvider>
-      <div className={`${inter.variable} portal min-h-dvh`}>
+      <div className="portal min-h-dvh" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
         <StudentPortalProvider value={portal}>
           <StudentShell>{body}</StudentShell>
         </StudentPortalProvider>

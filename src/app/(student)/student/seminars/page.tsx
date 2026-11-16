@@ -66,8 +66,11 @@ export default function SeminarsPage() {
         <div className="py-20 text-center bg-white rounded-2xl border border-dashed border-[#e3e8ed]">
           <Calendar className="w-12 h-12 text-portal-ink-2 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-portal-ink mb-1">No upcoming seminars</h3>
-          <p className="text-portal-ink-2 text-sm mb-4">Check back soon — new events are added regularly.</p>
-          <a href="/seminars" className="text-sm font-bold text-[#D66829] hover:underline">Browse all public seminars</a>
+          <p className="text-portal-ink-2 text-sm mb-4">Nothing is scheduled in the student list yet. The public seminar page and the monthly call are the next places to look.</p>
+          <span className="inline-flex flex-wrap items-center justify-center gap-4">
+            <a href="https://neurochiro.co/seminars" className="text-sm font-bold text-[#D66829] hover:underline">Browse seminars on neurochiro.co</a>
+            <Link href="/student/mentorship" className="text-sm font-bold text-[#0A6159] hover:underline">Monthly student call</Link>
+          </span>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

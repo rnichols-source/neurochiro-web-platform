@@ -32,14 +32,15 @@ export async function getStudentDashboardData() {
     if (student?.city) readiness += 20
     if (student?.techniques && student.techniques.length > 0) readiness += 20
 
-    const fullName = (profile as any)?.full_name || student?.fullName || ''
+    const account = profile as { full_name?: string | null; role?: string | null; tier?: string | null; stripe_customer_id?: string | null } | null
+    const fullName = account?.full_name || student?.fullName || ''
     return {
       profile: {
         name: fullName.split(' ')[0] || user.email?.split('@')[0],
         fullName,
-        role: (profile as any)?.role || student?.role,
-        status: ((profile as any)?.tier && (profile as any)?.tier !== 'free') ? 'active' : 'inactive',
-        hasSubscription: !!(profile as any)?.stripe_customer_id,
+        role: account?.role || student?.role,
+        status: (account?.tier && account.tier !== 'free') ? 'active' : 'inactive',
+        hasSubscription: !!account?.stripe_customer_id,
         school: student?.school || null,
         gradYear: student?.graduationYear || null,
         city: student?.city || null,
@@ -47,6 +48,7 @@ export async function getStudentDashboardData() {
         yearInSchool: student?.yearInSchool || null,
         interests: student?.techniques || [],
         skills: student?.techniques || [],
+
       },
       stats: {
         readiness,

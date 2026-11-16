@@ -64,7 +64,16 @@ export default async function StudentDoctorsPage({ searchParams }: { searchParam
           <Link key={label} href={badge ? `/student/doctors?badge=${badge}` : '/student/doctors'} className="min-h-11 inline-flex items-center rounded-lg border border-portal-border bg-white px-3 text-sm font-bold text-portal-ink">{label}</Link>
         ))}
       </div>
-      {rows.length === 0 ? <p className="text-base text-portal-ink-2">No doctors have turned this on yet.</p> : null}
+      {rows.length === 0 ? (
+        <article className="rounded-2xl bg-white p-6" style={{ boxShadow: 'inset 0 0 0 1px #ECE8E1' }}>
+          <h2 className="text-xl font-extrabold text-[#15202B]">No doctors have opted in yet</h2>
+          <p className="mt-2 text-[15px] leading-6 text-[#3d4a57]">This list only includes doctors who chose to meet students. Finish your profile so you are ready when someone turns it on, or open ChiroMatch if you are a member.</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link href="/student/profile" className="inline-flex min-h-11 items-center rounded-xl bg-[#2C6BB4] px-4 text-sm font-extrabold text-white">Finish your profile</Link>
+            <Link href="/student/match" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-sm font-extrabold text-[#1F4F8C]" style={{ boxShadow: 'inset 0 0 0 1px #ECE8E1' }}>Open ChiroMatch</Link>
+          </div>
+        </article>
+      ) : null}
       <div className="space-y-3">
         {rows.map((doctor) => {
           const name = `${doctor.first_name || ''} ${doctor.last_name || ''}`.trim() || 'Doctor';

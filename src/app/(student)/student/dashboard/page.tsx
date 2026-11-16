@@ -1,3 +1,4 @@
+import PlaceGrid from "@/components/student/place-grid";
 import DashboardHome from "./DashboardHome";
 import StudentPerks from "./student-perks";
 import { getCareerReadinessData, getStudentDashboardData, getMatchedJobsCount } from "./actions";
@@ -16,6 +17,7 @@ export default async function StudentDashboardPage() {
 
   return (
     <>
+      <PlaceGrid />
       <StudentPerks />
       <DashboardHome
         readiness={readiness}
