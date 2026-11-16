@@ -1,19 +1,12 @@
 import { NextResponse } from 'next/server';
-import { runReferralReminders } from '@/lib/referrals/data';
 
 export const maxDuration = 120;
 
-export async function GET(req: Request) {
-  // DISABLED 2026-11-15 — overwhelming doctors with referral reminder emails
+/**
+ * REFERRAL REMINDERS — DISABLED 2026-11-15
+ * Was overwhelming doctors with referral reminder emails.
+ * Original code sent multiple reminder emails per referral.
+ */
+export async function GET() {
   return NextResponse.json({ skipped: true, reason: 'Referral reminders disabled — too many emails' });
-
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  if (process.env.REFERRAL_CRON_DRY_RUN === 'true') {
-    return NextResponse.json({ success: true, dryRun: true });
-  }
-  const result = await runReferralReminders();
-  return NextResponse.json({ success: true, ...result });
 }
