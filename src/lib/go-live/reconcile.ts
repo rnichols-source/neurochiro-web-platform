@@ -7,6 +7,7 @@ import { isDoctorMembershipProduct, isStudentProduct, type ProductHint } from '.
 import {
   invoiceLineProduct,
   isDoctorMembershipCheckout,
+  reconcileIntakeReport,
   reconciliationLetter,
   subscriptionIdFromInvoice,
   type CheckoutIdentity,
@@ -127,6 +128,7 @@ export async function reconcileDoctorGoLive(): Promise<{ checked: number; missin
   const since = Math.floor(Date.now() / 1000) - WINDOW_SECONDS
   const missing: string[] = []
   const failed: string[] = []
+  const review: string[] = []
   let checked = 0
   await adoptStaleCheckoutClaims().catch((error) => {
     console.error('[go-live] stale claim adopt failed', error instanceof Error ? error.name : 'error')
@@ -143,9 +145,12 @@ export async function reconcileDoctorGoLive(): Promise<{ checked: number; missin
     try {
       const doctor = await findDoctor(customerId, email)
       if (!doctor) {
-        missing.push(label)
         const { ingestMembershipCheckout } = await import('./checkout')
-        await ingestMembershipCheckout(session as unknown as Record<string, any>)
+        const result = await ingestMembershipCheckout(session as unknown as Record<string, any>)
+        const report = reconcileIntakeReport(result.outcome)
+        if (report.missing) missing.push(label)
+        if (report.failed) failed.push(label)
+        if (result.reviewLine) review.push(result.reviewLine)
         continue
       }
       const state = await coverage(doctor.id)
@@ -187,9 +192,12 @@ export async function reconcileDoctorGoLive(): Promise<{ checked: number; missin
     try {
       const doctor = await findDoctor(customerId, null)
       if (!doctor) {
-        missing.push(label)
         const { noteMembershipInvoicePaid } = await import('./checkout')
-        await noteMembershipInvoicePaid(invoice as unknown as Record<string, any>)
+        const result = await noteMembershipInvoicePaid(invoice as unknown as Record<string, any>)
+        const report = reconcileIntakeReport(result.outcome)
+        if (report.missing) missing.push(label)
+        if (report.failed) failed.push(label)
+        if (result.reviewLine) review.push(result.reviewLine)
         continue
       }
       const state = await coverage(doctor.id)
@@ -212,7 +220,7 @@ export async function reconcileDoctorGoLive(): Promise<{ checked: number; missin
     }
   }
 
-  const letter = reconciliationLetter({ missing, failed })
+  const letter = reconciliationLetter({ missing, failed, review })
   const emailed = letter ? await emailRaymond(letter.html) : false
   return { checked, missing: missing.length, failed: failed.length, emailed }
 }

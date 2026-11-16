@@ -18,6 +18,19 @@ export type WebhookHealthInput = {
 export type WebhookHealthDecision = {
   alert: boolean
   reason: string | null
+  kind: 'signature' | 'stale' | null
+}
+
+/** The live Stripe webhook. The apex host is not this endpoint. */
+export const STRIPE_WEBHOOK_ENDPOINT = 'https://www.neurochiro.co/api/webhooks/stripe'
+
+export function webhookHealthEmailHtml(input: { reason: string; failedAt: string | null }): string {
+  const reason = input.reason.replace(/</g, '')
+  const failedAt = (input.failedAt || '').trim()
+  const parsed = Date.parse(failedAt)
+  const when = failedAt && Number.isFinite(parsed) ? `${new Date(parsed).toISOString()} UTC` : ''
+  const time = when ? `<p>Failure time: ${when}</p>` : ''
+  return `<p>${reason}</p>${time}<p>Endpoint: ${STRIPE_WEBHOOK_ENDPOINT}</p>`
 }
 
 function hoursBetween(laterIso: string, earlierIso: string): number {
@@ -38,15 +51,17 @@ function cooledDown(input: WebhookHealthInput): boolean {
  */
 export function decideWebhookHealth(input: WebhookHealthInput): WebhookHealthDecision {
   const staleHours = input.staleHours && input.staleHours > 0 ? input.staleHours : DEFAULT_WEBHOOK_STALE_HOURS
-  if (!cooledDown(input)) return { alert: false, reason: null }
+  if (!cooledDown(input)) return { alert: false, reason: null, kind: null }
 
   const signatureIsNew = Boolean(
     input.lastSignatureFailureAt
+    && (!input.lastEventAt || input.lastEventAt < input.lastSignatureFailureAt)
     && (!input.lastAlertAt || input.lastSignatureFailureAt > input.lastAlertAt),
   )
   if (signatureIsNew) {
     return {
       alert: true,
+      kind: 'signature',
       reason: 'Stripe webhook signature verification failed. Paid checkouts will not create doctor accounts until the signing secret matches.',
     }
   }
@@ -56,9 +71,10 @@ export function decideWebhookHealth(input: WebhookHealthInput): WebhookHealthDec
     const paid = input.paidCheckoutsInWindow
     return {
       alert: true,
+      kind: 'stale',
       reason: `The Stripe webhook has not accepted an event in ${staleHours} hours, and Stripe shows ${paid} paid checkout${paid === 1 ? '' : 's'} in that window. Those doctors will not go live until the endpoint is receiving events.`,
     }
   }
 
-  return { alert: false, reason: null }
+  return { alert: false, reason: null, kind: null }
 }

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { nudgeCopy } from './messages.ts'
-import { signatureFailureIsActionable } from './health.ts'
+import { decideWebhookHealth, signatureFailureIsActionable, webhookHealthEmailHtml } from './health.ts'
 import { APPROVAL_GO_LIVE_STEPS } from './steps.ts'
 import { welcomeInputFromListing, WELCOME_REPLY_TO } from './welcome-email.ts'
 import { isDoctorMembershipProduct } from './products.ts'
@@ -22,7 +22,10 @@ import {
   phoneFromCheckout,
   adminGoLiveSummary,
   minimumProfileGaps,
+  blocksNewDoctor,
+  listingNeverGoneLive,
   planCheckoutIntake,
+  planDuplicateGuard,
   planInvoiceIntake,
   planLoggedInCheckout,
   nextBookingNudge,
@@ -32,8 +35,10 @@ import {
   welcomeSendDecision,
   resumeClaimPlan,
   processedWebhookAction,
+  reconcileIntakeReport,
   reconciliationLetter,
   retryPlanForDoctor,
+  unmatchedPaymentLine,
   planPathB,
   promotionPlan,
   shouldSendWelcome,
@@ -198,7 +203,8 @@ describe('path B auto-create', () => {
       applications: [],
       listings: [],
     })
-    assert.deepEqual(renewal, { action: 'ignore', reason: 'renewal' })
+    assert.deepEqual(renewal, { action: 'needs_review', reason: 'matched_no_listing' })
+    assert.notEqual(renewal.action, 'create_and_go_live')
   })
 
   it('reads the subscription id from the current invoice parent and the built-in phone', () => {
@@ -520,7 +526,7 @@ describe('payment go-live paths', () => {
       hasSubscription: true,
       applications: [],
       listings: [],
-    }), { action: 'ignore', reason: 'renewal' })
+    }), { action: 'needs_review', reason: 'matched_no_listing' })
     assert.deepEqual(planInvoiceIntake({
       billingReason: 'manual',
       amountPaid: 3300,
@@ -639,7 +645,7 @@ describe('existing members and invoice go-live', () => {
       applications: [],
       listings: [],
     }), { action: 'ignore', reason: 'not_paid' })
-    assert.deepEqual(planInvoiceIntake({
+    const renewal = planInvoiceIntake({
       billingReason: 'subscription_cycle',
       amountPaid: 9900,
       membership: true,
@@ -647,7 +653,10 @@ describe('existing members and invoice go-live', () => {
       neverGoneLive: true,
       applications: [],
       listings: [],
-    }), { action: 'create_and_go_live' })
+    })
+    assert.deepEqual(renewal, { action: 'needs_review', reason: 'matched_no_listing' })
+    assert.notEqual(renewal.action, 'create_and_go_live')
+    assert.notEqual(renewal.action, 'go_live')
     assert.deepEqual(planInvoiceIntake({
       billingReason: 'subscription_cycle',
       amountPaid: 9900,
@@ -658,12 +667,187 @@ describe('existing members and invoice go-live', () => {
       neverGoneLive: true,
       applications: [],
       listings: [{ id: 'doc-1' }],
-    }), { action: 'go_live', doctorId: 'doc-1' })
+    }), { action: 'link_live', doctorId: 'doc-1' })
   })
 
   it('records checkout on the approval path', () => {
     assert.equal(APPROVAL_GO_LIVE_STEPS.includes('checkout'), true)
     assert.equal(APPROVAL_GO_LIVE_STEPS.includes('welcome'), true)
+  })
+})
+
+describe('duplicate doctors from go-live', () => {
+  it('does not create a doctor for a renewal invoice that matches no listing, and alerts for review', () => {
+    for (const billingReason of ['subscription_cycle', 'subscription_update', 'subscription_threshold']) {
+      const decision = planInvoiceIntake({
+        billingReason,
+        amountPaid: 9900,
+        membership: true,
+        hasSubscription: true,
+        neverGoneLive: true,
+        applications: [],
+        listings: [],
+      })
+      assert.deepEqual(decision, { action: 'needs_review', reason: 'matched_no_listing' })
+      assert.equal(blocksNewDoctor({ billingReason, earlierPaidInvoice: false }), true)
+    }
+    const earlier = planInvoiceIntake({
+      billingReason: 'subscription_create',
+      amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
+      earlierPaidInvoice: true,
+      applications: [],
+      listings: [],
+    })
+    assert.deepEqual(earlier, { action: 'needs_review', reason: 'matched_no_listing' })
+    assert.equal(listingNeverGoneLive({ listingCount: 0, welcomeOk: false }), false)
+    assert.equal(listingNeverGoneLive({ listingCount: 1, welcomeOk: false }), true)
+    assert.equal(listingNeverGoneLive({ listingCount: 1, welcomeOk: true }), false)
+    const line = unmatchedPaymentLine('Vincent Farrar', 'billing@example.com')
+    assert.equal(line, 'needs review: payment from Vincent Farrar/billing@example.com matched no listing')
+    const letter = reconciliationLetter({ missing: [], failed: [], review: [line] })
+    assert.match(letter?.html || '', /needs review: payment from Vincent Farrar\/billing@example.com matched no listing/)
+    assert.equal((letter?.html || '').toLowerCase().includes('patient'), false)
+    assert.match(letter?.html || '', /https:\/\/neurochiro\.co\/admin\/go-live/)
+    assert.equal(letter?.html.includes('create'), false)
+  })
+
+  it('links or flags a re-signup with a different billing email and the same last name and city', () => {
+    const plan = planPathB({
+      identity: identity({
+        email: 'bridget.billing@example.com',
+        name: 'Vincent & Bridget Farrar',
+        city: 'Charleston',
+        state: 'SC',
+        customerId: 'cus_new',
+      }),
+      existing: [listing({
+        email: 'vincent@practice.example',
+        firstName: 'Vincent',
+        lastName: 'Farrar',
+        city: 'Charleston',
+        state: 'SC',
+        stripeCustomerId: 'cus_old',
+        emails: ['office@practice.example'],
+      })],
+      claimed: false,
+      membership: true,
+    })
+    assert.notEqual(plan.action, 'create')
+    assert.equal(plan.action === 'flag_duplicate' || plan.action === 'attach', true)
+    if (plan.action === 'flag_duplicate' || plan.action === 'attach') assert.equal(plan.doctorId, 'doc-1')
+    const byState = planPathB({
+      identity: identity({
+        email: 'other.billing@example.com',
+        name: 'Bridget Farrar',
+        city: '',
+        state: 'South Carolina',
+        customerId: 'cus_state',
+      }),
+      existing: [listing({
+        email: 'vincent@practice.example',
+        firstName: 'Vincent',
+        lastName: 'Farrar',
+        city: 'Greenville',
+        state: 'SC',
+        stripeCustomerId: null,
+      })],
+      claimed: false,
+      membership: true,
+    })
+    assert.notEqual(byState.action, 'create')
+    const byPracticeEmail = planDuplicateGuard({
+      identity: identity({ email: 'office@practice.example', name: 'Someone New', city: 'Austin', customerId: 'cus_other' }),
+      existing: [listing({ email: 'listing@example.com', emails: ['Office@practice.example'], city: 'Dallas', state: 'TX' })],
+    })
+    assert.deepEqual(byPracticeEmail, { action: 'flag_duplicate', doctorId: 'doc-1' })
+    const byPracticeEmailSameName = planDuplicateGuard({
+      identity: identity({ email: 'office@practice.example', name: 'Ada Lovelace', city: 'Austin', state: 'TX', customerId: 'cus_other' }),
+      existing: [listing({ email: 'listing@example.com', emails: ['Office@practice.example'], city: 'Dallas', state: 'TX' })],
+    })
+    assert.deepEqual(byPracticeEmailSameName, { action: 'attach', doctorId: 'doc-1', reason: 'email' })
+    const byPhone = planPathB({
+      identity: identity({ email: 'new@example.com', name: 'New Person', city: 'Austin', phone: '(864) 555-0100' }),
+      existing: [listing({ email: 'other@example.com', city: 'Dallas', phones: ['+1 864-555-0100'], firstName: 'Ada', lastName: 'Other' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(byPhone, { action: 'flag_duplicate', doctorId: 'doc-1' })
+    const byPhoneSameName = planPathB({
+      identity: identity({ email: 'new@example.com', name: 'Ada Other', city: 'Austin', phone: '(864) 555-0100' }),
+      existing: [listing({ email: 'other@example.com', city: 'Dallas', phones: ['+1 864-555-0100'], firstName: 'Ada', lastName: 'Other' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(byPhoneSameName, { action: 'attach', doctorId: 'doc-1', reason: 'phone' })
+  })
+
+  it('lets a brand-new doctor with a common surname go live', () => {
+    const otherCity = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: 'Greenville', state: 'SC', phone: '+18645559999', customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Charleston', state: 'SC', stripeCustomerId: 'cus_old', phones: ['+18435550000'] })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(otherCity, { action: 'create' })
+    const otherState = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: '', state: 'TX', phone: null, customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Greenville', state: 'SC', stripeCustomerId: 'cus_old' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(otherState, { action: 'create' })
+    const sameCityOtherState = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: 'Greenville', state: 'NC', phone: null, customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Greenville', state: 'SC', stripeCustomerId: 'cus_old' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(sameCityOtherState, { action: 'create' })
+    const sameCity = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: 'Greenville', state: 'SC', phone: null, customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Greenville', state: 'SC', stripeCustomerId: 'cus_old' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.equal(sameCity.action, 'flag_duplicate')
+  })
+
+  it('does not report a reconcile link-only result as missing', () => {
+    assert.deepEqual(reconcileIntakeReport('linked'), { missing: false, failed: false })
+    assert.deepEqual(reconcileIntakeReport('flagged'), { missing: false, failed: false })
+    assert.deepEqual(reconcileIntakeReport('review'), { missing: false, failed: false })
+    assert.deepEqual(reconcileIntakeReport('ignored'), { missing: false, failed: false })
+    assert.deepEqual(reconcileIntakeReport('go_live'), { missing: false, failed: false })
+    assert.deepEqual(reconcileIntakeReport('created'), { missing: true, failed: false })
+    assert.deepEqual(reconcileIntakeReport('failed'), { missing: true, failed: true })
+  })
+
+  it('does not alert on a signature failure once a later event was accepted', () => {
+    const followed = decideWebhookHealth({
+      now: '2026-11-16T12:00:00.000Z',
+      lastEventAt: '2026-11-16T11:00:00.000Z',
+      lastSignatureFailureAt: '2026-11-16T10:00:00.000Z',
+      lastAlertAt: null,
+      paidCheckoutsInWindow: 0,
+    })
+    assert.equal(followed.alert, false)
+    assert.equal(followed.kind, null)
+    const onlyFailure = decideWebhookHealth({
+      now: '2026-11-16T12:00:00.000Z',
+      lastEventAt: '2026-11-16T09:00:00.000Z',
+      lastSignatureFailureAt: '2026-11-16T10:00:00.000Z',
+      lastAlertAt: null,
+      paidCheckoutsInWindow: 0,
+    })
+    assert.equal(onlyFailure.alert, true)
+    assert.equal(onlyFailure.kind, 'signature')
+    const html = webhookHealthEmailHtml({ reason: onlyFailure.reason || '', failedAt: '2026-11-16T10:00:00.000Z' })
+    assert.match(html, /Failure time: 2026-11-16T10:00:00.000Z UTC/)
+    assert.match(html, /https:\/\/www\.neurochiro\.co\/api\/webhooks\/stripe/)
+    assert.equal(html.includes('https://neurochiro.co/'), false)
+    assert.equal(html.toLowerCase().includes('patient'), false)
   })
 })
 

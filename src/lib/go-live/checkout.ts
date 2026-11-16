@@ -2,26 +2,32 @@ import 'server-only'
 
 import { stripe } from '@/lib/stripe'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { SUPABASE_URL } from '@/lib/supabase-env'
+import { resolveSupabaseAdminEnv } from '@/lib/supabase-runtime-env'
 import { doctorPriceIds, studentPriceIds } from '@/lib/member-referrals/catalog'
 import { isStudentProduct, type ProductHint } from './products.ts'
 import { goLiveStepAlreadyOk } from './log.ts'
 import {
+  blocksNewDoctor,
   checkoutApplicationContact,
   countryFromCurrency,
-  invoiceIsRenewal,
   invoiceLineProduct,
   isDoctorMembershipCheckout,
   isPublicLiveListing,
+  listingNeverGoneLive,
+  listingSearchFromIdentity,
+  phoneMatchKey,
   phoneFromCheckout,
   planCheckoutIntake,
+  planDuplicateGuard,
   planInvoiceIntake,
   planLoggedInCheckout,
-  planPathB,
   promotionPlan,
   resumeClaimPlan,
   readCheckoutContact,
   splitName,
   subscriptionIdFromInvoice,
+  unmatchedPaymentLine,
   type CheckoutIdentity,
   type ExistingListing,
 } from './plan.ts'
@@ -45,9 +51,9 @@ function identityFromSession(session: Record<string, any>, priceId: string | nul
     name: text(details.name) || text(session.metadata?.name),
     phone: phoneFromCheckout(session.custom_fields, text(details.phone)),
     smsConsent: contact.smsConsent,
-    city: contact.city,
-    state: contact.state,
-    country: null,
+    city: contact.city || text(details.address?.city),
+    state: contact.state || text(details.address?.state),
+    country: text(details.address?.country) || null,
     clinicName: contact.clinicName,
     amountTotal: typeof session.amount_total === 'number' ? session.amount_total : null,
     currency: text(session.currency) || null,
@@ -109,16 +115,54 @@ type ListedDoctor = ExistingListing & {
   goLiveFlowAt: string | null
 }
 
+export type MembershipIntakeResult = {
+  outcome: 'created' | 'linked' | 'flagged' | 'ignored' | 'review' | 'go_live' | 'failed'
+  doctorId: string | null
+  reviewLine: string | null
+}
+
+function intake(outcome: MembershipIntakeResult['outcome'], doctorId: string | null = null, reviewLine: string | null = null): MembershipIntakeResult {
+  return { outcome, doctorId, reviewLine }
+}
+
+const DOCTOR_COLUMNS = 'id, email, first_name, last_name, city, state, user_id, stripe_customer_id, verification_status, is_approved, go_live_flow_at, phone, lead_notification_emails, lead_alert_phones'
+const DOCTOR_BASIC = 'id, email, first_name, last_name, city, state, user_id, stripe_customer_id, verification_status, is_approved, go_live_flow_at, phone'
+
+function stringList(value: unknown): string[] {
+  if (Array.isArray(value)) return value.filter((item): item is string => typeof item === 'string')
+  if (typeof value === 'string' && value.trim()) return [value.trim()]
+  return []
+}
+
+type DoctorLookup = {
+  ilike: (column: string, value: string) => DoctorLookup
+  eq: (column: string, value: string) => DoctorLookup
+  in: (column: string, values: string[]) => DoctorLookup
+  contains: (column: string, value: string[]) => DoctorLookup
+  limit: (count: number) => Promise<{ data?: Record<string, unknown>[] | null; error?: { code?: string } | null }>
+}
+
+async function doctorQuery(
+  apply: (query: DoctorLookup) => Promise<{ data?: Record<string, unknown>[] | null; error?: { code?: string } | null }>,
+  columns = DOCTOR_COLUMNS,
+): Promise<Record<string, unknown>[]> {
+  try {
+    const result = await apply(db().from('doctors').select(columns))
+    if (!result?.error) return result?.data || []
+    if (columns === DOCTOR_COLUMNS) return doctorQuery(apply, DOCTOR_BASIC)
+    return []
+  } catch {
+    return []
+  }
+}
+
 async function existingListings(email: string, customerId: string | null): Promise<ListedDoctor[]> {
   const rows: ListedDoctor[] = []
-  const columns = 'id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved, go_live_flow_at'
   if (email) {
-    const { data } = await db().from('doctors').select(columns).ilike('email', email).limit(5)
-    for (const row of data || []) rows.push(asListing(row))
+    for (const row of await doctorQuery((query) => query.ilike('email', email).limit(5))) rows.push(asListing(row))
   }
   if (customerId) {
-    const { data } = await db().from('doctors').select(columns).eq('stripe_customer_id', customerId).limit(5)
-    for (const row of data || []) rows.push(asListing(row))
+    for (const row of await doctorQuery((query) => query.eq('stripe_customer_id', customerId).limit(5))) rows.push(asListing(row))
   }
   return rows
 }
@@ -130,12 +174,128 @@ function asListing(row: Record<string, unknown>): ListedDoctor {
     firstName: text(row.first_name),
     lastName: text(row.last_name),
     city: text(row.city),
+    state: text(row.state) || null,
     userId: text(row.user_id) || null,
     stripeCustomerId: text(row.stripe_customer_id) || null,
+    emails: [
+      text(row.email),
+      text(row.practice_email),
+      text(row.contact_email),
+      text(row.public_email),
+      text(row.private_email),
+      ...stringList(row.lead_notification_emails),
+    ].filter(Boolean),
+    phones: [
+      text(row.phone),
+      text(row.office_phone),
+      text(row.public_phone),
+      ...stringList(row.lead_alert_phones),
+    ].filter(Boolean),
     verificationStatus: text(row.verification_status) || null,
     isApproved: row.is_approved === true,
     goLiveFlowAt: text(row.go_live_flow_at) || null,
   }
+}
+
+function rememberListing(map: Map<string, ListedDoctor>, row: Record<string, unknown>, extraEmail?: string, extraPhone?: string): void {
+  const listing = asListing(row)
+  if (!listing.id) return
+  if (extraEmail) listing.emails = [...(listing.emails || []), extraEmail]
+  if (extraPhone) listing.phones = [...(listing.phones || []), extraPhone]
+  const prior = map.get(listing.id)
+  if (!prior) {
+    map.set(listing.id, listing)
+    return
+  }
+  prior.emails = [...(prior.emails || []), ...(listing.emails || [])]
+  prior.phones = [...(prior.phones || []), ...(listing.phones || [])]
+  if (!prior.state && listing.state) prior.state = listing.state
+}
+
+async function authUserIdByEmail(email: string): Promise<string | null> {
+  const env = resolveSupabaseAdminEnv(process.env, SUPABASE_URL || '')
+  if (!env) return null
+  try {
+    const url = new URL('/auth/v1/admin/users', env.url)
+    url.searchParams.set('filter', email)
+    url.searchParams.set('page', '1')
+    url.searchParams.set('per_page', '5')
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${env.key}`, apikey: env.key },
+    })
+    if (!response.ok) return null
+    const body = await response.json() as { users?: Array<{ id?: string; email?: string }> } | Array<{ id?: string; email?: string }>
+    const users = Array.isArray(body) ? body : body.users || []
+    const wanted = email.trim().toLowerCase()
+    const match = users.find((user) => (user.email || '').trim().toLowerCase() === wanted)
+    return match?.id ? String(match.id) : null
+  } catch {
+    return null
+  }
+}
+
+async function findCandidateListings(identity: CheckoutIdentity): Promise<ListedDoctor[]> {
+  const map = new Map<string, ListedDoctor>()
+  const { email, customerId, phoneKey, surname, city, state } = listingSearchFromIdentity(identity)
+  if (email) {
+    for (const row of await doctorQuery((query) => query.ilike('email', email).limit(8))) rememberListing(map, row, email)
+    for (const row of await doctorQuery((query) => query.contains('lead_notification_emails', [email]).limit(8))) rememberListing(map, row, email)
+    for (const column of ['practice_email', 'contact_email', 'public_email', 'private_email']) {
+      for (const row of await doctorQuery((query) => query.ilike(column, email).limit(8), `${DOCTOR_BASIC}, ${column}`)) {
+        rememberListing(map, row, email)
+      }
+    }
+    let profileIds: string[] = []
+    try {
+      const profiles = await db().from('profiles').select('id, email').ilike('email', email).limit(5)
+      profileIds = (profiles.data || []).map((row: { id?: string }) => text(row.id)).filter(Boolean)
+    } catch {
+      profileIds = []
+    }
+    if (profileIds.length) {
+      for (const row of await doctorQuery((query) => query.in('user_id', profileIds).limit(8))) rememberListing(map, row, email)
+    }
+    const authId = await authUserIdByEmail(email)
+    if (authId && !profileIds.includes(authId)) {
+      for (const row of await doctorQuery((query) => query.eq('user_id', authId).limit(5))) rememberListing(map, row, email)
+    }
+  }
+  if (customerId) {
+    for (const row of await doctorQuery((query) => query.eq('stripe_customer_id', customerId).limit(5))) rememberListing(map, row)
+  }
+  if (phoneKey) {
+    const alertVariants = [`+1${phoneKey}`, phoneKey, (identity.phone || '').trim()].filter(Boolean)
+    for (const variant of alertVariants) {
+      for (const row of await doctorQuery((query) => query.contains('lead_alert_phones', [variant]).limit(8))) {
+        rememberListing(map, row, undefined, identity.phone || undefined)
+      }
+    }
+    for (const column of ['phone', 'office_phone', 'public_phone']) {
+      const columns = column === 'phone' ? DOCTOR_COLUMNS : `${DOCTOR_BASIC}, ${column}`
+      for (const row of await doctorQuery((query) => query.ilike(column, `%${phoneKey}%`).limit(8), columns)) {
+        const matched = [row.phone, row.office_phone, row.public_phone, ...stringList(row.lead_alert_phones)]
+          .some((value) => phoneMatchKey(typeof value === 'string' ? value : null) === phoneKey)
+        if (matched) rememberListing(map, row, undefined, identity.phone || undefined)
+      }
+    }
+    const apps = await db().from('doctor_applications').select('doctor_id, mobile_e164').ilike('mobile_e164', `%${phoneKey}%`).limit(8)
+    const doctorIds = (apps.data || [])
+      .filter((row: { mobile_e164?: string }) => phoneMatchKey(text(row.mobile_e164)) === phoneKey)
+      .map((row: { doctor_id?: string }) => text(row.doctor_id))
+      .filter(Boolean)
+    if (doctorIds.length) {
+      for (const row of await doctorQuery((query) => query.in('id', doctorIds).limit(8))) rememberListing(map, row, undefined, identity.phone || undefined)
+    }
+  }
+  if (surname) {
+    if (city) {
+      for (const row of await doctorQuery((query) => query.ilike('last_name', surname).ilike('city', city).limit(8))) rememberListing(map, row)
+    }
+    if (state) {
+      for (const row of await doctorQuery((query) => query.ilike('last_name', surname).eq('state', state).limit(8))) rememberListing(map, row)
+    }
+  }
+  return [...map.values()]
 }
 
 async function protectListings(listings: ListedDoctor[]): Promise<{
@@ -159,7 +319,7 @@ async function protectListings(listings: ListedDoctor[]): Promise<{
   return {
     welcomeOk,
     preAutomation,
-    neverGoneLive: !welcomeOk && !preAutomation,
+    neverGoneLive: listingNeverGoneLive({ listingCount: listings.length, welcomeOk }),
     doctorId,
   }
 }
@@ -247,7 +407,85 @@ async function priorWelcomeOk(doctorId: string): Promise<boolean> {
   return goLiveStepAlreadyOk(doctorId, 'welcome')
 }
 
-export async function ingestMembershipCheckout(session: Record<string, any>): Promise<void> {
+type BeforeCreate =
+  | { action: 'create' }
+  | { action: 'use'; doctorId: string; goLive: boolean }
+  | { action: 'flagged'; doctorId: string }
+
+async function flagDuplicate(doctorId: string, identity: CheckoutIdentity): Promise<void> {
+  await db().from('doctors').update({ listing_exception: 'duplicate_name_city', needs_review: true }).eq('id', doctorId)
+  if (!identity.customerId) return
+  await db().from('doctor_checkout_claims').update({
+    status: 'duplicate',
+    doctor_id: doctorId,
+    detail: identity.email,
+  }).eq('stripe_customer_id', identity.customerId)
+}
+
+/** Wider match shared by payment links, invoices, logged-in checkout, and reconcile. */
+async function beforeCreate(identity: CheckoutIdentity): Promise<BeforeCreate> {
+  const candidates = await findCandidateListings(identity)
+  const decision = planDuplicateGuard({ identity, existing: candidates })
+  if (decision.action === 'attach') {
+    await linkStripeOnly(decision.doctorId, identity)
+    const row = candidates.find((item) => item.id === decision.doctorId)
+    const guard = await protectListings(row ? [row] : [])
+    const sameBillingEmail = (row?.email || '').trim().toLowerCase() === identity.email.trim().toLowerCase()
+    const sameCustomer = Boolean(identity.customerId && row?.stripeCustomerId && row.stripeCustomerId === identity.customerId)
+    const goLive = (sameBillingEmail || sameCustomer) && !guard.welcomeOk && !guard.preAutomation
+    return { action: 'use', doctorId: decision.doctorId, goLive }
+  }
+  if (decision.action === 'flag_duplicate') {
+    await flagDuplicate(decision.doctorId, identity)
+    return { action: 'flagged', doctorId: decision.doctorId }
+  }
+  return { action: 'create' }
+}
+
+async function recordUnmatchedPayment(identity: CheckoutIdentity, line: string): Promise<void> {
+  const detail = line.slice(0, 500)
+  const inserted = await db().from('doctor_checkout_claims').insert({
+    stripe_session_id: identity.sessionId || null,
+    stripe_customer_id: identity.customerId,
+    stripe_subscription_id: identity.subscriptionId,
+    email: identity.email || null,
+    status: 'needs_review',
+    detail,
+  })
+  if (!inserted.error) return
+  if (inserted.error.code !== '23505') {
+    console.error('[go-live] unmatched payment was not recorded', inserted.error.code || 'error')
+    return
+  }
+  if (!identity.customerId) return
+  await db().from('doctor_checkout_claims').update({ status: 'needs_review', detail }).eq('stripe_customer_id', identity.customerId).is('doctor_id', null)
+}
+
+/** A renewal that matches nothing is recorded for Raymond. It does not create a doctor. */
+async function reviewInsteadOfCreate(identity: CheckoutIdentity): Promise<MembershipIntakeResult> {
+  const before = await beforeCreate(identity)
+  if (before.action === 'use') return intake('linked', before.doctorId)
+  if (before.action === 'flagged') return intake('flagged', before.doctorId)
+  const line = unmatchedPaymentLine(identity.name, identity.email)
+  await recordUnmatchedPayment(identity, line)
+  return intake('review', null, line)
+}
+
+async function hasEarlierPaidInvoice(subscriptionId: string, invoiceId: string): Promise<boolean> {
+  if (!subscriptionId) return false
+  try {
+    const list = await stripe.invoices.list({ subscription: subscriptionId, limit: 24 })
+    return list.data.some((row) => {
+      if (invoiceId && row.id === invoiceId) return false
+      return row.status === 'paid' && Number(row.amount_paid || 0) > 0
+    })
+  } catch (error) {
+    console.error('[go-live] earlier invoice lookup failed', error instanceof Error ? error.name : 'error')
+    return false
+  }
+}
+
+export async function ingestMembershipCheckout(session: Record<string, any>): Promise<MembershipIntakeResult> {
   try {
     const priceId = await priceFromSession(session)
     const product = await productFromPriceId(priceId)
@@ -256,62 +494,65 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
       priceIds: doctorPriceIds(),
       studentPriceIds: studentPriceIds(),
     }, product)
-    if (!membership || !identity.email || isStudentProduct(product)) return
+    if (!membership || !identity.email || isStudentProduct(product)) return intake('ignored')
     const paid = checkoutIsPaid(session) || text(session.id).startsWith('invoice-')
-    if (identity.userId) {
-      await ingestLoggedIn(identity, paid)
-      return
-    }
+    if (identity.userId) return ingestLoggedIn(identity, paid)
     const claimed = await claim(identity)
     if (claimed === 'duplicate') {
       await resumeClaim(identity, paid)
-      return
+      return intake('ignored')
     }
-    if (claimed === 'unavailable') return
+    if (claimed === 'unavailable') return intake('ignored')
     const existing = await existingListings(identity.email, identity.customerId)
     const guard = await protectListings(existing)
     let hasOk = false
     for (const row of existing) {
       if (await priorCheckoutOk(row.id)) hasOk = true
     }
-    const intake = planCheckoutIntake({
+    const plan = planCheckoutIntake({
       membership: true,
       listings: existing,
       hasOkGoLive: hasOk,
       welcomeOk: guard.welcomeOk,
       preAutomation: guard.preAutomation,
     })
-    if (intake.action === 'ignore') return
-    if (intake.action === 'link_live') {
-      await linkStripeOnly(intake.doctorId, identity)
-      await db().from('doctor_checkout_claims').update({ status: 'link_live', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
-      return
+    if (plan.action === 'ignore') return intake('ignored')
+    if (plan.action === 'link_live') {
+      await linkStripeOnly(plan.doctorId, identity)
+      await db().from('doctor_checkout_claims').update({ status: 'link_live', doctor_id: plan.doctorId }).eq('stripe_customer_id', identity.customerId)
+      return intake('linked', plan.doctorId)
     }
-    if (intake.action === 'go_live') {
-      const live = existing.find((row) => row.id === intake.doctorId)
-      if (live && (live.verificationStatus === 'verified' || live.isApproved)) await linkStripeOnly(intake.doctorId, identity)
-      else await markPaymentReceived(intake.doctorId, identity)
-      await db().from('doctor_checkout_claims').update({ status: 'go_live', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
-      await startPaidGoLive(intake.doctorId, paid)
-      return
+    if (plan.action === 'go_live') {
+      const live = existing.find((row) => row.id === plan.doctorId)
+      if (live && (live.verificationStatus === 'verified' || live.isApproved)) await linkStripeOnly(plan.doctorId, identity)
+      else await markPaymentReceived(plan.doctorId, identity)
+      await db().from('doctor_checkout_claims').update({ status: 'go_live', doctor_id: plan.doctorId }).eq('stripe_customer_id', identity.customerId)
+      await startPaidGoLive(plan.doctorId, paid)
+      return intake('go_live', plan.doctorId)
     }
-    const duplicate = planPathB({ identity, existing, claimed: false, membership: true })
-    if (duplicate.action === 'flag_duplicate') {
-      await db().from('doctors').update({ listing_exception: 'duplicate_name_city', needs_review: true }).eq('id', duplicate.doctorId)
-      await db().from('doctor_checkout_claims').update({ status: 'duplicate', doctor_id: duplicate.doctorId, detail: identity.email }).eq('stripe_customer_id', identity.customerId)
-      return
+    const before = await beforeCreate(identity)
+    if (before.action === 'flagged') return intake('flagged', before.doctorId)
+    if (before.action === 'use') {
+      await db().from('doctor_checkout_claims').update({
+        status: before.goLive ? 'go_live' : 'link_live',
+        doctor_id: before.doctorId,
+      }).eq('stripe_customer_id', identity.customerId)
+      if (!before.goLive) return intake('linked', before.doctorId)
+      await startPaidGoLive(before.doctorId, paid)
+      return intake('go_live', before.doctorId)
     }
     const doctorId = await createPendingDoctor(identity)
-    if (!doctorId) return
+    if (!doctorId) return intake('ignored')
     await db().from('doctor_checkout_claims').update({ status: 'create_pending', doctor_id: doctorId }).eq('stripe_customer_id', identity.customerId)
     await startPaidGoLive(doctorId, paid)
+    return intake('created', doctorId)
   } catch (error) {
     console.error('[go-live] payment-link intake failed', error instanceof Error ? error.name : 'error')
     throw error
   }
 }
 
-async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promise<void> {
+async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promise<MembershipIntakeResult> {
   const userId = identity.userId || ''
   const { data: profile } = await db().from('profiles').select('id, role').eq('id', userId).maybeSingle()
   const role = text(profile?.role) || text(identity.metadataRole) || null
@@ -322,7 +563,7 @@ async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promis
     : { data: null }
   const guard = loaded.data
     ? await protectListings([asListing(loaded.data)])
-    : { welcomeOk: false, preAutomation: false, neverGoneLive: true, doctorId }
+    : { welcomeOk: false, preAutomation: false, neverGoneLive: false, doctorId }
   const hasOk = doctorId ? await priorCheckoutOk(doctorId) : false
   const plan = planLoggedInCheckout({
     membership: true,
@@ -336,18 +577,29 @@ async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promis
     if (plan.reason === 'student' && userId) {
       await db().from('profiles').update({ tier: 'student_paid' }).eq('id', userId)
     }
-    return
+    return intake('ignored')
   }
   if (plan.action === 'store_ids' && plan.doctorId) {
     await linkStripeOnly(plan.doctorId, identity)
-    return
+    return intake('linked', plan.doctorId)
   }
-  const target = plan.action === 'go_live' && plan.doctorId
-    ? plan.doctorId
-    : await createPendingDoctor({ ...identity, userId })
-  if (!target) return
+  if (plan.action === 'go_live' && plan.doctorId) {
+    await linkStripeOnly(plan.doctorId, identity)
+    await startPaidGoLive(plan.doctorId, paid)
+    return intake('go_live', plan.doctorId)
+  }
+  const before = await beforeCreate(identity)
+  if (before.action === 'flagged') return intake('flagged', before.doctorId)
+  if (before.action === 'use') {
+    if (!before.goLive) return intake('linked', before.doctorId)
+    await startPaidGoLive(before.doctorId, paid)
+    return intake('go_live', before.doctorId)
+  }
+  const target = await createPendingDoctor({ ...identity, userId })
+  if (!target) return intake('ignored')
   await linkStripeOnly(target, identity)
   await startPaidGoLive(target, paid)
+  return intake('created', target)
 }
 
 async function createPendingDoctor(identity: CheckoutIdentity): Promise<string | null> {
@@ -548,61 +800,44 @@ export async function noteMembershipInvoicePaid(invoice: {
   billing_reason?: string | null
   lines?: { data?: Array<Record<string, unknown>> } | null
   parent?: { subscription_details?: { subscription?: unknown } | null } | null
-}): Promise<void> {
+}): Promise<MembershipIntakeResult> {
+  const customerId = typeof invoice.customer === 'string' ? invoice.customer : ''
   try {
-    const customerId = typeof invoice.customer === 'string' ? invoice.customer : ''
     const subscriptionId = subscriptionIdFromInvoice(invoice) || ''
     const amountPaid = Number(invoice.amount_paid || 0)
-    if (!customerId || amountPaid <= 0) return
-    const earlyListings = await existingListings('', customerId)
-    const earlyGuard = await protectListings(earlyListings)
-    const renewal = invoiceIsRenewal(invoice.billing_reason || null, Boolean(subscriptionId))
-    if (renewal && !earlyGuard.neverGoneLive) {
-      const product = await invoiceProduct(invoice)
-      if (isStudentProduct(product) || !earlyGuard.doctorId) return
-      const customer = await stripe.customers.retrieve(customerId)
-      if (customer.deleted) return
-      const identity = identityFromSession({
-        id: `invoice-${text(invoice.id) || customerId}`,
-        customer: customerId,
-        subscription: subscriptionId,
-        customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
-        customer_email: customer.email,
-        mode: subscriptionId ? 'subscription' : 'payment',
-        currency: invoice.currency || null,
-        amount_total: amountPaid,
-        allow_amount_fallback: !product,
-        metadata: {},
-      }, null)
-      const membership = isDoctorMembershipCheckout(identity, {
-        priceIds: doctorPriceIds(),
-        studentPriceIds: studentPriceIds(),
-      }, product)
-      if (!membership) return
-      await linkStripeOnly(earlyGuard.doctorId, identity)
-      return
-    }
+    if (!customerId || amountPaid <= 0) return intake('ignored')
     const product = await invoiceProduct(invoice)
-    if (isStudentProduct(product)) return
+    if (isStudentProduct(product)) return intake('ignored')
     const customer = await stripe.customers.retrieve(customerId)
-    if (customer.deleted) return
-    const identity = identityFromSession({
+    if (customer.deleted) return intake('ignored')
+    const session = {
       id: `invoice-${text(invoice.id) || customerId}`,
       customer: customerId,
       subscription: subscriptionId,
-      customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
+      customer_details: {
+        email: customer.email,
+        name: customer.name,
+        phone: customer.phone,
+        address: customer.address || null,
+      },
       customer_email: customer.email,
       mode: subscriptionId ? 'subscription' : 'payment',
+      payment_status: 'paid',
       currency: invoice.currency || null,
       amount_total: amountPaid,
       allow_amount_fallback: !product,
       metadata: {},
-    }, null)
+    }
+    const identity = identityFromSession(session, null)
     const membership = isDoctorMembershipCheckout(identity, {
       priceIds: doctorPriceIds(),
       studentPriceIds: studentPriceIds(),
     }, product)
-    if (!membership) return
+    if (!membership) return intake('ignored')
+    const earlierPaidInvoice = await hasEarlierPaidInvoice(subscriptionId, text(invoice.id))
+    const blocked = blocksNewDoctor({ billingReason: invoice.billing_reason || null, earlierPaidInvoice })
+    const listings = await existingListings(text(customer.email), customerId)
+    const guard = await protectListings(listings)
     const { data: applicationRows } = await db()
       .from('doctor_applications')
       .select('id, status, reviewed_at, doctor_id, created_at')
@@ -615,9 +850,7 @@ export async function noteMembershipInvoicePaid(invoice: {
       reviewedAt: text(row.reviewed_at) || null,
       createdAt: text(row.created_at),
     }))
-    const listings = await existingListings(text(customer.email), customerId)
-    const guard = await protectListings(listings)
-    const intake = planInvoiceIntake({
+    const decision = planInvoiceIntake({
       billingReason: invoice.billing_reason || null,
       amountPaid,
       membership: true,
@@ -625,54 +858,32 @@ export async function noteMembershipInvoicePaid(invoice: {
       welcomeOk: guard.welcomeOk,
       preAutomation: guard.preAutomation,
       neverGoneLive: guard.neverGoneLive,
+      earlierPaidInvoice,
       applications,
       listings,
     })
-    if (intake.action === 'link_live') {
-      await linkStripeOnly(intake.doctorId, identity)
-      return
+    if (decision.action === 'needs_review' || (blocked && (decision.action === 'go_live' || decision.action === 'create_and_go_live' || decision.action === 'complete_bank'))) {
+      return reviewInsteadOfCreate(identity)
     }
-    if (intake.action === 'ignore' && intake.reason === 'already_live') {
+    if (decision.action === 'link_live') {
+      await linkStripeOnly(decision.doctorId, identity)
+      return intake('linked', decision.doctorId)
+    }
+    if (decision.action === 'ignore' && (decision.reason === 'already_live' || decision.reason === 'renewal')) {
       const live = listings[0]
-      if (live) await linkStripeOnly(live.id, identity)
-      return
+      if (!live) return intake('ignored')
+      await linkStripeOnly(live.id, identity)
+      return intake('linked', live.id)
     }
-    if (intake.action === 'ignore') return
-    if (intake.action === 'go_live' || intake.action === 'create_and_go_live') {
-      await ingestMembershipCheckout({
-        id: `invoice-${text(invoice.id) || customerId}`,
-        customer: customerId,
-        subscription: subscriptionId,
-        customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
-        customer_email: customer.email,
-        mode: subscriptionId ? 'subscription' : 'payment',
-        payment_status: 'paid',
-        currency: invoice.currency || null,
-        amount_total: amountPaid,
-        allow_amount_fallback: !product,
-        metadata: product ? {} : {},
-      })
-      return
+    if (decision.action === 'ignore') return intake('ignored')
+    if (decision.action === 'go_live' || decision.action === 'create_and_go_live' || decision.action === 'complete_bank') {
+      return ingestMembershipCheckout(session)
     }
-    if (intake.action === 'complete_bank') {
-      await ingestMembershipCheckout({
-        id: `invoice-${text(invoice.id) || customerId}`,
-        customer: customerId,
-        subscription: subscriptionId,
-        customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
-        customer_email: customer.email,
-        mode: subscriptionId ? 'subscription' : 'payment',
-        payment_status: 'paid',
-        currency: invoice.currency || null,
-        amount_total: amountPaid,
-        allow_amount_fallback: !product,
-        metadata: {},
-      })
-    }
+    return intake('ignored')
   } catch (error) {
     console.error('[go-live] invoice intake failed', error instanceof Error ? error.name : 'error')
-    const customerId = typeof invoice.customer === 'string' ? invoice.customer : ''
     await recordInvoiceFailure(customerId, error)
+    return intake('failed')
   }
 }
 
@@ -741,7 +952,22 @@ export async function adoptStaleCheckoutClaims(): Promise<number> {
       mode: 'subscription',
       paymentLinkPresent: true,
     }
-    const doctorId = listings[0]?.id || await createPendingDoctor(identity)
+    const before = await beforeCreate(identity)
+    if (before.action === 'flagged') {
+      await db().from('doctor_checkout_claims').update({ doctor_id: before.doctorId, status: 'duplicate' }).eq('id', row.id)
+      continue
+    }
+    if (before.action === 'use') {
+      await db().from('doctor_checkout_claims').update({
+        doctor_id: before.doctorId,
+        status: before.goLive ? 'go_live' : 'link_live',
+      }).eq('id', row.id)
+      if (!before.goLive) continue
+      await startPaidGoLive(before.doctorId, true)
+      adopted += 1
+      continue
+    }
+    const doctorId = await createPendingDoctor(identity)
     if (!doctorId) continue
     await db().from('doctor_checkout_claims').update({ doctor_id: doctorId, status: 'create_pending' }).eq('id', row.id)
     await startPaidGoLive(doctorId, true)
