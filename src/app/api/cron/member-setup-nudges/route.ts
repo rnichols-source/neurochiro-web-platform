@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { daysSince, nextNudge, profileCompleteness } from '@/lib/go-live/plan'
+import { daysSince, loginPasswordState, nextBookingNudge, nextNudge, nudgeProgress, profileCompleteness } from '@/lib/go-live/plan'
 import { nudgeCopy } from '@/lib/go-live/messages'
 import { canTextNumber } from '@/lib/go-live/plan'
 import { sendApplicationEmail } from '@/lib/applications/notify'
@@ -16,13 +16,24 @@ export async function GET(req: NextRequest) {
   }
   const admin = createAdminClient() as any
   const since = new Date(Date.now() - 31 * 24 * 60 * 60 * 1000).toISOString()
-  const { data, error } = await admin
+  const columns = 'id, user_id, email, first_name, last_name, clinic_name, bio, photo_url, specialties, hours, phone, address, city, booking_url, latitude, longitude, sms_alerts_enabled, lead_alert_phones, spotlight_status, live_feature_status, go_live_flow_at, onboarding_call_status, profile_publish_mode'
+  let listed = await admin
     .from('doctors')
-    .select('id, user_id, email, first_name, last_name, clinic_name, bio, photo_url, specialties, hours, phone, address, city, booking_url, latitude, longitude, sms_alerts_enabled, lead_alert_phones, spotlight_status, live_feature_status, go_live_flow_at')
+    .select(columns)
     .eq('verification_status', 'verified')
     .not('go_live_flow_at', 'is', null)
     .gte('go_live_flow_at', since)
     .limit(80)
+  if (listed.error) {
+    listed = await admin
+      .from('doctors')
+      .select(columns.replace(', profile_publish_mode', ''))
+      .eq('verification_status', 'verified')
+      .not('go_live_flow_at', 'is', null)
+      .gte('go_live_flow_at', since)
+      .limit(80)
+  }
+  const { data, error } = listed
   if (error) return NextResponse.json({ ok: true, sent: 0, detail: 'Nudge table or columns are not ready.' })
   const now = new Date().toISOString()
   let sent = 0
@@ -45,22 +56,29 @@ export async function GET(req: NextRequest) {
       longitude: row.longitude == null ? null : Number(row.longitude),
       textNumber: row.sms_alerts_enabled === true && phones.length > 0,
     })
-    let loginActivated = false
+    let passwordSet: boolean | 'unknown' = false
     if (row.user_id) {
-      const user = await admin.auth.admin.getUserById(row.user_id).catch(() => null)
-      loginActivated = Boolean(user?.data?.user?.last_sign_in_at)
+      const rpc = await admin.rpc('portal_password_is_set', { target: row.user_id }).catch(() => null)
+      const state = loginPasswordState(rpc)
+      passwordSet = state === 'set' ? true : state === 'unset' ? false : 'unknown'
     }
-    const plan = nextNudge({
-      daysSinceLive: daysSince(row.go_live_flow_at, now),
-      done: {
-        activate_login: loginActivated,
-        finish_profile: score.percent >= 70 && Boolean(row.photo_url),
-        book_spotlight: Boolean(row.spotlight_status && !['not_scheduled', 'not_booked'].includes(row.spotlight_status)),
-        book_ig_live: Boolean(row.live_feature_status && !['not_scheduled', 'not_booked'].includes(row.live_feature_status)),
-        add_text_number: row.sms_alerts_enabled === true && phones.length > 0,
-      },
-      sentKeys,
+    const days = daysSince(row.go_live_flow_at, now)
+    const done = nudgeProgress({
+      passwordSet,
+      profilePublishMode: row.profile_publish_mode || null,
+      profilePercent: score.percent,
+      hasPhoto: Boolean(row.photo_url),
+      spotlightBooked: Boolean(row.spotlight_status && !['not_scheduled', 'not_booked'].includes(row.spotlight_status)),
+      igLiveBooked: Boolean(row.live_feature_status && !['not_scheduled', 'not_booked'].includes(row.live_feature_status)),
+      textNumber: row.sms_alerts_enabled === true && phones.length > 0,
     })
+    const plan = nextNudge({ daysSinceLive: days, done, sentKeys })
+      || nextBookingNudge({
+        daysSinceLive: days,
+        onboardingCallCompleted: row.onboarding_call_status === 'completed',
+        done,
+        sentKeys,
+      })
     if (!plan || !row.email) continue
     const { count } = await admin.from('contact_requests').select('id', { count: 'exact', head: true }).eq('doctor_id', row.id)
     const copy = nudgeCopy(plan, { name: row.last_name || row.first_name || '', requestCount: count || 0, activateUrl: 'https://neurochiro.co/login?next=%2Fdoctor%2Fdashboard' })

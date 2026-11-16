@@ -22,6 +22,7 @@ import {
   techniquesToSpecialties,
   type ListingSource,
 } from './plan.ts'
+import { APPROVAL_GO_LIVE_STEPS } from './steps.ts'
 import { pinDoctor } from './pin.ts'
 
 function admin() {
@@ -167,7 +168,7 @@ export async function publishDoctorListing(application: StoredApplication, now: 
   await runDoctorGoLive({
     doctorId: application.doctorId,
     source: 'admin',
-    only: ['profile', 'portal', 'welcome', 'waitlist', 'instagram', 'summary'],
+    only: APPROVAL_GO_LIVE_STEPS,
   })
 }
 

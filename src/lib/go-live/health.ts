@@ -1,3 +1,8 @@
+/** An unsigned request has no Stripe-Signature header and must not write health or alert. */
+export function signatureFailureIsActionable(signatureHeader: string | null | undefined): boolean {
+  return Boolean(signatureHeader && signatureHeader.trim())
+}
+
 export const DEFAULT_WEBHOOK_STALE_HOURS = 6
 export const WEBHOOK_ALERT_COOLDOWN_HOURS = 6
 

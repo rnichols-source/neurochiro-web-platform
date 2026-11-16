@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { nudgeCopy } from './messages.ts'
+import { signatureFailureIsActionable } from './health.ts'
+import { APPROVAL_GO_LIVE_STEPS } from './steps.ts'
+import { welcomeInputFromListing, WELCOME_REPLY_TO } from './welcome-email.ts'
 import { isDoctorMembershipProduct } from './products.ts'
 import { isStopMessage, waitlistTextGate } from '../sms/waitlist-text.ts'
 import {
@@ -22,6 +25,15 @@ import {
   planCheckoutIntake,
   planInvoiceIntake,
   planLoggedInCheckout,
+  nextBookingNudge,
+  nudgeProgress,
+  portalPasswordIsSet,
+  loginPasswordState,
+  welcomeSendDecision,
+  resumeClaimPlan,
+  processedWebhookAction,
+  reconciliationLetter,
+  retryPlanForDoctor,
   planPathB,
   promotionPlan,
   shouldSendWelcome,
@@ -582,5 +594,218 @@ describe('payment go-live paths', () => {
       force: true,
       resendWelcome: true,
     }).includes('welcome'), true)
+  })
+})
+
+describe('existing members and invoice go-live', () => {
+  it('only links Stripe ids for a pre-automation doctor or one who already got a welcome', () => {
+    const live = listing({ verificationStatus: 'verified', isApproved: true })
+    assert.deepEqual(planCheckoutIntake({
+      membership: true,
+      hasOkGoLive: false,
+      preAutomation: true,
+      listings: [live],
+    }), { action: 'link_live', doctorId: 'doc-1' })
+    assert.deepEqual(planCheckoutIntake({
+      membership: true,
+      welcomeOk: true,
+      listings: [listing({ verificationStatus: 'hidden' })],
+    }), { action: 'link_live', doctorId: 'doc-1' })
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'subscription_create',
+      amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
+      welcomeOk: true,
+      applications: [],
+      listings: [{ id: 'doc-1', verificationStatus: 'verified' }],
+    }), { action: 'link_live', doctorId: 'doc-1' })
+    assert.deepEqual(planLoggedInCheckout({
+      membership: true,
+      role: 'doctor',
+      doctorId: 'doc-1',
+      hasOkGoLive: false,
+      preAutomation: true,
+    }), { action: 'store_ids', doctorId: 'doc-1' })
+  })
+
+  it('ignores a zero-dollar invoice and runs go-live on the first paid invoice', () => {
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'subscription_create',
+      amountPaid: 0,
+      membership: true,
+      hasSubscription: true,
+      neverGoneLive: true,
+      applications: [],
+      listings: [],
+    }), { action: 'ignore', reason: 'not_paid' })
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'subscription_cycle',
+      amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
+      neverGoneLive: true,
+      applications: [],
+      listings: [],
+    }), { action: 'create_and_go_live' })
+    assert.deepEqual(planInvoiceIntake({
+      billingReason: 'subscription_cycle',
+      amountPaid: 9900,
+      membership: true,
+      hasSubscription: true,
+      hasOkGoLive: true,
+      welcomeOk: false,
+      neverGoneLive: true,
+      applications: [],
+      listings: [{ id: 'doc-1' }],
+    }), { action: 'go_live', doctorId: 'doc-1' })
+  })
+
+  it('records checkout on the approval path', () => {
+    assert.equal(APPROVAL_GO_LIVE_STEPS.includes('checkout'), true)
+    assert.equal(APPROVAL_GO_LIVE_STEPS.includes('welcome'), true)
+  })
+})
+
+describe('go-live concurrency and retries', () => {
+  it('waits instead of creating a second doctor when a claim is not linked yet', () => {
+    assert.deepEqual(resumeClaimPlan({ doctorId: null, claimExists: true, listings: [] }), { action: 'wait' })
+    assert.deepEqual(resumeClaimPlan({ doctorId: 'doc-1', claimExists: true, listings: [] }), { action: 'use', doctorId: 'doc-1' })
+    assert.deepEqual(resumeClaimPlan({ doctorId: null, claimExists: true, listings: [{ id: 'doc-2' }] }), { action: 'use', doctorId: 'doc-2' })
+  })
+
+  it('holds the welcome until the profile is ok, then flags it if retries are used up', () => {
+    assert.equal(welcomeSendDecision({ profileOk: false, profileFailures: 1, welcomeOk: false }), 'wait_for_profile')
+    assert.equal(welcomeSendDecision({ profileOk: true, profileFailures: 1, welcomeOk: false }), 'send')
+    assert.equal(welcomeSendDecision({ profileOk: false, profileFailures: 3, welcomeOk: false }), 'send_and_flag')
+    assert.equal(welcomeSendDecision({ profileOk: false, profileFailures: 4, welcomeOk: true }), 'skip_welcome_done')
+  })
+
+  it('retries failed steps and skips a welcome that already succeeded', () => {
+    assert.deepEqual(retryPlanForDoctor([
+      { step: 'profile', status: 'failed' },
+      { step: 'welcome', status: 'ok' },
+    ]), ['profile'])
+    assert.deepEqual(retryPlanForDoctor([
+      { step: 'profile', status: 'ok' },
+      { step: 'welcome', status: 'failed' },
+    ]), ['welcome'])
+    assert.equal(retryPlanForDoctor([
+      { step: 'profile', status: 'failed' },
+      { step: 'welcome', status: 'skipped' },
+    ])?.includes('welcome'), false)
+  })
+
+  it('records a webhook at the start and lets a failed event run again', () => {
+    assert.equal(processedWebhookAction(null), 'run')
+    assert.equal(processedWebhookAction({ status: 'processing' }), 'skip')
+    assert.equal(processedWebhookAction({ status: 'completed' }), 'skip')
+    assert.equal(processedWebhookAction({ status: null }), 'skip')
+    assert.equal(processedWebhookAction({ status: 'failed' }), 'run')
+  })
+
+  it('does not treat an unsigned webhook as a signature failure', () => {
+    assert.equal(signatureFailureIsActionable(null), false)
+    assert.equal(signatureFailureIsActionable(''), false)
+    assert.equal(signatureFailureIsActionable('t=1,v1=abc'), true)
+  })
+
+  it('emails Raymond only when reconciliation found a gap', () => {
+    assert.equal(reconciliationLetter({ missing: [], failed: [] }), null)
+    const letter = reconciliationLetter({ missing: ['ada@example.com'], failed: ['invoice failed'] })
+    assert.equal(letter?.subject, 'Go-live reconciliation')
+    assert.match(letter?.html || '', /https:\/\/neurochiro\.co\/admin\/go-live/)
+    assert.equal((letter?.html || '').toLowerCase().includes('patient'), false)
+  })
+})
+
+describe('setup nudges after go-live', () => {
+  it('keeps Spotlight and IG Live off the day 1-4 nudges until the onboarding call', () => {
+    const done = {
+      ...emptyDone,
+      activate_login: true,
+      finish_profile: true,
+      add_text_number: true,
+    }
+    assert.equal(nextNudge({ daysSinceLive: 2, done, sentKeys: [] }), null)
+    assert.equal(nextBookingNudge({
+      daysSinceLive: 2,
+      onboardingCallCompleted: true,
+      done: emptyDone,
+      sentKeys: [],
+    }), null)
+    const after = nextBookingNudge({
+      daysSinceLive: 7,
+      onboardingCallCompleted: true,
+      done: emptyDone,
+      sentKeys: [],
+    })
+    assert.equal(after?.step, 'book_spotlight')
+    assert.equal(nextBookingNudge({
+      daysSinceLive: 8,
+      onboardingCallCompleted: false,
+      done: emptyDone,
+      sentKeys: [],
+    }), null)
+    for (const step of ['activate_login', 'finish_profile', 'add_text_number'] as const) {
+      const copy = nudgeCopy({ kind: 'setup', day: 1, step, key: 'setup:1:' + step }, {
+        name: 'Lovelace',
+        requestCount: 0,
+        activateUrl: 'https://neurochiro.co/login',
+      })
+      assert.equal(copy.body.includes('calendly.com'), false)
+      assert.equal(copy.body.toLowerCase().includes('patient'), false)
+      assert.match(copy.body, /neurochiro\.co/)
+    }
+  })
+
+  it('asks for a password when none is set and for a profile when the listing is minimum', () => {
+    assert.equal(portalPasswordIsSet(null, false), false)
+    assert.equal(portalPasswordIsSet({ encrypted_password: '' }), false)
+    assert.equal(portalPasswordIsSet({ encrypted_password: 'hash' }), true)
+    const progress = nudgeProgress({
+      passwordSet: false,
+      profilePublishMode: 'minimum',
+      profilePercent: 90,
+      hasPhoto: true,
+      spotlightBooked: false,
+      igLiveBooked: false,
+      textNumber: true,
+    })
+    assert.equal(progress.activate_login, false)
+    assert.equal(progress.finish_profile, false)
+    const plan = nextNudge({ daysSinceLive: 1, done: progress, sentKeys: [] })
+    assert.equal(plan?.step, 'activate_login')
+
+    assert.equal(loginPasswordState(null), 'unknown')
+    assert.equal(loginPasswordState({ data: null, error: { message: 'permission denied' } }), 'unknown')
+    assert.equal(loginPasswordState({ data: false, error: null }), 'unset')
+    assert.equal(loginPasswordState({ data: true, error: null }), 'set')
+    const unknown = nudgeProgress({
+      passwordSet: 'unknown',
+      profilePublishMode: null,
+      profilePercent: 0,
+      hasPhoto: false,
+      spotlightBooked: false,
+      igLiveBooked: false,
+      textNumber: true,
+    })
+    assert.equal(unknown.activate_login, true)
+    assert.equal(nextNudge({ daysSinceLive: 1, done: unknown, sentKeys: [] })?.step, 'finish_profile')
+  })
+
+  it('builds the welcome from the listing after the profile step', () => {
+    const mail = welcomeInputFromListing({
+      email: 'ada@example.com',
+      first_name: 'Ada',
+      last_name: 'Lovelace',
+      clinic_name: 'Harbor Nervous System',
+      city: 'Greenville',
+      county: '',
+      paid_at: '2026-11-16T22:00:00.000Z',
+    }, 'https://neurochiro.co/directory/ada-lovelace')
+    assert.equal(mail.practiceName, 'Harbor Nervous System')
+    assert.equal(mail.city, 'Greenville')
+    assert.equal(WELCOME_REPLY_TO, 'drray@neurochirodirectory.com')
   })
 })

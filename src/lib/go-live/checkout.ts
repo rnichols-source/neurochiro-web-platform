@@ -11,12 +11,14 @@ import {
   invoiceIsRenewal,
   invoiceLineProduct,
   isDoctorMembershipCheckout,
+  isPublicLiveListing,
   phoneFromCheckout,
   planCheckoutIntake,
   planInvoiceIntake,
   planLoggedInCheckout,
   planPathB,
   promotionPlan,
+  resumeClaimPlan,
   readCheckoutContact,
   splitName,
   subscriptionIdFromInvoice,
@@ -101,20 +103,27 @@ async function priceFromSession(session: Record<string, any>): Promise<string | 
   }
 }
 
-async function existingListings(email: string, customerId: string | null): Promise<Array<ExistingListing & { verificationStatus: string | null; isApproved: boolean | null }>> {
-  const rows: Array<ExistingListing & { verificationStatus: string | null; isApproved: boolean | null }> = []
+type ListedDoctor = ExistingListing & {
+  verificationStatus: string | null
+  isApproved: boolean | null
+  goLiveFlowAt: string | null
+}
+
+async function existingListings(email: string, customerId: string | null): Promise<ListedDoctor[]> {
+  const rows: ListedDoctor[] = []
+  const columns = 'id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved, go_live_flow_at'
   if (email) {
-    const { data } = await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved').ilike('email', email).limit(5)
+    const { data } = await db().from('doctors').select(columns).ilike('email', email).limit(5)
     for (const row of data || []) rows.push(asListing(row))
   }
   if (customerId) {
-    const { data } = await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved').eq('stripe_customer_id', customerId).limit(5)
+    const { data } = await db().from('doctors').select(columns).eq('stripe_customer_id', customerId).limit(5)
     for (const row of data || []) rows.push(asListing(row))
   }
   return rows
 }
 
-function asListing(row: Record<string, unknown>): ExistingListing & { verificationStatus: string | null; isApproved: boolean | null } {
+function asListing(row: Record<string, unknown>): ListedDoctor {
   return {
     id: text(row.id),
     email: text(row.email) || null,
@@ -125,6 +134,33 @@ function asListing(row: Record<string, unknown>): ExistingListing & { verificati
     stripeCustomerId: text(row.stripe_customer_id) || null,
     verificationStatus: text(row.verification_status) || null,
     isApproved: row.is_approved === true,
+    goLiveFlowAt: text(row.go_live_flow_at) || null,
+  }
+}
+
+async function protectListings(listings: ListedDoctor[]): Promise<{
+  welcomeOk: boolean
+  preAutomation: boolean
+  neverGoneLive: boolean
+  doctorId: string | null
+}> {
+  let welcomeOk = false
+  for (const row of listings) {
+    if (await goLiveStepAlreadyOk(row.id, 'welcome')) welcomeOk = true
+  }
+  const legacy = listings.find((row) => isPublicLiveListing(row) && !row.goLiveFlowAt)
+  let legacyHasRun = false
+  if (legacy) {
+    const runs = await db().from('doctor_go_live_runs').select('id').eq('doctor_id', legacy.id).limit(1)
+    legacyHasRun = !runs.error && Array.isArray(runs.data) && runs.data.length > 0
+  }
+  const preAutomation = Boolean(legacy) && !legacyHasRun && !welcomeOk
+  const doctorId = legacy?.id || listings.find((row) => isPublicLiveListing(row))?.id || listings[0]?.id || null
+  return {
+    welcomeOk,
+    preAutomation,
+    neverGoneLive: !welcomeOk && !preAutomation,
+    doctorId,
   }
 }
 
@@ -158,34 +194,57 @@ async function startPaidGoLive(doctorId: string | null, paid: boolean): Promise<
 
 async function resumeClaim(identity: CheckoutIdentity, paid: boolean): Promise<void> {
   if (!paid) return
-  const bySession = identity.sessionId
-    ? await db().from('doctor_checkout_claims').select('doctor_id, status').eq('stripe_session_id', identity.sessionId).maybeSingle()
-    : { data: null }
-  const byCustomer = !bySession.data && identity.customerId
-    ? await db().from('doctor_checkout_claims').select('doctor_id, status').eq('stripe_customer_id', identity.customerId).maybeSingle()
-    : bySession
-  let doctorId = text(byCustomer.data?.doctor_id)
-  if (!doctorId) {
+  let doctorId = ''
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const bySession = identity.sessionId
+      ? await db().from('doctor_checkout_claims').select('doctor_id, status').eq('stripe_session_id', identity.sessionId).maybeSingle()
+      : { data: null }
+    const byCustomer = !bySession.data && identity.customerId
+      ? await db().from('doctor_checkout_claims').select('doctor_id, status').eq('stripe_customer_id', identity.customerId).maybeSingle()
+      : bySession
+    const claimExists = Boolean(bySession.data || byCustomer.data)
     const listings = await existingListings(identity.email, identity.customerId)
-    const live = listings.find((row) => row.verificationStatus === 'verified' || row.isApproved)
-    if (live) {
-      if (!(await priorCheckoutOk(live.id))) await startPaidGoLive(live.id, true)
+    const plan = resumeClaimPlan({
+      doctorId: text(byCustomer.data?.doctor_id) || null,
+      claimExists,
+      listings: listings.map((row) => ({ id: row.id })),
+    })
+    if (plan.action === 'wait') {
+      await new Promise((resolve) => setTimeout(resolve, 400))
+      continue
+    }
+    doctorId = plan.doctorId
+    const guard = await protectListings(listings.filter((row) => row.id === doctorId).concat(listings))
+    if (guard.welcomeOk || guard.preAutomation) {
+      if (guard.doctorId) await linkStripeOnly(guard.doctorId, identity)
+      if (identity.customerId) {
+        await db().from('doctor_checkout_claims').update({ status: 'link_live', doctor_id: guard.doctorId || doctorId }).eq('stripe_customer_id', identity.customerId)
+      }
       return
     }
-    doctorId = listings[0]?.id || ''
-    if (!doctorId) doctorId = (await createPendingDoctor(identity)) || ''
-    if (doctorId && identity.customerId) {
-      await db().from('doctor_checkout_claims').update({ doctor_id: doctorId, status: 'create_pending' }).eq('stripe_customer_id', identity.customerId)
-    }
+    break
   }
   if (!doctorId) return
-  const doctor = await db().from('doctors').select('verification_status').eq('id', doctorId).maybeSingle()
-  if (doctor.data?.verification_status === 'verified' && await priorCheckoutOk(doctorId)) return
+  if (identity.customerId) {
+    await db().from('doctor_checkout_claims').update({ doctor_id: doctorId, status: 'go_live' }).eq('stripe_customer_id', identity.customerId).is('doctor_id', null)
+  }
+  const doctor = await db().from('doctors').select('verification_status, go_live_flow_at').eq('id', doctorId).maybeSingle()
+  const welcomeOk = await priorWelcomeOk(doctorId)
+  const preAutomation = doctor.data?.verification_status === 'verified' && !text(doctor.data?.go_live_flow_at) && !welcomeOk
+  if (welcomeOk || preAutomation) {
+    await linkStripeOnly(doctorId, identity)
+    return
+  }
+  if (doctor.data?.verification_status === 'verified' && await priorCheckoutOk(doctorId) && welcomeOk) return
   await startPaidGoLive(doctorId, true)
 }
 
 async function priorCheckoutOk(doctorId: string): Promise<boolean> {
   return goLiveStepAlreadyOk(doctorId, 'checkout')
+}
+
+async function priorWelcomeOk(doctorId: string): Promise<boolean> {
+  return goLiveStepAlreadyOk(doctorId, 'welcome')
 }
 
 export async function ingestMembershipCheckout(session: Record<string, any>): Promise<void> {
@@ -210,11 +269,18 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
     }
     if (claimed === 'unavailable') return
     const existing = await existingListings(identity.email, identity.customerId)
+    const guard = await protectListings(existing)
     let hasOk = false
     for (const row of existing) {
       if (await priorCheckoutOk(row.id)) hasOk = true
     }
-    const intake = planCheckoutIntake({ membership: true, listings: existing, hasOkGoLive: hasOk })
+    const intake = planCheckoutIntake({
+      membership: true,
+      listings: existing,
+      hasOkGoLive: hasOk,
+      welcomeOk: guard.welcomeOk,
+      preAutomation: guard.preAutomation,
+    })
     if (intake.action === 'ignore') return
     if (intake.action === 'link_live') {
       await linkStripeOnly(intake.doctorId, identity)
@@ -251,8 +317,21 @@ async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promis
   const role = text(profile?.role) || text(identity.metadataRole) || null
   const { data: doctor } = await db().from('doctors').select('id').eq('user_id', userId).maybeSingle()
   const doctorId = text(doctor?.id) || null
+  const loaded = doctorId
+    ? await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved, go_live_flow_at').eq('id', doctorId).maybeSingle()
+    : { data: null }
+  const guard = loaded.data
+    ? await protectListings([asListing(loaded.data)])
+    : { welcomeOk: false, preAutomation: false, neverGoneLive: true, doctorId }
   const hasOk = doctorId ? await priorCheckoutOk(doctorId) : false
-  const plan = planLoggedInCheckout({ membership: true, role, doctorId, hasOkGoLive: hasOk })
+  const plan = planLoggedInCheckout({
+    membership: true,
+    role,
+    doctorId,
+    hasOkGoLive: hasOk,
+    welcomeOk: guard.welcomeOk,
+    preAutomation: guard.preAutomation,
+  })
   if (plan.action === 'ignore') {
     if (plan.reason === 'student' && userId) {
       await db().from('profiles').update({ tier: 'student_paid' }).eq('id', userId)
@@ -475,7 +554,34 @@ export async function noteMembershipInvoicePaid(invoice: {
     const subscriptionId = subscriptionIdFromInvoice(invoice) || ''
     const amountPaid = Number(invoice.amount_paid || 0)
     if (!customerId || amountPaid <= 0) return
-    if (invoiceIsRenewal(invoice.billing_reason || null, Boolean(subscriptionId))) return
+    const earlyListings = await existingListings('', customerId)
+    const earlyGuard = await protectListings(earlyListings)
+    const renewal = invoiceIsRenewal(invoice.billing_reason || null, Boolean(subscriptionId))
+    if (renewal && !earlyGuard.neverGoneLive) {
+      const product = await invoiceProduct(invoice)
+      if (isStudentProduct(product) || !earlyGuard.doctorId) return
+      const customer = await stripe.customers.retrieve(customerId)
+      if (customer.deleted) return
+      const identity = identityFromSession({
+        id: `invoice-${text(invoice.id) || customerId}`,
+        customer: customerId,
+        subscription: subscriptionId,
+        customer_details: { email: customer.email, name: customer.name, phone: customer.phone },
+        customer_email: customer.email,
+        mode: subscriptionId ? 'subscription' : 'payment',
+        currency: invoice.currency || null,
+        amount_total: amountPaid,
+        allow_amount_fallback: !product,
+        metadata: {},
+      }, null)
+      const membership = isDoctorMembershipCheckout(identity, {
+        priceIds: doctorPriceIds(),
+        studentPriceIds: studentPriceIds(),
+      }, product)
+      if (!membership) return
+      await linkStripeOnly(earlyGuard.doctorId, identity)
+      return
+    }
     const product = await invoiceProduct(invoice)
     if (isStudentProduct(product)) return
     const customer = await stripe.customers.retrieve(customerId)
@@ -510,19 +616,22 @@ export async function noteMembershipInvoicePaid(invoice: {
       createdAt: text(row.created_at),
     }))
     const listings = await existingListings(text(customer.email), customerId)
-    let hasOk = false
-    for (const row of listings) {
-      if (await priorCheckoutOk(row.id)) hasOk = true
-    }
+    const guard = await protectListings(listings)
     const intake = planInvoiceIntake({
       billingReason: invoice.billing_reason || null,
       amountPaid,
       membership: true,
       hasSubscription: Boolean(subscriptionId),
-      hasOkGoLive: hasOk,
+      welcomeOk: guard.welcomeOk,
+      preAutomation: guard.preAutomation,
+      neverGoneLive: guard.neverGoneLive,
       applications,
       listings,
     })
+    if (intake.action === 'link_live') {
+      await linkStripeOnly(intake.doctorId, identity)
+      return
+    }
     if (intake.action === 'ignore' && intake.reason === 'already_live') {
       const live = listings[0]
       if (live) await linkStripeOnly(live.id, identity)
@@ -562,5 +671,81 @@ export async function noteMembershipInvoicePaid(invoice: {
     }
   } catch (error) {
     console.error('[go-live] invoice intake failed', error instanceof Error ? error.name : 'error')
+    const customerId = typeof invoice.customer === 'string' ? invoice.customer : ''
+    await recordInvoiceFailure(customerId, error)
   }
+}
+
+async function recordInvoiceFailure(customerId: string, error: unknown): Promise<void> {
+  if (!customerId) return
+  try {
+    const listings = await existingListings('', customerId)
+    const doctorId = listings[0]?.id
+    if (!doctorId) return
+    const { openGoLiveRun, saveGoLiveStep } = await import('./log')
+    const runId = await openGoLiveRun(doctorId, 'stripe', false)
+    const message = error instanceof Error ? error.message : 'Invoice intake failed'
+    await saveGoLiveStep(runId, doctorId, {
+      step: 'checkout',
+      status: 'failed',
+      reason: `Invoice intake failed. ${message}`.slice(0, 500),
+    })
+  } catch (nested) {
+    console.error('[go-live] invoice failure log failed', nested instanceof Error ? nested.name : 'error')
+  }
+}
+
+export async function adoptStaleCheckoutClaims(): Promise<number> {
+  const cutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+  const { data } = await db()
+    .from('doctor_checkout_claims')
+    .select('id, stripe_customer_id, stripe_subscription_id, email, doctor_id, created_at')
+    .is('doctor_id', null)
+    .lt('created_at', cutoff)
+    .limit(20)
+  let adopted = 0
+  for (const row of data || []) {
+    const email = text(row.email)
+    if (!email.includes('@')) continue
+    const taken = await db()
+      .from('doctor_checkout_claims')
+      .update({ status: 'creating' })
+      .eq('id', row.id)
+      .is('doctor_id', null)
+      .select('id')
+    if (!taken.data?.length) continue
+    const listings = await existingListings(email, text(row.stripe_customer_id) || null)
+    const guard = await protectListings(listings)
+    if ((guard.welcomeOk || guard.preAutomation) && guard.doctorId) {
+      await db().from('doctor_checkout_claims').update({ doctor_id: guard.doctorId, status: 'link_live' }).eq('id', row.id)
+      continue
+    }
+    const identity: CheckoutIdentity = {
+      sessionId: '',
+      customerId: text(row.stripe_customer_id) || null,
+      subscriptionId: text(row.stripe_subscription_id) || null,
+      email,
+      name: email,
+      phone: null,
+      smsConsent: null,
+      city: null,
+      state: null,
+      country: null,
+      clinicName: null,
+      amountTotal: null,
+      currency: null,
+      priceId: null,
+      metadataType: 'doctor_membership',
+      metadataRole: 'doctor',
+      userId: null,
+      mode: 'subscription',
+      paymentLinkPresent: true,
+    }
+    const doctorId = listings[0]?.id || await createPendingDoctor(identity)
+    if (!doctorId) continue
+    await db().from('doctor_checkout_claims').update({ doctor_id: doctorId, status: 'create_pending' }).eq('id', row.id)
+    await startPaidGoLive(doctorId, true)
+    adopted += 1
+  }
+  return adopted
 }

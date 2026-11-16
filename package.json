@@ -36,6 +36,7 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.4",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/functions": "^3.11.3",
     "@vercel/og": "^0.11.1",
     "@vercel/speed-insights": "^2.1.0",
     "ai": "^7.0.173",

@@ -117,6 +117,14 @@
     {
       "path": "/api/cron/webhook-health",
       "schedule": "15 * * * *"
+    },
+    {
+      "path": "/api/cron/go-live-retry",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/go-live-reconcile",
+      "schedule": "0 13 * * *"
     }
   ],
   "redirects": [

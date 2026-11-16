@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { goLiveWelcomeEmail, welcomeDayPart, welcomeHasOtherBookingLink } from './welcome-email.ts'
+import { goLiveWelcomeEmail, welcomeDayPart, welcomeHasOtherBookingLink, WELCOME_REPLY_TO } from './welcome-email.ts'
 
 const AFTER_FIVE = new Date('2026-11-16T22:00:00.000Z')
 const BEFORE_FIVE = new Date('2026-11-16T21:59:00.000Z')
@@ -23,6 +23,7 @@ describe('go-live welcome email', () => {
       at: AFTER_FIVE,
     })
     assert.equal(mail.subject, 'Welcome to NeuroChiro, Dr. Lovelace')
+    assert.equal(mail.replyTo, WELCOME_REPLY_TO)
     assert.match(mail.html, /Hi Dr\. Ada,/)
     assert.match(mail.html, /come through tonight/)
     assert.match(mail.html, /Harbor Nervous System/)

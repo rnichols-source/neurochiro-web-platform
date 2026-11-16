@@ -20,7 +20,33 @@ export type GoLiveWelcomeInput = {
   at: Date
 }
 
-export type GoLiveWelcome = { to: string; subject: string; html: string }
+export const WELCOME_REPLY_TO = 'drray@neurochirodirectory.com'
+
+export type GoLiveWelcome = { to: string; subject: string; html: string; replyTo: string }
+
+export function welcomeInputFromListing(row: {
+  email?: unknown
+  first_name?: unknown
+  last_name?: unknown
+  clinic_name?: unknown
+  city?: unknown
+  county?: unknown
+  paid_at?: unknown
+}, profileUrl: string): GoLiveWelcomeInput {
+  const text = (value: unknown) => typeof value === 'string' ? value.trim() : ''
+  const paidAt = text(row.paid_at)
+  const at = paidAt ? new Date(paidAt) : new Date()
+  return {
+    to: text(row.email),
+    firstName: text(row.first_name),
+    lastName: text(row.last_name),
+    practiceName: text(row.clinic_name),
+    city: text(row.city),
+    area: text(row.county),
+    profileUrl,
+    at: Number.isNaN(at.getTime()) ? new Date() : at,
+  }
+}
 
 export function welcomeDayPart(at: Date): 'today' | 'tonight' {
   const hour = Number(new Intl.DateTimeFormat('en-US', {
@@ -101,5 +127,6 @@ export function goLiveWelcomeEmail(input: GoLiveWelcomeInput): GoLiveWelcome {
     to: email,
     subject: subjectFor(input.lastName, input.firstName),
     html,
+    replyTo: WELCOME_REPLY_TO,
   }
 }

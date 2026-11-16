@@ -15,7 +15,10 @@ import { invalidateDoctorStripe } from "@/lib/billing/stripe-cache";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
 import { ingestMembershipCheckout, noteMembershipInvoicePaid } from "@/lib/go-live/checkout";
+import { deferGoLive } from "@/lib/go-live/defer";
 import { noteSignatureFailure, noteWebhookEvent } from "@/lib/go-live/webhook-health";
+import { signatureFailureIsActionable } from "@/lib/go-live/health";
+import { claimWebhookEvent, finishWebhookEvent } from "@/lib/go-live/webhook-claim";
 import { subscriptionIdFromInvoice } from "@/lib/go-live/plan";
 import {
   isUndefinedPaymentIssueColumn,
@@ -232,18 +235,14 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     const err = error as Error;
     console.error(`Stripe webhook signature error: ${err.message}`);
-    await noteSignatureFailure().catch(() => undefined)
+    if (signatureFailureIsActionable(signature)) {
+      await noteSignatureFailure().catch(() => undefined)
+    }
     return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
   }
 
-  // 1. IDEMPOTENCY CHECK
-  const { data: alreadyProcessed } = await supabase
-    .from('processed_webhooks')
-    .select('id')
-    .eq('id', event.id)
-    .single();
-
-  if (alreadyProcessed) {
+  const claim = await claimWebhookEvent(supabase, event)
+  if (claim === 'skip') {
     return NextResponse.json({ received: true, duplicate: true });
   }
 
@@ -1062,7 +1061,7 @@ export async function POST(req: Request) {
           }
         }
 
-        await ingestMembershipCheckout(session);
+        deferGoLive(ingestMembershipCheckout(session));
         // Enqueue automations
         Automations.onPaymentSuccess(session);
         break;
@@ -1074,7 +1073,7 @@ export async function POST(req: Request) {
           await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
           break;
         }
-        await ingestMembershipCheckout(session);
+        deferGoLive(ingestMembershipCheckout(session));
         break;
       }
 
@@ -1132,7 +1131,7 @@ export async function POST(req: Request) {
         if (paidCustomer && Number(invoice.amount_paid || 0) > 0) {
           await settleMemberReferral({ customerId: paidCustomer, invoicePaid: true });
         }
-        await noteMembershipInvoicePaid(invoice);
+        deferGoLive(noteMembershipInvoicePaid(invoice));
         break;
       }
 
@@ -1199,10 +1198,11 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     console.error("Webhook Automation Dispatch Error:", error);
+    await finishWebhookEvent(supabase, event.id, 'failed')
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 
-  await supabase.from('processed_webhooks').insert({ id: event.id });
+  await finishWebhookEvent(supabase, event.id, 'completed')
   await noteWebhookEvent(event.id, event.type).catch(() => undefined);
   return NextResponse.json({ received: true });
 }
