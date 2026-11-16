@@ -4,6 +4,7 @@ import { STUDENT_CONFIG } from '@/config/students';
 import { stripe } from '@/lib/stripe';
 import {
   countFoundingSeats,
+  FOUNDING_INCLUDED_SUBSCRIPTION_IDS,
   foundingSeatAvailable,
   foundingSeatCap,
   foundingSpotsCopy,
@@ -65,10 +66,27 @@ async function subscriptionsOnPrice(priceId: string): Promise<FoundingSeatSubscr
   return rows;
 }
 
+async function includedFoundingSubscriptions(): Promise<FoundingSeatSubscription[]> {
+  const rows: FoundingSeatSubscription[] = [];
+  for (const id of FOUNDING_INCLUDED_SUBSCRIPTION_IDS) {
+    try {
+      const subscription = await stripe.subscriptions.retrieve(id);
+      const priceId = subscription.items?.data?.[0]?.price?.id ?? null;
+      rows.push({ id: subscription.id, status: subscription.status, priceId });
+    } catch (error) {
+      console.error('[students] founding subscription lookup failed', error instanceof Error ? error.message : 'unknown');
+    }
+  }
+  return rows;
+}
+
 export async function countFoundingSubscriptions(): Promise<number> {
   const priceIds = foundingPriceIdList();
-  const groups = await Promise.all(priceIds.map((priceId) => subscriptionsOnPrice(priceId)));
-  return countFoundingSeats(groups.flat(), priceIds);
+  const [groups, included] = await Promise.all([
+    Promise.all(priceIds.map((priceId) => subscriptionsOnPrice(priceId))),
+    includedFoundingSubscriptions(),
+  ]);
+  return countFoundingSeats([...groups.flat(), ...included], priceIds);
 }
 
 export async function listOpenFoundingHolds(): Promise<OpenFoundingHold[]> {

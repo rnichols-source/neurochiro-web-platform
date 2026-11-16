@@ -17,6 +17,12 @@ export type OpenFoundingHold = {
 
 const COUNTED_STATUSES = new Set(['active', 'trialing', 'past_due']);
 
+/**
+ * Moved from the legacy $12 plan onto the founding $9.99 price, with Raymond's approval.
+ * Counts toward the cap while active, trialing, or past due.
+ */
+export const FOUNDING_INCLUDED_SUBSCRIPTION_IDS = new Set(['sub_1TWyUBQ4WJOENoxrOxzuf9i8']);
+
 export function foundingSeatCap(): number {
   return STUDENT_CONFIG.founding.maxSeats;
 }
@@ -35,8 +41,9 @@ export function countsTowardFoundingCap(
   subscription: FoundingSeatSubscription,
   foundingPriceIds: readonly string[],
 ): boolean {
-  if (!subscription.priceId) return false;
   if (!COUNTED_STATUSES.has(subscription.status)) return false;
+  if (FOUNDING_INCLUDED_SUBSCRIPTION_IDS.has(subscription.id)) return true;
+  if (!subscription.priceId) return false;
   return foundingPriceIds.includes(subscription.priceId);
 }
 

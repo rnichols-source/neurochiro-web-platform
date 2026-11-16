@@ -6,7 +6,7 @@ export const STUDENT_CONFIG = {
   },
   founding: {
     enabled: true,
-    maxSeats: 33,
+    maxSeats: 50,
     promoCodeEnv: 'STRIPE_STUDENT_FOUNDING_PROMO_CODE_ID',
     monthly: { usd: 9.99, stripePriceEnv: 'STRIPE_STUDENT_FOUNDING_MONTHLY_PRICE_ID', priceId: 'price_1UbYJUQ4WJOENoxrsDIl4gzE', expectCents: 999, interval: 'month' as const },
     annual: { usd: 99, stripePriceEnv: 'STRIPE_STUDENT_FOUNDING_ANNUAL_PRICE_ID', priceId: 'price_1UbYJUQ4WJOENoxrZLq76Ret', expectCents: 9900, interval: 'year' as const },

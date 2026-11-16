@@ -4,14 +4,15 @@ Approved by Raymond on Oct 31, 2026. The config in `src/config/students.ts` matc
 
 ## Decided
 
-1. The first 33 paying students get $9.99/month or $99/year, locked until they graduate. Checkout uses that price while fewer than 33 founding subscriptions (active, trialing, or past due) exist. After that, checkout uses $33/month or $333/year. The public line is `Founding 33: X spots left at $9.99/mo`.
-2. Do not change existing subscribers. The original $12/month subscription stays on its current price.
+1. The first 50 paying students get $9.99/month or $99/year, locked until they graduate. Checkout uses that price while fewer than 50 founding subscriptions (active, trialing, or past due) exist. After that, checkout uses $33/month or $333/year. The public line is `Founding 50: X spots left at $9.99/mo`.
+2. Do not change existing subscribers, except the one Raymond approved on Nov 16, 2026. `sub_1TWyUBQ4WJOENoxrOxzuf9i8` was moved from the legacy $12/month price onto the founding $9.99 price (`price_1UbYJUQ4WJOENoxrsDIl4gzE`). That subscription counts toward the 50 while it is active, trialing, or past due.
 3. Current free students get 30 days of access after `launchAt`, then $33. `launchAt` is null until Raymond sets it.
 4. No free trial.
 5. Member doctors get 2 active job posts. Featured boost is $49 for 30 days.
 6. Outside clinics pay $149 per post for 60 days. Admin approval is required. A rejection refunds the full charge.
 7. Students can browse jobs free. Membership is required to apply, match, message mentors, book shadow days, and join the monthly call.
 8. The name stays ChiroMatch. Matching is always on. Twice-a-year cycles are retired. Doctors appear only if they opt in. Students verify their school before doctors can see them. v1 weights are in `src/lib/match/score.ts`. See `docs/matching/how-scoring-works.md`. A weight change needs Raymond's approval.
+9. Welcome and profile save the school and graduation year on `students.school_name` and `students.graduation_year`. The same school, current trimester, graduation year, city, state, and technique interest are saved on `profiles` (`school_name`, `chiropractic_school`, `current_year_in_school`, `graduation_year`, `practice_city`, `practice_state`, `areas_of_interest`). Those columns already exist. No new migration is required.
 
 ## Still open
 

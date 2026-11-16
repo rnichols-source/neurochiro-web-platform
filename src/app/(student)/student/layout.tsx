@@ -8,6 +8,7 @@ import StudentShell from '@/components/student/StudentShell';
 import { featureForPath } from '@/config/student-features';
 import { getStudentPortal, isStaffRole } from '@/lib/students/context';
 import { hasMemberAccess } from '@/lib/students/membership-pure';
+import { studentProfileComplete } from '@/lib/students/onboarding-fields';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -34,7 +35,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
   if (portal.role === 'patient') redirect('/portal');
   if (portal.role !== 'student' && !isStaffRole(portal.role)) redirect('/');
 
-  const needsWelcome = portal.role === 'student' && !portal.school && !portal.graduationYear;
+  const needsWelcome = portal.role === 'student' && !studentProfileComplete(portal);
   if (path && needsWelcome && !WELCOME_EXEMPT.some((item) => path === item || path.startsWith(`${item}/`))) {
     redirect('/student/welcome');
   }
