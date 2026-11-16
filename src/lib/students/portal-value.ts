@@ -6,7 +6,11 @@ export type StudentPortalValue = {
   email: string;
   role: string;
   school: string | null;
+  yearInSchool: string | null;
   graduationYear: number | null;
+  city: string | null;
+  state: string | null;
+  techniques: string[];
   membership: StudentMembership;
   unreadMessages: number;
 };

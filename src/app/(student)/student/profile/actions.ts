@@ -1,93 +1,36 @@
 'use server'
 
-import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
+import { createServerSupabase } from '@/lib/supabase-server'
+import { loadStudentProfile, saveStudentProfileFields } from '@/lib/students/save-student-profile'
 
 export async function getStudentProfile() {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  if (!user) return { profile: null, error: 'Sign in to view your profile.' }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('full_name, email, role, tier')
-    .eq('id', user.id)
-    .single()
-
-  const { data: student } = await supabase
-    .from('students')
-    .select('*')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  if (profileError) {
-    console.error("Error fetching student profile:", profileError)
-    return null
-  }
-
-  return { ...(profile as any), ...(student || {}) }
+  const loaded = await loadStudentProfile(user.id)
+  if (loaded.error || !loaded.data) return { profile: null, error: loaded.error || 'Could not load your profile.' }
+  return { profile: loaded.data, error: null }
 }
 
 export async function updateStudentProfile(formData: FormData) {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error("Unauthorized")
+  if (!user) return { error: 'Sign in to save your profile.' }
 
-  const fullName = formData.get('full_name') as string
-  const school = formData.get('school') as string
-  const gradYear = formData.get('gradYear') as string
-  const locationCity = formData.get('location_city') as string | null
-  const interests = formData.get('interests')?.toString().split(',').map(s => s.trim()).filter(Boolean) || []
-  const skills = formData.get('skills')?.toString().split(',').map(s => s.trim()).filter(Boolean) || []
-  const isLookingForMentorship = formData.get('is_looking_for_mentorship') === 'true'
-
-  // 1. Update Profile (Name)
-  const { error: profileError } = await supabase
-    .from('profiles')
-    .update({ full_name: fullName })
-    .eq('id', user.id)
-
-  if (profileError) throw profileError
-
-  // 2. Upsert Student table (creates row if it doesn't exist)
-  const { error: studentError } = await supabase
-    .from('students')
-    .upsert({
-      id: user.id,
-      user_id: user.id,
-      full_name: fullName,
-      school: school || null,
-      graduation_year: gradYear ? parseInt(gradYear, 10) : null,
-      location_city: locationCity || null,
-      region_code: locationCity || 'unknown',
-      interests: interests,
-      skills: skills,
-      is_looking_for_mentorship: isLookingForMentorship
-    }, { onConflict: 'id' })
-
-  if (studentError) {
-      console.error("Student upsert error:", JSON.stringify(studentError));
-      // Try update instead of upsert as fallback
-      const { error: updateError } = await supabase
-        .from('students')
-        .update({
-          full_name: fullName,
-          school: school || null,
-          graduation_year: gradYear ? parseInt(gradYear, 10) : null,
-          location_city: locationCity || null,
-          interests: interests,
-          skills: skills,
-          is_looking_for_mentorship: isLookingForMentorship
-        })
-        .eq('id', user.id)
-
-      if (updateError) {
-        console.error("Student update fallback error:", JSON.stringify(updateError));
-        throw updateError;
-      }
-  }
+  const saved = await saveStudentProfileFields(user.id, {
+    fullName: String(formData.get('full_name') || ''),
+    school: String(formData.get('school') || ''),
+    yearInSchool: String(formData.get('yearInSchool') || ''),
+    graduationYear: String(formData.get('gradYear') || ''),
+    city: String(formData.get('city') || ''),
+    state: String(formData.get('state') || ''),
+    techniques: formData.getAll('techniques').map((value) => String(value)),
+  })
+  if (!saved.ok) return { error: saved.error }
 
   revalidatePath('/student/profile')
-  revalidatePath('/student/dashboard')
-  return { success: true }
+  revalidatePath('/student/dashboard', 'layout')
+  return { success: true as const }
 }

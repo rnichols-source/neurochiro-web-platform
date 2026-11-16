@@ -3,6 +3,7 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { canTransitionStudentToDoctor } from '@/lib/security/role-transition'
+import { loadStudentProfile } from '@/lib/students/save-student-profile'
 
 export async function getStudentDashboardData() {
   const supabase = createServerSupabase()
@@ -17,43 +18,40 @@ export async function getStudentDashboardData() {
       .eq('id', user.id)
       .single()
 
-    const { data: student } = await supabase
-      .from('students')
-      .select('school, graduation_year, interests, skills, location_city, is_looking_for_mentorship, resume_url')
-      .eq('id', user.id)
-      .maybeSingle()
+    const loaded = await loadStudentProfile(user.id)
+    const student = loaded.data
 
     const { count: applicationsCount } = await supabase
       .from('job_applications')
       .select('*', { count: 'exact', head: true })
       .eq('applicant_id', user.id)
 
-    // Calculate dynamic readiness score
-    let readiness = 20; // Base
-    if ((student as any)?.school) readiness += 20;
-    if ((student as any)?.graduation_year) readiness += 20;
-    if ((student as any)?.location_city) readiness += 20;
-    if ((student as any)?.interests && (student as any).interests.length > 0) readiness += 20;
+    let readiness = 20
+    if (student?.school) readiness += 20
+    if (student?.graduationYear) readiness += 20
+    if (student?.city) readiness += 20
+    if (student?.techniques && student.techniques.length > 0) readiness += 20
 
+    const fullName = (profile as any)?.full_name || student?.fullName || ''
     return {
       profile: {
-        name: (profile as any)?.full_name?.split(' ')[0] || user.email?.split('@')[0],
-        fullName: (profile as any)?.full_name,
-        role: (profile as any)?.role,
+        name: fullName.split(' ')[0] || user.email?.split('@')[0],
+        fullName,
+        role: (profile as any)?.role || student?.role,
         status: ((profile as any)?.tier && (profile as any)?.tier !== 'free') ? 'active' : 'inactive',
         hasSubscription: !!(profile as any)?.stripe_customer_id,
-        school: (student as any)?.school || null,
-        gradYear: (student as any)?.graduation_year || null,
-        city: (student as any)?.location_city || null,
-        interests: (student as any)?.interests || [],
-        skills: (student as any)?.skills || [],
-        hasResume: !!(student as any)?.resume_url,
-        isMentoring: (student as any)?.is_looking_for_mentorship || false,
+        school: student?.school || null,
+        gradYear: student?.graduationYear || null,
+        city: student?.city || null,
+        state: student?.state || null,
+        yearInSchool: student?.yearInSchool || null,
+        interests: student?.techniques || [],
+        skills: student?.techniques || [],
       },
       stats: {
-        readiness: readiness,
+        readiness,
         applications: applicationsCount || 0,
-        matchScore: (student as any)?.location_city ? 9.2 : 0
+        matchScore: student?.city ? 9.2 : 0
       }
     }
   } catch (e) {
@@ -91,22 +89,16 @@ export async function getCareerReadinessData() {
   if (!user) return null
 
   try {
-    // Profile completeness (20%)
-    const { data: student } = await supabase
-      .from('students')
-      .select('full_name, school, graduation_year, location_city, interests, skills, resume_url')
-      .eq('id', user.id)
-      .maybeSingle()
-
-    const s = student as any
+    const loaded = await loadStudentProfile(user.id)
+    const s = loaded.data
     let profileScore = 0
-    if (s?.full_name) profileScore += 15
+    if (s?.fullName) profileScore += 15
     if (s?.school) profileScore += 15
-    if (s?.graduation_year) profileScore += 15
-    if (s?.location_city) profileScore += 15
-    if (s?.interests?.length > 0) profileScore += 15
-    if (s?.skills?.length > 0) profileScore += 15
-    if (s?.resume_url) profileScore += 10
+    if (s?.graduationYear) profileScore += 15
+    if (s?.city) profileScore += 15
+    if (s?.yearInSchool) profileScore += 15
+    if (s?.techniques && s.techniques.length > 0) profileScore += 15
+    if (s?.state) profileScore += 10
     profileScore = Math.min(profileScore, 100)
 
     // Academy progress (25%)

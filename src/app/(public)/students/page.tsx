@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import FoundingSpots from '@/components/student/FoundingSpots';
 import { STUDENT_CONFIG } from '@/config/students';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'NeuroChiro for students',
@@ -69,6 +72,7 @@ export default function StudentsPage() {
       <section className="max-w-3xl mx-auto px-4 pb-12">
         <article className="bg-white border border-[#e3e8ed] rounded-xl p-6">
           <h2 className="text-2xl font-bold">{STUDENT_CONFIG.membership.tagline}</h2>
+          <FoundingSpots className="mt-2 text-base font-bold text-[#16202a]" />
           <p className="mt-2 text-lg">${monthly}/month or ${annual}/year. That is two months free on the yearly plan.</p>
           <p className="mt-2 text-base text-[#3d4a57]">Cancel anytime. There is no free trial. Students who already have a free account keep access for 30 days after launch, then this price.</p>
           <Link href="/get-started?role=student&plan=monthly" className="mt-5 min-h-11 inline-flex items-center rounded-lg bg-[#d66829] px-5 text-base font-bold text-white">Join as a student</Link>
