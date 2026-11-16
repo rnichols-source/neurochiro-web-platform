@@ -626,8 +626,19 @@ function lastNamesMatch(payerName: string, listingLastName: string): boolean {
   return surnames.includes(listing)
 }
 
+/**
+ * Same city is required whenever both sides have one. State alone only counts when the payer gave no city.
+ * Known states that differ never match. Keeps common surnames from matching across a whole state.
+ */
 function samePlace(identity: CheckoutIdentity, row: ExistingListing): boolean {
-  return citiesEqual(identity.city, row.city) || statesEqual(identity.state, row.state, identity.country)
+  const payerState = (identity.state || '').trim()
+  const rowState = (row.state || '').trim()
+  if (payerState && rowState && !statesEqual(payerState, rowState, identity.country)) return false
+  const payerCity = (identity.city || '').trim()
+  const rowCity = (row.city || '').trim()
+  if (payerCity && rowCity) return citiesEqual(payerCity, rowCity)
+  if (payerCity) return false
+  return Boolean(payerState && rowState)
 }
 
 export type ListingSearch = {
@@ -683,18 +694,23 @@ export function planPathB(input: {
   const email = input.identity.email.trim().toLowerCase()
   if (!email.includes('@')) return { action: 'skip', reason: 'missing_email' }
   const phone = phoneMatchKey(input.identity.phone)
-  const strong: Array<{ row: ExistingListing; reason: 'customer' | 'email' | 'phone' }> = []
+  const strong: Array<{ row: ExistingListing; reason: 'customer' | 'email' | 'phone'; sure: boolean }> = []
   const seen = new Set<string>()
   for (const row of input.existing) {
     if (!row.id || seen.has(row.id)) continue
     const byCustomer = Boolean(input.identity.customerId && row.stripeCustomerId && row.stripeCustomerId === input.identity.customerId)
-    const byEmail = listingEmails(row).includes(email)
+    const byListingEmail = (row.email || '').trim().toLowerCase() === email
+    const byOtherEmail = !byListingEmail && listingEmails(row).includes(email)
     const byPhone = Boolean(phone && listingPhones(row).includes(phone))
-    if (!byCustomer && !byEmail && !byPhone) continue
+    if (!byCustomer && !byListingEmail && !byOtherEmail && !byPhone) continue
     seen.add(row.id)
-    strong.push({ row, reason: byCustomer ? 'customer' : byEmail ? 'email' : 'phone' })
+    // Office phones and practice or contact emails are often shared by colleagues.
+    // Those only link when the last name also matches; otherwise Raymond reviews it.
+    const sure = byCustomer || byListingEmail || lastNamesMatch(input.identity.name, row.lastName)
+    strong.push({ row, reason: byCustomer ? 'customer' : byListingEmail || byOtherEmail ? 'email' : 'phone', sure })
   }
-  if (strong.length === 1) return { action: 'attach', doctorId: strong[0].row.id, reason: strong[0].reason }
+  if (strong.length === 1 && strong[0].sure) return { action: 'attach', doctorId: strong[0].row.id, reason: strong[0].reason }
+  if (strong.length === 1) return { action: 'flag_duplicate', doctorId: strong[0].row.id }
   if (strong.length > 1) return { action: 'flag_duplicate', doctorId: strong[0].row.id }
   const plausible = input.existing.filter((row) => row.id && !seen.has(row.id) && lastNamesMatch(input.identity.name, row.lastName) && samePlace(input.identity, row))
   if (plausible.length >= 1) return { action: 'flag_duplicate', doctorId: plausible[0].id }

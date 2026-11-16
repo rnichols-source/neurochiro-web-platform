@@ -761,14 +761,57 @@ describe('duplicate doctors from go-live', () => {
       identity: identity({ email: 'office@practice.example', name: 'Someone New', city: 'Austin', customerId: 'cus_other' }),
       existing: [listing({ email: 'listing@example.com', emails: ['Office@practice.example'], city: 'Dallas', state: 'TX' })],
     })
-    assert.deepEqual(byPracticeEmail, { action: 'attach', doctorId: 'doc-1', reason: 'email' })
+    assert.deepEqual(byPracticeEmail, { action: 'flag_duplicate', doctorId: 'doc-1' })
+    const byPracticeEmailSameName = planDuplicateGuard({
+      identity: identity({ email: 'office@practice.example', name: 'Ada Lovelace', city: 'Austin', state: 'TX', customerId: 'cus_other' }),
+      existing: [listing({ email: 'listing@example.com', emails: ['Office@practice.example'], city: 'Dallas', state: 'TX' })],
+    })
+    assert.deepEqual(byPracticeEmailSameName, { action: 'attach', doctorId: 'doc-1', reason: 'email' })
     const byPhone = planPathB({
       identity: identity({ email: 'new@example.com', name: 'New Person', city: 'Austin', phone: '(864) 555-0100' }),
       existing: [listing({ email: 'other@example.com', city: 'Dallas', phones: ['+1 864-555-0100'], firstName: 'Ada', lastName: 'Other' })],
       claimed: false,
       membership: true,
     })
-    assert.deepEqual(byPhone, { action: 'attach', doctorId: 'doc-1', reason: 'phone' })
+    assert.deepEqual(byPhone, { action: 'flag_duplicate', doctorId: 'doc-1' })
+    const byPhoneSameName = planPathB({
+      identity: identity({ email: 'new@example.com', name: 'Ada Other', city: 'Austin', phone: '(864) 555-0100' }),
+      existing: [listing({ email: 'other@example.com', city: 'Dallas', phones: ['+1 864-555-0100'], firstName: 'Ada', lastName: 'Other' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(byPhoneSameName, { action: 'attach', doctorId: 'doc-1', reason: 'phone' })
+  })
+
+  it('lets a brand-new doctor with a common surname go live', () => {
+    const otherCity = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: 'Greenville', state: 'SC', phone: '+18645559999', customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Charleston', state: 'SC', stripeCustomerId: 'cus_old', phones: ['+18435550000'] })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(otherCity, { action: 'create' })
+    const otherState = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: '', state: 'TX', phone: null, customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Greenville', state: 'SC', stripeCustomerId: 'cus_old' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(otherState, { action: 'create' })
+    const sameCityOtherState = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: 'Greenville', state: 'NC', phone: null, customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Greenville', state: 'SC', stripeCustomerId: 'cus_old' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.deepEqual(sameCityOtherState, { action: 'create' })
+    const sameCity = planPathB({
+      identity: identity({ email: 'new.smith@example.com', name: 'John Smith', city: 'Greenville', state: 'SC', phone: null, customerId: 'cus_new' }),
+      existing: [listing({ email: 'jane.smith@example.com', firstName: 'Jane', lastName: 'Smith', city: 'Greenville', state: 'SC', stripeCustomerId: 'cus_old' })],
+      claimed: false,
+      membership: true,
+    })
+    assert.equal(sameCity.action, 'flag_duplicate')
   })
 
   it('does not report a reconcile link-only result as missing', () => {
