@@ -37,6 +37,8 @@ export async function saveSettingsAction(formData: FormData): Promise<{ ok: bool
     followers: clean(formData.get('followers')),
     peopleUsed: clean(formData.get('peopleUsed')),
     peopleUsedApproximate: formData.get('approximate') === 'on',
+    carePlansStarted: clean(formData.get('carePlansStarted')),
+    averageCarePlan: clean(formData.get('averageCarePlan')),
   })
   const automations = automationsFrom({
     didYouGetIn: formData.get('didYouGetIn') === 'on',
@@ -49,6 +51,8 @@ export async function saveSettingsAction(formData: FormData): Promise<{ ok: bool
   await writeAudit({ actorId: user.id, action: 'settings_saved', summary: 'Updated founder figures and automation switches' })
   revalidatePath('/admin/settings')
   revalidatePath('/admin/card')
+  revalidatePath('/admin/growth/funnel')
+  revalidatePath('/admin')
   refreshRoster()
   return { ok: true, message: 'Saved.' }
 }

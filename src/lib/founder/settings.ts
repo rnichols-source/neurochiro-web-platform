@@ -6,6 +6,8 @@ export type FounderFigures = {
   followers: number
   peopleUsed: number
   peopleUsedApproximate: boolean
+  carePlansStarted: number
+  averageCarePlan: number
 }
 
 export type FounderAutomations = {
@@ -18,6 +20,8 @@ export const DEFAULT_FIGURES: FounderFigures = {
   followers: 189000,
   peopleUsed: 6000,
   peopleUsedApproximate: true,
+  carePlansStarted: 7,
+  averageCarePlan: 2134,
 }
 
 export const DEFAULT_AUTOMATIONS: FounderAutomations = {
@@ -45,6 +49,8 @@ export function figuresFrom(value: unknown): FounderFigures {
     followers: whole(row.followers, DEFAULT_FIGURES.followers),
     peopleUsed: whole(row.peopleUsed, DEFAULT_FIGURES.peopleUsed),
     peopleUsedApproximate: row.peopleUsedApproximate !== false,
+    carePlansStarted: whole(row.carePlansStarted, DEFAULT_FIGURES.carePlansStarted),
+    averageCarePlan: whole(row.averageCarePlan, DEFAULT_FIGURES.averageCarePlan),
   }
 }
 

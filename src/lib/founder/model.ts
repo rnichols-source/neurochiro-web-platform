@@ -243,7 +243,7 @@ function titleCase(value: string): string {
   return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
-export function roiCard(roster: FounderRoster, now = new Date()) {
+export function roiCard(roster: FounderRoster, now = new Date(), carePlansStarted = 0, averageCarePlan = 0) {
   const open = openRequests(roster, now)
   const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed').length
   const prices = roster.doctors.map((doctor) => parseVisitPrice(doctor.priceText)).filter((value): value is number => value != null)
@@ -257,6 +257,10 @@ export function roiCard(roster: FounderRoster, now = new Date()) {
     perDoctor: doctors ? Math.round((open.length / doctors) * 10) / 10 : null,
     sentValue: visit == null ? null : confirmed * visit,
     confirmed,
+    carePlansStarted,
+    averageCarePlan,
+    carePlanValue: carePlansStarted * averageCarePlan,
+    carePlanVisitValue: visit == null ? null : carePlansStarted * visit,
   }
 }
 

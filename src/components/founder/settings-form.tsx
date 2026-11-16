@@ -7,7 +7,7 @@ export function SettingsForm({
   figures,
   automations,
 }: {
-  figures: { followers: number; peopleUsed: number; peopleUsedApproximate: boolean }
+  figures: { followers: number; peopleUsed: number; peopleUsedApproximate: boolean; carePlansStarted: number; averageCarePlan: number }
   automations: { didYouGetIn: boolean; autoNudge: boolean; mondayDigest: boolean }
 }) {
   const [message, setMessage] = useState('')
@@ -34,6 +34,16 @@ export function SettingsForm({
       <label className="flex min-h-11 items-center gap-2 text-[14px]">
         <input type="checkbox" name="approximate" defaultChecked={figures.peopleUsedApproximate} />
         Show this number with a ~
+      </label>
+      <label className="block">
+        <span className="fd-ui text-[13px] font-extrabold">Care plans started · doctor-reported</span>
+        <input name="carePlansStarted" type="number" min={0} defaultValue={figures.carePlansStarted} className="mt-1 min-h-12 w-full rounded-xl border border-[#D7DEE6] px-3" />
+        <span className="mt-1 block text-[13px] text-[#5b6773]">The number you use on a call. Doctors told you how many community members started a care plan. This is not counted from visit requests.</span>
+      </label>
+      <label className="block">
+        <span className="fd-ui text-[13px] font-extrabold">Average care plan value</span>
+        <input name="averageCarePlan" type="number" min={0} defaultValue={figures.averageCarePlan} className="mt-1 min-h-12 w-full rounded-xl border border-[#D7DEE6] px-3" />
+        <span className="mt-1 block text-[13px] text-[#5b6773]">Industry average until doctors report their own. Source: Chiropractic Economics 2025 survey.</span>
       </label>
       <div className="rounded-2xl bg-[#FFF7F1] p-4">
         <h2 className="fd-ui text-[16px] font-extrabold">Automatic messages</h2>
