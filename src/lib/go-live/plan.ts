@@ -1,4 +1,5 @@
 import { toApplicationE164 } from '../applications/phone.ts'
+import { resolveStateCode } from '../resolve-state.ts'
 import { toE164 } from '../sms/phone.ts'
 import { GO_LIVE_STEPS, type GoLiveStep } from './steps.ts'
 import { isDoctorMembershipProduct, isStudentProduct, type ProductHint } from './products.ts'
@@ -301,11 +302,17 @@ export type ExistingListing = {
   city: string
   userId: string | null
   stripeCustomerId: string | null
+  /** 2-letter code when the listing has one. */
+  state?: string | null
+  /** Profile, auth, contact, and practice emails besides the listing email. */
+  emails?: Array<string | null> | null
+  /** Listing, office, and alert numbers. Compared after normalization. */
+  phones?: Array<string | null> | null
 }
 
 export type PathBPlan =
   | { action: 'skip'; reason: string }
-  | { action: 'attach'; doctorId: string; reason: 'email' | 'customer' }
+  | { action: 'attach'; doctorId: string; reason: 'email' | 'customer' | 'phone' }
   | { action: 'flag_duplicate'; doctorId: string }
   | { action: 'create' }
 
@@ -363,6 +370,7 @@ export type InvoiceIntake =
   | { action: 'go_live'; doctorId: string }
   | { action: 'create_and_go_live' }
   | { action: 'link_live'; doctorId: string }
+  | { action: 'needs_review'; reason: 'matched_no_listing' }
 
 /** A renewal never starts go-live. The first paid doctor-membership invoice does. */
 export function invoiceIsRenewal(billingReason: string | null, hasSubscription: boolean): boolean {
@@ -373,6 +381,24 @@ export function invoiceIsRenewal(billingReason: string | null, hasSubscription: 
   if (reason === 'subscription_create' || reason === 'manual') return false
   if (!reason) return hasSubscription
   return hasSubscription
+}
+
+/**
+ * These payments belong to a subscription that already exists.
+ * They must not create a doctor or start go-live.
+ */
+export function blocksNewDoctor(input: {
+  billingReason: string | null
+  earlierPaidInvoice?: boolean
+}): boolean {
+  if (input.earlierPaidInvoice === true) return true
+  const reason = (input.billingReason || '').trim()
+  return reason === 'subscription_cycle' || reason === 'subscription_update' || reason === 'subscription_threshold'
+}
+
+/** True only when a listing was found and it has no ok welcome step. An empty match is never this. */
+export function listingNeverGoneLive(input: { listingCount: number; welcomeOk: boolean }): boolean {
+  return input.listingCount > 0 && input.welcomeOk !== true
 }
 
 export function planInvoiceIntake(input: {
@@ -386,8 +412,10 @@ export function planInvoiceIntake(input: {
   welcomeOk?: boolean
   /** Published before go-live existed. */
   preAutomation?: boolean
-  /** Paid invoice on a subscription that has never gone live. Not a renewal. */
+  /** True only when a listing was found and it has no ok welcome step. Never set this for an empty match. */
   neverGoneLive?: boolean
+  /** Another paid invoice already exists on this subscription. */
+  earlierPaidInvoice?: boolean
   applications: InvoiceApplication[]
   listings: Array<{ id?: string; verificationStatus?: string | null; isApproved?: boolean | null }>
 }): InvoiceIntake {
@@ -396,6 +424,7 @@ export function planInvoiceIntake(input: {
   if ((input.welcomeOk || input.preAutomation) && doctorId) {
     return { action: 'link_live', doctorId }
   }
+  if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
   const reason = input.billingReason || ''
   const hasSubscription = input.hasSubscription ?? (
     reason === 'subscription_create'
@@ -403,10 +432,14 @@ export function planInvoiceIntake(input: {
     || reason === 'subscription_update'
     || reason === 'subscription_threshold'
   )
+  if (blocksNewDoctor({ billingReason: input.billingReason, earlierPaidInvoice: input.earlierPaidInvoice })) {
+    if (!doctorId) return { action: 'needs_review', reason: 'matched_no_listing' }
+    if (input.neverGoneLive === true) return { action: 'link_live', doctorId }
+    return { action: 'ignore', reason: 'renewal' }
+  }
   if (invoiceIsRenewal(input.billingReason, hasSubscription) && input.neverGoneLive !== true) {
     return { action: 'ignore', reason: 'renewal' }
   }
-  if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
   const bank = [...input.applications]
     .filter((row) => row.status === 'needs_action' && row.reviewedAt)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
@@ -505,6 +538,139 @@ export function paymentIntentIdFromInvoicePayment(payment: {
   return null
 }
 
+const NAME_CREDENTIALS = new Set(['dr', 'dc', 'dcc', 'dacnb', 'ccsp', 'chiropractor', 'doctor'])
+
+function nameTokens(value: string): string[] {
+  return value
+    .replace(/\./g, ' ')
+    .split(/[^A-Za-z']+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 1 && !NAME_CREDENTIALS.has(token.toLowerCase()))
+}
+
+/** Last name only. "Vincent & Bridget Farrar" and "Vincent Farrar" both yield farrar. */
+export function surnamesFromName(name: string): string[] {
+  const trimmed = name.trim()
+  if (!trimmed || trimmed.includes('@')) return []
+  const source = trimmed.includes(',') ? trimmed.split(',')[0] || '' : trimmed
+  const tokens = nameTokens(source)
+  const last = tokens[tokens.length - 1]?.toLowerCase() || ''
+  return last ? [last] : []
+}
+
+export function phoneMatchKey(phone: string | null | undefined): string | null {
+  if (!phone) return null
+  const digits = phone.replace(/\D/g, '')
+  if (digits.length < 10) return null
+  if ((digits.length === 11 || digits.length === 12) && digits.startsWith('1')) return digits.slice(1, 11)
+  return digits
+}
+
+function listingEmails(row: ExistingListing): string[] {
+  const values = [row.email, ...(row.emails || [])]
+  const seen = new Set<string>()
+  const emails: string[] = []
+  for (const value of values) {
+    const email = (value || '').trim().toLowerCase()
+    if (!email.includes('@') || seen.has(email)) continue
+    seen.add(email)
+    emails.push(email)
+  }
+  return emails
+}
+
+function listingPhones(row: ExistingListing): string[] {
+  const seen = new Set<string>()
+  const phones: string[] = []
+  for (const value of row.phones || []) {
+    const key = phoneMatchKey(value)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    phones.push(key)
+  }
+  return phones
+}
+
+export function citiesEqual(left: string | null | undefined, right: string | null | undefined): boolean {
+  const a = (left || '').trim().toLowerCase().replace(/[.]/g, '').replace(/\s+/g, ' ')
+  const b = (right || '').trim().toLowerCase().replace(/[.]/g, '').replace(/\s+/g, ' ')
+  return Boolean(a && b && a === b)
+}
+
+function stateRegion(country: string | null | undefined): string {
+  const value = (country || 'US').trim().toUpperCase()
+  if (value === 'USA' || value === 'UNITED STATES') return 'US'
+  if (value === 'UK' || value === 'UNITED KINGDOM') return 'GB'
+  if (value === 'CANADA') return 'CA'
+  return value || 'US'
+}
+
+export function statesEqual(left: string | null | undefined, right: string | null | undefined, country?: string | null): boolean {
+  const a = (left || '').trim()
+  const b = (right || '').trim()
+  if (!a || !b) return false
+  if (a.toLowerCase() === b.toLowerCase()) return true
+  const region = stateRegion(country)
+  const codeA = resolveStateCode(a, region) || resolveStateCode(a, 'US')
+  const codeB = resolveStateCode(b, region) || resolveStateCode(b, 'US')
+  if (codeA && codeB && codeA === codeB) return true
+  if (codeA && codeA.toLowerCase() === b.toLowerCase()) return true
+  if (codeB && codeB.toLowerCase() === a.toLowerCase()) return true
+  return false
+}
+
+function lastNamesMatch(payerName: string, listingLastName: string): boolean {
+  const surnames = surnamesFromName(payerName)
+  const listing = surnamesFromName(listingLastName)[0] || listingLastName.trim().toLowerCase()
+  if (!listing || surnames.length === 0) return false
+  return surnames.includes(listing)
+}
+
+function samePlace(identity: CheckoutIdentity, row: ExistingListing): boolean {
+  return citiesEqual(identity.city, row.city) || statesEqual(identity.state, row.state, identity.country)
+}
+
+export type ListingSearch = {
+  email: string | null
+  customerId: string | null
+  phoneKey: string | null
+  surname: string | null
+  city: string | null
+  state: string | null
+}
+
+/** Search keys for the wider doctor lookup. Strips characters that would widen a filter. */
+export function listingSearchFromIdentity(identity: CheckoutIdentity): ListingSearch {
+  const email = identity.email.trim().replace(/[%_,]/g, '')
+  const rawState = (identity.state || '').trim()
+  const code = rawState ? resolveStateCode(rawState, stateRegion(identity.country)) : null
+  const state = (code || rawState).replace(/[%_,]/g, '')
+  return {
+    email: email.includes('@') ? email : null,
+    customerId: identity.customerId,
+    phoneKey: phoneMatchKey(identity.phone),
+    surname: surnamesFromName(identity.name)[0] || null,
+    city: (identity.city || '').trim().replace(/[%_,]/g, '') || null,
+    state: state || null,
+  }
+}
+
+/**
+ * Run before creating a doctor, including when the payer already has an account.
+ * planPathB skips logged-in checkouts; this still checks the wider listing set.
+ */
+export function planDuplicateGuard(input: {
+  identity: CheckoutIdentity
+  existing: ExistingListing[]
+}): PathBPlan {
+  return planPathB({
+    identity: { ...input.identity, userId: null },
+    existing: input.existing,
+    claimed: false,
+    membership: true,
+  })
+}
+
 export function planPathB(input: {
   identity: CheckoutIdentity
   existing: ExistingListing[]
@@ -516,20 +682,22 @@ export function planPathB(input: {
   if (input.identity.userId) return { action: 'skip', reason: 'account_already_linked' }
   const email = input.identity.email.trim().toLowerCase()
   if (!email.includes('@')) return { action: 'skip', reason: 'missing_email' }
-  const byCustomer = input.identity.customerId
-    ? input.existing.find((row) => row.stripeCustomerId && row.stripeCustomerId === input.identity.customerId)
-    : null
-  if (byCustomer) return { action: 'attach', doctorId: byCustomer.id, reason: 'customer' }
-  const byEmail = input.existing.find((row) => (row.email || '').trim().toLowerCase() === email)
-  if (byEmail) return { action: 'attach', doctorId: byEmail.id, reason: 'email' }
-  const [firstName, ...rest] = input.identity.name.trim().split(/\s+/)
-  const lastName = rest.join(' ')
-  const city = (input.identity.city || '').trim()
-  if (firstName && lastName && city) {
-    const key = duplicateKey(firstName, lastName, city)
-    const twin = input.existing.find((row) => duplicateKey(row.firstName, row.lastName, row.city) === key)
-    if (twin) return { action: 'flag_duplicate', doctorId: twin.id }
+  const phone = phoneMatchKey(input.identity.phone)
+  const strong: Array<{ row: ExistingListing; reason: 'customer' | 'email' | 'phone' }> = []
+  const seen = new Set<string>()
+  for (const row of input.existing) {
+    if (!row.id || seen.has(row.id)) continue
+    const byCustomer = Boolean(input.identity.customerId && row.stripeCustomerId && row.stripeCustomerId === input.identity.customerId)
+    const byEmail = listingEmails(row).includes(email)
+    const byPhone = Boolean(phone && listingPhones(row).includes(phone))
+    if (!byCustomer && !byEmail && !byPhone) continue
+    seen.add(row.id)
+    strong.push({ row, reason: byCustomer ? 'customer' : byEmail ? 'email' : 'phone' })
   }
+  if (strong.length === 1) return { action: 'attach', doctorId: strong[0].row.id, reason: strong[0].reason }
+  if (strong.length > 1) return { action: 'flag_duplicate', doctorId: strong[0].row.id }
+  const plausible = input.existing.filter((row) => row.id && !seen.has(row.id) && lastNamesMatch(input.identity.name, row.lastName) && samePlace(input.identity, row))
+  if (plausible.length >= 1) return { action: 'flag_duplicate', doctorId: plausible[0].id }
   return { action: 'create' }
 }
 
@@ -670,6 +838,22 @@ export function reconciliationShouldEmail(input: { missing: number; failed: numb
   return input.missing > 0 || input.failed > 0
 }
 
+export type ReconcileIntakeOutcome = 'created' | 'linked' | 'flagged' | 'ignored' | 'review' | 'go_live' | 'failed'
+
+/** Link-only and review results are not missing. A doctor was missing only when one was created or the pass failed. */
+export function reconcileIntakeReport(outcome: ReconcileIntakeOutcome): { missing: boolean; failed: boolean } {
+  if (outcome === 'failed') return { missing: true, failed: true }
+  if (outcome === 'created') return { missing: true, failed: false }
+  return { missing: false, failed: false }
+}
+
+export function unmatchedPaymentLine(name: string | null | undefined, email: string | null | undefined): string {
+  const who = (name || '').trim()
+  const address = (email || '').trim()
+  const payer = who && address ? `${who}/${address}` : who || address || 'unknown'
+  return `needs review: payment from ${payer} matched no listing`
+}
+
 export function retryPlanForDoctor(rows: { step: string; status: string }[]): GoLiveStep[] | null {
   const anyOk = (step: string) => rows.some((row) => row.step === step && row.status === 'ok')
   const profileFailures = rows.filter((row) => row.step === 'profile' && row.status === 'failed').length
@@ -693,13 +877,20 @@ export function retryPlanForDoctor(rows: { step: string; status: string }[]): Go
 export function reconciliationLetter(input: {
   missing: string[]
   failed: string[]
+  review?: string[]
 }): { subject: string; html: string } | null {
-  if (!reconciliationShouldEmail({ missing: input.missing.length, failed: input.failed.length })) return null
+  const review = (input.review || []).map((line) => line.trim()).filter(Boolean)
+  const unfinished = reconciliationShouldEmail({ missing: input.missing.length, failed: input.failed.length })
+  if (!unfinished && review.length === 0) return null
   const items = [
     ...input.missing.map((line) => `Missing: ${line}`),
     ...input.failed.map((line) => `Failed: ${line}`),
+    ...review,
   ]
-  const html = `<p>Go-live reconciliation found doctor memberships that were not finished.</p><ul>${items.map((line) => `<li>${line.replace(/</g, '')}</li>`).join('')}</ul><p><a href="https://neurochiro.co/admin/go-live">Open the go-live log</a></p>`
+  const intro = unfinished
+    ? 'Go-live reconciliation found doctor memberships that were not finished.'
+    : 'Go-live reconciliation found a payment to review.'
+  const html = `<p>${intro}</p><ul>${items.map((line) => `<li>${line.replace(/</g, '')}</li>`).join('')}</ul><p><a href="https://neurochiro.co/admin/go-live">Open the go-live log</a></p>`
   return { subject: 'Go-live reconciliation', html }
 }
 

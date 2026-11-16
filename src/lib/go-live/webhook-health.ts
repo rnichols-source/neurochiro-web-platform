@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 import { stripe } from '@/lib/stripe'
 import { isMissingTable } from '@/lib/leads/schema'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { decideWebhookHealth, DEFAULT_WEBHOOK_STALE_HOURS } from './health.ts'
+import { decideWebhookHealth, DEFAULT_WEBHOOK_STALE_HOURS, webhookHealthEmailHtml } from './health.ts'
 
 const ADMIN_EMAIL = process.env.ADMIN_ALERT_EMAIL || 'drray@neurochirodirectory.com'
 
@@ -32,7 +32,7 @@ async function readHealth(): Promise<{
   }
 }
 
-async function emailAdmin(reason: string): Promise<boolean> {
+async function emailAdmin(reason: string, failedAt: string | null): Promise<boolean> {
   const key = process.env.RESEND_API_KEY || ''
   if (!key || process.env.GO_LIVE_DRY_RUN === '1' || process.env.GO_LIVE_DRY_RUN === 'true') return false
   const resend = new Resend(key)
@@ -40,7 +40,7 @@ async function emailAdmin(reason: string): Promise<boolean> {
     from: 'NeuroChiro <support@neurochirodirectory.com>',
     to: [ADMIN_EMAIL],
     subject: 'Stripe webhook needs a look',
-    html: `<p>${reason.replace(/</g, '')}</p><p>Endpoint: https://neurochiro.co/api/webhooks/stripe</p>`,
+    html: webhookHealthEmailHtml({ reason, failedAt }),
   })
   return !result.error
 }
@@ -72,7 +72,7 @@ export async function noteSignatureFailure(): Promise<void> {
     paidCheckoutsInWindow: 0,
   })
   if (!decision.alert || !decision.reason) return
-  const sent = await emailAdmin(decision.reason)
+  const sent = await emailAdmin(decision.reason, decision.kind === 'signature' ? now : null)
   if (sent) {
     await db().from('stripe_webhook_health').update({
       last_alert_at: now,
@@ -103,7 +103,7 @@ export async function checkWebhookHealth(): Promise<{ alert: boolean; reason: st
     staleHours: hours,
   })
   if (decision.alert && decision.reason) {
-    const sent = await emailAdmin(decision.reason)
+    const sent = await emailAdmin(decision.reason, decision.kind === 'signature' ? current.lastSignatureFailureAt : null)
     if (sent) {
       await db().from('stripe_webhook_health').update({
         last_alert_at: now,
