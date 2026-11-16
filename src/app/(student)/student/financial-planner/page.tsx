@@ -216,6 +216,7 @@ export default function FinancialPlanner() {
 function FinancialPlannerContent() {
   const [state, setState] = useState<PlannerState>({ ...INITIAL_STATE, isPurchased: true, checkingPurchase: false });
   const [loaded, setLoaded] = useState(false);
+  const [saveNote, setSaveNote] = useState<string | null>(null);
 
   // Load from Supabase on mount
   useEffect(() => {
@@ -258,9 +259,10 @@ function FinancialPlannerContent() {
         const toSave = { ...stateRef.current };
         delete (toSave as Record<string, unknown>).checkingPurchase;
         delete (toSave as Record<string, unknown>).isPurchased;
-        await (supabase as any)
+        const saved = await (supabase as any)
           .from("financial_plans")
           .upsert({ user_id: user.id, plan_data: toSave, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+        setSaveNote(saved.error ? "Could not save this plan yet. Your numbers stay on this page until you leave." : "Saved on your account.");
       } catch { /* ignore */ }
     }, 500);
     return () => clearTimeout(timer);
@@ -1610,8 +1612,9 @@ function FinancialPlannerContent() {
             <DollarSign className="w-7 h-7 text-[#D66829]" /> Financial Planner
           </h1>
           <p className="text-[#5A6873] text-sm mt-1">
-            What your first year actually looks like, in dollars.
+            Loan payment, taxes, and what is left for rent. The plan saves to your account as you go.
           </p>
+          {saveNote ? <p role="status" className="text-sm font-semibold text-[#0A6159] mt-1">{saveNote}</p> : null}
         </div>
         <button
           onClick={resetAll}
@@ -1637,7 +1640,7 @@ function FinancialPlannerContent() {
           <p className="text-xs text-[#5A6873]">You&apos;ve done the work. Go see where you stand.</p>
         </div>
         <Link
-          href="/student/roadmap"
+          href="/student/dashboard"
           className="w-full sm:w-auto px-5 py-2.5 bg-[#EFF1F2] text-[#5A6873] rounded-lg hover:text-[#16222D] hover:bg-[#DDE2E5] text-xs font-bold transition-colors flex items-center justify-center gap-2"
         >
           Career Pipeline <ArrowRight className="w-3.5 h-3.5" />

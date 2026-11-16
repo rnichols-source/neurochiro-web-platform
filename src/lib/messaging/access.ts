@@ -47,6 +47,7 @@ export function decideAccess(sender: AccessParty, recipient: AccessParty, ctx: A
   if (sender.role === 'doctor' && recipient.role === 'student') return { allowed: true };
   if (sender.role === 'student' && recipient.role === 'student') return { allowed: true };
   if (sender.role === 'student' && recipient.role === 'doctor') {
+    if (ctx.existingThread) return { allowed: true };
     if (!recipient.acceptsStudentMessages) {
       return deny('student_closed', 'This doctor is not accepting student messages.');
     }

@@ -29,8 +29,8 @@ function getActionLink(n: any): string | null {
   if (n.link) return n.link;
   const cat = getCategory(n);
   if (cat === "job") return "/student/jobs";
-  if (cat === "mentor") return "/student/mentors";
-  if (cat === "progress") return "/student/academy";
+  if (cat === "mentor") return "/student/doctors";
+  if (cat === "progress") return "/student/techniques";
   return null;
 }
 

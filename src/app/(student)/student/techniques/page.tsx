@@ -154,13 +154,13 @@ export default function TechniqueComparisonGuide() {
           const supabase = createClient();
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            await (supabase as any)
+            const saved = await (supabase as any)
               .from("technique_quiz_state")
               .upsert(
-                { user_id: user.id, quiz_data: quizRef.current },
+                { user_id: user.id, quiz_data: quizRef.current, updated_at: new Date().toISOString() },
                 { onConflict: "user_id" }
               );
-            return;
+            if (!saved.error) return;
           }
         } catch {
           // fall through to localStorage
@@ -280,13 +280,13 @@ export default function TechniqueComparisonGuide() {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        await (supabase as any)
+        const saved = await (supabase as any)
           .from("technique_quiz_state")
           .upsert(
-            { user_id: user.id, quiz_data: INITIAL_QUIZ },
+            { user_id: user.id, quiz_data: INITIAL_QUIZ, updated_at: new Date().toISOString() },
             { onConflict: "user_id" }
           );
-        return;
+        if (!saved.error) return;
       }
     } catch { /* fall through */ }
     localStorage.removeItem(LS_KEY);

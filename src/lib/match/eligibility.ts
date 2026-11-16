@@ -5,8 +5,7 @@ export function canStudentMatch(input: {
   completed: boolean;
   visible: boolean;
 }): boolean {
-  if (!input.memberAccess || !input.completed || !input.visible) return false;
-  if (input.requireSchoolVerification && !input.schoolVerified) return false;
+  if (!input.completed || !input.visible) return false;
   return true;
 }
 

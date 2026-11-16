@@ -2,6 +2,23 @@
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { loadStudentProfile } from '@/lib/students/save-student-profile'
+
+export async function getJobMatchProfile() {
+  const supabase = createServerSupabase()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const loaded = await loadStudentProfile(user.id)
+  if (!loaded.data) return null
+  return {
+    city: loaded.data.city,
+    state: loaded.data.state,
+    region_code: loaded.data.state,
+    interests: loaded.data.techniques,
+    graduation_year: loaded.data.graduationYear,
+    is_looking_for_mentorship: false,
+  }
+}
 
 export async function getMyJobApplicationStages(): Promise<{ job_id: string; stage: string | null }[]> {
   const supabase = createServerSupabase()

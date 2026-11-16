@@ -16,7 +16,7 @@ interface PipelinePreviewProps {
 }
 
 const STAGES = [
-  { id: "learn", label: "Learn", href: "/student/academy", check: (m: MilestoneData) => m.firstCourseCompleted, active: (m: MilestoneData) => m.firstCourseStarted && !m.firstCourseCompleted },
+  { id: "learn", label: "Learn", href: "/student/techniques", check: (m: MilestoneData) => m.firstCourseCompleted, active: (m: MilestoneData) => m.firstCourseStarted && !m.firstCourseCompleted },
   { id: "techniques", label: "Techniques", href: "/student/techniques", check: (_m: MilestoneData, mods: number) => mods >= 6, active: (m: MilestoneData) => m.firstCourseCompleted },
   { id: "interview", label: "Interview", href: "/student/interview-prep", check: (_m: MilestoneData, mods: number) => mods >= 12, active: (_m: MilestoneData, mods: number) => mods >= 6 },
   { id: "jobs", label: "Apply", href: "/student/jobs", check: (m: MilestoneData) => m.firstJobApp, active: (_m: MilestoneData, mods: number) => mods >= 10 },
@@ -29,7 +29,7 @@ export default function PipelinePreview({ milestones, modulesCompleted }: Pipeli
     <div>
       <div className="flex items-center justify-between mb-5">
         <p className="text-xs tracking-[0.2em] text-portal-ink-2 font-semibold">Pipeline</p>
-        <Link href="/student/roadmap" className="text-xs text-[#D66829] font-semibold hover:underline">
+        <Link href="/student/dashboard" className="text-xs text-[#D66829] font-semibold hover:underline">
           View all
         </Link>
       </div>

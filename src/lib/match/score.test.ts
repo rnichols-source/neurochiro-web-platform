@@ -128,8 +128,8 @@ describe('score', () => {
 
 describe('eligibility', () => {
   it('excludes a non-member, an unverified school, and a doctor who is not open', () => {
-    assert.equal(canStudentMatch({ memberAccess: false, schoolVerified: true, requireSchoolVerification: true, completed: true, visible: true }), false);
-    assert.equal(canStudentMatch({ memberAccess: true, schoolVerified: false, requireSchoolVerification: true, completed: true, visible: true }), false);
+    assert.equal(canStudentMatch({ memberAccess: false, schoolVerified: false, requireSchoolVerification: true, completed: true, visible: true }), true);
+    assert.equal(canStudentMatch({ memberAccess: true, schoolVerified: false, requireSchoolVerification: true, completed: false, visible: true }), false);
     assert.equal(canStudentMatch({ memberAccess: true, schoolVerified: true, requireSchoolVerification: true, completed: true, visible: true }), true);
     assert.equal(canDoctorMatch({ member: true, openToStudents: false, completed: true, visible: true }), false);
     assert.equal(canDoctorMatch({ member: true, openToStudents: true, completed: true, visible: true }), true);

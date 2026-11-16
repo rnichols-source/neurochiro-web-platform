@@ -15,7 +15,7 @@ interface CareerReadinessProps {
 
 const CATEGORY_LINKS: Record<string, string> = {
   profile: "/student/profile",
-  academy: "/student/academy",
+  academy: "/student/techniques",
   interview: "/student/interview-prep",
   jobs: "/student/jobs",
   contract: "/student/contract-lab",

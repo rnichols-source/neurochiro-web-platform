@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Search, MapPin, Briefcase, Clock, CheckCircle2, Star, Filter, ArrowRight, ChevronDown, Zap } from "lucide-react";
 import Link from "next/link";
 import { getPublicJobs } from "@/app/(public)/careers/actions";
-import { getMyJobApplicationStages } from "@/app/(student)/student/jobs/actions";
+import { getJobMatchProfile, getMyJobApplicationStages } from "@/app/(student)/student/jobs/actions";
 import { createClient } from "@/lib/supabase";
 
 interface StudentProfile {
@@ -110,21 +110,8 @@ export default function JobsPage() {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
       // Fetch student profile for matching
-      const { data: student } = await supabase
-        .from("students")
-        .select("location_city, region_code, interests, graduation_year, is_looking_for_mentorship")
-        .eq("id", user.id)
-        .maybeSingle();
-      if (student) {
-        setProfile({
-          city: (student as any).location_city || null,
-          state: null,
-          region_code: (student as any).region_code || null,
-          interests: (student as any).interests || [],
-          graduation_year: (student as any).graduation_year || null,
-          is_looking_for_mentorship: (student as any).is_looking_for_mentorship || false,
-        });
-      }
+      const matchProfile = await getJobMatchProfile();
+      if (matchProfile) setProfile(matchProfile);
       const appliedRows = await getMyJobApplicationStages();
       if (appliedRows.length) {
         setAppliedJobIds(new Set(appliedRows.map((a) => a.job_id)));
@@ -346,12 +333,16 @@ export default function JobsPage() {
           </h3>
           <p className="text-[#5A6873] text-sm mb-4">
             {jobs.length === 0
-              ? "Check back. New posts show up here."
+              ? "Doctors post associate roles here. Until one is live, introduce yourself to a doctor who has opted in."
               : (search.trim() || filterEmployment !== "all" || filterMentor)
                 ? "Clear a filter or check back."
                 : "Add your school, city, and graduation year so the list can rank what fits."}
           </p>
-          <Link href="/student/welcome" className="text-sm font-bold text-[#D66829] hover:underline">Finish your profile</Link>
+          <span className="inline-flex flex-wrap items-center justify-center gap-4">
+            <Link href="/student/profile" className="text-sm font-bold text-[#D66829] hover:underline">Finish your profile</Link>
+            <Link href="/student/doctors" className="text-sm font-bold text-[#1F4F8C] hover:underline">See opted-in doctors</Link>
+            <Link href="/student/interview-prep" className="text-sm font-bold text-[#5C3473] hover:underline">Read the interview playbook</Link>
+          </span>
         </div>
       ) : (
         <div className="space-y-3">

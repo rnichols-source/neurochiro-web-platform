@@ -58,6 +58,12 @@ const nextConfig: NextConfig = {
       },
       { source: '/student/career-pipeline', destination: '/student/dashboard', permanent: false },
       { source: '/student/mentors', destination: '/student/doctors', permanent: false },
+      { source: '/student/roadmap', destination: '/student/dashboard', permanent: false },
+      { source: '/student/community', destination: '/student/dashboard', permanent: false },
+      { source: '/student/academy', destination: '/student/techniques', permanent: false },
+      { source: '/student/ce-tracker', destination: '/student/seminars', permanent: false },
+      { source: '/student/chiromatch/:path*', destination: '/student/match', permanent: false },
+      { source: '/student/chiromatch', destination: '/student/match', permanent: false },
       {
         source: '/admin/directory',
         has: [{ type: 'query', key: 'search', value: '(?<search>.*)' }],

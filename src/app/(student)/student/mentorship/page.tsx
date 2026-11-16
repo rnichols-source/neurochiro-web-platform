@@ -44,7 +44,7 @@ export default async function MentorshipPage() {
   if (calls.error && missingSchema(calls.error)) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <PageHeader title="Monthly call" description="The first call is being scheduled. You'll get an email." />
+        <PageHeader title="Monthly call" description="The first call with Dr. Ray and a guest doctor is being scheduled. You will get an email." />
       </div>
     );
   }
@@ -70,7 +70,8 @@ export default async function MentorshipPage() {
       <PageHeader title="Monthly call" description="Dr. Ray and a guest doctor. One hour. Members only." />
       {!upcoming ? (
         <article className="bg-white border border-portal-border rounded-xl p-6">
-          <p className="text-base text-portal-ink">The first call is being scheduled. You'll get an email.</p>
+          <p className="text-base text-portal-ink">The first call with Dr. Ray and a guest doctor is being scheduled. You will get an email when the date is set.</p>
+          <Link href="/student/doctors" className="mt-4 inline-flex min-h-11 items-center text-sm font-extrabold text-[#0A6159]">Meet doctors who have opted in</Link>
         </article>
       ) : (
         <article className="bg-white border border-portal-border rounded-xl p-6 space-y-3">
