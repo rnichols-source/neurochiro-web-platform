@@ -6,8 +6,10 @@ import { seminarSlug } from '@/lib/seminars/slug'
 import { resolveStateCode } from '@/lib/resolve-state'
 import { Doctor } from '@/types/directory'
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { getThresholds } from '@/lib/thresholds'
 import { applyPublicListing, excludeTestDoctors, isDoctorPubliclyVisible, type PublicListingRow } from '@/lib/directory/visibility'
+import { isBotUserAgent } from '@/lib/analytics/profile-events'
 
 export async function getDoctors(options: {
   regionCode?: string;
@@ -168,11 +170,14 @@ export async function getDoctorBySlug(slug: string) {
 }
 
 export async function incrementDoctorViews(slug: string) {
-  const supabase = createServerSupabase();
   try {
-    await supabase.rpc('increment_doctor_views', { doctor_slug: slug });
-  } catch (e) {
-    // Masked internally
+    const userAgent = (await headers()).get('user-agent') || '';
+    if (isBotUserAgent(userAgent)) return;
+    const supabase = createServerSupabase();
+    const { error } = await supabase.rpc('increment_doctor_views', { doctor_slug: slug });
+    if (error) console.error('[profile-views] failed', error.code);
+  } catch {
+    // The profile still renders when the counter cannot be written.
   }
 }
 

@@ -2,11 +2,13 @@
 
 import { Mail, Check, Globe, Phone, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { trackCommunityRequest } from "@/lib/analytics/browser";
 
 interface ContactGateCTAProps {
   variant: 'sidebar' | 'hero' | 'mobile';
   doctorId: string;
   doctorName?: string;
+  doctorSlug?: string;
   isClaimed?: boolean;
   phone?: string | null;
   website?: string | null;
@@ -33,7 +35,7 @@ function maskUrl(url: string): string {
   }
 }
 
-export default function ContactGateCTA({ variant, doctorId, doctorName, isClaimed = true, phone, website }: ContactGateCTAProps) {
+export default function ContactGateCTA({ variant, doctorId, doctorName, doctorSlug, isClaimed = true, phone, website }: ContactGateCTAProps) {
   const [showForm, setShowForm] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -45,11 +47,12 @@ export default function ContactGateCTA({ variant, doctorId, doctorName, isClaime
     if (!email) return;
     setLoading(true);
     try {
-      await fetch("/api/patient-request", {
+      const res = await fetch("/api/patient-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ doctorId, patientEmail: email, patientName: name }),
       });
+      if (res.ok) trackCommunityRequest(doctorSlug || "");
       setSubmitted(true);
     } catch {
       setSubmitted(true);

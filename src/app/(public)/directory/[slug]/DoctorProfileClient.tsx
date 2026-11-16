@@ -20,6 +20,7 @@ import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-displa
 import { credentialedName, doctorFormalName, isPracticeListing, listingCardCopy, listingDisplayName, listingPhotos, parseCoOwners, sameListingPerson, type CoOwner } from "@/lib/listing-display";
 import { containsHealthWords, isPlausibleEmail, requiredPhoneError } from "@/lib/leads/validate";
 import { PatientSmsConsentLabel } from "@/components/sms/SmsConsentLabel";
+import { trackCommunityRequest, trackDoctorClick, trackProfileView } from "@/lib/analytics/browser";
 
 function formatUrl(url: string | null | undefined): string | null {
   if (!url || !url.trim()) return null;
@@ -164,9 +165,14 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const firstSentence = pullEnd > 0 ? pullQuote.trim() : "";
   const restOfBio = firstSentence ? doctor.bio?.slice(doctor.bio.indexOf(firstSentence) + firstSentence.length).trim() || "" : doctor.bio || "";
 
-  const trackEvent = (eventType: string) => {
-    fetch('/api/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ doctorId: doctor.id, eventType }) }).catch(() => {});
+  const trackEvent = (eventType: 'phone_tap' | 'booking_click' | 'website_click' | 'contact_click') => {
+    trackDoctorClick(eventType, { doctorId: doctor.id, slug });
   };
+
+  useEffect(() => {
+    if (!doctor?.id) return;
+    trackProfileView(doctor.id);
+  }, [doctor?.id]);
 
   // Conversion tracking for the conversion_events table
   const trackConversion = (eventType: string) => {
@@ -235,6 +241,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
       if (!res.ok) throw new Error(data.error || 'Something went wrong.');
       setAppointmentSubmitted(true);
       trackConversion('inquiry');
+      trackCommunityRequest(slug);
     } catch (err) {
       const message = err instanceof Error && err.message ? err.message : 'Something went wrong. Please try again or call the office directly.';
       alert(message);
@@ -418,7 +425,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 </a>
               )}
               {!gated && formatUrl(doctor.website_url) && (
-                <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
+                <a href={formatUrl(doctor.website_url)!} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent('website_click')} style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.6)" }}>
                   <Globe style={{ width: 16, height: 16 }} />
                 </a>
               )}
@@ -433,7 +440,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             {/* CTA Buttons */}
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
               {gated ? (
-                <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
+                <ContactGateCTA variant="hero" doctorId={doctor.id} doctorName={name} doctorSlug={slug} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
               ) : (
                 <>
                   <a href="#appointment-form" onClick={() => trackConversion('inquiry')} style={{ padding: "14px 28px", background: "#B4501A", color: "white", borderRadius: 14, fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", gap: 8, textDecoration: "none", minHeight: 44 }}>
@@ -495,7 +502,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               Send a note to {doctor.clinic_name || name}. The office gets it by email and in their NeuroChiro portal.
             </p>
             {gated ? (
-              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
+              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} doctorSlug={slug} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
             ) : appointmentSubmitted ? requestSuccess() : (
               <>
                 {acceptingNewPatients !== false && (
@@ -707,7 +714,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
         <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
           <div style={{ padding: "20px 24px", background: "#f8f6f2", borderRadius: 12, textAlign: "center" }}>
             <p style={{ fontSize: 14, color: "#718096", margin: 0 }}>Contact the office for pricing, insurance, and availability.</p>
-            {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B", fontSize: 16 }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
+            {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B", fontSize: 16 }}><a href={'tel:' + doctor.phone} onClick={() => trackEvent('phone_tap')} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
           </div>
         </Section>
       ) : (
@@ -769,7 +776,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             ) : (
               <div style={{ padding: "16px 20px", background: "#f8f6f2", borderRadius: 12, fontSize: 14, color: "#718096" }}>
                 <p style={{ margin: 0 }}>Contact the office for pricing and insurance information.</p>
-                {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
+                {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} onClick={() => trackEvent('phone_tap')} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
               </div>
             )}
           </div>
@@ -796,7 +803,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             ) : (
               <div style={{ padding: "16px 20px", background: "#f8f6f2", borderRadius: 12, fontSize: 14, color: "#718096" }}>
                 <p style={{ margin: 0 }}>Contact the office for hours and availability.</p>
-                {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
+                {doctor.phone && <p style={{ margin: "8px 0 0", fontWeight: 700, color: "#1E2D3B" }}><a href={'tel:' + doctor.phone} onClick={() => trackEvent('phone_tap')} style={{ color: "#1E2D3B", textDecoration: "none" }}>{doctor.phone}</a></p>}
               </div>
             )}
           </div>
@@ -972,7 +979,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           </div>
           {gated ? (
             <div style={{ textAlign: "center", paddingTop: 24 }}>
-              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
+              <ContactGateCTA variant="sidebar" doctorId={doctor.id} doctorName={name} doctorSlug={slug} isClaimed={!!doctor.user_id} phone={doctor.phone} website={doctor.website_url} />
             </div>
           ) : (
             <>
@@ -1214,12 +1221,12 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                 <Calendar className="w-4 h-4" /> Request
               </button>
               {doctor.phone && (
-                <a href={`tel:${doctor.phone}`} onClick={() => trackConversion('call')} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
+                <a href={`tel:${doctor.phone}`} onClick={() => { trackEvent('phone_tap'); trackConversion('call'); }} className="py-3 px-5 bg-white/10 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Call ${name}`}>
                   <Phone className="w-4 h-4" /> Call
                 </a>
               )}
               {bookingUrl ? (
-                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackConversion('book')} className="flex-1 py-3 border border-white/30 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book on the website for ${name}`}>
+                <a href={bookingUrl} target="_blank" rel="noopener noreferrer" onClick={() => { trackEvent('booking_click'); trackConversion('book'); }} className="flex-1 py-3 border border-white/30 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 min-h-[44px]" aria-label={`Book on the website for ${name}`}>
                   Book
                 </a>
               ) : null}

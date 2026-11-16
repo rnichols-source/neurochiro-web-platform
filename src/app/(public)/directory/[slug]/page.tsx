@@ -8,7 +8,6 @@ import { addressForSchema } from "@/lib/profile-display";
 import { coOwnerLine, isPracticeListing, listingDisplayName, listingMeta, parseCoOwners } from "@/lib/listing-display";
 import { getApprovedStories } from "@/app/actions/patient-stories";
 import { isDemoSlug } from "@/lib/directory/exclude-demo";
-import { trackProfileView } from "@/lib/portal/track-view";
 import { loadEarnedBadgeIds } from "@/lib/badges/compute";
 
 export const revalidate = 60; // ISR: cache for 60 seconds
@@ -95,9 +94,9 @@ export default async function DoctorProfilePage({ params }: Props) {
     faq?: { question?: string; answer?: string }[] | null;
   };
 
-  // 🛡️ Track View (Background)
+  // Lifetime counter for the doctor ROI dashboard. Dated views are recorded
+  // from the browser so a cached or prefetched render is not a visit.
   await incrementDoctorViews(resolvedParams.slug);
-  await trackProfileView({ id: doctor.id, user_id: doctor.user_id });
 
   // Fetch doctor's seminars, jobs, city data, and nearby doctors in parallel
   const [seminars, jobs, cityDoctorCount, nearbyDoctors, citySearchVolume, stories, badgeIds] = await Promise.all([

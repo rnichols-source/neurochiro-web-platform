@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Lato, Montserrat } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const lato = Lato({
@@ -132,6 +134,8 @@ export default function RootLayout({
             __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`
           }}
         />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
