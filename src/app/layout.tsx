@@ -9,10 +9,11 @@ const lato = Lato({
   display: 'swap',
 });
 
+// Montserrat is a variable font. Listing every static weight makes Turbopack
+// emit a Google font query it cannot resolve ("queries have exactly one entry").
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
   display: 'swap',
 });
 
