@@ -92,7 +92,11 @@ function asListing(row: Record<string, unknown>): ExistingListing & { verificati
   }
 }
 
-async function claim(identity: CheckoutIdentity): Promise<boolean> {
+function checkoutIsPaid(session: Record<string, any>): boolean {
+  return session.payment_status === 'paid'
+}
+
+async function claim(identity: CheckoutIdentity): Promise<'new' | 'duplicate' | 'unavailable'> {
   const inserted = await db().from('doctor_checkout_claims').insert({
     stripe_session_id: identity.sessionId || null,
     stripe_customer_id: identity.customerId,
@@ -100,8 +104,45 @@ async function claim(identity: CheckoutIdentity): Promise<boolean> {
     email: identity.email,
     status: 'pending',
   })
-  if (!inserted.error) return true
-  return inserted.error.code !== '23505' && inserted.error.code !== '42P01'
+  if (!inserted.error) return 'new'
+  if (inserted.error.code === '23505') return 'duplicate'
+  return 'unavailable'
+}
+
+async function startPaidGoLive(doctorId: string | null, paid: boolean): Promise<void> {
+  if (!doctorId || !paid) return
+  const { runDoctorGoLive } = await import('./orchestrator')
+  try {
+    await runDoctorGoLive({ doctorId, source: 'stripe' })
+  } catch (error) {
+    console.error('[go-live] follow-up failed', error instanceof Error ? error.name : 'error')
+    throw error
+  }
+}
+
+async function resumeClaim(identity: CheckoutIdentity, paid: boolean): Promise<void> {
+  if (!paid) return
+  const bySession = identity.sessionId
+    ? await db().from('doctor_checkout_claims').select('doctor_id, status').eq('stripe_session_id', identity.sessionId).maybeSingle()
+    : { data: null }
+  const byCustomer = !bySession.data && identity.customerId
+    ? await db().from('doctor_checkout_claims').select('doctor_id, status').eq('stripe_customer_id', identity.customerId).maybeSingle()
+    : bySession
+  let doctorId = text(byCustomer.data?.doctor_id)
+  if (!doctorId) {
+    const listings = await existingListings(identity.email, identity.customerId)
+    const live = listings.find((row) => row.verificationStatus === 'verified' || row.isApproved)
+    if (live) return
+    doctorId = listings[0]?.id || ''
+    if (!doctorId) doctorId = (await createPendingDoctor(identity)) || ''
+    if (doctorId && identity.customerId) {
+      await db().from('doctor_checkout_claims').update({ doctor_id: doctorId, status: 'create_pending' }).eq('stripe_customer_id', identity.customerId)
+    }
+  }
+  if (!doctorId) return
+  const doctor = await db().from('doctors').select('verification_status').eq('id', doctorId).maybeSingle()
+  if (doctor.data?.verification_status === 'verified') return
+  await startPaidGoLive(doctorId, true)
 }
 
 export async function ingestMembershipCheckout(session: Record<string, any>): Promise<void> {
@@ -115,8 +156,13 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
       studentPriceIds: studentPriceIds(),
     })
     if (!membership || !identity.email) return
+    const paid = checkoutIsPaid(session)
     const claimed = await claim(identity)
-    if (!claimed) return
+    if (claimed === 'duplicate') {
+      await resumeClaim(identity, paid)
+      return
+    }
+    if (claimed === 'unavailable') return
     const existing = await existingListings(identity.email, identity.customerId)
     const intake = planCheckoutIntake({ membership: true, listings: existing })
     if (intake.action === 'ignore') return
@@ -128,6 +174,7 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
     if (intake.action === 'attach_pending') {
       await markPaymentReceived(intake.doctorId, identity)
       await db().from('doctor_checkout_claims').update({ status: 'attach_pending', doctor_id: intake.doctorId }).eq('stripe_customer_id', identity.customerId)
+      await startPaidGoLive(intake.doctorId, paid)
       return
     }
     const duplicate = planPathB({ identity, existing, claimed: false, membership: true })
@@ -139,8 +186,10 @@ export async function ingestMembershipCheckout(session: Record<string, any>): Pr
     const doctorId = await createPendingDoctor(identity)
     if (!doctorId) return
     await db().from('doctor_checkout_claims').update({ status: 'create_pending', doctor_id: doctorId }).eq('stripe_customer_id', identity.customerId)
+    await startPaidGoLive(doctorId, paid)
   } catch (error) {
     console.error('[go-live] payment-link intake failed', error instanceof Error ? error.name : 'error')
+    throw error
   }
 }
 
@@ -320,6 +369,7 @@ export async function noteMembershipInvoicePaid(invoice: {
         customer_email: customer.email,
         mode: 'subscription',
         payment_link: 'invoice',
+        payment_status: Number(invoice.amount_paid || 0) > 0 ? 'paid' : 'unpaid',
         currency: null,
         amount_total: invoice.amount_paid,
         metadata: { type: 'doctor_membership' },

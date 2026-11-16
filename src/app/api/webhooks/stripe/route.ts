@@ -15,6 +15,7 @@ import { invalidateDoctorStripe } from "@/lib/billing/stripe-cache";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
 import { ingestMembershipCheckout, noteMembershipInvoicePaid } from "@/lib/go-live/checkout";
+import { noteSignatureFailure, noteWebhookEvent } from "@/lib/go-live/webhook-health";
 import { subscriptionIdFromInvoice } from "@/lib/go-live/plan";
 import {
   isUndefinedPaymentIssueColumn,
@@ -26,6 +27,10 @@ import type { Database } from "@/types/supabase";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 type AdminClient = SupabaseClient<Database>;
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const maxDuration = 60
 
 const NON_MEMBERSHIP_TYPES = new Set(["synapse_seat", "seminar_package"]);
 
@@ -227,6 +232,7 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     const err = error as Error;
     console.error(`Stripe webhook signature error: ${err.message}`);
+    await noteSignatureFailure().catch(() => undefined)
     return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 400 });
   }
 
@@ -240,9 +246,6 @@ export async function POST(req: Request) {
   if (alreadyProcessed) {
     return NextResponse.json({ received: true, duplicate: true });
   }
-
-  // 2. RECORD PROCESSING START
-  await supabase.from('processed_webhooks').insert({ id: event.id });
 
   try {
     switch (event.type) {
@@ -1069,7 +1072,9 @@ export async function POST(req: Request) {
         const session = event.data.object as any;
         if (isSeminarCheckout(session.metadata?.type || "") && session.payment_status === "paid") {
           await fulfillSeminarSession(supabaseSeminarStore(), checkoutFromStripeSession(session));
+          break;
         }
+        if (!session.metadata?.userId) await ingestMembershipCheckout(session);
         break;
       }
 
@@ -1194,7 +1199,10 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     console.error("Webhook Automation Dispatch Error:", error);
+    return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 
+  await supabase.from('processed_webhooks').insert({ id: event.id });
+  await noteWebhookEvent(event.id, event.type).catch(() => undefined);
   return NextResponse.json({ received: true });
 }

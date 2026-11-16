@@ -37,6 +37,9 @@ export type ExtractedProfile = {
   country: string
   faqs: FaqEntry[]
   dossier: string
+  /** Office number from the website or booking page. Never the application mobile. */
+  practicePhone: string
+  galleryUrls: string[]
 }
 
 export type VoiceDraft = {

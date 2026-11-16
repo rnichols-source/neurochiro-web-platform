@@ -117,8 +117,16 @@ export async function activateAfterOnboardingCall(doctorId: string) {
     }).catch(() => {});
   }
 
+  const { runDoctorGoLive } = await import('@/lib/go-live/orchestrator')
+  await runDoctorGoLive({
+    doctorId,
+    source: 'admin',
+    only: ['waitlist', 'instagram', 'summary'],
+  }).catch(() => undefined)
+
   revalidatePath('/admin/directory');
   revalidatePath('/admin/members');
+  revalidatePath('/admin/go-live');
   bustAdminCoverage();
   return { success: true };
 }

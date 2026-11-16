@@ -50,6 +50,46 @@ export function emptyVoice(): VoiceDraft {
   return { bio: '', shortIntro: '', philosophy: '', faqs: [] }
 }
 
+/** Used when the AI Gateway is down. Facts only, from the scrape and the application. */
+export function minimumVoice(input: {
+  doctorName: string
+  clinicName: string
+  city: string
+  state: string
+  techniques: string[]
+  firstVisitInfo: string
+  faqs: FaqEntry[]
+}): VoiceDraft {
+  const name = input.doctorName.trim()
+  const clinic = input.clinicName.trim()
+  const place = [input.city.trim(), input.state.trim()].filter(Boolean).join(', ')
+  const who = name ? `Dr. ${name}` : (clinic || 'This practice')
+  const where = clinic && place
+    ? `${who} practices at ${clinic} in ${place}.`
+    : place
+      ? `${who} practices in ${place}.`
+      : clinic
+        ? `${who} practices at ${clinic}.`
+        : ''
+  const techniques = input.techniques.filter(Boolean).slice(0, 4)
+  const techniqueLine = techniques.length
+    ? ` Care includes ${techniques.join(', ')}.`
+    : ''
+  const visit = sanitizeVoice(input.firstVisitInfo)
+  const bio = sanitizeVoice(`${where}${techniqueLine}${visit ? ` ${visit}` : ''}`)
+  const shortIntro = sanitizeVoice(
+    clinic && place
+      ? `${clinic} offers nervous system focused chiropractic care in ${place}.`
+      : where,
+  )
+  return sanitizeDraft({
+    bio,
+    shortIntro,
+    philosophy: '',
+    faqs: input.faqs,
+  })
+}
+
 function swapPatients(value: string): string {
   return value
     .replace(/\bpatients'\b/gi, 'community members\'')

@@ -1,4 +1,3 @@
-import { ONBOARDING_CONFIG } from '../onboarding-config.ts'
 import { escapeHtml } from '../students/html.ts'
 import { PORTAL_LOGIN_URL, REFERRAL_URL, REQUESTS_URL } from '../go-live/plan.ts'
 
@@ -67,15 +66,13 @@ export function approvedWelcomeEmail(input: ApprovedWelcome): Mail {
     html: `
       <h1>You're approved.</h1>
       <p>Congratulations, Dr. ${name}.</p>
-      <p>Open your portal first. This link signs you in. You can set a password later in Settings.</p>
-      <p><a href="${escapeHtml(activate)}">Activate your portal</a></p>
+      <p>Open your portal first. This link signs you in and lets you set a password. After that, log in at <a href="${escapeHtml(PORTAL_LOGIN_URL)}">${escapeHtml(PORTAL_LOGIN_URL)}</a>.</p>
+      <p><a href="${escapeHtml(activate)}">Set your password and open the portal</a></p>
       <p>Your profile is live.</p>
       <p><a href="${escapeHtml(profile)}">${escapeHtml(profile)}</a></p>
       <p>${started}${receiptHtml}</p>
       <p>New community member requests arrive by text and by email as soon as someone asks for your office. Reply to that text or email. Each request includes a one-click link: they came in, or they did not come in. The same list is in your portal: <a href="${escapeHtml(REQUESTS_URL)}">community member requests</a>.</p>
-      <p>Book your onboarding call. <a href="${escapeHtml(ONBOARDING_CALL_URL)}">Pick a time with Dr. Ray</a>.</p>
-      <p>Book your Spotlight interview (20-30 minutes). The full episode goes on YouTube and the NeuroChiro Spotlight podcast. Clips go on Instagram, TikTok, and YouTube. <a href="${escapeHtml(ONBOARDING_CONFIG.CALENDLY_SPOTLIGHT)}">Book your Spotlight interview</a>.</p>
-      <p>Book your Weekly Adjustment IG Live. <a href="${escapeHtml(ONBOARDING_CONFIG.CALENDLY_IG_LIVE)}">Book your IG Live</a>.</p>
+      <p>The next step is your onboarding call. <a href="${escapeHtml(ONBOARDING_CALL_URL)}">Pick a time with Dr. Ray</a>.</p>
       <p>When a colleague joins from your link, you get a free month. <a href="${escapeHtml(REFERRAL_URL)}">Your referral program</a>.</p>
       <p>Dr. Ray</p>
     `,

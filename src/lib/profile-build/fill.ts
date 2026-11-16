@@ -32,6 +32,8 @@ export type ResearchDraft = {
   shortIntro: string
   philosophy: string
   faq: { question: string; answer: string }[]
+  practicePhone: string
+  galleryUrls: string[]
 }
 
 const FILLABLE = [
@@ -63,6 +65,7 @@ const FILLABLE = [
   'short_intro',
   'philosophy',
   'faq',
+  'gallery_images',
   'timezone',
   'profile_built_at',
 ] as const
@@ -104,6 +107,8 @@ export function draftFromExtraction(extracted: ExtractedProfile, voice: VoiceDra
     shortIntro: voice.shortIntro,
     philosophy: voice.philosophy,
     faq: voiceFaqs(extracted.faqs, voice.faqs),
+    practicePhone: extracted.practicePhone,
+    galleryUrls: extracted.galleryUrls,
   }
 }
 
@@ -139,14 +144,43 @@ export function researchColumns(draft: ResearchDraft): Record<string, unknown> {
   assign(columns, 'short_intro', draft.shortIntro, 500)
   assign(columns, 'philosophy', draft.philosophy, 1000)
   if (draft.faq.length) columns.faq = draft.faq.slice(0, 5)
+  if (draft.galleryUrls.length) columns.gallery_images = draft.galleryUrls.slice(0, 6)
   return columns
+}
+
+export function phoneDigits(value: string): string {
+  const digits = value.replace(/\D/g, '')
+  if (digits.length === 11 && digits.startsWith('1')) return digits.slice(1)
+  return digits
+}
+
+/**
+ * Publish the website office number when the listing phone is blank, or when
+ * the listing phone is only the application mobile. Never replace a different
+ * office number, and never write the application mobile by itself.
+ */
+export function decideListingPhone(input: {
+  currentPhone: string
+  practicePhone: string
+  alertPhones: string[]
+}): string | null {
+  const practice = input.practicePhone.trim()
+  if (!practice || !phoneDigits(practice)) return null
+  const current = input.currentPhone.trim()
+  if (!current) return practice.slice(0, 40)
+  const currentDigits = phoneDigits(current)
+  const practiceDigits = phoneDigits(practice)
+  if (!currentDigits || currentDigits === practiceDigits) return null
+  const alerts = input.alertPhones.map(phoneDigits).filter((digits) => digits.length >= 10)
+  if (alerts.includes(currentDigits)) return practice.slice(0, 40)
+  return null
 }
 
 export function applyResearch(
   current: Record<string, unknown>,
   draft: ResearchDraft,
   now: string,
-  options: { complete?: boolean } = {},
+  options: { complete?: boolean; alertPhones?: string[] } = {},
 ): Record<string, unknown> {
   const proposed = researchColumns(draft)
   const state = typeof proposed.state === 'string' ? proposed.state : text(current.state)
@@ -158,7 +192,20 @@ export function applyResearch(
     currentForFill.timezone = ''
   }
   if (options.complete !== false && isBlank(current.profile_built_at)) proposed.profile_built_at = now
-  return fillOnlyBlank(currentForFill, proposed)
+  const patch = fillOnlyBlank(currentForFill, proposed)
+  const alerts = options.alertPhones || stringList(current.lead_alert_phones)
+  const phone = decideListingPhone({
+    currentPhone: text(current.phone),
+    practicePhone: draft.practicePhone,
+    alertPhones: alerts,
+  })
+  if (phone) patch.phone = phone
+  return patch
+}
+
+function stringList(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  return value.filter((item): item is string => typeof item === 'string')
 }
 
 export function fillOnlyBlank(current: Record<string, unknown>, proposed: Record<string, unknown>): Record<string, unknown> {

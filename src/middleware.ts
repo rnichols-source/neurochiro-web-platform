@@ -4,6 +4,7 @@ import type { NextRequest } from 'next/server';
 import { loginPathWithReturn } from '@/lib/auth/safe-return-path';
 import { MEMBER_REF_COOKIE, normalizeRefSlug } from '@/lib/member-referrals/logic';
 import { SUPABASE_PUBLIC_KEY, SUPABASE_URL } from '@/lib/supabase-env';
+import { resolveSupabasePublicEnv } from '@/lib/supabase-runtime-env';
 
 export async function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
@@ -11,9 +12,21 @@ export async function middleware(req: NextRequest) {
   requestHeaders.set('x-search', req.nextUrl.search);
   const res = NextResponse.next({ request: { headers: requestHeaders } });
 
+  const publicEnv = resolveSupabasePublicEnv(process.env, SUPABASE_URL, SUPABASE_PUBLIC_KEY);
+  if (!publicEnv) {
+    const path = req.nextUrl.pathname;
+    const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
+    const careInvite = path === '/portal/care/from-doctor' || path.startsWith('/portal/care/from-doctor/');
+    const open = path === '/get-started' || path === '/student/verify' || applying || careInvite;
+    if (!open && (path.startsWith('/portal') || path.startsWith('/doctor') || path.startsWith('/student') || path.startsWith('/admin'))) {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+    return res;
+  }
+
   const supabase = createServerClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLIC_KEY,
+    publicEnv.url,
+    publicEnv.key,
     {
       cookies: {
         getAll() {
