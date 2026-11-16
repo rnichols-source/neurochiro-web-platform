@@ -93,14 +93,20 @@ export async function saveLeadTextAlerts(input: {
   }
 
   const consent = input.consent === true
-  const patch = {
+  const patch: Record<string, unknown> = {
     lead_alert_phones: phones,
     sms_alerts_enabled: input.enabled === true,
     sms_alerts_consent_at: consent ? new Date().toISOString() : null,
     sms_alerts_consent_text: consent ? DOCTOR_SMS_CONSENT_V1 : null,
   }
+  if (consent && phones.length > 0) patch.sms_prompt_required = false
   const admin = doctorDb()
-  const { error } = await admin.from('doctors').update(patch).eq('id', owned.id)
+  let { error } = await admin.from('doctors').update(patch).eq('id', owned.id)
+  if (error && missing(error) && 'sms_prompt_required' in patch) {
+    delete patch.sms_prompt_required
+    const retry = await admin.from('doctors').update(patch).eq('id', owned.id)
+    error = retry.error
+  }
   if (error) {
     if (missing(error)) return { ok: false, error: 'Text alerts are coming soon', comingSoon: true }
     return { ok: false, error: 'Text alerts could not be saved.' }

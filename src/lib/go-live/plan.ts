@@ -1,5 +1,6 @@
 import { toApplicationE164 } from '../applications/phone.ts'
 import { toE164 } from '../sms/phone.ts'
+import { isDoctorMembershipProduct, isStudentProduct, type ProductHint } from './products.ts'
 
 export const DOCTOR_PAY_URL = 'https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q'
 export const PORTAL_LOGIN_URL = 'https://neurochiro.co/login?next=%2Fdoctor%2Fdashboard'
@@ -25,11 +26,20 @@ const NON_MEMBERSHIP = new Set([
   'conference_signup',
 ])
 
+/** Recurring list prices, Dec 1 USD prices, founding currencies, and multi-office totals. */
 const KNOWN_AMOUNTS: Record<string, number[]> = {
-  usd: [9900, 99000],
+  usd: [9900, 99000, 19900, 199000, 16800, 168000, 30600, 306000],
   cad: [13900, 139000],
   aud: [12900, 129000],
   gbp: [7900, 79000],
+  eur: [7900, 79000],
+  nzd: [13900, 139000],
+  aed: [36400, 363600],
+}
+
+/** One-time first charges: $39 back pay and $49 Brave Practice first month. */
+const SPECIAL_ONE_TIME: Record<string, number[]> = {
+  usd: [3900, 4000, 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900],
 }
 
 export type PaymentState = 'paid' | 'requires_action' | 'failed'
@@ -240,24 +250,46 @@ export type CheckoutIdentity = {
   userId: string | null
   mode: string | null
   paymentLinkPresent: boolean
+  /** Invoices have no Payment Link. The amount list still applies when the product could not be loaded. */
+  allowAmountFallback?: boolean
 }
 
+export type { ProductHint }
+
+function amountMatches(currency: string | null, amount: number | null, table: Record<string, number[]>): boolean {
+  if (amount == null) return false
+  return (table[(currency || '').toLowerCase()] || []).includes(amount)
+}
+
+/**
+ * A checkout is a doctor membership when metadata, a known price, the Stripe
+ * product, or the amount fallback says so. Students and other products never match.
+ * The amount fallback stays for Payment Links whose product could not be loaded.
+ */
 export function isDoctorMembershipCheckout(
   input: CheckoutIdentity,
   known: { priceIds: string[]; studentPriceIds: string[] },
+  product?: ProductHint | null,
 ): boolean {
   const type = (input.metadataType || '').trim()
   if (NON_MEMBERSHIP.has(type)) return false
   if ((input.metadataRole || '').toLowerCase() === 'student') return false
   if (input.priceId && known.studentPriceIds.includes(input.priceId)) return false
+  if (isStudentProduct(product)) return false
   if (type === 'doctor_membership' || (input.metadataRole || '').toLowerCase() === 'doctor') return true
   if (input.priceId && known.priceIds.includes(input.priceId)) return true
-  if (!input.paymentLinkPresent || input.mode !== 'subscription') return false
+  if (isDoctorMembershipProduct(product)) return true
+  if (product?.id) return false
   if (type) return false
-  const currency = (input.currency || '').toLowerCase()
-  const amount = input.amountTotal
-  if (amount == null) return false
-  return (KNOWN_AMOUNTS[currency] || []).includes(amount)
+  const amountAllowed = input.paymentLinkPresent || input.allowAmountFallback === true
+  if (!amountAllowed) return false
+  if (input.mode === 'payment') {
+    return amountMatches(input.currency, input.amountTotal, SPECIAL_ONE_TIME)
+      || amountMatches(input.currency, input.amountTotal, { aed: [363600] })
+  }
+  if (input.mode !== 'subscription') return false
+  if (amountMatches(input.currency, input.amountTotal, SPECIAL_ONE_TIME)) return true
+  return amountMatches(input.currency, input.amountTotal, KNOWN_AMOUNTS)
 }
 
 export type ExistingListing = {
@@ -286,23 +318,26 @@ export function isPublicLiveListing(row: {
 export type CheckoutIntake =
   | { action: 'ignore'; reason: 'not_membership' }
   | { action: 'link_live'; doctorId: string }
-  | { action: 'attach_pending'; doctorId: string }
-  | { action: 'create_pending' }
+  | { action: 'go_live'; doctorId: string }
+  | { action: 'create_and_go_live' }
 
 /**
- * A Payment Link for someone who is already verified or approved only records Stripe ids.
- * It never hides that listing. A brand-new payer with no listing becomes a pending review row.
+ * Payment publishes the doctor. A listing that already has a successful go-live
+ * run only stores Stripe ids. Every other payer runs go-live, and a live listing
+ * is never hidden.
  */
 export function planCheckoutIntake(input: {
   membership: boolean
+  hasOkGoLive?: boolean
   listings: Array<ExistingListing & { verificationStatus?: string | null; isApproved?: boolean | null }>
 }): CheckoutIntake {
   if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
   const live = input.listings.find((row) => isPublicLiveListing(row))
-  if (live) return { action: 'link_live', doctorId: live.id }
+  if (live && input.hasOkGoLive) return { action: 'link_live', doctorId: live.id }
+  if (live) return { action: 'go_live', doctorId: live.id }
   const pending = input.listings[0]
-  if (pending) return { action: 'attach_pending', doctorId: pending.id }
-  return { action: 'create_pending' }
+  if (pending) return { action: 'go_live', doctorId: pending.id }
+  return { action: 'create_and_go_live' }
 }
 
 export type InvoiceApplication = {
@@ -313,28 +348,51 @@ export type InvoiceApplication = {
 }
 
 export type InvoiceIntake =
-  | { action: 'ignore'; reason: 'not_paid' | 'renewal' | 'live_listing' | 'already_tracked' }
+  | { action: 'ignore'; reason: 'not_paid' | 'renewal' | 'not_membership' | 'already_live' }
   | { action: 'complete_bank'; applicationId: string }
-  | { action: 'create_pending' }
+  | { action: 'go_live'; doctorId: string }
+  | { action: 'create_and_go_live' }
 
-/** Renewals are ignored. Only the first invoice of a new subscription can open a pending listing. */
+/** A renewal never starts go-live. The first paid doctor-membership invoice does. */
+export function invoiceIsRenewal(billingReason: string | null, hasSubscription: boolean): boolean {
+  const reason = (billingReason || '').trim()
+  if (reason === 'subscription_cycle' || reason === 'subscription_update' || reason === 'subscription_threshold' || reason === 'upcoming') {
+    return true
+  }
+  if (reason === 'subscription_create' || reason === 'manual') return false
+  if (!reason) return hasSubscription
+  return hasSubscription
+}
+
 export function planInvoiceIntake(input: {
   billingReason: string | null
   amountPaid: number
+  membership: boolean
+  hasSubscription?: boolean
+  hasOkGoLive?: boolean
   applications: InvoiceApplication[]
-  listings: Array<{ verificationStatus?: string | null; isApproved?: boolean | null }>
+  listings: Array<{ id?: string; verificationStatus?: string | null; isApproved?: boolean | null }>
 }): InvoiceIntake {
   if (input.amountPaid <= 0) return { action: 'ignore', reason: 'not_paid' }
-  if (input.billingReason !== 'subscription_create') return { action: 'ignore', reason: 'renewal' }
+  const reason = input.billingReason || ''
+  const hasSubscription = input.hasSubscription ?? (
+    reason === 'subscription_create'
+    || reason === 'subscription_cycle'
+    || reason === 'subscription_update'
+    || reason === 'subscription_threshold'
+  )
+  if (invoiceIsRenewal(input.billingReason, hasSubscription)) {
+    return { action: 'ignore', reason: 'renewal' }
+  }
+  if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
   const bank = [...input.applications]
     .filter((row) => row.status === 'needs_action' && row.reviewedAt)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
   if (bank) return { action: 'complete_bank', applicationId: bank.id }
-  if (input.applications.some((row) => row.status === 'approved' || row.status === 'under_review' || row.status === 'declined')) {
-    return { action: 'ignore', reason: 'already_tracked' }
-  }
-  if (input.listings.some((row) => isPublicLiveListing(row))) return { action: 'ignore', reason: 'live_listing' }
-  return { action: 'create_pending' }
+  if (input.hasOkGoLive) return { action: 'ignore', reason: 'already_live' }
+  const listing = input.listings.find((row) => row.id)
+  if (listing?.id) return { action: 'go_live', doctorId: listing.id }
+  return { action: 'create_and_go_live' }
 }
 
 export function subscriptionIdFromInvoice(invoice: {
@@ -581,4 +639,145 @@ export function orderWaitlistTiers<T extends WaitlistMatch>(matches: T[]): T[] {
     if (bandA !== bandB) return bandA - bandB
     return a.distanceMiles - b.distanceMiles
   })
+}
+
+const STEP_NAMES = ['checkout', 'profile', 'portal', 'welcome', 'waitlist', 'instagram', 'summary'] as const
+type StepName = (typeof STEP_NAMES)[number]
+
+type RecordedStep = { step: string; status: string }
+
+function recordedStepOk(steps: RecordedStep[], step: string): boolean {
+  return steps.some((row) => row.step === step && row.status === 'ok')
+}
+
+/** Force re-runs unfinished work. A welcome that already succeeded stays put unless resend is ticked. */
+export function shouldSendWelcome(input: { alreadyOk: boolean; resendWelcome: boolean }): boolean {
+  if (!input.alreadyOk) return true
+  return input.resendWelcome === true
+}
+
+export function stepsToRun(input: {
+  completed: RecordedStep[]
+  force: boolean
+  resendWelcome: boolean
+}): StepName[] {
+  return STEP_NAMES.filter((step) => {
+    const ok = recordedStepOk(input.completed, step)
+    if (step === 'welcome') return shouldSendWelcome({ alreadyOk: ok, resendWelcome: input.resendWelcome })
+    if (!ok) return true
+    return input.force
+  })
+}
+
+export function isStudentRole(role: string | null | undefined): boolean {
+  const value = (role || '').trim().toLowerCase()
+  return value === 'student' || value === 'student_paid' || value.startsWith('student_')
+}
+
+export type PromotionPlan =
+  | { action: 'create_user' }
+  | { action: 'exclude'; reason: 'student' | 'vendor' | 'admin' }
+  | { action: 'link_existing'; promoteRole: boolean }
+
+/** An existing community member becomes a doctor on the same auth user. Students stay students. */
+export function promotionPlan(input: {
+  hasAccount: boolean
+  hasDoctor: boolean
+  role: string | null
+}): PromotionPlan {
+  if (!input.hasAccount) return { action: 'create_user' }
+  if (isStudentRole(input.role)) return { action: 'exclude', reason: 'student' }
+  const role = (input.role || '').trim().toLowerCase()
+  if (role === 'vendor') return { action: 'exclude', reason: 'vendor' }
+  if (role === 'admin' || role === 'founder' || role === 'super_admin' || role === 'staff') {
+    return { action: 'exclude', reason: 'admin' }
+  }
+  const alreadyDoctor = role.includes('doctor')
+  return { action: 'link_existing', promoteRole: !alreadyDoctor }
+}
+
+export type LoggedInPlan =
+  | { action: 'ignore'; reason: 'not_membership' | 'student' | 'excluded' }
+  | { action: 'store_ids'; doctorId: string }
+  | { action: 'go_live'; doctorId: string }
+  | { action: 'promote_and_go_live' }
+  | { action: 'create_and_go_live' }
+
+export function planLoggedInCheckout(input: {
+  membership: boolean
+  role: string | null
+  doctorId: string | null
+  hasOkGoLive: boolean
+}): LoggedInPlan {
+  if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
+  const promotion = promotionPlan({
+    hasAccount: true,
+    hasDoctor: Boolean(input.doctorId),
+    role: input.role,
+  })
+  if (promotion.action === 'exclude') {
+    return { action: 'ignore', reason: promotion.reason === 'student' ? 'student' : 'excluded' }
+  }
+  if (input.doctorId && input.hasOkGoLive) return { action: 'store_ids', doctorId: input.doctorId }
+  if (input.doctorId) return { action: 'go_live', doctorId: input.doctorId }
+  if (promotion.action === 'link_existing') return { action: 'promote_and_go_live' }
+  return { action: 'create_and_go_live' }
+}
+
+export type ProfileGap = 'website' | 'photo' | 'write-up'
+
+export function minimumProfileGaps(input: { website: string; photo: string; bio: string }): ProfileGap[] {
+  const missing: ProfileGap[] = []
+  if (!input.website.trim()) missing.push('website')
+  if (!input.photo.trim()) missing.push('photo')
+  if (input.bio.trim().length < 20) missing.push('write-up')
+  return missing
+}
+
+export function smsPromptRequired(input: { phone: string | null; consent: boolean }): boolean {
+  if (input.consent === true && canTextNumber(input.phone)) return false
+  return true
+}
+
+export function adminGoLiveSummary(input: {
+  doctorName: string
+  email: string
+  profileUrl: string
+  city: string
+  source: string
+  missing: string[]
+  textSent: boolean
+}): { subject: string; text: string } {
+  const lines = [
+    `${input.doctorName || 'A doctor'} is live.`,
+    `Email: ${input.email || 'unknown'}`,
+    input.city ? `City: ${input.city}` : '',
+    input.profileUrl ? `Profile: ${input.profileUrl}` : '',
+    `Source: ${input.source}`,
+  ].filter(Boolean)
+  if (input.missing.length) {
+    lines.push('Profile went live in basic form: needs website/photo/write-up')
+    lines.push(`Missing: ${input.missing.join(', ')}`)
+  }
+  if (!input.textSent) lines.push('No text sent: no mobile on file')
+  return {
+    subject: `Go-live: ${input.doctorName || input.email || 'new doctor'}`,
+    text: lines.join('\n'),
+  }
+}
+
+export function invoiceLineProduct(line: {
+  price?: { id?: string | null; product?: string | { id?: string | null } | null } | null
+  pricing?: { price_details?: { price?: string | null; product?: string | null } | null } | null
+}): { priceId: string | null; productId: string | null } {
+  const modern = line.pricing?.price_details
+  const legacyProduct = line.price?.product
+  const productId = modern?.product
+    || (typeof legacyProduct === 'string' ? legacyProduct : legacyProduct?.id)
+    || null
+  const priceId = modern?.price || line.price?.id || null
+  return {
+    priceId: priceId || null,
+    productId: productId || null,
+  }
 }

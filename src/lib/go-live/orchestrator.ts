@@ -8,7 +8,7 @@ import { buildDoctorProfileNow } from '@/lib/profile-build/run'
 import { readSmsConfig } from '@/lib/sms/config'
 import { quoSend } from '@/lib/sms/quo'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { PORTAL_LOGIN_URL } from './plan.ts'
+import { adminGoLiveSummary, minimumProfileGaps, PORTAL_LOGIN_URL, smsPromptRequired } from './plan.ts'
 import {
   goLiveStepAlreadyOk,
   openGoLiveRun,
@@ -120,6 +120,8 @@ export async function runDoctorGoLive(input: {
   source: GoLiveSource
   only?: GoLiveStep[]
   force?: boolean
+  /** Sends the welcome again only when this is true. An ok welcome step, including a hand-entered one, stays put. */
+  resendWelcome?: boolean
 }): Promise<GoLiveStepResult[]> {
   const doctor = await loadDoctor(input.doctorId)
   if (!doctor) return [{ step: 'checkout', status: 'failed', reason: 'Doctor listing was not found.' }]
@@ -146,10 +148,24 @@ export async function runDoctorGoLive(input: {
   if (wanted.has('profile')) {
     const built = await buildDoctorProfileNow(input.doctorId)
     await publishListing(doctor, input.source)
+    const fresh = await loadDoctor(input.doctorId)
+    const missing = minimumProfileGaps({
+      website: text(fresh?.website_url),
+      photo: text(fresh?.photo_url),
+      bio: text(fresh?.bio),
+    })
+    const minimum = missing.length > 0 || fresh?.needs_ai_enrich === true
+    await db().from('doctors').update({
+      profile_publish_mode: minimum ? 'minimum' : 'full',
+      ...(minimum ? { needs_ai_enrich: true } : {}),
+    }).eq('id', input.doctorId)
+    const reason = minimum
+      ? `${built.reason} Profile went live in basic form: needs website/photo/write-up. Missing: ${missing.join(', ') || 'write-up'}.`
+      : built.reason
     await keep({
       step: 'profile',
       status: built.ok ? 'ok' : 'failed',
-      reason: built.reason,
+      reason,
     })
   }
 
@@ -159,8 +175,8 @@ export async function runDoctorGoLive(input: {
   }
 
   if (wanted.has('welcome')) {
-    const already = !input.force && await goLiveStepAlreadyOk(input.doctorId, 'welcome')
-    if (already) {
+    const already = await goLiveStepAlreadyOk(input.doctorId, 'welcome')
+    if (already && input.resendWelcome !== true) {
       await keep({ step: 'welcome', status: 'skipped', reason: 'Welcome email and text were already sent for this doctor.' })
     } else {
       await keep(await sendWelcome(doctor, live))
@@ -198,9 +214,14 @@ async function sendWelcome(doctor: Record<string, unknown>, live: boolean): Prom
     profileUrl: url,
     at: Number.isNaN(at.getTime()) ? new Date() : at,
   })
+  const mobile = firstAlert(doctor.lead_alert_phones)
+  const prompt = smsPromptRequired({ phone: mobile, consent: Boolean(mobile) })
+  if (prompt) {
+    await db().from('doctors').update({ sms_prompt_required: true }).eq('id', doctor.id)
+  }
   const sms = approvalSmsFor({
-    smsConsent: true,
-    mobileE164: firstAlert(doctor.lead_alert_phones),
+    smsConsent: Boolean(mobile),
+    mobileE164: mobile,
     lastName,
     profileUrl: url,
   })
@@ -251,6 +272,11 @@ async function sendPlainWelcome(mail: { to: string; subject: string; html: strin
     console.error('[go-live] welcome email failed', error instanceof Error ? error.name : 'error')
     return false
   }
+}
+
+function summaryReason(lines: string[]): string {
+  const notable = lines.filter((line) => line.startsWith('Profile went live') || line.startsWith('Missing:') || line.startsWith('No text sent'))
+  return [`Emailed ${ADMIN_EMAIL}.`, ...notable].join(' ')
 }
 
 function firstAlert(value: unknown): string | null {
@@ -305,10 +331,31 @@ async function queueInstagram(doctorId: string, name: string, live: boolean): Pr
 
 async function sendSummary(doctor: Record<string, unknown>, steps: GoLiveStepResult[], live: boolean): Promise<GoLiveStepResult> {
   const name = text(doctor.last_name) || text(doctor.first_name) || 'Doctor'
-  const lines = steps.map((step) => `${step.step}: ${step.status} — ${step.reason}`)
+  const fresh = await loadDoctor(text(doctor.id)) || doctor
+  const missing = minimumProfileGaps({
+    website: text(fresh.website_url),
+    photo: text(fresh.photo_url),
+    bio: text(fresh.bio),
+  })
+  const minimum = missing.length > 0 || fresh.needs_ai_enrich === true || fresh.profile_publish_mode === 'minimum'
+  const mobile = firstAlert(fresh.lead_alert_phones)
+  const textSent = !smsPromptRequired({ phone: mobile, consent: Boolean(mobile) })
+  const note = adminGoLiveSummary({
+    doctorName: `Dr. ${name}`,
+    email: text(fresh.email),
+    profileUrl: profileUrl(text(fresh.slug)),
+    city: text(fresh.city),
+    source: 'go-live',
+    missing: minimum ? (missing.length ? missing : ['website', 'photo', 'write-up']) : [],
+    textSent,
+  })
+  const lines = [
+    ...steps.map((step) => `${step.step}: ${step.status} — ${step.reason}`),
+    ...note.text.split('\n').filter((line) => line.startsWith('Profile went live') || line.startsWith('Missing:') || line.startsWith('No text sent')),
+  ]
   const subject = `Dr ${name} is live`
   if (!live) {
-    return { step: 'summary', status: 'ok', reason: `Would email ${ADMIN_EMAIL}: ${subject}. Nothing was sent.`, detail: { lines } }
+    return { step: 'summary', status: 'ok', reason: `Would email ${ADMIN_EMAIL}: ${subject}. ${summaryReason(lines)} Nothing was sent.`, detail: { lines } }
   }
   const key = process.env.RESEND_API_KEY || ''
   if (!key) return { step: 'summary', status: 'failed', reason: 'RESEND_API_KEY is not set, so the summary email was not sent.' }
@@ -323,7 +370,7 @@ async function sendSummary(doctor: Record<string, unknown>, steps: GoLiveStepRes
       html,
     })
     if (result.error) return { step: 'summary', status: 'failed', reason: 'Summary email was rejected.' }
-    return { step: 'summary', status: 'ok', reason: `Emailed ${ADMIN_EMAIL}.` }
+    return { step: 'summary', status: 'ok', reason: summaryReason(lines) }
   } catch {
     return { step: 'summary', status: 'failed', reason: 'Summary email failed.' }
   }
