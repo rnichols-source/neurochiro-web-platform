@@ -23,11 +23,15 @@ describe('doctor go-live dry run', () => {
     assert.doesNotMatch(report.profile.firstVisit, /alignlife|patient/i)
   })
 
-  it('welcomes with the onboarding link only', () => {
+  it('welcomes with the personal note and the onboarding link only', () => {
+    assert.equal(report.welcome.subject, 'Welcome to NeuroChiro, Dr. Lovelace')
     assert.equal(report.welcome.hasOnboarding, true)
     assert.equal(report.welcome.hasLogin, true)
-    assert.equal(report.welcome.hasSpotlight, false)
-    assert.equal(report.welcome.hasIgLive, false)
+    assert.equal(report.welcome.mentionsSpotlight, true)
+    assert.equal(report.welcome.hasOtherBooking, false)
+    assert.match(report.welcome.html, /Hi Dr\. Ada,/)
+    assert.match(report.welcome.html, /reset-password\?email=/)
+    assert.doesNotMatch(report.welcome.html, /auth\/activate/)
     assert.match(report.sms, /neurochiro-onboarding-call/)
     assert.match(report.sms, /neurochiro\.co\/login/)
     assert.doesNotMatch(report.sms, /!|Spotlight|IG Live/)

@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { approvedWelcomeEmail } from '../applications/emails.ts'
 import { approvalText } from '../applications/approval-sms.ts'
+import { goLiveWelcomeEmail, welcomeHasOtherBookingLink } from './welcome-email.ts'
 import { extractProfile } from '../profile-build/extract.ts'
 import { decideListingPhone } from '../profile-build/fill.ts'
 import type { PageDocument } from '../profile-build/types.ts'
@@ -17,6 +17,7 @@ const TEST_DOCTOR = {
   is_test: true,
   firstName: 'Ada',
   lastName: 'Lovelace',
+  practiceName: 'Harbor Nervous System',
   email: 'go-live-dry-run@example.com',
   slug: 'ada-lovelace-dry-run',
   mobile: '+18645550100',
@@ -46,7 +47,7 @@ export type DryRunReport = {
   sends: 'stubbed'
   steps: GoLiveStepResult[]
   retry: GoLiveStepResult[]
-  welcome: { subject: string; hasSpotlight: boolean; hasIgLive: boolean; hasOnboarding: boolean; hasLogin: boolean }
+  welcome: { subject: string; html: string; hasOtherBooking: boolean; hasOnboarding: boolean; hasLogin: boolean; mentionsSpotlight: boolean }
   sms: string
   profile: { practicePhone: string; publishedPhone: string; firstVisit: string; faqs: string[]; needsAiEnrich: boolean }
   webhookHealth: { signature: string | null; stalePaid: string | null }
@@ -69,15 +70,15 @@ export function runGoLiveDryRun(now = '2026-11-16T01:30:00.000Z'): DryRunReport 
     alertPhones: [TEST_DOCTOR.mobile],
   }) || ''
   const profileUrl = `https://neurochiro.co/directory/${TEST_DOCTOR.slug}`
-  const mail = approvedWelcomeEmail({
+  const mail = goLiveWelcomeEmail({
     to: TEST_DOCTOR.email,
+    firstName: TEST_DOCTOR.firstName,
     lastName: TEST_DOCTOR.lastName,
+    practiceName: TEST_DOCTOR.practiceName,
+    city: TEST_DOCTOR.city,
+    area: '',
     profileUrl,
-    plan: 'monthly',
-    priceLabel: '$99/mo',
-    amountLabel: null,
-    receiptUrl: null,
-    activateUrl: 'https://neurochiro.co/auth/activate?token_hash=dry-run&type=recovery&next=%2Fdoctor%2Fdashboard',
+    at: new Date(now),
   })
   const sms = approvalText(TEST_DOCTOR.lastName, profileUrl)
   const questions = voice.faqs.map((item) => item.question)
@@ -88,7 +89,7 @@ export function runGoLiveDryRun(now = '2026-11-16T01:30:00.000Z'): DryRunReport 
       status: 'ok',
       reason: `AI Gateway unavailable. Published a minimum profile and flagged needs AI enrich. Practice phone ${publishedPhone || 'missing'}. Would geocode ${extracted.address}, ${extracted.city}, ${extracted.state}.`,
     },
-    { step: 'portal', status: 'ok', reason: `Would create a portal account for ${TEST_DOCTOR.email} and include a set-password link. No account was created.` },
+    { step: 'portal', status: 'ok', reason: `Would create a portal account for ${TEST_DOCTOR.email}. The welcome email explains the reset code. No account was created.` },
     { step: 'welcome', status: 'ok', reason: `Would email ${TEST_DOCTOR.email} and text ${TEST_DOCTOR.mobile}. Onboarding call only. Nothing was sent.`, detail: { subject: mail.subject, sms } },
     { step: 'waitlist', status: 'ok', reason: 'Would email and text community members inside the existing radius with the profile and request form. Nothing was sent.' },
     { step: 'instagram', status: 'ok', reason: 'Would queue a public comment tagging the doctor and DMs for nearby Instagram requests, both with the appointment request form. Nothing was posted.' },
@@ -122,10 +123,11 @@ export function runGoLiveDryRun(now = '2026-11-16T01:30:00.000Z'): DryRunReport 
     retry,
     welcome: {
       subject: mail.subject,
-      hasSpotlight: /spotlight/i.test(mail.html),
-      hasIgLive: /ig live/i.test(mail.html),
+      html: mail.html,
+      hasOtherBooking: welcomeHasOtherBookingLink(mail.html),
       hasOnboarding: mail.html.includes('neurochiro-onboarding-call'),
       hasLogin: mail.html.includes('https://neurochiro.co/login'),
+      mentionsSpotlight: /Spotlight interview/.test(mail.html) && /Instagram Live/.test(mail.html),
     },
     sms,
     profile: {
@@ -158,8 +160,10 @@ function printReport(): void {
     `welcome subject: ${report.welcome.subject}`,
     `welcome has onboarding link: ${report.welcome.hasOnboarding}`,
     `welcome has login link: ${report.welcome.hasLogin}`,
-    `welcome has spotlight: ${report.welcome.hasSpotlight}`,
-    `welcome has IG live: ${report.welcome.hasIgLive}`,
+    `welcome mentions spotlight and IG live by name: ${report.welcome.mentionsSpotlight}`,
+    `welcome has another booking link: ${report.welcome.hasOtherBooking}`,
+    'welcome body:',
+    report.welcome.html,
     `sms: ${report.sms}`,
     `practice phone published: ${report.profile.publishedPhone}`,
     `application mobile kept off the listing: ${report.profile.publishedPhone !== report.doctor.mobile}`,

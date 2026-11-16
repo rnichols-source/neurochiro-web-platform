@@ -1,8 +1,7 @@
 import 'server-only'
 
-import { approvedWelcomeEmail } from '@/lib/applications/emails'
 import { approvalSmsFor } from '@/lib/applications/approval-sms'
-import { sendApplicationEmail } from '@/lib/applications/notify'
+import { goLiveWelcomeEmail, welcomeHasOtherBookingLink } from '@/lib/go-live/welcome-email'
 import { enqueueDoctorNotification } from '@/lib/doctor-joined-notify'
 import { queueInstagramBatch } from '@/lib/instagram/queue'
 import { buildDoctorProfileNow } from '@/lib/profile-build/run'
@@ -85,7 +84,7 @@ async function ensurePortal(doctor: Record<string, unknown>, live: boolean): Pro
     return {
       step: 'portal',
       status: 'ok',
-      reason: `Would confirm a portal account for ${email} and include a set-password link. No account was created.`,
+      reason: `Would confirm a portal account for ${email}. The welcome email explains the reset code. No account was created.`,
       activateUrl: PORTAL_LOGIN_URL,
     }
   }
@@ -111,7 +110,7 @@ async function ensurePortal(doctor: Record<string, unknown>, live: boolean): Pro
   return {
     step: 'portal',
     status: 'ok',
-    reason: 'Portal account is ready. The welcome email includes the set-password link.',
+    reason: 'Portal account is ready. The welcome email explains how to set a password with the reset code.',
     activateUrl: url,
   }
 }
@@ -154,10 +153,8 @@ export async function runDoctorGoLive(input: {
     })
   }
 
-  let portalUrl = PORTAL_LOGIN_URL
   if (wanted.has('portal')) {
     const portal = await ensurePortal(doctor, live)
-    portalUrl = portal.activateUrl
     await keep(portal)
   }
 
@@ -166,7 +163,7 @@ export async function runDoctorGoLive(input: {
     if (already) {
       await keep({ step: 'welcome', status: 'skipped', reason: 'Welcome email and text were already sent for this doctor.' })
     } else {
-      await keep(await sendWelcome(doctor, portalUrl, live))
+      await keep(await sendWelcome(doctor, live))
     }
   }
 
@@ -185,19 +182,21 @@ export async function runDoctorGoLive(input: {
   return results
 }
 
-async function sendWelcome(doctor: Record<string, unknown>, activate: string, live: boolean): Promise<GoLiveStepResult> {
+async function sendWelcome(doctor: Record<string, unknown>, live: boolean): Promise<GoLiveStepResult> {
   const email = text(doctor.email)
   const lastName = text(doctor.last_name) || text(doctor.first_name) || 'there'
   const url = profileUrl(text(doctor.slug))
-  const mail = approvedWelcomeEmail({
+  const paidAt = text(doctor.paid_at)
+  const at = paidAt ? new Date(paidAt) : new Date()
+  const mail = goLiveWelcomeEmail({
     to: email,
-    lastName,
+    firstName: text(doctor.first_name),
+    lastName: text(doctor.last_name),
+    practiceName: text(doctor.clinic_name),
+    city: text(doctor.city),
+    area: text(doctor.county),
     profileUrl: url,
-    plan: null,
-    priceLabel: null,
-    amountLabel: null,
-    receiptUrl: null,
-    activateUrl: activate,
+    at: Number.isNaN(at.getTime()) ? new Date() : at,
   })
   const sms = approvalSmsFor({
     smsConsent: true,
@@ -205,20 +204,20 @@ async function sendWelcome(doctor: Record<string, unknown>, activate: string, li
     lastName,
     profileUrl: url,
   })
-  if (/spotlight|ig live/i.test(mail.html)) {
-    return { step: 'welcome', status: 'failed', reason: 'Welcome copy still includes a Spotlight or IG Live link.' }
+  if (welcomeHasOtherBookingLink(mail.html)) {
+    return { step: 'welcome', status: 'failed', reason: 'Welcome copy includes a booking link other than the onboarding call.' }
   }
   if (!live) {
     return {
       step: 'welcome',
       status: 'ok',
-      reason: `Would email ${email || 'the doctor'} and text the onboarding link only. Nothing was sent.`,
+      reason: `Would email ${email || 'the doctor'} the personal welcome and text the onboarding link. Nothing was sent.`,
       detail: { subject: mail.subject, sms: sms?.body || null, profileUrl: url },
     }
   }
   let emailOk = false
   let smsReason = sms ? 'not sent' : 'No text consent or mobile on file.'
-  if (email.includes('@')) emailOk = await sendApplicationEmail(mail)
+  if (email.includes('@')) emailOk = await sendPlainWelcome(mail)
   if (sms) {
     const runtime = readSmsConfig()
     if (!runtime.enabled) smsReason = 'SMS is switched off.'
@@ -232,6 +231,25 @@ async function sendWelcome(doctor: Record<string, unknown>, activate: string, li
     step: 'welcome',
     status: ok ? 'ok' : 'failed',
     reason: `${emailOk ? 'Welcome email sent.' : 'Welcome email failed.'} ${smsReason} Onboarding call link only.`,
+  }
+}
+
+async function sendPlainWelcome(mail: { to: string; subject: string; html: string }): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY || ''
+  if (!key) return false
+  try {
+    const { Resend } = await import('resend')
+    const resend = new Resend(key)
+    const result = await resend.emails.send({
+      from: 'Dr. Ray <ray@neurochirodirectory.com>',
+      to: mail.to,
+      subject: mail.subject,
+      html: mail.html,
+    })
+    return !result.error
+  } catch (error) {
+    console.error('[go-live] welcome email failed', error instanceof Error ? error.name : 'error')
+    return false
   }
 }
 
