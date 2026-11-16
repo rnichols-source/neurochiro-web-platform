@@ -5,6 +5,7 @@ import {
   enqueueDoctorNotification,
   logNotification,
 } from '@/lib/doctor-joined-notify'
+import { adminIsConfigured } from '@/lib/supabase-admin'
 
 /**
  * Cron: Scan for newly verified doctors and queue notifications.
@@ -23,6 +24,9 @@ export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  if (!adminIsConfigured()) {
+    return NextResponse.json({ error: 'Supabase environment is missing' }, { status: 500 })
   }
 
   const settings = await getNotifySettings()

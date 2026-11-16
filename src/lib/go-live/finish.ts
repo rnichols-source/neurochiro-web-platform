@@ -157,15 +157,18 @@ export async function publishDoctorListing(application: StoredApplication, now: 
   await rememberText(application.doctorId, application.mobileE164, application.smsConsent, now)
   await writeDroppingMissing('doctors', 'id', application.doctorId, { go_live_flow_at: now })
   await syncPaidPlan(application.userId, application.stripeCustomerId)
-  await notifyDoctorLive(application.doctorId)
   const { enqueueProfileBuild } = await import('@/lib/profile-build/enqueue')
   await enqueueProfileBuild({
     doctorId: application.doctorId,
     applicationId: application.id,
     websiteUrl: application.answers.website || '',
   })
-  const { queueInstagramBatch } = await import('@/lib/instagram/queue')
-  await queueInstagramBatch(application.doctorId)
+  const { runDoctorGoLive } = await import('./orchestrator')
+  await runDoctorGoLive({
+    doctorId: application.doctorId,
+    source: 'admin',
+    only: ['profile', 'portal', 'welcome', 'waitlist', 'instagram', 'summary'],
+  })
 }
 
 export async function notifyDoctorLive(doctorId: string): Promise<void> {
@@ -262,7 +265,8 @@ export async function finishDecision(input: {
     }
   }
 
-  if (decision.email || decision.sms) {
+  const sentByGoLive = !duplicateId && decision.doctor?.verification_status === 'verified' && decision.application?.status === 'approved'
+  if ((decision.email || decision.sms) && !sentByGoLive) {
     await deliverApprovalNotices({
       email: decision.email,
       sms: decision.sms,

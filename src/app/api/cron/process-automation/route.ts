@@ -1,16 +1,8 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { getSupabaseSecretKey } from '@/lib/supabase-secret';
-import { SUPABASE_URL } from '@/lib/supabase-env';
 import { executeAutomation } from '@/lib/automations';
+import { adminIsConfigured, createAdminClient } from '@/lib/supabase-admin';
 
 export const maxDuration = 60;
-
-const getSupabase = () => createClient(
-  SUPABASE_URL,
-  getSupabaseSecretKey(),
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
 
 export async function GET(req: Request) {
   const authHeader = req.headers.get('authorization');
@@ -18,8 +10,11 @@ export async function GET(req: Request) {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  if (!adminIsConfigured()) {
+    return NextResponse.json({ error: 'Supabase environment is missing' }, { status: 500 });
+  }
 
-  const supabase = getSupabase();
+  const supabase = createAdminClient() as any;
   
   try {
     // 2. Fetch pending items from the queue that are scheduled for now or earlier

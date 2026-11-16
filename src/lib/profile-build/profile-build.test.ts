@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path'
 import { describe, it } from 'node:test'
 import { fileURLToPath } from 'node:url'
 import { extractProfile } from './extract.ts'
-import { applyResearch, draftFromExtraction, fillOnlyBlank, researchColumns } from './fill.ts'
+import { applyResearch, decideListingPhone, draftFromExtraction, fillOnlyBlank, researchColumns } from './fill.ts'
 import type { PageDocument } from './types.ts'
 import { discoverTargets, isPublicHttpUrl } from './urls.ts'
 import { buildVoicePrompt, emptyVoice, sanitizeVoice, VOICE_INSTRUCTIONS } from './voice.ts'
@@ -59,9 +59,34 @@ describe('profile extraction', () => {
     assert.equal(extracted.zipCode, '29601')
     assert.equal(extracted.country, 'US')
     assert.equal(extracted.faqs.length, 3)
+    assert.equal(extracted.faqs[0].question, 'What happens at the first visit?')
+    assert.equal(extracted.practicePhone, '+18645550199')
     assert.equal(Object.hasOwn(extracted, 'phone'), false)
+    assert.ok(extracted.galleryUrls.some((url) => url.includes('ada-portrait')))
     assert.doesNotMatch(extracted.clinicName, /alignlife/i)
     assert.doesNotMatch(extracted.hours, /perfect storm/i)
+  })
+
+  it('drops navigation and footer questions and keeps the first-visit section', () => {
+    const extracted = extractProfile([
+      ...pages(),
+      {
+        url: 'https://harbor.example/menu',
+        kind: 'home',
+        html: `
+          <nav><h2>Menu</h2><p>Home About Services Contact Book</p></nav>
+          <footer><h3>Quick links</h3><p>Privacy policy and terms live here.</p></footer>
+          <h2>Your first visit</h2>
+          <p>Plan on 60 minutes for the first visit. The visit fee is $175 and includes the scan.</p>
+        `,
+      },
+    ])
+    const questions = extracted.faqs.map((item) => item.question.toLowerCase())
+    assert.equal(questions.includes('menu'), false)
+    assert.equal(questions.includes('quick links'), false)
+    assert.match(extracted.firstVisitInfo, /60 minutes/)
+    assert.doesNotMatch(extracted.firstVisitInfo, /\bmenu\b/i)
+    assert.equal(new Set(questions).size, questions.length)
   })
 
   it('uses the about-page portrait when the social image is a logo', () => {
@@ -159,6 +184,15 @@ describe('fill only blank fields', () => {
     assert.equal(Object.hasOwn(patch, 'faq'), false)
     assert.equal(Object.hasOwn(patch, 'booking_url'), false)
     assert.equal(Object.hasOwn(patch, 'files_insurance'), false)
+    const blankPhone = applyResearch({ phone: '', lead_alert_phones: ['+18645550100'], profile_built_at: NOW }, draft, NOW)
+    assert.equal(blankPhone.phone, '+18645550199')
+    const replacedMobile = applyResearch({ phone: '+18645550100', lead_alert_phones: ['+18645550100'], profile_built_at: NOW }, draft, NOW)
+    assert.equal(replacedMobile.phone, '+18645550199')
+    assert.equal(decideListingPhone({
+      currentPhone: '(864) 555-0100',
+      practicePhone: '+18645550199',
+      alertPhones: ['+18645550188'],
+    }), null)
     const columns = researchColumns(draft)
     assert.equal(Object.hasOwn(columns, 'phone'), false)
     const forced = fillOnlyBlank(current, { ...columns, phone: '+18645550199', email: 'new@example.com' })

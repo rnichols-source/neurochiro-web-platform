@@ -24,12 +24,13 @@ export const MORE = [
   { label: 'Seminars & jobs', href: '/admin/work' },
   { label: 'Audit log', href: '/admin/audit' },
   { label: 'Profile research', href: '/admin/profile-builds' },
+  { label: 'Doctor go-live', href: '/admin/go-live' },
   { label: 'System health', href: '/admin/health' },
   { label: 'Settings', href: '/admin/settings' },
 ] as const
 
 const GROWTH = ['/admin/growth', '/admin/coverage', '/admin/doctor-referrals', '/admin/referrals', '/admin/match', '/admin/stats/recommendations']
-const PEOPLE = ['/admin/people', '/admin/members', '/admin/applications', '/admin/leads', '/admin/contact-requests', '/admin/students', '/admin/invisible-doctors', '/admin/list', '/admin/profile-builds']
+const PEOPLE = ['/admin/people', '/admin/members', '/admin/applications', '/admin/leads', '/admin/contact-requests', '/admin/students', '/admin/invisible-doctors', '/admin/list', '/admin/profile-builds', '/admin/go-live']
 const MONEY = ['/admin/money', '/admin/revenue']
 const BROADCAST = ['/admin/broadcast', '/admin/outreach', '/admin/announcements', '/admin/notifications', '/admin/inbox']
 
@@ -64,6 +65,7 @@ export const PEOPLE_TOOLS = [
   { label: 'Directory list', href: '/admin/list' },
   { label: 'Invisible doctors', href: '/admin/invisible-doctors' },
   { label: 'Profile research', href: '/admin/profile-builds' },
+  { label: 'Doctor go-live', href: '/admin/go-live' },
 ]
 
 export const MONEY_TOOLS = [

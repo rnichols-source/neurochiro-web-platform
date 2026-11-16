@@ -47,7 +47,7 @@ export function approvalText(lastName: string, profileUrl: string): string {
   const url = canonicalProfileUrl(profileUrl)
   const cleaned = (lastName || 'there').replace(/\s+/g, ' ').trim() || 'there'
   const build = (who: string) =>
-    `Congrats Dr. ${who}! You're approved for NeuroChiro. Your profile is live: ${url}. Next step: book your onboarding call: ${ONBOARDING_CALL_URL} - Dr. Ray, NeuroChiro. Reply STOP to opt out.`
+    `Dr. ${who}, your NeuroChiro profile is live: ${url}. Log in or set your password at https://neurochiro.co/login. Book your onboarding call: ${ONBOARDING_CALL_URL} - Dr. Ray, NeuroChiro. Reply STOP to opt out.`
   let name = cleaned
   let body = build(name)
   while (body.length > TEXT_LIMIT && name.length > 1) {

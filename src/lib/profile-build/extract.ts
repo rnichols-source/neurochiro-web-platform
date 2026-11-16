@@ -37,7 +37,7 @@ export function extractProfile(pages: PageDocument[]): ExtractedProfile {
   const hours = readHours(nodes) || readHoursText(text)
   const flags = hourFlags(hours)
   const payment = readPayment(text)
-  const firstVisit = readFirstVisit(text)
+  const firstVisit = readFirstVisitFromPages(docs)
   const profile: ExtractedProfile = {
     clinicName: readClinicName(docs, nodes),
     headshotUrl: readHeadshot(docs),
@@ -64,6 +64,8 @@ export function extractProfile(pages: PageDocument[]): ExtractedProfile {
     country: address.country,
     faqs: readFaqs(docs).slice(0, 8),
     dossier: buildDossier(docs),
+    practicePhone: readPracticePhone(docs, nodes),
+    galleryUrls: readGallery(docs),
   }
   if (/alignlife/i.test(profile.clinicName)) profile.clinicName = ''
   return profile
@@ -213,11 +215,40 @@ function readTechniques(text: string): string[] {
   return unique(found).slice(0, 12)
 }
 
-function readFirstVisit(text: string): { info: string; price: string } {
-  const match = text.match(/((?:first visit|new patient|what to expect)[\s\S]{0,500})/i)
-  const info = (match?.[1] || '').replace(/\s+/g, ' ').trim().slice(0, 800)
-  const price = info.match(/\$\s?\d{2,4}(?:\s?[-–]\s?\$?\s?\d{2,4})?/)
-  return { info, price: price ? price[0].replace(/\s+/g, '') : '' }
+function readFirstVisitFromPages(pages: PageDocument[]): { info: string; price: string } {
+  let info = ''
+  let price = ''
+  for (const page of pages) {
+    const section = firstVisitSection(stripChrome(page.html))
+    if (section && section.length > info.length) info = section
+    const found = section.match(/\$\s?\d{2,4}(?:\s?[-–]\s?\$?\s?\d{2,4})?/)
+    if (found && !price) price = found[0].replace(/\s+/g, '')
+  }
+  if (!info) {
+    const blob = pages.map((page) => visibleText(stripChrome(page.html))).join('\n')
+    const match = blob.match(/((?:first visit|new patient visit|what to expect)[\s\S]{0,500})/i)
+    info = (match?.[1] || '').replace(/\s+/g, ' ').trim()
+  }
+  if (!price) {
+    const blob = `${info}\n${pages.map((page) => visibleText(stripChrome(page.html))).join('\n')}`
+    const found = blob.match(/(?:first visit|new patient|consultation)[^$\n]{0,80}(\$\s?\d{2,4}(?:\s?[-–]\s?\$?\s?\d{2,4})?)/i)
+      || info.match(/\$\s?\d{2,4}(?:\s?[-–]\s?\$?\s?\d{2,4})?/)
+    price = found ? (found[1] || found[0]).replace(/\s+/g, '') : ''
+  }
+  return { info: info.replace(/\s+/g, ' ').trim().slice(0, 800), price }
+}
+
+function firstVisitSection(html: string): string {
+  const pattern = /<h[1-3][^>]*>([\s\S]*?)<\/h[1-3]>([\s\S]*?)(?=<h[1-3]\b|$)/gi
+  let best = ''
+  for (const match of html.matchAll(pattern)) {
+    const heading = visibleText(match[1] || '')
+    if (!/first visit|new patient|what to expect/i.test(heading)) continue
+    const body = visibleText(match[2] || '')
+    const section = `${heading}. ${body}`.replace(/\s+/g, ' ').trim()
+    if (section.length > best.length) best = section
+  }
+  return best.slice(0, 800)
 }
 
 function readPayment(text: string): {
@@ -262,10 +293,13 @@ function readNetworks(text: string): string[] {
   return known.filter((name) => new RegExp(name, 'i').test(text)).slice(0, 12)
 }
 
+const FAQ_CHROME = /^(home|about|about us|services|our services|contact|contact us|menu|navigation|book|book now|book online|blog|shop|faq|faqs|login|log in|sign in|privacy|privacy policy|terms|cart|search|quick links|follow us|new patients)$/i
+
 function readFaqs(pages: PageDocument[]): FaqEntry[] {
   const faqs: FaqEntry[] = []
   for (const page of pages) {
-    for (const node of jsonLdNodes(page.html)) {
+    const clean = stripChrome(page.html)
+    for (const node of jsonLdNodes(clean)) {
       const entities = Array.isArray(node.mainEntity) ? node.mainEntity : []
       for (const entity of entities) {
         if (!entity || typeof entity !== 'object') continue
@@ -278,17 +312,68 @@ function readFaqs(pages: PageDocument[]): FaqEntry[] {
         pushFaq(faqs, question, answer)
       }
     }
-    const pairs = page.html.matchAll(/<h[23][^>]*>([\s\S]*?)<\/h[23]>\s*<p[^>]*>([\s\S]*?)<\/p>/gi)
+    const pairs = clean.matchAll(/<h[23][^>]*>((?:(?!<h[1-6]\b)[\s\S])*?)<\/h[23]>\s*<p[^>]*>([\s\S]*?)<\/p>/gi)
     for (const pair of pairs) pushFaq(faqs, visibleText(pair[1]), visibleText(pair[2]))
   }
   return faqs
 }
 
+function stripChrome(html: string): string {
+  return html
+    .replace(/<(nav|header|footer|menu)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<[^>]+(?:id|class)\s*=\s*["'][^"']*(?:\bnav\b|\bmenu\b|\bfooter\b|\bheader\b|cookie|breadcrumb)[^"']*["'][^>]*>[\s\S]*?<\/(?:div|ul|ol|section|aside)>/gi, ' ')
+}
+
+function readPracticePhone(pages: PageDocument[], nodes: JsonNode[]): string {
+  for (const node of nodes) {
+    const telephone = stringValue(node.telephone)
+    if (looksLikePhone(telephone)) return telephone.slice(0, 40)
+  }
+  for (const page of pages) {
+    if (page.kind !== 'contact' && page.kind !== 'home' && page.kind !== 'booking') continue
+    const links = page.html.match(/<a\b[^>]*href\s*=\s*["']tel:[^"']+["'][^>]*>/gi) || []
+    for (const link of links) {
+      const href = attr(link, 'href').replace(/^tel:/i, '')
+      if (looksLikePhone(href)) return href.slice(0, 40)
+    }
+  }
+  const text = pages
+    .filter((page) => page.kind === 'contact' || page.kind === 'home' || page.kind === 'booking')
+    .map((page) => visibleText(stripChrome(page.html)))
+    .join('\n')
+  const labeled = text.match(/(?:call|phone|office)\s*(?:the office\s*)?(?:at|:)?\s*(\+?1?[\s.(]*\d{3}[\s.)-]*\d{3}[\s.-]*\d{4})/i)
+  if (labeled && looksLikePhone(labeled[1])) return labeled[1].replace(/\s+/g, ' ').trim().slice(0, 40)
+  return ''
+}
+
+function looksLikePhone(value: string): boolean {
+  const digits = value.replace(/\D/g, '')
+  return digits.length >= 10 && digits.length <= 15
+}
+
+function readGallery(pages: PageDocument[]): string[] {
+  const urls: string[] = []
+  for (const page of pages) {
+    if (page.kind !== 'about' && page.kind !== 'home') continue
+    for (const image of images(page.html)) {
+      const resolved = resolveHref(page.url, image.src)
+      if (!resolved || looksLikeLogo(`${resolved} ${image.alt} ${image.className}`)) continue
+      if (urls.includes(resolved)) continue
+      urls.push(resolved)
+      if (urls.length === 6) return urls
+    }
+  }
+  return urls
+}
+
 function pushFaq(faqs: FaqEntry[], question: string, answer: string) {
   const q = question.replace(/\s+/g, ' ').trim()
   const a = answer.replace(/\s+/g, ' ').trim()
-  if (q.length < 8 || a.length < 8) return
-  if (faqs.some((item) => item.question.toLowerCase() === q.toLowerCase())) return
+  if (q.length < 8 || a.length < 12) return
+  if (FAQ_CHROME.test(q)) return
+  if (!/[?]/.test(q) && q.split(' ').length < 4) return
+  const key = q.toLowerCase().replace(/[^a-z0-9]+/g, '')
+  if (faqs.some((item) => item.question.toLowerCase().replace(/[^a-z0-9]+/g, '') === key)) return
   faqs.push({ question: q.slice(0, 180), answer: a.slice(0, 600) })
 }
 

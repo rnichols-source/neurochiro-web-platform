@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase-admin'
+import { adminIsConfigured, createAdminClient } from '@/lib/supabase-admin'
 import {
   getNotifySettings,
   logNotification,
@@ -61,6 +61,9 @@ export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  if (!adminIsConfigured()) {
+    return NextResponse.json({ error: 'Supabase environment is missing' }, { status: 500 })
   }
 
   const settings = await getNotifySettings()

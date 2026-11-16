@@ -42,7 +42,7 @@ export function ApplicationsClient({
       <div>
         <h1 className="font-heading text-2xl font-bold text-neuro-navy">Doctor applications</h1>
         <p className="mt-1 text-sm text-neuro-navy/80">
-          Approve charges the saved card and publishes the listing. Decline keeps the listing hidden, removes the card, and does not charge.
+          A paid membership publishes on its own. This button is the manual fallback. It charges the saved card only when payment has not come in, then publishes the listing. Decline keeps the listing hidden and does not charge.
         </p>
       </div>
       {loadError ? <p className="rounded-xl bg-white p-4 text-sm">{loadError}</p> : null}
@@ -97,7 +97,7 @@ export function ApplicationsClient({
                 onClick={() => void run(row.id, 'approve')}
                 className="min-h-11 rounded-xl bg-neuro-orange px-4 text-sm font-bold text-white disabled:opacity-50"
               >
-                {busy === `approve:${row.id}` ? 'Approving…' : 'Approve and charge'}
+                {busy === `approve:${row.id}` ? 'Approving…' : row.paymentReceived ? 'Approve and publish' : 'Approve and charge'}
               </button>
               <button
                 type="button"

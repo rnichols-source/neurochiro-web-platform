@@ -2,6 +2,7 @@ import 'server-only'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/types/supabase'
 import { SUPABASE_URL } from '@/lib/supabase-env'
+import { resolveSupabaseAdminEnv } from '@/lib/supabase-runtime-env'
 
 /**
  * ⚠️  SUPABASE DEFAULT ROW LIMIT IS 1000.
@@ -20,10 +21,11 @@ import { SUPABASE_URL } from '@/lib/supabase-env'
  */
 
 function adminEnv(): { url: string; key: string } | null {
-  const url = (SUPABASE_URL || '').trim()
-  const key = (process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? '').trim()
-  if (!url || url.includes('your-project-url') || !key) return null
-  return { url, key }
+  return resolveSupabaseAdminEnv(process.env, SUPABASE_URL || '')
+}
+
+export function adminIsConfigured(): boolean {
+  return adminEnv() != null
 }
 
 /**
