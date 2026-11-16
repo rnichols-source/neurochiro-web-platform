@@ -1,5 +1,6 @@
 import { toApplicationE164 } from '../applications/phone.ts'
 import { toE164 } from '../sms/phone.ts'
+import { GO_LIVE_STEPS, type GoLiveStep } from './steps.ts'
 import { isDoctorMembershipProduct, isStudentProduct, type ProductHint } from './products.ts'
 
 export const DOCTOR_PAY_URL = 'https://buy.stripe.com/4gM14p3EHeEs8qyfas7wA0q'
@@ -323,16 +324,25 @@ export type CheckoutIntake =
 
 /**
  * Payment publishes the doctor. A listing that already has a successful go-live
- * run only stores Stripe ids. Every other payer runs go-live, and a live listing
- * is never hidden.
+ * run only stores Stripe ids. A doctor who was already published before this
+ * automation, or who already has an ok welcome step, only stores Stripe ids.
+ * Every other payer runs go-live, and a live listing is never hidden.
  */
 export function planCheckoutIntake(input: {
   membership: boolean
   hasOkGoLive?: boolean
+  /** Any ok welcome step for this doctor. */
+  welcomeOk?: boolean
+  /** Verified or approved before go-live existed: no run and no go-live timestamp. */
+  preAutomation?: boolean
   listings: Array<ExistingListing & { verificationStatus?: string | null; isApproved?: boolean | null }>
 }): CheckoutIntake {
   if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
   const live = input.listings.find((row) => isPublicLiveListing(row))
+  if (input.welcomeOk || input.preAutomation) {
+    const id = live?.id || input.listings[0]?.id
+    if (id) return { action: 'link_live', doctorId: id }
+  }
   if (live && input.hasOkGoLive) return { action: 'link_live', doctorId: live.id }
   if (live) return { action: 'go_live', doctorId: live.id }
   const pending = input.listings[0]
@@ -352,6 +362,7 @@ export type InvoiceIntake =
   | { action: 'complete_bank'; applicationId: string }
   | { action: 'go_live'; doctorId: string }
   | { action: 'create_and_go_live' }
+  | { action: 'link_live'; doctorId: string }
 
 /** A renewal never starts go-live. The first paid doctor-membership invoice does. */
 export function invoiceIsRenewal(billingReason: string | null, hasSubscription: boolean): boolean {
@@ -369,11 +380,22 @@ export function planInvoiceIntake(input: {
   amountPaid: number
   membership: boolean
   hasSubscription?: boolean
+  /** Kept so older callers still compile. The invoice path keys off welcomeOk, not an ok checkout step. */
   hasOkGoLive?: boolean
+  /** Any ok welcome step. This, not an ok checkout step, means go-live already happened. */
+  welcomeOk?: boolean
+  /** Published before go-live existed. */
+  preAutomation?: boolean
+  /** Paid invoice on a subscription that has never gone live. Not a renewal. */
+  neverGoneLive?: boolean
   applications: InvoiceApplication[]
   listings: Array<{ id?: string; verificationStatus?: string | null; isApproved?: boolean | null }>
 }): InvoiceIntake {
   if (input.amountPaid <= 0) return { action: 'ignore', reason: 'not_paid' }
+  const doctorId = input.listings.find((row) => row.id)?.id
+  if ((input.welcomeOk || input.preAutomation) && doctorId) {
+    return { action: 'link_live', doctorId }
+  }
   const reason = input.billingReason || ''
   const hasSubscription = input.hasSubscription ?? (
     reason === 'subscription_create'
@@ -381,7 +403,7 @@ export function planInvoiceIntake(input: {
     || reason === 'subscription_update'
     || reason === 'subscription_threshold'
   )
-  if (invoiceIsRenewal(input.billingReason, hasSubscription)) {
+  if (invoiceIsRenewal(input.billingReason, hasSubscription) && input.neverGoneLive !== true) {
     return { action: 'ignore', reason: 'renewal' }
   }
   if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
@@ -389,7 +411,7 @@ export function planInvoiceIntake(input: {
     .filter((row) => row.status === 'needs_action' && row.reviewedAt)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
   if (bank) return { action: 'complete_bank', applicationId: bank.id }
-  if (input.hasOkGoLive) return { action: 'ignore', reason: 'already_live' }
+  if (input.welcomeOk) return { action: 'ignore', reason: 'already_live' }
   const listing = input.listings.find((row) => row.id)
   if (listing?.id) return { action: 'go_live', doctorId: listing.id }
   return { action: 'create_and_go_live' }
@@ -528,10 +550,11 @@ export type NudgePlan = {
   key: string
 }
 
-const SETUP_ORDER: SetupStep[] = ['activate_login', 'finish_profile', 'book_spotlight', 'book_ig_live', 'add_text_number']
+const EARLY_SETUP: SetupStep[] = ['activate_login', 'finish_profile', 'add_text_number']
+const AFTER_CALL_SETUP: SetupStep[] = ['book_spotlight', 'book_ig_live']
 
-export function nextUnfinishedStep(done: Record<SetupStep, boolean>): SetupStep | null {
-  return SETUP_ORDER.find((step) => !done[step]) || null
+export function nextUnfinishedStep(done: Record<SetupStep, boolean>, steps: SetupStep[] = EARLY_SETUP): SetupStep | null {
+  return steps.find((step) => !done[step]) || null
 }
 
 export function nextNudge(input: {
@@ -547,11 +570,127 @@ export function nextNudge(input: {
     return { kind: 'checkin', day, step: null, key }
   }
   if (day !== 1 && day !== 2 && day !== 3 && day !== 4) return null
-  const step = nextUnfinishedStep(input.done)
+  const step = nextUnfinishedStep(input.done, EARLY_SETUP)
   if (!step) return null
   const key = `setup:${day}:${step}`
   if (sent.has(key)) return null
   return { kind: 'setup', day, step, key }
+}
+
+/** Spotlight and IG Live booking links go out only after the onboarding call, and never on days 1-4. */
+export function nextBookingNudge(input: {
+  daysSinceLive: number
+  onboardingCallCompleted: boolean
+  done: Record<SetupStep, boolean>
+  sentKeys: string[]
+}): NudgePlan | null {
+  if (!input.onboardingCallCompleted || input.daysSinceLive < 5) return null
+  const sent = new Set(input.sentKeys)
+  const step = nextUnfinishedStep(input.done, AFTER_CALL_SETUP)
+  if (!step) return null
+  const key = `setup:after-call:${step}`
+  if (sent.has(key)) return null
+  const day = input.daysSinceLive === 14 || input.daysSinceLive === 30 ? input.daysSinceLive : 7
+  return { kind: 'setup', day, step, key }
+}
+
+export function nudgeProgress(input: {
+  passwordSet: boolean
+  profilePublishMode: string | null
+  profilePercent: number
+  hasPhoto: boolean
+  spotlightBooked: boolean
+  igLiveBooked: boolean
+  textNumber: boolean
+}): Record<SetupStep, boolean> {
+  const minimum = (input.profilePublishMode || '').trim().toLowerCase() === 'minimum'
+  return {
+    activate_login: input.passwordSet,
+    finish_profile: !minimum && input.profilePercent >= 70 && input.hasPhoto,
+    book_spotlight: input.spotlightBooked,
+    book_ig_live: input.igLiveBooked,
+    add_text_number: input.textNumber,
+  }
+}
+
+export function portalPasswordIsSet(user: {
+  encrypted_password?: string | null
+  user_metadata?: Record<string, unknown> | null
+} | null, rpcValue?: boolean | null): boolean {
+  if (typeof rpcValue === 'boolean') return rpcValue
+  if (!user) return false
+  if (typeof user.encrypted_password === 'string') return user.encrypted_password.length > 0
+  return user.user_metadata?.password_set === true
+}
+
+export const PROFILE_WELCOME_ATTEMPTS = 3
+
+export function welcomeSendDecision(input: {
+  profileOk: boolean
+  profileFailures: number
+  welcomeOk: boolean
+  limit?: number
+}): 'skip_welcome_done' | 'wait_for_profile' | 'send' | 'send_and_flag' {
+  if (input.welcomeOk) return 'skip_welcome_done'
+  if (input.profileOk) return 'send'
+  const limit = input.limit && input.limit > 0 ? input.limit : PROFILE_WELCOME_ATTEMPTS
+  if (input.profileFailures >= limit) return 'send_and_flag'
+  return 'wait_for_profile'
+}
+
+export function resumeClaimPlan(input: {
+  doctorId: string | null
+  claimExists: boolean
+  listings: Array<{ id: string }>
+}): { action: 'use'; doctorId: string } | { action: 'wait' } {
+  if (input.doctorId) return { action: 'use', doctorId: input.doctorId }
+  const existing = input.listings[0]
+  if (existing) return { action: 'use', doctorId: existing.id }
+  if (input.claimExists) return { action: 'wait' }
+  return { action: 'wait' }
+}
+
+export function processedWebhookAction(existing: { status: string | null } | null): 'run' | 'skip' {
+  if (!existing) return 'run'
+  if (existing.status === 'failed') return 'run'
+  return 'skip'
+}
+
+export function reconciliationShouldEmail(input: { missing: number; failed: number }): boolean {
+  return input.missing > 0 || input.failed > 0
+}
+
+export function retryPlanForDoctor(rows: { step: string; status: string }[]): GoLiveStep[] | null {
+  const anyOk = (step: string) => rows.some((row) => row.step === step && row.status === 'ok')
+  const profileFailures = rows.filter((row) => row.step === 'profile' && row.status === 'failed').length
+  const decision = welcomeSendDecision({
+    profileOk: anyOk('profile'),
+    profileFailures,
+    welcomeOk: anyOk('welcome'),
+  })
+  const only: GoLiveStep[] = []
+  for (const step of GO_LIVE_STEPS) {
+    if (step === 'welcome') {
+      if (decision === 'send' || decision === 'send_and_flag') only.push(step)
+      continue
+    }
+    if (anyOk(step)) continue
+    if (rows.some((row) => row.step === step && row.status === 'failed')) only.push(step)
+  }
+  return only.length ? only : null
+}
+
+export function reconciliationLetter(input: {
+  missing: string[]
+  failed: string[]
+}): { subject: string; html: string } | null {
+  if (!reconciliationShouldEmail({ missing: input.missing.length, failed: input.failed.length })) return null
+  const items = [
+    ...input.missing.map((line) => `Missing: ${line}`),
+    ...input.failed.map((line) => `Failed: ${line}`),
+  ]
+  const html = `<p>Go-live reconciliation found doctor memberships that were not finished.</p><ul>${items.map((line) => `<li>${line.replace(/</g, '')}</li>`).join('')}</ul><p><a href="https://neurochiro.co/admin/go-live">Open the go-live log</a></p>`
+  return { subject: 'Go-live reconciliation', html }
 }
 
 export function daysSince(liveAt: string, now: string): number {
@@ -708,6 +847,8 @@ export function planLoggedInCheckout(input: {
   role: string | null
   doctorId: string | null
   hasOkGoLive: boolean
+  welcomeOk?: boolean
+  preAutomation?: boolean
 }): LoggedInPlan {
   if (!input.membership) return { action: 'ignore', reason: 'not_membership' }
   const promotion = promotionPlan({
@@ -718,7 +859,9 @@ export function planLoggedInCheckout(input: {
   if (promotion.action === 'exclude') {
     return { action: 'ignore', reason: promotion.reason === 'student' ? 'student' : 'excluded' }
   }
-  if (input.doctorId && input.hasOkGoLive) return { action: 'store_ids', doctorId: input.doctorId }
+  if (input.doctorId && (input.hasOkGoLive || input.welcomeOk || input.preAutomation)) {
+    return { action: 'store_ids', doctorId: input.doctorId }
+  }
   if (input.doctorId) return { action: 'go_live', doctorId: input.doctorId }
   if (promotion.action === 'link_existing') return { action: 'promote_and_go_live' }
   return { action: 'create_and_go_live' }

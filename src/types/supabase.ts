@@ -1035,14 +1035,23 @@ export interface Database {
         Row: {
           id: string
           created_at: string
+          status: string | null
+          event_type: string | null
+          updated_at: string | null
         }
         Insert: {
           id: string
           created_at?: string
+          status?: string | null
+          event_type?: string | null
+          updated_at?: string | null
         }
         Update: {
           id?: string
           created_at?: string
+          status?: string | null
+          event_type?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }

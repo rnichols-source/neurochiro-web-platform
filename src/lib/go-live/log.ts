@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { isMissingTable } from '@/lib/leads/schema'
+import { isMissingColumn, isMissingTable } from '@/lib/leads/schema'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { GO_LIVE_STEPS, type GoLiveStep, type GoLiveStatus, type GoLiveStepResult } from './steps.ts'
 
@@ -52,6 +52,58 @@ export async function goLiveStepAlreadyOk(doctorId: string, step: GoLiveStep): P
   return Array.isArray(data) && data.length > 0
 }
 
+export async function countGoLiveStep(doctorId: string, step: GoLiveStep, status: GoLiveStatus): Promise<number> {
+  const { count, error } = await db()
+    .from('doctor_go_live_steps')
+    .select('id', { count: 'exact', head: true })
+    .eq('doctor_id', doctorId)
+    .eq('step', step)
+    .eq('status', status)
+  if (error) return 0
+  return count || 0
+}
+
+const LOCK_MS = 3 * 60 * 1000
+
+export async function acquireGoLiveLock(doctorId: string): Promise<boolean> {
+  const now = new Date().toISOString()
+  const inserted = await db().from('doctor_go_live_locks').insert({ doctor_id: doctorId, acquired_at: now })
+  if (!inserted.error) return true
+  if (isMissingTable(inserted.error)) return true
+  if (inserted.error.code !== '23505') return true
+  const current = await db().from('doctor_go_live_locks').select('acquired_at').eq('doctor_id', doctorId).maybeSingle()
+  const acquiredAt = typeof current.data?.acquired_at === 'string' ? current.data.acquired_at : ''
+  if (!acquiredAt || Date.now() - Date.parse(acquiredAt) < LOCK_MS) return false
+  const stolen = await db()
+    .from('doctor_go_live_locks')
+    .update({ acquired_at: now })
+    .eq('doctor_id', doctorId)
+    .eq('acquired_at', acquiredAt)
+    .select('doctor_id')
+  return Array.isArray(stolen.data) && stolen.data.length > 0
+}
+
+export async function releaseGoLiveLock(doctorId: string): Promise<void> {
+  await db().from('doctor_go_live_locks').delete().eq('doctor_id', doctorId)
+}
+
+export async function claimWelcomeStep(runId: string | null, doctorId: string): Promise<'won' | 'lost' | 'unavailable'> {
+  if (!runId) return 'unavailable'
+  const inserted = await db().from('doctor_go_live_steps').insert({
+    run_id: runId,
+    doctor_id: doctorId,
+    step: 'welcome',
+    status: 'pending',
+    reason: 'Welcome claimed. The email sends only for the claim that won.',
+    detail: {},
+  })
+  if (!inserted.error) return 'won'
+  if (inserted.error.code === '23505') return 'lost'
+  if (inserted.error.code === '23514' || isMissingTable(inserted.error) || isMissingColumn(inserted.error)) return 'unavailable'
+  console.error('[go-live] welcome claim failed', inserted.error.code || 'error')
+  return 'unavailable'
+}
+
 export type GoLiveStepRow = GoLiveStepResult & {
   id: string
   doctorId: string
@@ -91,7 +143,7 @@ export async function loadRecentGoLiveSteps(): Promise<{ ready: boolean; rows: G
       doctorName: names.get(doctorId) || 'Doctor',
       source: '',
       step,
-      status: (row.status === 'failed' || row.status === 'skipped' ? row.status : 'ok'),
+      status: (row.status === 'failed' || row.status === 'skipped' || row.status === 'pending' ? row.status : 'ok'),
       reason: String(row.reason || ''),
       updatedAt: String(row.updated_at || ''),
     })

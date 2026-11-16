@@ -9,7 +9,17 @@ export const GO_LIVE_STEPS = [
 ] as const
 
 export type GoLiveStep = (typeof GO_LIVE_STEPS)[number]
-export type GoLiveStatus = 'ok' | 'failed' | 'skipped'
+export type GoLiveStatus = 'ok' | 'failed' | 'skipped' | 'pending'
+
+export const APPROVAL_GO_LIVE_STEPS: GoLiveStep[] = [
+  'checkout',
+  'profile',
+  'portal',
+  'welcome',
+  'waitlist',
+  'instagram',
+  'summary',
+]
 
 export type GoLiveStepResult = {
   step: GoLiveStep
