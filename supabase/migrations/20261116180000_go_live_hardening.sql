@@ -41,8 +41,8 @@ create or replace function public.portal_password_is_set(target uuid)
 returns boolean
 language sql
 stable
-security invoker
-set search_path = auth, public
+security definer
+set search_path = ''
 as $$
   select coalesce((
     select length(btrim(encrypted_password)) > 0
@@ -50,6 +50,8 @@ as $$
     where id = target
   ), false);
 $$;
+
+alter function public.portal_password_is_set(uuid) owner to postgres;
 
 revoke all on function public.portal_password_is_set(uuid) from public, anon, authenticated;
 grant execute on function public.portal_password_is_set(uuid) to service_role;

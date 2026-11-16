@@ -28,6 +28,7 @@ import {
   nextBookingNudge,
   nudgeProgress,
   portalPasswordIsSet,
+  loginPasswordState,
   welcomeSendDecision,
   resumeClaimPlan,
   processedWebhookAction,
@@ -775,6 +776,22 @@ describe('setup nudges after go-live', () => {
     assert.equal(progress.finish_profile, false)
     const plan = nextNudge({ daysSinceLive: 1, done: progress, sentKeys: [] })
     assert.equal(plan?.step, 'activate_login')
+
+    assert.equal(loginPasswordState(null), 'unknown')
+    assert.equal(loginPasswordState({ data: null, error: { message: 'permission denied' } }), 'unknown')
+    assert.equal(loginPasswordState({ data: false, error: null }), 'unset')
+    assert.equal(loginPasswordState({ data: true, error: null }), 'set')
+    const unknown = nudgeProgress({
+      passwordSet: 'unknown',
+      profilePublishMode: null,
+      profilePercent: 0,
+      hasPhoto: false,
+      spotlightBooked: false,
+      igLiveBooked: false,
+      textNumber: true,
+    })
+    assert.equal(unknown.activate_login, true)
+    assert.equal(nextNudge({ daysSinceLive: 1, done: unknown, sentKeys: [] })?.step, 'finish_profile')
   })
 
   it('builds the welcome from the listing after the profile step', () => {

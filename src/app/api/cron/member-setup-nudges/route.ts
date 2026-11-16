@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { daysSince, nextBookingNudge, nextNudge, nudgeProgress, portalPasswordIsSet, profileCompleteness } from '@/lib/go-live/plan'
+import { daysSince, loginPasswordState, nextBookingNudge, nextNudge, nudgeProgress, profileCompleteness } from '@/lib/go-live/plan'
 import { nudgeCopy } from '@/lib/go-live/messages'
 import { canTextNumber } from '@/lib/go-live/plan'
 import { sendApplicationEmail } from '@/lib/applications/notify'
@@ -56,13 +56,11 @@ export async function GET(req: NextRequest) {
       longitude: row.longitude == null ? null : Number(row.longitude),
       textNumber: row.sms_alerts_enabled === true && phones.length > 0,
     })
-    let passwordSet = false
+    let passwordSet: boolean | 'unknown' = false
     if (row.user_id) {
       const rpc = await admin.rpc('portal_password_is_set', { target: row.user_id }).catch(() => null)
-      const user = rpc && typeof rpc.data === 'boolean'
-        ? null
-        : await admin.auth.admin.getUserById(row.user_id).catch(() => null)
-      passwordSet = portalPasswordIsSet(user?.data?.user || null, typeof rpc?.data === 'boolean' ? rpc.data : null)
+      const state = loginPasswordState(rpc)
+      passwordSet = state === 'set' ? true : state === 'unset' ? false : 'unknown'
     }
     const days = daysSince(row.go_live_flow_at, now)
     const done = nudgeProgress({

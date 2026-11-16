@@ -594,8 +594,18 @@ export function nextBookingNudge(input: {
   return { kind: 'setup', day, step, key }
 }
 
+export type LoginPasswordState = 'set' | 'unset' | 'unknown'
+
+/** An RPC error is unknown. Unknown skips the login nudge instead of sending it. */
+export function loginPasswordState(rpc: { data?: unknown; error?: unknown } | null): LoginPasswordState {
+  if (!rpc || rpc.error) return 'unknown'
+  if (rpc.data === true) return 'set'
+  if (rpc.data === false) return 'unset'
+  return 'unknown'
+}
+
 export function nudgeProgress(input: {
-  passwordSet: boolean
+  passwordSet: boolean | 'unknown'
   profilePublishMode: string | null
   profilePercent: number
   hasPhoto: boolean
@@ -605,7 +615,7 @@ export function nudgeProgress(input: {
 }): Record<SetupStep, boolean> {
   const minimum = (input.profilePublishMode || '').trim().toLowerCase() === 'minimum'
   return {
-    activate_login: input.passwordSet,
+    activate_login: input.passwordSet !== false,
     finish_profile: !minimum && input.profilePercent >= 70 && input.hasPhoto,
     book_spotlight: input.spotlightBooked,
     book_ig_live: input.igLiveBooked,
