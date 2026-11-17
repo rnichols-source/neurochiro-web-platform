@@ -28,6 +28,17 @@ function application(overrides: Partial<ApplicationRecord> = {}): ApplicationRec
     mobileE164: '+18645550100',
     smsConsent: true,
     priceLabel: '$99 per month',
+    checklistAnswers: {
+      practiceApproach: 'We focus on the nervous system and how the body adapts.',
+      heardAbout: 'Instagram',
+      techniques: 'Toggle',
+      usesNervousSystemScans: false,
+      scanTypes: '',
+      yearsInPractice: 8,
+      officeAddress: '123 Main Street',
+      city: 'Greenville',
+      country: 'US',
+    },
     ...overrides,
   }
 }

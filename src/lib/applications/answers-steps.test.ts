@@ -75,17 +75,17 @@ describe('application steps', () => {
       whyJoin: '',
       ...office,
     }), 3)
-    assert.equal(applicationStopLabel({ status: 'draft', cardOnFile: false, answers: {} }), 'Step 2 of 3 · Practice details')
+    assert.equal(applicationStopLabel({ status: 'draft', cardOnFile: false, answers: {} }), 'Step 2 of 4 · How you practice')
     assert.equal(applicationStopLabel({
       status: 'draft',
       cardOnFile: false,
       answers: { practiceApproach: practice, heardAbout: 'Event', whyJoin: '' },
-    }), 'Step 2 of 3 · Practice details')
+    }), 'Step 3 of 4 · Your office')
     assert.equal(applicationStopLabel({
       status: 'draft',
       cardOnFile: false,
       answers: { practiceApproach: practice, heardAbout: 'Event', whyJoin: '', ...office },
-    }), 'Step 3 of 3 · Plan and card')
+    }), 'Step 4 of 4 · Plan and card')
     assert.equal(applicationStopLabel({ status: 'under_review', cardOnFile: true, answers: {} }), 'Submitted')
   })
 
@@ -93,11 +93,11 @@ describe('application steps', () => {
     const practice = 'We focus on the nervous system and how the body adapts.'
     const started = { practiceApproach: practice, heardAbout: 'Google', whyJoin: '' }
     const ready = { ...started, ...office }
-    assert.equal(applicationResumePath({}), '/doctor/apply?step=2')
-    assert.equal(applicationResumePath({}), ACCOUNT_CONTINUE_PATH)
-    assert.equal(applicationResumePath(started), '/doctor/apply?step=2&part=2')
-    assert.equal(applicationResumePath(ready), '/doctor/apply?step=3')
-    assert.equal(applicationResumeUrl({}), 'https://neurochiro.co/doctor/apply?step=2')
+    assert.equal(applicationResumePath({}), '/doctor/apply?step=2&resume=1')
+    assert.equal(ACCOUNT_CONTINUE_PATH, '/doctor/apply?step=2')
+    assert.equal(applicationResumePath(started), '/doctor/apply?step=2&part=2&resume=1')
+    assert.equal(applicationResumePath(ready), '/doctor/apply?step=3&resume=1')
+    assert.equal(applicationResumeUrl({}), 'https://neurochiro.co/doctor/apply?step=2&resume=1')
     assert.equal(applicationResumeUrl(ready).includes('neurochirodirectory.com'), false)
     assert.equal(formStepFromRequest({}, { step: '2' }), 1)
     assert.equal(formStepFromRequest({}, { step: '3' }), 1)

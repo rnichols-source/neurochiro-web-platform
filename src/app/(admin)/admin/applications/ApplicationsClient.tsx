@@ -2,7 +2,18 @@
 
 import { useState } from 'react'
 import type { AdminApplicationRow } from '@/lib/applications/admin-row'
+import { applicationQueue } from '@/lib/applications/status'
 import { approveDoctorApplication, declineDoctorApplication } from './actions'
+
+function activityLabel(iso: string): string {
+  const date = new Date(iso)
+  if (!iso || Number.isNaN(date.getTime())) return 'No activity yet'
+  return new Intl.DateTimeFormat('en-US', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: 'UTC',
+  }).format(date) + ' UTC'
+}
 
 export function ApplicationsClient({
   rows,
@@ -13,13 +24,13 @@ export function ApplicationsClient({
   loadError: string | null
   initialNotice?: string
 }) {
-  const [filter, setFilter] = useState<'open' | 'all'>('open')
+  const [filter, setFilter] = useState<'decision' | 'progress' | 'all'>('decision')
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [message, setMessage] = useState('')
   const [warning, setWarning] = useState(initialNotice)
   const [busy, setBusy] = useState('')
 
-  const visible = rows.filter((row) => filter === 'all' || row.status === 'draft' || row.status === 'under_review' || row.status === 'needs_action')
+  const visible = rows.filter((row) => filter === 'all' || applicationQueue(row.status) === filter)
 
   async function run(id: string, kind: 'approve' | 'decline') {
     setBusy(`${kind}:${id}`)
@@ -42,14 +53,15 @@ export function ApplicationsClient({
       <div>
         <h1 className="font-heading text-2xl font-bold text-neuro-navy">Doctor applications</h1>
         <p className="mt-1 text-sm text-neuro-navy/80">
-          A paid membership publishes on its own. This button is the manual fallback. It charges the saved card only when payment has not come in, then publishes the listing. Decline keeps the listing hidden and does not charge.
+          Needs a decision is under review or a charge that still needs a step. In progress is a draft, with the step they reached and the last time it was saved. Approve and charge appears only when every required field and a card are on file. A payment-link payment is already approved.
         </p>
       </div>
       {loadError ? <p className="rounded-xl bg-white p-4 text-sm">{loadError}</p> : null}
       {warning ? <p role="status" className="rounded-xl border border-neuro-orange/40 bg-white p-4 text-sm">{warning}</p> : null}
       {message ? <p className="rounded-xl bg-white p-4 text-sm">{message}</p> : null}
       <div className="flex gap-2">
-        <button type="button" onClick={() => setFilter('open')} className={`min-h-11 rounded-xl px-4 text-sm font-bold ${filter === 'open' ? 'bg-neuro-orange text-white' : 'bg-white'}`}>Needs a decision</button>
+        <button type="button" onClick={() => setFilter('decision')} className={`min-h-11 rounded-xl px-4 text-sm font-bold ${filter === 'decision' ? 'bg-neuro-orange text-white' : 'bg-white'}`}>Needs a decision</button>
+        <button type="button" onClick={() => setFilter('progress')} className={`min-h-11 rounded-xl px-4 text-sm font-bold ${filter === 'progress' ? 'bg-neuro-orange text-white' : 'bg-white'}`}>In progress</button>
         <button type="button" onClick={() => setFilter('all')} className={`min-h-11 rounded-xl px-4 text-sm font-bold ${filter === 'all' ? 'bg-neuro-orange text-white' : 'bg-white'}`}>All</button>
       </div>
       {visible.length === 0 ? <p className="text-sm">No applications in this list.</p> : null}
@@ -66,7 +78,8 @@ export function ApplicationsClient({
           <dl className="grid gap-2 text-sm sm:grid-cols-2">
             <div><dt className="font-bold">Plan</dt><dd>{row.plan} · {row.priceLabel}</dd></div>
             <div><dt className="font-bold">Card on file</dt><dd>{row.cardOnFile ? 'Yes' : 'No'}</dd></div>
-            <div><dt className="font-bold">Where they stopped</dt><dd>{row.stoppedAt}</dd></div>
+            <div><dt className="font-bold">Step reached</dt><dd>{row.stoppedAt}</dd></div>
+            <div><dt className="font-bold">Last activity</dt><dd>{activityLabel(row.lastActivity)}</dd></div>
             <div><dt className="font-bold">Mobile</dt><dd>{row.mobile || 'Not given'}</dd></div>
             <div><dt className="font-bold">Text consent</dt><dd>{row.smsConsent}</dd></div>
             <div><dt className="font-bold">Payment</dt><dd>{row.paymentReceived ? 'Received — Approve will not charge again' : 'Not received'}</dd></div>
@@ -89,16 +102,25 @@ export function ApplicationsClient({
               className="mt-1 min-h-20 w-full rounded-xl border border-black/10 px-3 py-2 text-sm"
             />
           </label>
-          {row.status === 'approved' || row.status === 'declined' ? null : (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                disabled={busy !== '' || !row.cardOnFile}
-                onClick={() => void run(row.id, 'approve')}
-                className="min-h-11 rounded-xl bg-neuro-orange px-4 text-sm font-bold text-white disabled:opacity-50"
-              >
-                {busy === `approve:${row.id}` ? 'Approving…' : row.paymentReceived ? 'Approve and publish' : 'Approve and charge'}
-              </button>
+          {applicationQueue(row.status) === 'decision' ? (
+            <div className="space-y-3">
+              {row.complete ? (
+                <button
+                  type="button"
+                  disabled={busy !== ''}
+                  onClick={() => void run(row.id, 'approve')}
+                  className="min-h-11 rounded-xl bg-neuro-orange px-4 text-sm font-bold text-white disabled:opacity-50"
+                >
+                  {busy === `approve:${row.id}` ? 'Approving…' : row.paymentReceived ? 'Approve and publish' : 'Approve and charge'}
+                </button>
+              ) : (
+                <div>
+                  <p className="text-sm font-bold">Missing</p>
+                  <ul className="mt-1 list-disc pl-5 text-sm">
+                    {row.missing.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+              )}
               <button
                 type="button"
                 disabled={busy !== ''}
@@ -108,9 +130,6 @@ export function ApplicationsClient({
                 {busy === `decline:${row.id}` ? 'Declining…' : 'Decline'}
               </button>
             </div>
-          )}
-          {!row.cardOnFile && row.status !== 'approved' && row.status !== 'declined' ? (
-            <p className="text-sm">Approve stays off until a card is saved.</p>
           ) : null}
         </article>
       ))}

@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { paymentMethodFromSetupSession } from './billing.ts'
+import { paymentMethodFromSetupIntent, paymentMethodFromSetupSession } from './billing.ts'
 import { pingApplicationDiscord } from './notify.ts'
 import { markCardOnFile } from './store.ts'
 
@@ -19,6 +19,29 @@ export async function fulfillDoctorApplicationSetup(session: SessionLike, expect
     sessionId: session.id,
     userId: saved.userId,
     doctorId: saved.doctorId,
+    confirmed: true,
+  })
+  if (!savedCard) return false
+  if (savedCard.notify) {
+    await pingApplicationDiscord({ ...savedCard.application.answers, cardOnFile: true })
+  }
+  return true
+}
+
+/** Idempotent. Used when the card was confirmed with Stripe Elements on our page. */
+export async function fulfillDoctorApplicationSetupIntent(setupIntentId: string, expectedUserId?: string): Promise<boolean> {
+  if (!setupIntentId) return false
+  const saved = await paymentMethodFromSetupIntent(setupIntentId)
+  if (!saved) return false
+  if (expectedUserId && saved.userId && saved.userId !== expectedUserId) return false
+  const savedCard = await markCardOnFile({
+    applicationId: saved.applicationId,
+    customerId: saved.customerId,
+    paymentMethodId: saved.paymentMethodId,
+    sessionId: setupIntentId,
+    userId: saved.userId,
+    doctorId: saved.doctorId,
+    confirmed: true,
   })
   if (!savedCard) return false
   if (savedCard.notify) {

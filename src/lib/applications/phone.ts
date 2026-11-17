@@ -71,6 +71,8 @@ export function toApplicationE164(raw: string | null | undefined, country: strin
   if (raw == null) return null
   const trimmed = String(raw).trim()
   if (!trimmed) return null
+  // Emails and words are not mobile numbers, even when digits are hiding in them.
+  if (/[a-z@]/i.test(trimmed)) return null
   const region = regionOf(country)
   if (region === 'US' || region === 'CA') return toE164(trimmed, region)
   if (region === 'OTHER') return otherE164(trimmed)

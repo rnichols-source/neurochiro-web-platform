@@ -2,14 +2,14 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
-import { fulfillDoctorApplicationSetup } from '@/lib/applications/fulfill'
+import { fulfillDoctorApplicationSetup, fulfillDoctorApplicationSetupIntent } from '@/lib/applications/fulfill'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ApplyCompletePage({
   searchParams,
 }: {
-  searchParams: Promise<{ session_id?: string }>
+  searchParams: Promise<{ session_id?: string; setup_intent?: string }>
 }) {
   if (!isApplicationFlowEnabled()) redirect('/doctor/dashboard')
   const supabase = createServerSupabase()
@@ -17,9 +17,11 @@ export default async function ApplyCompletePage({
   if (!user) redirect('/login?next=/doctor/apply')
 
   const params = await searchParams
-  const saved = params.session_id
-    ? await fulfillDoctorApplicationSetup({ id: params.session_id }, user.id).catch(() => false)
-    : false
+  const saved = params.setup_intent
+    ? await fulfillDoctorApplicationSetupIntent(params.setup_intent, user.id).catch(() => false)
+    : params.session_id
+      ? await fulfillDoctorApplicationSetup({ id: params.session_id }, user.id).catch(() => false)
+      : false
 
   return (
     <div className="mx-auto max-w-lg px-4 py-10">

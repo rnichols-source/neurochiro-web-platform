@@ -3,6 +3,8 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { pinDoctor } from '@/lib/go-live/pin'
 import { isMissingColumn } from '@/lib/leads/schema'
+import { applicationGaps } from './checklist.ts'
+import { applicationStatusAfterCard } from './status.ts'
 import { applicationStopLabel, type ApplicationAnswers } from './answers.ts'
 import type { AdminApplicationRow } from './admin-row.ts'
 import { doctorProfileUrl } from './approval-sms.ts'
@@ -91,6 +93,22 @@ export function mapApplication(row: Row, doctor?: Row | null, profile?: Row | nu
     smsConsent: contact.smsConsent,
     priceLabel: text(row.price_label) || null,
     paymentReceived: typeof row.payment_received_at === 'string' && row.payment_received_at.length > 0,
+    checklistAnswers: {
+      practiceApproach: text(row.practice_approach),
+      heardAbout: text(row.heard_about),
+      whyJoin: text(row.why_join),
+      techniques: text(row.techniques),
+      usesNervousSystemScans: typeof row.uses_nervous_system_scans === 'boolean' ? row.uses_nervous_system_scans : null,
+      scanTypes: text(row.scan_types),
+      yearsInPractice: typeof row.years_in_practice === 'number' ? row.years_in_practice : null,
+      officeAddress: text(row.office_address),
+      city: text(row.city),
+      country: text(row.country),
+      website: text(row.website),
+      instagram: text(row.instagram),
+      mobile: contact.mobileE164,
+      mobileE164: contact.mobileE164,
+    },
     currency: text(row.currency) || null,
     answers: {
       name: `${firstName} ${lastName}`.trim(),
@@ -386,6 +404,8 @@ export async function markCardOnFile(input: {
   sessionId: string
   userId: string
   doctorId: string
+  /** True only after Stripe reports the SetupIntent status is succeeded. */
+  confirmed: boolean
 }): Promise<{ application: StoredApplication; notify: boolean } | null> {
   const client = db()
   const current = await client.from('doctor_applications').select('*').eq('id', input.applicationId).maybeSingle()
@@ -394,14 +414,21 @@ export async function markCardOnFile(input: {
   if (text(currentRow.user_id) && input.userId && text(currentRow.user_id) !== input.userId) return null
   const terminal = currentRow.status === 'approved' || currentRow.status === 'declined'
   const alreadySaved = currentRow.card_on_file === true
-  const notify = !alreadySaved && !terminal
+  const paymentReceived = typeof currentRow.payment_received_at === 'string' && currentRow.payment_received_at.length > 0
+  const nextStatus = applicationStatusAfterCard({
+    setupStatus: input.confirmed ? 'succeeded' : null,
+    currentStatus: text(currentRow.status) || 'draft',
+    paymentReceived,
+  })
+  if (!input.confirmed || !nextStatus) return null
+  const notify = !alreadySaved && !terminal && nextStatus === 'under_review'
   if (!alreadySaved) {
     const updated = await client.from('doctor_applications').update({
       stripe_customer_id: input.customerId,
       stripe_payment_method_id: input.paymentMethodId,
       stripe_setup_session_id: input.sessionId,
       card_on_file: true,
-      status: terminal ? currentRow.status : 'under_review',
+      status: nextStatus,
       updated_at: new Date().toISOString(),
     }).eq('id', input.applicationId)
     if (updated.error) return null
@@ -500,6 +527,14 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
         : mapped.answers.usesNervousSystemScans === false
           ? 'No'
           : 'Not answered'
+      const gaps = applicationGaps({
+        ...(mapped.checklistAnswers || {}),
+        plan: mapped.plan && mapped.stripePriceId ? mapped.plan : null,
+        cardOnFile: mapped.cardOnFile && Boolean(mapped.stripeCustomerId) && Boolean(mapped.stripePaymentMethodId),
+        email: mapped.email,
+        mobile: mapped.mobileE164 || '',
+        country: mapped.answers.country,
+      })
       return {
         id: mapped.id,
         status: mapped.status,
@@ -527,6 +562,9 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
         notes: humanAdminNotes(text(row.admin_notes)),
         mobile: mapped.mobileE164 || '',
         smsConsent: mapped.smsConsent ? consentStatusLabel(true, contactFromApplicationRow(row).smsConsentAt) : 'No',
+        lastActivity: text(row.updated_at) || text(row.created_at),
+        missing: gaps.map((gap) => gap.label),
+        complete: gaps.length === 0,
         stoppedAt: applicationStopLabel({
           status: mapped.status,
           cardOnFile: mapped.cardOnFile,

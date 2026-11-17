@@ -10,7 +10,7 @@ import { fulfillSynapseCheckout, lapseSynapseSubscription } from "@/lib/synapse/
 import { noteSynapsePaymentFailed, synapseUpdateShouldLapse } from "@/lib/synapse/payment-failed";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
 import { accessForStripeStatus } from "@/lib/portal/membership";
-import { fulfillDoctorApplicationSetup } from "@/lib/applications/fulfill";
+import { fulfillDoctorApplicationSetup, fulfillDoctorApplicationSetupIntent } from "@/lib/applications/fulfill";
 import { invalidateDoctorStripe } from "@/lib/billing/stripe-cache";
 import { syncDoctorMembershipByCustomer } from "@/lib/applications/membership-sync";
 import { customerIdFromInvoice, settleMemberReferral } from "@/lib/member-referrals/settle";
@@ -248,6 +248,13 @@ export async function POST(req: Request) {
 
   try {
     switch (event.type) {
+      case "setup_intent.succeeded": {
+        const intent = event.data.object as { id?: string; metadata?: { type?: string } };
+        if (intent.metadata?.type === "doctor_application_setup" && intent.id) {
+          await fulfillDoctorApplicationSetupIntent(intent.id);
+        }
+        break;
+      }
       case "checkout.session.completed": {
         const session = event.data.object as any;
         if (session.metadata?.type === "doctor_application_setup") {

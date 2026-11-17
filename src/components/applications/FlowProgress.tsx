@@ -1,15 +1,11 @@
-const STEPS = [
-  { n: 1, label: 'You and your account' },
-  { n: 2, label: 'Practice details' },
-  { n: 3, label: 'Plan and card' },
-] as const
+import { APPLICATION_FLOW_STEPS, type ApplicationFlowStep } from '@/lib/applications/flow-steps'
 
-export function FlowProgress({ step }: { step: 1 | 2 | 3 }) {
+export function FlowProgress({ step }: { step: ApplicationFlowStep }) {
   return (
     <nav aria-label="Application progress" className="mb-6">
-      <p className="text-sm font-bold text-neuro-orange">Step {step} of 3</p>
-      <ol className="mt-3 grid grid-cols-3 gap-2">
-        {STEPS.map((item) => {
+      <p className="text-sm font-bold text-neuro-orange">Step {step} of {APPLICATION_FLOW_STEPS.length}</p>
+      <ol className="mt-3 grid grid-cols-4 gap-2">
+        {APPLICATION_FLOW_STEPS.map((item) => {
           const done = item.n < step
           const current = item.n === step
           return (

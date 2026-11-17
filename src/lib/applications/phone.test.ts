@@ -31,7 +31,13 @@ describe('application mobile numbers', () => {
     assert.equal(toApplicationE164('0645550100', 'US'), null)
   })
 
-  it('requires a valid mobile and text consent', () => {
+  it('rejects an email or other text in the mobile field', () => {
+    assert.equal(toApplicationE164('ada@example.com', 'US'), null)
+    assert.equal(toApplicationE164('user@8645550100.com', 'US'), null)
+    assert.equal(toApplicationE164('call me', 'CA'), null)
+  })
+
+  it('requires a valid mobile and treats text consent as optional', () => {
     const base = {
       practiceApproach: 'We focus on the nervous system and how the body adapts.',
       techniques: 'Toggle',
@@ -56,7 +62,8 @@ describe('application mobile numbers', () => {
       assert.equal(ok.value.smsConsent, true)
     }
     const noConsent = validateAnswers({ ...base, smsConsent: false, whyJoin: '' })
-    assert.equal(noConsent.ok, false)
+    assert.equal(noConsent.ok, true)
+    if (noConsent.ok) assert.equal(noConsent.value.smsConsent, false)
     const badPhone = validateAnswers({ ...base, mobile: '123' })
     assert.equal(badPhone.ok, false)
     assert.equal(APPLICATION_SMS_CONSENT.includes('Reply STOP to opt out'), true)

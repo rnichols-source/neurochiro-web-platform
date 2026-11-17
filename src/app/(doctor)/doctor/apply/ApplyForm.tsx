@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useEffect, useState, type FormEvent } from 'react'
 import { FlowProgress } from '@/components/applications/FlowProgress'
 import {
@@ -7,11 +8,18 @@ import {
   HEARD_ABOUT_CHOICES,
   parseHeardAbout,
 } from '@/lib/applications/answers'
-import { APPLICATION_SMS_CONSENT } from '@/lib/applications/consent'
+import { chargeCopyFromLabel } from '@/lib/applications/charge-copy'
+import { gapsBeforeCard, type ApplicationGap } from '@/lib/applications/checklist'
 import { APPLICATION_COUNTRIES } from '@/lib/applications/countries'
+import { flowStepLabel, type ApplicationFlowStep } from '@/lib/applications/flow-steps'
 import { toApplicationE164 } from '@/lib/applications/phone'
 import type { BillingCycle, DoctorCurrency } from '@/lib/applications/prices'
-import { plansForCountry, saveApplyStep, submitApplication, type PlanChoice } from './actions'
+import { plansForCountry, prepareCardSetup, saveApplyStep, type PlanChoice } from './actions'
+
+const CardSetup = dynamic(
+  () => import('@/components/applications/CardSetup').then((mod) => mod.CardSetup),
+  { ssr: false },
+)
 
 type Initial = {
   practiceApproach: string
@@ -36,7 +44,9 @@ const fieldClass = 'mt-1 w-full min-h-11 rounded-xl border border-black/10 bg-wh
 
 export function ApplyForm({
   doctorName,
+  doctorEmail,
   canceled,
+  resumed,
   referralCode,
   referredBy,
   initialCountry,
@@ -46,7 +56,9 @@ export function ApplyForm({
   initialStep,
 }: {
   doctorName: string
+  doctorEmail: string
   canceled: boolean
+  resumed: boolean
   referralCode: string
   referredBy: string | null
   initialCountry: string
@@ -71,7 +83,12 @@ export function ApplyForm({
   const [currency, setCurrency] = useState(startingCurrency)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const flowStep: 2 | 3 = step === 3 ? 3 : 2
+  const [clientSecret, setClientSecret] = useState('')
+  const [returnUrl, setReturnUrl] = useState('')
+  const flowStep: ApplicationFlowStep = step === 1 ? 2 : step === 2 ? 3 : 4
+  const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
+  const selectedPlan = plans.find((choice) => choice.cycle === plan) || plans[0]
+  const chargeCopy = chargeCopyFromLabel(selectedPlan?.label || '', plan)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -95,8 +112,19 @@ export function ApplyForm({
     }
   }
 
+  function gapsNow(): ApplicationGap[] {
+    return gapsBeforeCard({
+      ...answers(),
+      email: doctorEmail,
+      plan,
+      mobile: values.mobile,
+      country: values.country,
+    })
+  }
+
   async function onCountry(country: string) {
     set('country', country)
+    setClientSecret('')
     const next = await plansForCountry(country)
     setCurrency(next.currency)
     setPlans(next.plans)
@@ -106,17 +134,17 @@ export function ApplyForm({
     event.preventDefault()
     setLoading(true)
     setError('')
+    const blocked = gapsNow().filter((gap) => {
+      if (step === 1) return gap.key === 'practice' || gap.key === 'heard'
+      if (step === 2) return ['techniques', 'scans', 'years', 'address', 'city', 'country', 'website', 'instagram'].includes(gap.key)
+      return gap.key !== 'card'
+    })
+    if (blocked.length > 0) {
+      setError(`Missing: ${blocked.map((gap) => gap.label).join(', ')}.`)
+      setLoading(false)
+      return
+    }
     if (step === 1 || step === 2) {
-      if (step === 2) {
-        const mobile = toApplicationE164(values.mobile, values.country)
-        if (!mobile) {
-          setError(values.country === 'OTHER'
-            ? 'Enter a mobile number with + and the country code.'
-            : 'Enter a mobile number for the country you selected.')
-          setLoading(false)
-          return
-        }
-      }
       const saved = await saveApplyStep(step, { referralCode, referrerName, answers: answers() })
       if (saved.error) {
         setError(saved.error)
@@ -128,26 +156,39 @@ export function ApplyForm({
       return
     }
 
-    const mobile = toApplicationE164(values.mobile, values.country)
-    if (!mobile) {
+    const mobile = values.mobile.trim()
+      ? toApplicationE164(values.mobile, values.country)
+      : ''
+    if (values.mobile.trim() && !mobile) {
       setError(values.country === 'OTHER'
         ? 'Enter a mobile number with + and the country code.'
         : 'Enter a mobile number for the country you selected.')
       setLoading(false)
       return
     }
-    const result = await submitApplication({
+    const result = await prepareCardSetup({
       plan,
       referralCode,
       referrerName,
-      answers: { ...answers(), mobile },
+      answers: { ...answers(), mobile: mobile || values.mobile },
     })
-    if (result.error || !result.url) {
-      setError(result.error || 'Something went wrong.')
+    if (result.error) {
+      setError(result.error)
       setLoading(false)
       return
     }
-    window.location.href = result.url
+    if (result.url) {
+      window.location.href = result.url
+      return
+    }
+    if (!result.clientSecret || !result.returnUrl) {
+      setError('Stripe could not open the card form. Check the price settings and try again.')
+      setLoading(false)
+      return
+    }
+    setReturnUrl(result.returnUrl)
+    setClientSecret(result.clientSecret)
+    setLoading(false)
   }
 
   return (
@@ -155,14 +196,15 @@ export function ApplyForm({
       <div>
         <p className="text-sm font-bold text-neuro-navy">NeuroChiro</p>
         <FlowProgress step={flowStep} />
-        <h1 className="mt-1 text-2xl font-bold text-neuro-navy">{flowStep === 3 ? 'Plan and card' : 'Practice details'}</h1>
+        <h1 className="mt-1 text-2xl font-bold text-neuro-navy">{flowStepLabel(flowStep)}</h1>
         <p className="mt-2 text-sm text-neuro-navy/80">
-          {doctorName && flowStep === 2 ? `Your account is saved, Dr. ${doctorName}. ` : ''}
-          {step === 1 ? 'How you practice. This is the next step, and it stays saved if you leave.' : null}
-          {step === 2 ? 'Your office. A mobile number is required. Text messages are optional.' : null}
-          {step === 3 ? 'Choose monthly or annual in your currency. The card is saved now and is not charged unless you are approved.' : null}
+          {doctorName && step === 1 ? `Your account is saved, Dr. ${doctorName}. ` : ''}
+          {step === 1 ? 'How you practice. This stays saved if you leave.' : null}
+          {step === 2 ? 'Your office. This stays saved if you leave.' : null}
+          {step === 3 ? `${chargeCopy} Currency: ${currency}.` : null}
         </p>
       </div>
+      {resumed ? <p className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-neuro-navy">Pick up where you left off</p> : null}
       {referredBy ? <p className="rounded-xl bg-white px-3 py-2 text-sm text-neuro-navy">Referred by {referredBy}</p> : null}
       {canceled ? <p className="rounded-xl bg-white p-3 text-sm">The card form was closed. You can try again when you are ready.</p> : null}
       {error ? <p role="alert" className="text-sm font-bold text-red-700">{error}</p> : null}
@@ -259,37 +301,6 @@ export function ApplyForm({
             </select>
           </label>
           <label className="block text-sm font-bold">
-            Mobile number
-            <input
-              required
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              value={values.mobile}
-              onChange={(event) => set('mobile', event.target.value)}
-              className={fieldClass}
-              placeholder={values.country === 'OTHER' ? '+ country code' : ''}
-            />
-            <span className="mt-1 block text-xs font-normal text-neuro-navy/70">
-              {values.country === 'OTHER'
-                ? 'Start with + and the country code.'
-                : 'Use a mobile number in the country you selected.'}
-            </span>
-          </label>
-          <label className="flex min-h-11 items-start gap-3 text-sm">
-            <input
-              type="checkbox"
-              required
-              className="mt-1 h-5 w-5"
-              checked={values.smsConsent}
-              onChange={(event) => set('smsConsent', event.target.checked)}
-            />
-            <span>
-              <span className="font-bold">Required. </span>
-              {APPLICATION_SMS_CONSENT}
-            </span>
-          </label>
-          <label className="block text-sm font-bold">
             Website
             <input value={values.website} onChange={(event) => set('website', event.target.value)} className={fieldClass} placeholder="https://" />
           </label>
@@ -301,24 +312,50 @@ export function ApplyForm({
       ) : null}
 
       {step === 3 ? (
-        <fieldset>
-          <legend className="text-sm font-bold">Membership in {currency}. Per office. Not charged today.</legend>
-          <div className="mt-2 space-y-2">
-            {plans.map((choice) => (
-              <label key={choice.cycle} className="flex min-h-11 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm">
-                <input
-                  type="radio"
-                  name="plan"
-                  disabled={!choice.available}
-                  checked={plan === choice.cycle}
-                  onChange={() => setPlan(choice.cycle)}
-                />
-                <span>{choice.cycle === 'monthly' ? 'Monthly' : 'Annual'}: {choice.label}</span>
-                {choice.available ? null : <span>Price not configured</span>}
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <>
+          <fieldset>
+            <legend className="text-sm font-bold">Membership in {currency}. Per office.</legend>
+            <div className="mt-2 space-y-2">
+              {plans.map((choice) => (
+                <label key={choice.cycle} className="flex min-h-11 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm">
+                  <input
+                    type="radio"
+                    name="plan"
+                    disabled={!choice.available}
+                    checked={plan === choice.cycle}
+                    onChange={() => { setPlan(choice.cycle); setClientSecret('') }}
+                  />
+                  <span>{choice.cycle === 'monthly' ? 'Monthly' : 'Annual'}: {choice.label}</span>
+                  {choice.available ? null : <span>Price not configured</span>}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <p className="rounded-xl bg-white px-3 py-3 text-sm font-bold text-neuro-navy">{chargeCopy}</p>
+          {!values.mobile ? (
+            <label className="block text-sm font-bold">
+              Mobile number
+              <input
+                required
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                value={values.mobile}
+                onChange={(event) => set('mobile', event.target.value)}
+                className={fieldClass}
+                placeholder={values.country === 'OTHER' ? '+ country code' : ''}
+              />
+            </label>
+          ) : null}
+          {clientSecret ? (
+            <CardSetup
+              publishableKey={publishableKey}
+              clientSecret={clientSecret}
+              returnUrl={returnUrl}
+              onError={setError}
+            />
+          ) : null}
+        </>
       ) : null}
 
       <div className="flex flex-col gap-3">
@@ -326,9 +363,9 @@ export function ApplyForm({
           <button type="submit" disabled={loading} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 font-bold text-white disabled:opacity-60">
             {loading ? 'Saving…' : 'Next'}
           </button>
-        ) : (
-          <button type="submit" disabled={loading} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 font-bold text-white disabled:opacity-60">
-            {loading ? 'Opening the card form…' : 'Save card and submit application'}
+        ) : clientSecret ? null : (
+          <button type="submit" disabled={loading || !selectedPlan?.available} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 font-bold text-white disabled:opacity-60">
+            {loading ? 'Opening the card form…' : 'Continue to card'}
           </button>
         )}
         {step > 1 ? (

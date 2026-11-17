@@ -1,4 +1,5 @@
 import { approvalSmsFor, paymentSmsFor, type ApprovalSms } from './approval-sms.ts'
+import { applicationGaps, approveBlockMessage, type ChecklistInput } from './checklist.ts'
 import { approvedEmail, declinedEmail, unpaidEmail, type Mail } from './emails.ts'
 import { DOCTOR_PAY_URL, safePayUrl } from '../go-live/plan.ts'
 
@@ -26,6 +27,8 @@ export type ApplicationRecord = {
   priceLabel: string | null
   /** Path B already paid on a Stripe link. Approve must not charge again. */
   paymentReceived?: boolean
+  /** Practice answers used by the shared completeness checklist. */
+  checklistAnswers?: ChecklistInput
 }
 
 export type ChargeResult = {
@@ -86,11 +89,17 @@ function notesOrNull(notes: string): string | null {
   return trimmed ? trimmed.slice(0, 2000) : null
 }
 
-function missingCard(app: ApplicationRecord): string | null {
-  if (!app.cardOnFile || !app.stripeCustomerId || !app.stripePaymentMethodId) return 'There is no card on file yet.'
-  if (!app.stripePriceId || !app.plan) return 'This application has no plan selected.'
-  if (!app.email.includes('@')) return 'This application has no email address.'
-  return null
+function checklistFor(app: ApplicationRecord): ChecklistInput {
+  const cardReady = app.cardOnFile === true && Boolean(app.stripeCustomerId) && Boolean(app.stripePaymentMethodId)
+  return {
+    ...(app.checklistAnswers || {}),
+    plan: app.plan && app.stripePriceId ? app.plan : null,
+    cardOnFile: cardReady,
+    email: app.email,
+    mobile: app.mobileE164 || app.checklistAnswers?.mobile || '',
+    mobileE164: app.mobileE164 || '',
+    country: app.checklistAnswers?.country || 'US',
+  }
 }
 
 export async function approveApplication(
@@ -155,7 +164,7 @@ export async function approveApplication(
     }
   }
 
-  const blocked = missingCard(app)
+  const blocked = approveBlockMessage(applicationGaps(checklistFor(app)))
   if (blocked || !app.stripeCustomerId || !app.stripePaymentMethodId || !app.stripePriceId) {
     return { ok: false, message: blocked || 'There is no card on file yet.', doctor: null, application: null, email: null, sms: null, charged: false, detached: false }
   }

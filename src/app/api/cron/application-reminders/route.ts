@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { deliverReminders, applicationReminderSmsEnabled } from '@/lib/applications/reminder-plan'
-import { claimReminder, loadReminderCandidates, releaseReminder } from '@/lib/applications/reminder-run'
+import { claimReminder, loadReminderCandidates, logReminderSend, releaseReminder, resumeMagicLink } from '@/lib/applications/reminder-run'
 import { sendApplicationEmail } from '@/lib/applications/notify'
 import { quoSend } from '@/lib/sms/quo'
 
@@ -36,6 +36,8 @@ export async function GET(req: Request) {
         const sent = await quoSend({ to: message.to, content: message.content })
         return sent.ok
       },
+      resumeLink: (row) => resumeMagicLink(row.email, row.resumeUrl || 'https://neurochiro.co/doctor/apply?step=2&resume=1'),
+      logSend: logReminderSend,
     })
     if (result.unavailable) {
       return NextResponse.json({ ok: true, ready: false, emailed: result.emailed, texted: result.texted })

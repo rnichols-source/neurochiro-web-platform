@@ -3,11 +3,14 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn, isMissingTable } from '@/lib/leads/schema'
 import { applicationResumeUrl } from './answers.ts'
+import { magicResumeUrl } from './magic-link.ts'
+import { applicationTimezone } from './quiet.ts'
 import {
   consentFromApplicationRow,
   reminderWindows,
   type ReminderCandidate,
   type ReminderKind,
+  type ReminderSendLog,
 } from './reminder-plan.ts'
 
 type Row = Record<string, unknown>
@@ -16,6 +19,7 @@ type Result = { data: Row | Row[] | null; error?: DbError }
 
 type Chain = {
   select: (columns: string) => Chain
+  insert: (values: Record<string, unknown>) => Promise<Result>
   update: (values: Record<string, unknown>) => Chain
   eq: (column: string, value: unknown) => Chain
   in: (column: string, values: string[]) => Chain
@@ -124,6 +128,11 @@ export async function loadReminderCandidates(now: Date): Promise<{ rows: Reminde
         smsConsent: contact.consent,
         mobile: contact.phone || null,
         resumeUrl: applicationResumeUrl(answersForResume(row, contact.phone)),
+        timezone: applicationTimezone({
+          state: text(row.state),
+          country: text(row.country),
+          phone: contact.phone,
+        }),
       }
     }).filter((row) => row.id),
   }
@@ -145,6 +154,44 @@ export async function claimReminder(id: string, kind: ReminderKind, now = new Da
     return 'taken'
   }
   return rowsOf(result).length > 0 ? 'claimed' : 'taken'
+}
+
+const REMINDER_LOG_SQL = 'supabase/migrations/proposed/20261117170000_application_reminder_log.sql'
+
+/** Builds a one-time magic link. Does not send email. */
+export async function resumeMagicLink(email: string, nextPath: string): Promise<string> {
+  const fallback = `https://neurochiro.co/login?next=${encodeURIComponent(nextPath.startsWith('/doctor/apply') ? nextPath : '/doctor/apply?step=2&resume=1')}`
+  if (!email.includes('@')) return fallback
+  try {
+    const admin = createAdminClient()
+    const link = await admin.auth.admin.generateLink({
+      type: 'magiclink',
+      email,
+      options: { redirectTo: `https://neurochiro.co/auth/activate?next=${encodeURIComponent(nextPath)}` },
+    })
+    const token = link.data?.properties?.hashed_token
+    if (typeof token === 'string' && token) return magicResumeUrl(token, nextPath)
+  } catch (error) {
+    console.error('[application-reminder] magic link failed', error instanceof Error ? error.name : 'error')
+  }
+  return fallback
+}
+
+export async function logReminderSend(entry: ReminderSendLog): Promise<void> {
+  const result = await db().from('application_reminder_sends').insert({
+    application_id: entry.applicationId,
+    channel: entry.channel,
+    kind: entry.kind,
+    timezone: entry.timezone,
+    sent_at: new Date().toISOString(),
+  })
+  if (result.error) {
+    if (missingSchema(result.error)) {
+      console.error(`[application-reminder] send log is not ready. Apply ${REMINDER_LOG_SQL}`)
+      return
+    }
+    console.error('[application-reminder] send log failed', result.error.code || 'error')
+  }
 }
 
 export async function releaseReminder(id: string, kind: ReminderKind): Promise<void> {
