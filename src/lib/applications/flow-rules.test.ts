@@ -4,8 +4,8 @@ import { APPLICATION_SMS_CONSENT } from './consent.ts'
 import { applicationGaps, approveBlockMessage } from './checklist.ts'
 import { chargeApprovalCopy } from './charge-copy.ts'
 import { approveApplication, type ApplicationRecord, type BillingPort } from './decide.ts'
-import { EXISTING_LISTING_MESSAGE, signupDuplicateDecision, type ListingDoctor } from './existing-listing.ts'
-import { magicResumeUrl } from './magic-link.ts'
+import { EXISTING_LISTING_MESSAGE, LISTING_PASSWORD_EMAIL, signupDuplicateDecision, startListingClaim, type ListingDoctor } from './existing-listing.ts'
+import { magicResumeUrl, resumePathOnly } from './magic-link.ts'
 import { currencyForCountry } from './prices.ts'
 import { applicationTimezone, reminderInQuietHours } from './quiet.ts'
 import { deliverReminders, type ReminderCandidate } from './reminder-plan.ts'
@@ -141,6 +141,39 @@ describe('signup country, duplicates, and consent', () => {
     assert.equal(listed.action, 'link')
   })
 
+  it('does not create a login with the submitted password or link the listing before the email is verified', async () => {
+    const submittedPassword = 'attacker-password'
+    const seen: unknown[] = []
+    const result = await startListingClaim({
+      submittedPassword,
+      doctor: doctor({ id: 'doc-paid', userId: null, paidAt: '2026-01-01T00:00:00.000Z', isApproved: true }),
+      existingUserId: null,
+      ports: {
+        async createUnconfirmedLogin(input) {
+          seen.push(input)
+          assert.equal(JSON.stringify(input).includes(submittedPassword), false)
+          assert.equal('password' in input, false)
+          return { userId: 'user-new' }
+        },
+        async rememberPendingClaim(input) {
+          seen.push(input)
+          assert.equal(JSON.stringify(input).includes(submittedPassword), false)
+          return true
+        },
+        async sendPasswordLink(input) {
+          seen.push(input)
+          assert.equal(input.email, 'ada@example.com')
+          assert.equal(JSON.stringify(input).includes(submittedPassword), false)
+          return { ok: true, userId: input.userId }
+        },
+      },
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.linked, false)
+    assert.equal(result.message, LISTING_PASSWORD_EMAIL)
+    assert.equal(seen.some((item) => JSON.stringify(item).includes(submittedPassword)), false)
+  })
+
   it('says patient requests on the optional text consent', () => {
     assert.match(APPLICATION_SMS_CONSENT, /patient request/)
     assert.equal(APPLICATION_SMS_CONSENT.includes('community member'), false)
@@ -158,6 +191,10 @@ describe('resume link and quiet hours', () => {
     assert.equal(parsed.searchParams.get('type'), 'magiclink')
     assert.equal(parsed.searchParams.get('token_hash'), 'tok_123')
     assert.equal(parsed.searchParams.get('next'), '/doctor/apply?step=2&part=2&resume=1')
+    const full = 'https://neurochiro.co/doctor/apply?step=3&resume=1'
+    assert.equal(resumePathOnly(full), '/doctor/apply?step=3&resume=1')
+    assert.equal(new URL(magicResumeUrl('tok_123', full)).searchParams.get('next'), '/doctor/apply?step=2&resume=1')
+    assert.equal(new URL(magicResumeUrl('tok_123', resumePathOnly(full))).searchParams.get('next'), '/doctor/apply?step=3&resume=1')
   })
 
   it('uses the office state, then the phone area code, and holds 9 PM to 8 AM', () => {

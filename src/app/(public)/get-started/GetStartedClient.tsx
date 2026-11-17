@@ -7,7 +7,7 @@ import { CheckCircle2, Loader2, Shield, Users, BarChart3, MessageSquare, Briefca
 import { FlowProgress } from "@/components/applications/FlowProgress";
 import { APPLICATION_SMS_CONSENT } from "@/lib/applications/consent";
 import { APPLICATION_COUNTRIES } from "@/lib/applications/countries";
-import { EXISTING_LISTING_MESSAGE } from "@/lib/applications/existing-listing";
+import { LISTING_PASSWORD_EMAIL } from "@/lib/applications/existing-listing";
 import { toApplicationE164 } from "@/lib/applications/phone";
 import { currencyForCountry, knownPlanLabel } from "@/lib/applications/prices";
 import { continueAfterAccount } from "@/lib/applications/resume-path";
@@ -48,7 +48,7 @@ function GetStartedInner({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [accountExists, setAccountExists] = useState(false);
-  const [existingListing, setExistingListing] = useState(false);
+  const [checkEmail, setCheckEmail] = useState(false);
   const [success, setSuccess] = useState(false);
   const doctorFlow = applicationFlow && role === "doctor";
   const currency = currencyForCountry(country);
@@ -65,7 +65,7 @@ function GetStartedInner({
     setLoading(true);
     setError("");
     setAccountExists(false);
-    setExistingListing(false);
+    setCheckEmail(false);
 
     if (doctorFlow) {
       if (/[a-z@]/i.test(phone)) {
@@ -92,9 +92,8 @@ function GetStartedInner({
       smsConsent: doctorFlow ? smsConsent : undefined,
       referralCode,
     });
-    if ("existingListing" in result && result.existingListing) {
-      setExistingListing(true);
-      setError(EXISTING_LISTING_MESSAGE);
+    if ("checkEmail" in result && result.checkEmail) {
+      setCheckEmail(true);
       setLoading(false);
       return;
     }
@@ -125,6 +124,19 @@ function GetStartedInner({
       window.location.href = `/student/subscribe?plan=${paramPlan}`;
     }
   };
+
+  if (checkEmail) {
+    return (
+      <div className="min-h-dvh bg-neuro-cream flex items-center justify-center px-6">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-10">
+            <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">{LISTING_PASSWORD_EMAIL}</h1>
+            <p className="text-gray-500">The link goes to the email address already on the listing. The password from this form was not saved.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -303,11 +315,6 @@ function GetStartedInner({
           </div>
 
           {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
-          {existingListing ? (
-            <Link href="/login" className="block text-center text-sm font-bold text-neuro-orange hover:underline">
-              Set your password
-            </Link>
-          ) : null}
           {accountExists && doctorFlow ? (
             <Link href={continueAfterAccount(false, continuePath)} className="block text-center text-sm font-bold text-neuro-orange hover:underline">
               Log in and continue your application

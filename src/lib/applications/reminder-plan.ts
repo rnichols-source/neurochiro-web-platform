@@ -20,6 +20,8 @@ export type ReminderCandidate = {
   smsConsent: boolean
   mobile: string | null
   resumeUrl?: string
+  /** Path only, such as /doctor/apply?step=3&resume=1. Magic links reject a full URL. */
+  resumePath?: string
   /** IANA zone for 9 PM–8 AM quiet hours. Office state or phone area code. */
   timezone?: string
 }

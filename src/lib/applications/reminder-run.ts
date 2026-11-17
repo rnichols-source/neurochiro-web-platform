@@ -2,8 +2,8 @@ import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn, isMissingTable } from '@/lib/leads/schema'
-import { applicationResumeUrl } from './answers.ts'
-import { magicResumeUrl } from './magic-link.ts'
+import { applicationResumePath, applicationResumeUrl } from './answers.ts'
+import { magicResumeUrl, resumePathOnly } from './magic-link.ts'
 import { applicationTimezone } from './quiet.ts'
 import {
   consentFromApplicationRow,
@@ -116,6 +116,7 @@ export async function loadReminderCandidates(now: Date): Promise<{ rows: Reminde
       const profile = profileMap.get(text(row.user_id))
       const contact = consentFromApplicationRow(row)
       const fullName = text(profile?.full_name)
+      const answers = answersForResume(row, contact.phone)
       return {
         id: text(row.id),
         email: text(profile?.email) || text(doctor?.email),
@@ -127,7 +128,8 @@ export async function loadReminderCandidates(now: Date): Promise<{ rows: Reminde
         reminder24hSentAt: text(row.reminder_24h_sent_at) || null,
         smsConsent: contact.consent,
         mobile: contact.phone || null,
-        resumeUrl: applicationResumeUrl(answersForResume(row, contact.phone)),
+        resumeUrl: applicationResumeUrl(answers),
+        resumePath: applicationResumePath(answers),
         timezone: applicationTimezone({
           state: text(row.state),
           country: text(row.country),
@@ -160,17 +162,18 @@ const REMINDER_LOG_SQL = 'supabase/migrations/proposed/20261117170000_applicatio
 
 /** Builds a one-time magic link. Does not send email. */
 export async function resumeMagicLink(email: string, nextPath: string): Promise<string> {
-  const fallback = `https://neurochiro.co/login?next=${encodeURIComponent(nextPath.startsWith('/doctor/apply') ? nextPath : '/doctor/apply?step=2&resume=1')}`
+  const path = resumePathOnly(nextPath)
+  const fallback = `https://neurochiro.co/login?next=${encodeURIComponent(path)}`
   if (!email.includes('@')) return fallback
   try {
     const admin = createAdminClient()
     const link = await admin.auth.admin.generateLink({
       type: 'magiclink',
       email,
-      options: { redirectTo: `https://neurochiro.co/auth/activate?next=${encodeURIComponent(nextPath)}` },
+      options: { redirectTo: `https://neurochiro.co/auth/activate?next=${encodeURIComponent(path)}` },
     })
     const token = link.data?.properties?.hashed_token
-    if (typeof token === 'string' && token) return magicResumeUrl(token, nextPath)
+    if (typeof token === 'string' && token) return magicResumeUrl(token, path)
   } catch (error) {
     console.error('[application-reminder] magic link failed', error instanceof Error ? error.name : 'error')
   }

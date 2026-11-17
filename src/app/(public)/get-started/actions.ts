@@ -4,10 +4,14 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { assertSelfServeRole } from '@/lib/auth/roles'
 import { APPLICATION_COUNTRIES } from '@/lib/applications/countries'
 import {
-  EXISTING_LISTING_MESSAGE,
   signupDuplicateDecision,
+  startListingClaim,
   type ListingDoctor,
 } from '@/lib/applications/existing-listing'
+import { listingPasswordUrl } from '@/lib/applications/magic-link'
+import { sendApplicationEmail } from '@/lib/applications/notify'
+import { escapeHtml } from '@/lib/students/html'
+import { randomBytes } from 'crypto'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { toApplicationE164 } from '@/lib/applications/phone'
 import { currencyForCountry } from '@/lib/applications/prices'
@@ -91,30 +95,55 @@ export async function createFreeAccount(data: {
       const decision = signupDuplicateDecision(email, doctors)
       if (decision.action === 'link') {
         const doctor = doctors.find((item) => item.id === decision.doctorId)
-        let userId = profileId
-        if (!userId) {
-          const created = await supabase.auth.admin.createUser({
-            email,
-            password: data.password,
-            email_confirm: true,
-            user_metadata: { full_name: data.name, role: data.role, phone: mobile },
-          })
-          if (created.error || !created.data.user) {
-            return { existingListing: true, error: EXISTING_LISTING_MESSAGE }
-          }
-          userId = created.data.user.id
-          await (supabase as any).from('profiles').upsert({
-            id: userId,
-            email,
-            full_name: data.name,
-            role: data.role,
-            tier: 'pro',
-          })
-        }
-        if (doctor && !doctor.userId) {
-          await supabase.from('doctors').update({ user_id: userId }).eq('id', doctor.id).is('user_id', null)
-        }
-        return { existingListing: true, error: EXISTING_LISTING_MESSAGE }
+        if (!doctor) return { error: 'Something went wrong. Please try again.' }
+        const claim = await startListingClaim({
+          submittedPassword: data.password,
+          doctor,
+          existingUserId: doctor.userId || profileId || null,
+          ports: {
+            async createUnconfirmedLogin({ email: loginEmail }) {
+              const created = await supabase.auth.admin.createUser({
+                email: loginEmail,
+                password: randomBytes(32).toString('base64url'),
+                email_confirm: false,
+                app_metadata: { role: 'doctor', pending_listing_doctor_id: doctor.id },
+              })
+              if (created.data.user?.id) return { userId: created.data.user.id }
+              if (created.error && /already/i.test(created.error.message)) return { alreadyExists: true }
+              return { failed: true }
+            },
+            async rememberPendingClaim({ userId, doctorId }) {
+              const current = await supabase.auth.admin.getUserById(userId)
+              const meta = { ...(current.data.user?.app_metadata || {}), role: 'doctor', pending_listing_doctor_id: doctorId }
+              const updated = await supabase.auth.admin.updateUserById(userId, { app_metadata: meta })
+              return !updated.error
+            },
+            async sendPasswordLink({ email: loginEmail, doctorId, userId }) {
+              const link = await supabase.auth.admin.generateLink({
+                type: 'recovery',
+                email: loginEmail,
+                options: { redirectTo: 'https://neurochiro.co/auth/activate?next=%2Freset-password' },
+              })
+              const token = link.data?.properties?.hashed_token
+              const resolvedId = userId || link.data?.user?.id || null
+              if (!token || !link.data?.user) return { ok: false, userId: resolvedId }
+              if (!doctor.userId && resolvedId) {
+                const meta = { ...(link.data.user.app_metadata || {}), role: 'doctor', pending_listing_doctor_id: doctorId }
+                const updated = await supabase.auth.admin.updateUserById(resolvedId, { app_metadata: meta })
+                if (updated.error) return { ok: false, userId: resolvedId }
+              }
+              const href = listingPasswordUrl(token)
+              const mailed = await sendApplicationEmail({
+                to: loginEmail,
+                subject: 'Set your NeuroChiro password',
+                html: `<p>You already have a NeuroChiro listing.</p><p><a href="${escapeHtml(href)}">Set your password</a></p><p>This link only works for the email address on that listing.</p>`,
+              })
+              return { ok: mailed, userId: resolvedId }
+            },
+          },
+        })
+        if (!claim.ok) return { error: claim.message }
+        return { existingListing: true, checkEmail: true, error: claim.message }
       }
     }
 
