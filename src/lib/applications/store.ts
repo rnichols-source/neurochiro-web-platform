@@ -441,6 +441,10 @@ export async function markCardOnFile(input: {
     updated_at: new Date().toISOString(),
   }
   if (previousStatus === 'needs_action') patch.stripe_subscription_id = null
+  // The old create call used this attempt's idempotency key. A fresh key lets the next approval start a new subscription.
+  if (cancelSubscriptionId) {
+    patch.charge_attempt = (typeof currentRow.charge_attempt === 'number' ? currentRow.charge_attempt : 0) + 1
+  }
   const updated = await client.from('doctor_applications').update(patch).eq('id', input.applicationId)
   if (updated.error) return null
   if (input.userId) {

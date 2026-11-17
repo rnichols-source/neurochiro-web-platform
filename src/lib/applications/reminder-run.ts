@@ -154,10 +154,36 @@ export async function loadReminderCandidates(now: Date): Promise<{ rows: Reminde
       existingMember,
     }
   }).filter((row) => row.id && !row.existingMember)
-  const stopped = await optedOutPhones(rows.map((row) => row.mobile || ''))
+  // A second login or draft for someone who already has a listing or paid membership under the same email.
+  const emails = [...new Set(rows.flatMap((row) => [row.email.trim(), row.email.trim().toLowerCase()]).filter((value) => value.includes('@')))]
+  const listed = new Set<string>()
+  if (emails.length > 0) {
+    const sameEmail = await db().from('doctors')
+      .select('id, email, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id')
+      .in('email', emails)
+    if (sameEmail.error) {
+      console.error('[application-reminder] listing lookup failed', sameEmail.error.code || 'error')
+      return { rows: [], unavailable: true }
+    }
+    for (const doctor of rowsOf(sameEmail)) {
+      const listing = isListingOrPaidMembership({
+        id: text(doctor.id),
+        email: text(doctor.email),
+        userId: null,
+        isApproved: doctor.is_approved === true,
+        verificationStatus: text(doctor.verification_status) || null,
+        paidAt: text(doctor.paid_at) || null,
+        membershipTier: text(doctor.membership_tier) || null,
+        stripeSubscriptionId: text(doctor.stripe_subscription_id) || null,
+      })
+      if (listing) listed.add(text(doctor.email).trim().toLowerCase())
+    }
+  }
+  const unlisted = rows.filter((row) => !listed.has(row.email.trim().toLowerCase()))
+  const stopped = await optedOutPhones(unlisted.map((row) => row.mobile || ''))
   return {
     unavailable: false,
-    rows: rows.map((row) => ({
+    rows: unlisted.map((row) => ({
       ...row,
       smsOptedOut: stopped === 'unknown' ? true : Boolean(row.mobile && stopped.has(row.mobile)),
     })),
