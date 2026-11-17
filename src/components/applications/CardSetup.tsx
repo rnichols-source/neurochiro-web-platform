@@ -71,7 +71,7 @@ function CardFields({
         layout: { type: 'accordion', defaultCollapsed: false, radios: 'always', spacedAccordionItems: false },
         wallets: { applePay: 'auto', googlePay: 'auto' },
       }} />
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-[#F5F3EF]/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="nc-flow-cta fixed inset-x-0 bottom-0 z-30 !mb-0 border-t border-black/10 bg-[#F5F3EF]/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
         <div className="mx-auto max-w-2xl">
         {message ? <p ref={errorRef} role="alert" className="mb-2 text-base font-bold text-red-700">{message}</p> : null}
         <button
