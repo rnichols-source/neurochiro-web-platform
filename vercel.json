@@ -11,10 +11,6 @@
       "schedule": "0 8 * * 2"
     },
     {
-      "path": "/api/cron/profile-nudger",
-      "schedule": "0 13 * * *"
-    },
-    {
       "path": "/api/cron/analytics-compiler",
       "schedule": "0 11 * * 1"
     },
