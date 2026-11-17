@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { fulfillDoctorApplicationSetup, fulfillDoctorApplicationSetupIntent } from '@/lib/applications/fulfill'
+import { DR_RAY_REVIEW_STEPS, DR_RAY_SIGN_OFF } from '@/lib/applications/next-steps'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,11 +29,17 @@ export default async function ApplyCompletePage({
       <h1 className="text-2xl font-bold text-neuro-navy">
         {saved ? 'Application under review' : 'We could not confirm the card'}
       </h1>
-      <p className="mt-3 text-sm text-neuro-navy/80">
-        {saved
-          ? 'Your card is saved and you have not been charged. Raymond will review the application. Your listing stays off the directory until he approves it.'
-          : 'Go back and save the card again. If Stripe already showed a success page, refresh this page in a minute.'}
-      </p>
+      {saved ? (
+        <>
+          <p className="mt-3 text-base text-neuro-navy/80">Your card is saved and you have not been charged. Your listing stays off the directory until you are approved.</p>
+          <ul className="mt-4 space-y-2 text-base text-neuro-navy">
+            {DR_RAY_REVIEW_STEPS.map((step) => <li key={step}>{step}</li>)}
+          </ul>
+          <p className="mt-4 text-base font-bold text-neuro-navy">{DR_RAY_SIGN_OFF}</p>
+        </>
+      ) : (
+        <p className="mt-3 text-base text-neuro-navy/80">Go back and save the card again. If Stripe already showed a success page, refresh this page in a minute.</p>
+      )}
       <Link href={saved ? '/doctor/dashboard' : '/doctor/apply'} className="mt-6 inline-flex min-h-11 items-center font-bold text-neuro-orange">
         {saved ? 'Back to the portal' : 'Return to the application'}
       </Link>

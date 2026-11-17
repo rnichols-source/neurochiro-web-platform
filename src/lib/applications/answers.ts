@@ -64,6 +64,25 @@ export function normalizeWebsite(value: string): string {
   return `https://${trimmed}`
 }
 
+/** First whole number in "15", "15+", or "15 years". Null when there is no number. */
+export function parseYearsInPractice(value: unknown): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    const match = String(value).match(/\d+/)
+    return match ? Number(match[0]) : null
+  }
+  if (typeof value !== 'string') return null
+  const match = value.trim().match(/\d+/)
+  return match ? Number(match[0]) : null
+}
+
+export function officeAddressWithPostal(address: string, postal: string): string {
+  const street = address.trim()
+  const code = postal.trim()
+  if (!code) return street
+  if (street.toLowerCase().includes(code.toLowerCase())) return street
+  return `${street} ${code}`.trim()
+}
+
 export function normalizeInstagram(value: string): string {
   return value.trim().replace(/^@/, '').replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '')
 }
@@ -122,8 +141,8 @@ export function validateStep2(input: unknown): { ok: true; value: Step2Answers }
   const website = text(source.website)
   const instagram = normalizeInstagram(text(source.instagram))
   const yearsRaw = source.yearsInPractice
-  const yearsBlank = yearsRaw == null || (typeof yearsRaw !== 'number' && text(yearsRaw) === '')
-  const yearsInPractice = typeof yearsRaw === 'number' ? yearsRaw : Number(text(yearsRaw))
+  const yearsBlank = yearsRaw == null || (typeof yearsRaw === 'string' && yearsRaw.trim() === '')
+  const yearsInPractice = parseYearsInPractice(yearsRaw)
   const usesNervousSystemScans = source.usesNervousSystemScans === true || source.usesNervousSystemScans === 'yes'
 
   if (techniques.length < 2) return { ok: false, error: 'Add the techniques you use.' }
@@ -134,7 +153,8 @@ export function validateStep2(input: unknown): { ok: true; value: Step2Answers }
   if (usesNervousSystemScans && scanTypes.length < 2) {
     return { ok: false, error: 'Which scans do you use? INSiGHT, HRV, and thermal are examples.' }
   }
-  if (yearsBlank || !Number.isInteger(yearsInPractice) || yearsInPractice < 0 || yearsInPractice > 80) {
+  if (yearsBlank) return { ok: false, error: 'Add your years in practice.' }
+  if (yearsInPractice == null || yearsInPractice < 0 || yearsInPractice > 80) {
     return { ok: false, error: 'Years in practice should be a whole number from 0 to 80.' }
   }
   if (officeAddress.length < 4) return { ok: false, error: 'Add the office address.' }
@@ -198,8 +218,8 @@ export function firstUnfinishedStep(input: unknown): 1 | 2 | 3 {
 /**
  * The public flow has four labels: account, how you practice, your office, plan and card.
  * `step=2` is how you practice. `step=2&part=2` is the office. `step=3` is the card.
- * A link opens that screen only when it is the one still unfinished.
- * A later link does not skip required answers. An earlier link does not rewind.
+ * A later link does not skip required answers. An earlier link opens that earlier step
+ * so the browser Back button can move one step inside the form.
  */
 export function formStepFromRequest(
   input: unknown,
@@ -207,7 +227,8 @@ export function formStepFromRequest(
 ): 1 | 2 | 3 {
   const current = firstUnfinishedStep(input)
   const asked = requestedFormStep(request)
-  return asked === current ? asked : current
+  if (asked == null || asked > current) return current
+  return asked
 }
 
 function requestedFormStep(request: { step?: string | null; part?: string | null }): 1 | 2 | 3 | null {

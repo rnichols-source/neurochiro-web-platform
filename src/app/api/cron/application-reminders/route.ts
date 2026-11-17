@@ -8,11 +8,13 @@ import { quoSend } from '@/lib/sms/quo'
 export const maxDuration = 60
 
 /**
- * Unscheduled in vercel.json. A separate process handles stalled applicants.
- * Unfinished doctor applications.
- * About 1 hour after signup, then about 24 hours after.
+ * Hourly from 12:00 through 01:00 UTC, which covers 8 AM–8 PM Eastern in both EST and EDT.
+ * Quiet hours (9 PM–8 AM local) still hold anything outside that window.
+ * Unfinished doctor applications. About 1 hour after signup, then about 24 hours after.
  * Each note is claimed before it is sent, and only while the application is still a draft with no card.
+ * Approved, paid, and existing members are skipped. STOP opt-outs are not texted.
  * Email is on. Texts stay off unless APPLICATION_REMINDER_SMS_ENABLED is exactly true.
+ * This is not the profile nudge. That cron stays off.
  */
 export async function GET(req: Request) {
   const cronSecret = process.env.CRON_SECRET

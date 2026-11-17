@@ -112,11 +112,31 @@ describe('approve a doctor application', () => {
     assert.equal(decision.ok, false)
     assert.equal(decision.doctor?.verification_status, 'hidden')
     assert.equal(decision.doctor?.is_approved, false)
-    assert.match(decision.email?.html || '', /buy\.stripe\.com/)
+    assert.equal(decision.doctor?.stripe_subscription_id, null)
+    assert.equal((decision.email?.html || '').includes('buy.stripe.com'), false)
+    assert.match(decision.email?.html || '', /doctor\/apply\?step=3/)
+    assert.match(decision.sms?.body || '', /doctor\/apply\?step=3/)
+    assert.equal((decision.sms?.body || '').includes('buy.stripe.com'), false)
     assert.equal(decision.charged, false)
     assert.equal(decision.application?.status, 'needs_action')
+    assert.equal(decision.application?.stripe_subscription_id, null)
     assert.equal(decision.application?.charge_attempt, 1)
     assert.equal(calls.length, 1)
+  })
+
+  it('does not link a voided invoice or the USD payment link when the charge fails', async () => {
+    const { port } = billing({
+      subscriptionId: 'sub_void',
+      status: 'incomplete',
+      hostedInvoiceUrl: 'https://invoice.stripe.com/i/voided',
+      paymentState: 'failed',
+      errorMessage: 'The card was declined.',
+    })
+    const decision = await approveApplication(application(), port, NOW, '')
+    assert.equal((decision.email?.html || '').includes('invoice.stripe.com'), false)
+    assert.equal((decision.email?.html || '').includes('buy.stripe.com'), false)
+    assert.match(decision.email?.html || '', /https:\/\/neurochiro\.co\/doctor\/apply\?step=3/)
+    assert.equal(decision.application?.status, 'needs_action')
   })
 
   it('does not create a second subscription after approval', async () => {

@@ -151,7 +151,9 @@ describe('approval email and text', () => {
     }), NOW, '')
     assert.equal(decision.ok, false)
     assert.match(decision.email?.html || '', /did not go through/)
-    assert.match(decision.sms?.body || '', /buy\.stripe\.com/)
+    assert.match(decision.sms?.body || '', /doctor\/apply\?step=3/)
+    assert.match(decision.sms?.body || '', /Reply STOP to opt out/)
+    assert.equal((decision.sms?.body || '').includes('buy.stripe.com'), false)
     assert.equal((decision.sms?.body || '').includes('Congrats'), false)
   })
 

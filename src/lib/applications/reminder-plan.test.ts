@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { readFileSync } from 'node:fs'
 import {
   APPLY_URL,
   applicationReminderSmsEnabled,
@@ -7,6 +8,7 @@ import {
   dueEmailReminder,
   reminderMail,
   reminderSmsTo,
+  reminderStepPhrase,
   reminderText,
   type ReminderCandidate,
 } from './reminder-plan.ts'
@@ -77,6 +79,47 @@ describe('application reminder timing', () => {
     assert.equal(linked.html.includes('neurochirodirectory.com'), false)
     assert.match(reminderText('24h', 'Ada', 'https://neurochiro.co/doctor/apply?step=3'), /step=3/)
     assert.match(reminderText('1h', 'Ada', 'https://evil.example/phish'), new RegExp(APPLY_URL.replace(/[.]/g, '\\.')))
+    const office = reminderMail('1h', 'Ada', 'https://neurochiro.co/doctor/apply?step=2&part=2&resume=1')
+    assert.match(office.html, /You're on step 3 of 4: Your office/)
+    assert.equal(office.html.toLowerCase().includes("haven't started"), false)
+    assert.equal(office.html.toLowerCase().includes('have not started'), false)
+    assert.equal(reminderStepPhrase('https://neurochiro.co/auth/activate?next=%2Fdoctor%2Fapply%3Fstep%3D2%26part%3D2'), "You're on step 3 of 4: Your office")
+    assert.match(reminderText('24h', 'Ada', 'https://neurochiro.co/doctor/apply?step=2&part=2'), /step 3 of 4: Your office/)
+  })
+
+  it('skips existing members and STOP opt-outs, and does not send the same note twice', async () => {
+    assert.equal(dueEmailReminder({ ...row(), existingMember: true, now: NOW }), null)
+    assert.equal(reminderSmsTo({ enabled: true, consent: true, phone: '8645550100', optedOut: true }), null)
+    const emails: string[] = []
+    const texts: string[] = []
+    const result = await deliverReminders({
+      now: NOW,
+      smsEnabled: true,
+      rows: [row(), row(), row({ id: 'app-2', email: 'bea@example.com', smsOptedOut: true }), row({ id: 'app-3', existingMember: true })],
+      claim: async () => 'claimed',
+      release: async () => {},
+      sendEmail: async (mail) => {
+        emails.push(mail.to)
+        return true
+      },
+      sendSms: async (message) => {
+        texts.push(message.to)
+        return true
+      },
+    })
+    assert.deepEqual(emails, ['ada@example.com', 'bea@example.com'])
+    assert.deepEqual(texts, ['+18645550100'])
+    assert.equal(result.emailed, 2)
+    assert.equal(result.texted, 1)
+  })
+
+  it('keeps the application reminder cron and leaves the profile nudge off', () => {
+    const vercel = JSON.parse(readFileSync(new URL('../../../vercel.json', import.meta.url), 'utf8')) as {
+      crons: { path: string; schedule: string }[]
+    }
+    const reminder = vercel.crons.find((cron) => cron.path === '/api/cron/application-reminders')
+    assert.equal(reminder?.schedule, '0 12-23,0,1 * * *')
+    assert.equal(vercel.crons.some((cron) => cron.path === '/api/cron/profile-nudger'), false)
   })
 
   it('claims each reminder once and does not text when the flag is off', async () => {

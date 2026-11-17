@@ -24,6 +24,10 @@ export type ReminderCandidate = {
   resumePath?: string
   /** IANA zone for 9 PM–8 AM quiet hours. Office state or phone area code. */
   timezone?: string
+  /** Approved, paid, or an existing public member. */
+  existingMember?: boolean
+  /** Replied STOP. Do not text. */
+  smsOptedOut?: boolean
 }
 
 export type ReminderSendLog = {
@@ -44,7 +48,9 @@ export function dueEmailReminder(input: {
   reminder1hSentAt: string | null
   reminder24hSentAt: string | null
   now: Date
+  existingMember?: boolean
 }): ReminderKind | null {
+  if (input.existingMember) return null
   if (input.status !== 'draft' || input.cardOnFile) return null
   const created = Date.parse(input.createdAt)
   if (!Number.isFinite(created)) return null
@@ -65,9 +71,19 @@ export function reminderSmsTo(input: {
   enabled: boolean
   consent: boolean
   phone: string | null | undefined
+  optedOut?: boolean
 }): string | null {
-  if (!input.enabled || input.consent !== true) return null
+  if (!input.enabled || input.consent !== true || input.optedOut === true) return null
   return toE164(input.phone, 'US')
+}
+
+/** Names the unfinished step. Never says they have not started. */
+export function reminderStepPhrase(resumeUrl?: string): string {
+  const value = decodeURIComponent(resumeUrl || '')
+  if (value.includes('step=3')) return "You're on step 4 of 4: Plan and card"
+  if (value.includes('part=2')) return "You're on step 3 of 4: Your office"
+  if (value.includes('step=2') || value.includes('step=1')) return "You're on step 2 of 4: How you practice"
+  return "You're on step 2 of 4: How you practice"
 }
 
 export function consentFromApplicationRow(row: Record<string, unknown>): { consent: boolean; phone: string } {
@@ -78,6 +94,7 @@ export function consentFromApplicationRow(row: Record<string, unknown>): { conse
 export function reminderMail(kind: ReminderKind, firstName: string, resumeUrl = APPLY_URL): { subject: string; html: string } {
   const name = escapeHtml((firstName || '').trim() || 'there')
   const href = escapeHtml(resumeUrl.startsWith('https://neurochiro.co/') ? resumeUrl : APPLY_URL)
+  const where = escapeHtml(reminderStepPhrase(resumeUrl))
   const link = `<p><a href="${href}">Finish your application</a></p>`
   const close = `
     <p>It takes about 5 minutes. You'll save a card at the end, and your card isn't charged unless you're approved.</p>
@@ -87,21 +104,22 @@ export function reminderMail(kind: ReminderKind, firstName: string, resumeUrl = 
   if (kind === '24h') {
     return {
       subject: 'Your NeuroChiro application is still waiting',
-      html: `<p>Hi Dr. ${name},</p><p>I still have your NeuroChiro application, and it is unfinished. When you have a few minutes, I would like to read it.</p>${close}`,
+      html: `<p>Hi Dr. ${name},</p><p>${where}. It is still unfinished. When you have a few minutes, I would like to read it.</p>${close}`,
     }
   }
   return {
     subject: 'Your NeuroChiro application is still open',
-    html: `<p>Hi Dr. ${name},</p><p>You started an application to join NeuroChiro. I saved your place, so you can pick it up when you are ready.</p>${close}`,
+    html: `<p>Hi Dr. ${name},</p><p>${where}. I saved your place, so you can pick it up when you are ready.</p>${close}`,
   }
 }
 
 export function reminderText(kind: ReminderKind, firstName: string, resumeUrl = APPLY_URL): string {
   const name = (firstName || 'there').replace(/\s+/g, ' ').trim() || 'there'
   const link = resumeUrl.startsWith('https://neurochiro.co/') ? resumeUrl : APPLY_URL
+  const where = reminderStepPhrase(resumeUrl)
   const lead = kind === '24h'
-    ? `Hi Dr. ${name}, it's Dr. Ray. Your NeuroChiro application is still open.`
-    : `Hi Dr. ${name}, it's Dr. Ray at NeuroChiro. Your application is still open.`
+    ? `Hi Dr. ${name}, it's Dr. Ray. ${where}.`
+    : `Hi Dr. ${name}, it's Dr. Ray at NeuroChiro. ${where}.`
   return `${lead} It takes about 5 minutes, and your card isn't charged unless you're approved. ${link} Reply STOP to opt out.`
 }
 
@@ -120,9 +138,11 @@ export async function deliverReminders(input: {
   let emailed = 0
   let texted = 0
   let skipped = 0
+  const sentKeys = new Set<string>()
   for (const row of input.rows) {
     const kind = dueEmailReminder({ ...row, now: input.now })
-    if (!kind || !row.email.includes('@')) {
+    const sendKey = `${row.id}:${kind}`
+    if (!kind || !row.email.includes('@') || sentKeys.has(sendKey)) {
       skipped += 1
       continue
     }
@@ -159,6 +179,7 @@ export async function deliverReminders(input: {
       continue
     }
     emailed += 1
+    sentKeys.add(sendKey)
     if (input.logSend) {
       try {
         await input.logSend({ applicationId: row.id, channel: 'email', kind, timezone: zone })
@@ -166,7 +187,12 @@ export async function deliverReminders(input: {
         // The note already went out. A failed log does not undo it.
       }
     }
-    const to = reminderSmsTo({ enabled: input.smsEnabled, consent: row.smsConsent, phone: row.mobile })
+    const to = reminderSmsTo({
+      enabled: input.smsEnabled,
+      consent: row.smsConsent,
+      phone: row.mobile,
+      optedOut: row.smsOptedOut === true,
+    })
     if (!to) continue
     try {
       const ok = await input.sendSms({ to, content: reminderText(kind, row.firstName, resumeUrl) })

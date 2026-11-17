@@ -1,15 +1,17 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { FlowProgress } from '@/components/applications/FlowProgress'
+import { applyStepPath } from '@/lib/applications/apply-nav'
 import {
   composeHeardAbout,
   HEARD_ABOUT_CHOICES,
+  officeAddressWithPostal,
   parseHeardAbout,
 } from '@/lib/applications/answers'
 import { chargeCopyFromLabel } from '@/lib/applications/charge-copy'
-import { gapsBeforeCard, type ApplicationGap } from '@/lib/applications/checklist'
+import { clientGapMessage, gapsBeforeCard, type ApplicationGap } from '@/lib/applications/checklist'
 import { APPLICATION_COUNTRIES } from '@/lib/applications/countries'
 import { flowStepLabel, type ApplicationFlowStep } from '@/lib/applications/flow-steps'
 import { toApplicationE164 } from '@/lib/applications/phone'
@@ -40,7 +42,7 @@ type Initial = {
   referrerName: string
 }
 
-const fieldClass = 'mt-1 w-full min-h-11 rounded-xl border border-black/10 bg-white px-3 text-sm'
+const fieldClass = 'mt-1 w-full min-h-11 rounded-xl border border-black/10 bg-white px-3 py-2 text-base'
 
 export function ApplyForm({
   doctorName,
@@ -75,16 +77,19 @@ export function ApplyForm({
     mobile: initial.mobile || '',
     smsConsent: initial.smsConsent === true,
   })
+  const [postalCode, setPostalCode] = useState('')
   const [referrerName, setReferrerName] = useState(initial.referrerName || '')
   const [heardChoice, setHeardChoice] = useState(heard.choice)
   const [heardOther, setHeardOther] = useState(heard.other)
-  const [plan, setPlan] = useState<BillingCycle>('monthly')
+  const [plan, setPlan] = useState<BillingCycle>(startingPlans.find((choice) => choice.available)?.cycle || 'monthly')
   const [plans, setPlans] = useState(startingPlans)
   const [currency, setCurrency] = useState(startingCurrency)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [clientSecret, setClientSecret] = useState('')
   const [returnUrl, setReturnUrl] = useState('')
+  const buttonAlertRef = useRef<HTMLParagraphElement>(null)
+  const initialStepRef = useRef(initialStep)
   const flowStep: ApplicationFlowStep = step === 1 ? 2 : step === 2 ? 3 : 4
   const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ''
   const selectedPlan = plans.find((choice) => choice.cycle === plan) || plans[0]
@@ -94,15 +99,68 @@ export function ApplyForm({
     window.scrollTo(0, 0)
   }, [step])
 
+  useEffect(() => {
+    if (!error) return
+    buttonAlertRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [error])
+
+  useEffect(() => {
+    const onPop = (event: PopStateEvent) => {
+      const next = event.state?.applyStep
+      if (next === 1 || next === 2 || next === 3) {
+        setStep(next)
+        setError('')
+        setClientSecret('')
+      }
+    }
+    window.addEventListener('popstate', onPop)
+    if (window.history.state?.applySeeded) {
+      return () => window.removeEventListener('popstate', onPop)
+    }
+    const current = initialStepRef.current
+    const write = (target: 1 | 2 | 3, mode: 'replace' | 'push') => {
+      const path = applyStepPath(window.location.pathname, window.location.search, target)
+      const state = { applySeeded: true, applyStep: target }
+      if (mode === 'replace') window.history.replaceState(state, '', path)
+      else window.history.pushState(state, '', path)
+    }
+    write(1, 'replace')
+    for (let next = 2; next <= current; next += 1) write(next as 1 | 2 | 3, 'push')
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
   function set<K extends keyof Initial>(key: K, value: Initial[K]) {
     setValues((current) => ({ ...current, [key]: value }))
+  }
+
+  function showError(message: string) {
+    setError(message)
+  }
+
+  function pushStep(next: 1 | 2 | 3) {
+    setStep(next)
+    setClientSecret('')
+    const path = applyStepPath(window.location.pathname, window.location.search, next)
+    window.history.pushState({ applySeeded: true, applyStep: next }, '', path)
+  }
+
+  function goBack() {
+    setError('')
+    setClientSecret('')
+    const current = window.history.state?.applyStep
+    if (current === 2 || current === 3) {
+      window.history.back()
+      return
+    }
+    setStep((value) => (value === 3 ? 2 : 1))
   }
 
   function answers() {
     return {
       ...values,
+      officeAddress: officeAddressWithPostal(values.officeAddress, postalCode),
       heardAbout: composeHeardAbout(heardChoice, heardOther),
-      yearsInPractice: values.yearsInPractice === '' ? '' : Number(values.yearsInPractice),
+      yearsInPractice: values.yearsInPractice,
       usesNervousSystemScans: values.usesNervousSystemScans === 'yes'
         ? true
         : values.usesNervousSystemScans === 'no'
@@ -128,6 +186,7 @@ export function ApplyForm({
     const next = await plansForCountry(country)
     setCurrency(next.currency)
     setPlans(next.plans)
+    setPlan((current) => next.plans.some((choice) => choice.cycle === current) ? current : (next.plans[0]?.cycle || current))
   }
 
   async function onSubmit(event: FormEvent) {
@@ -140,18 +199,18 @@ export function ApplyForm({
       return gap.key !== 'card'
     })
     if (blocked.length > 0) {
-      setError(`Missing: ${blocked.map((gap) => gap.label).join(', ')}.`)
+      showError(clientGapMessage(blocked))
       setLoading(false)
       return
     }
     if (step === 1 || step === 2) {
       const saved = await saveApplyStep(step, { referralCode, referrerName, answers: answers() })
       if (saved.error) {
-        setError(saved.error)
+        showError(saved.error)
         setLoading(false)
         return
       }
-      setStep(step === 1 ? 2 : 3)
+      pushStep(step === 1 ? 2 : 3)
       setLoading(false)
       return
     }
@@ -160,7 +219,7 @@ export function ApplyForm({
       ? toApplicationE164(values.mobile, values.country)
       : ''
     if (values.mobile.trim() && !mobile) {
-      setError(values.country === 'OTHER'
+      showError(values.country === 'OTHER'
         ? 'Enter a mobile number with + and the country code.'
         : 'Enter a mobile number for the country you selected.')
       setLoading(false)
@@ -173,7 +232,7 @@ export function ApplyForm({
       answers: { ...answers(), mobile: mobile || values.mobile },
     })
     if (result.error) {
-      setError(result.error)
+      showError(result.error)
       setLoading(false)
       return
     }
@@ -182,7 +241,7 @@ export function ApplyForm({
       return
     }
     if (!result.clientSecret || !result.returnUrl) {
-      setError('Stripe could not open the card form. Check the price settings and try again.')
+      showError('Stripe could not open the card form. Check the price settings and try again.')
       setLoading(false)
       return
     }
@@ -192,31 +251,31 @@ export function ApplyForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-5 px-4 py-6">
+    <form noValidate onSubmit={onSubmit} className={`mx-auto max-w-2xl space-y-5 overflow-x-hidden px-4 py-6 ${clientSecret ? 'pb-44' : 'pb-40'}`}>
       <div>
         <p className="text-sm font-bold text-neuro-navy">NeuroChiro</p>
         <FlowProgress step={flowStep} />
         <h1 className="mt-1 text-2xl font-bold text-neuro-navy">{flowStepLabel(flowStep)}</h1>
-        <p className="mt-2 text-sm text-neuro-navy/80">
+        <p className="mt-2 text-base text-neuro-navy/80">
           {doctorName && step === 1 ? `Your account is saved, Dr. ${doctorName}. ` : ''}
           {step === 1 ? 'How you practice. This stays saved if you leave.' : null}
           {step === 2 ? 'Your office. This stays saved if you leave.' : null}
           {step === 3 ? `${chargeCopy} Currency: ${currency}.` : null}
         </p>
       </div>
-      {resumed ? <p className="rounded-xl bg-white px-3 py-2 text-sm font-bold text-neuro-navy">Pick up where you left off</p> : null}
-      {referredBy ? <p className="rounded-xl bg-white px-3 py-2 text-sm text-neuro-navy">Referred by {referredBy}</p> : null}
-      {canceled ? <p className="rounded-xl bg-white p-3 text-sm">The card form was closed. You can try again when you are ready.</p> : null}
-      {error ? <p role="alert" className="text-sm font-bold text-red-700">{error}</p> : null}
+      {resumed ? <p className="rounded-xl bg-white px-3 py-2 text-base font-bold text-neuro-navy">Pick up where you left off</p> : null}
+      {referredBy ? <p className="rounded-xl bg-white px-3 py-2 text-base text-neuro-navy">Referred by {referredBy}</p> : null}
+      {canceled ? <p className="rounded-xl bg-white p-3 text-base">The card form was closed. You can try again when you are ready.</p> : null}
+      {error ? <p className="text-base font-bold text-red-700">{error}</p> : null}
 
       {step === 1 ? (
         <>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             How do you practice, and what is the philosophy of the office?
             <textarea required value={values.practiceApproach} onChange={(event) => set('practiceApproach', event.target.value)} className={`${fieldClass} min-h-28 py-2`} />
-            <span className="mt-1 block text-xs font-normal text-neuro-navy/70">A few sentences is enough.</span>
+            <span className="mt-1 block text-sm font-normal text-neuro-navy/70">A few sentences is enough.</span>
           </label>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             How did you hear about NeuroChiro?
             <select required value={heardChoice} onChange={(event) => setHeardChoice(event.target.value)} className={fieldClass}>
               <option value="">Choose one</option>
@@ -227,18 +286,18 @@ export function ApplyForm({
             </select>
           </label>
           {referredBy ? null : (
-            <label className="block text-sm font-bold">
+            <label className="block text-base font-bold">
               Who referred you? <span className="font-normal text-neuro-navy/70">Optional</span>
               <input value={referrerName} onChange={(event) => setReferrerName(event.target.value)} className={fieldClass} autoComplete="off" />
             </label>
           )}
           {heardChoice === 'Other' ? (
-            <label className="block text-sm font-bold">
+            <label className="block text-base font-bold">
               Tell us a little more
               <input required value={heardOther} onChange={(event) => setHeardOther(event.target.value)} className={fieldClass} />
             </label>
           ) : null}
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             Why do you want to join? <span className="font-normal text-neuro-navy/70">Optional</span>
             <textarea value={values.whyJoin} onChange={(event) => set('whyJoin', event.target.value)} className={`${fieldClass} min-h-28 py-2`} />
           </label>
@@ -247,15 +306,15 @@ export function ApplyForm({
 
       {step === 2 ? (
         <>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             Which techniques do you use?
-            <input required value={values.techniques} onChange={(event) => set('techniques', event.target.value)} className={fieldClass} />
+            <input required value={values.techniques} onChange={(event) => set('techniques', event.target.value)} className={fieldClass} autoComplete="off" />
           </label>
           <fieldset>
-            <legend className="text-sm font-bold">Do you use nervous system scans, such as INSiGHT, HRV, or thermal?</legend>
+            <legend className="text-base font-bold">Do you use nervous system scans, such as INSiGHT, HRV, or thermal?</legend>
             <div className="mt-2 flex gap-3">
               {(['yes', 'no'] as const).map((choice) => (
-                <label key={choice} className="flex min-h-11 items-center gap-2 text-sm">
+                <label key={choice} className="flex min-h-11 items-center gap-2 text-base">
                   <input
                     type="radio"
                     name="scans"
@@ -269,44 +328,48 @@ export function ApplyForm({
             </div>
           </fieldset>
           {values.usesNervousSystemScans === 'yes' ? (
-            <label className="block text-sm font-bold">
+            <label className="block text-base font-bold">
               Which scans?
               <input required value={values.scanTypes} onChange={(event) => set('scanTypes', event.target.value)} className={fieldClass} />
             </label>
           ) : null}
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             Years in practice
-            <input required inputMode="numeric" value={values.yearsInPractice} onChange={(event) => set('yearsInPractice', event.target.value)} className={fieldClass} />
+            <input required inputMode="numeric" autoComplete="off" value={values.yearsInPractice} onChange={(event) => set('yearsInPractice', event.target.value)} className={fieldClass} />
           </label>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             Office address
-            <input required value={values.officeAddress} onChange={(event) => set('officeAddress', event.target.value)} className={fieldClass} />
+            <input required autoComplete="street-address" value={values.officeAddress} onChange={(event) => set('officeAddress', event.target.value)} className={fieldClass} />
           </label>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block text-sm font-bold">
+            <label className="block text-base font-bold">
               City
-              <input required value={values.city} onChange={(event) => set('city', event.target.value)} className={fieldClass} />
+              <input required autoComplete="address-level2" value={values.city} onChange={(event) => set('city', event.target.value)} className={fieldClass} />
             </label>
-            <label className="block text-sm font-bold">
+            <label className="block text-base font-bold">
               State or region
-              <input value={values.state} onChange={(event) => set('state', event.target.value)} className={fieldClass} />
+              <input autoComplete="address-level1" value={values.state} onChange={(event) => set('state', event.target.value)} className={fieldClass} />
             </label>
           </div>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
+            Postal code <span className="font-normal text-neuro-navy/70">Optional</span>
+            <input autoComplete="postal-code" value={postalCode} onChange={(event) => setPostalCode(event.target.value)} className={fieldClass} />
+          </label>
+          <label className="block text-base font-bold">
             Country
-            <select required value={values.country} onChange={(event) => void onCountry(event.target.value)} className={fieldClass}>
+            <select required autoComplete="country" value={values.country} onChange={(event) => void onCountry(event.target.value)} className={fieldClass}>
               {APPLICATION_COUNTRIES.map((country) => (
                 <option key={country.code} value={country.code}>{country.name}</option>
               ))}
             </select>
           </label>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             Website
-            <input value={values.website} onChange={(event) => set('website', event.target.value)} className={fieldClass} placeholder="https://" />
+            <input type="url" inputMode="url" autoComplete="url" value={values.website} onChange={(event) => set('website', event.target.value)} className={fieldClass} placeholder="https://" />
           </label>
-          <label className="block text-sm font-bold">
+          <label className="block text-base font-bold">
             Instagram
-            <input value={values.instagram} onChange={(event) => set('instagram', event.target.value)} className={fieldClass} placeholder="@yourclinic" />
+            <input value={values.instagram} onChange={(event) => set('instagram', event.target.value)} className={fieldClass} placeholder="@yourclinic" autoComplete="off" />
           </label>
         </>
       ) : null}
@@ -314,26 +377,28 @@ export function ApplyForm({
       {step === 3 ? (
         <>
           <fieldset>
-            <legend className="text-sm font-bold">Membership in {currency}. Per office.</legend>
-            <div className="mt-2 space-y-2">
-              {plans.map((choice) => (
-                <label key={choice.cycle} className="flex min-h-11 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-sm">
-                  <input
-                    type="radio"
-                    name="plan"
-                    disabled={!choice.available}
-                    checked={plan === choice.cycle}
-                    onChange={() => { setPlan(choice.cycle); setClientSecret('') }}
-                  />
-                  <span>{choice.cycle === 'monthly' ? 'Monthly' : 'Annual'}: {choice.label}</span>
-                  {choice.available ? null : <span>Price not configured</span>}
-                </label>
-              ))}
-            </div>
+            <legend className="text-base font-bold">Membership in {currency}. Per office.</legend>
+            {plans.length === 0 ? (
+              <p className="mt-2 text-base text-neuro-navy">Membership prices for {currency} are not available yet.</p>
+            ) : (
+              <div className="mt-2 space-y-2">
+                {plans.map((choice) => (
+                  <label key={choice.cycle} className="flex min-h-11 items-center gap-2 rounded-xl border border-black/10 bg-white px-3 text-base">
+                    <input
+                      type="radio"
+                      name="plan"
+                      checked={plan === choice.cycle}
+                      onChange={() => { setPlan(choice.cycle); setClientSecret('') }}
+                    />
+                    <span>{choice.cycle === 'monthly' ? 'Monthly' : 'Annual'}: {choice.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </fieldset>
-          <p className="rounded-xl bg-white px-3 py-3 text-sm font-bold text-neuro-navy">{chargeCopy}</p>
+          {selectedPlan ? <p className="rounded-xl bg-white px-3 py-3 text-base font-bold text-neuro-navy">{chargeCopy}</p> : null}
           {!values.mobile ? (
-            <label className="block text-sm font-bold">
+            <label className="block text-base font-bold">
               Mobile number
               <input
                 required
@@ -352,33 +417,39 @@ export function ApplyForm({
               publishableKey={publishableKey}
               clientSecret={clientSecret}
               returnUrl={returnUrl}
-              onError={setError}
+              onError={showError}
+              onBack={goBack}
             />
           ) : null}
         </>
       ) : null}
 
-      <div className="flex flex-col gap-3">
-        {step < 3 ? (
-          <button type="submit" disabled={loading} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 font-bold text-white disabled:opacity-60">
-            {loading ? 'Saving…' : 'Next'}
-          </button>
-        ) : clientSecret ? null : (
-          <button type="submit" disabled={loading || !selectedPlan?.available} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 font-bold text-white disabled:opacity-60">
-            {loading ? 'Opening the card form…' : 'Continue to card'}
-          </button>
-        )}
-        {step > 1 ? (
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => { setError(''); setStep(step === 3 ? 2 : 1) }}
-            className="min-h-11 w-full rounded-xl border border-black/10 bg-white px-4 text-sm font-bold text-neuro-navy disabled:opacity-60"
-          >
-            Back
-          </button>
-        ) : null}
-      </div>
+      {clientSecret ? null : (
+        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-[#F5F3EF]/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+          <div className="mx-auto flex max-w-2xl flex-col gap-3">
+          {error ? <p ref={buttonAlertRef} role="alert" className="text-base font-bold text-red-700">{error}</p> : null}
+            {step < 3 ? (
+              <button type="submit" disabled={loading} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 text-base font-bold text-white disabled:opacity-60">
+                {loading ? 'Saving…' : 'Continue'}
+              </button>
+            ) : (
+              <button type="submit" disabled={loading || !selectedPlan?.available} className="min-h-11 w-full rounded-xl bg-neuro-orange px-4 text-base font-bold text-white disabled:opacity-60">
+                {loading ? 'Opening the card form…' : 'Continue to card'}
+              </button>
+            )}
+            {step > 1 ? (
+              <button
+                type="button"
+                disabled={loading}
+                onClick={goBack}
+                className="min-h-11 w-full rounded-xl border border-black/10 bg-white px-4 text-base font-bold text-neuro-navy disabled:opacity-60"
+              >
+                Back
+              </button>
+            ) : null}
+          </div>
+        </div>
+      )}
     </form>
   )
 }

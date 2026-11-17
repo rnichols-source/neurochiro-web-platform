@@ -3,8 +3,10 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn, isMissingTable } from '@/lib/leads/schema'
 import { applicationResumePath, applicationResumeUrl } from './answers.ts'
+import { isListingOrPaidMembership } from './existing-listing.ts'
 import { magicResumeUrl, resumePathOnly } from './magic-link.ts'
 import { applicationTimezone } from './quiet.ts'
+import { optedOutPhones } from './sms-opt-out.ts'
 import {
   consentFromApplicationRow,
   reminderWindows,
@@ -101,42 +103,64 @@ export async function loadReminderCandidates(now: Date): Promise<{ rows: Reminde
   const userIds = applications.map((row) => text(row.user_id)).filter(Boolean)
   const [doctors, profiles] = await Promise.all([
     doctorIds.length
-      ? db().from('doctors').select('id, first_name, email').in('id', doctorIds)
-      : Promise.resolve({ data: [] as Row[] }),
+      ? db().from('doctors').select('id, first_name, email, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id').in('id', doctorIds)
+      : Promise.resolve({ data: [] as Row[], error: null }),
     userIds.length
       ? db().from('profiles').select('id, full_name, email').in('id', userIds)
-      : Promise.resolve({ data: [] as Row[] }),
+      : Promise.resolve({ data: [] as Row[], error: null }),
   ])
+  if (doctors.error) {
+    console.error('[application-reminder] doctor lookup failed', doctors.error.code || 'error')
+    return { rows: [], unavailable: true }
+  }
   const doctorMap = new Map(rowsOf(doctors).map((row) => [text(row.id), row]))
   const profileMap = new Map(rowsOf(profiles).map((row) => [text(row.id), row]))
+  const rows = applications.map((row) => {
+    const doctor = doctorMap.get(text(row.doctor_id))
+    const profile = profileMap.get(text(row.user_id))
+    const contact = consentFromApplicationRow(row)
+    const fullName = text(profile?.full_name)
+    const answers = answersForResume(row, contact.phone)
+    const email = text(profile?.email) || text(doctor?.email)
+    const paid = typeof row.payment_received_at === 'string' && row.payment_received_at.length > 0
+    const existingMember = paid || (doctor ? isListingOrPaidMembership({
+      id: text(doctor.id),
+      email: text(doctor.email) || email,
+      userId: null,
+      isApproved: doctor.is_approved === true,
+      verificationStatus: text(doctor.verification_status) || null,
+      paidAt: text(doctor.paid_at) || null,
+      membershipTier: text(doctor.membership_tier) || null,
+      stripeSubscriptionId: text(doctor.stripe_subscription_id) || null,
+    }) : false)
+    return {
+      id: text(row.id),
+      email,
+      firstName: text(doctor?.first_name) || fullName.split(' ')[0] || 'there',
+      status: text(row.status) || 'draft',
+      cardOnFile: row.card_on_file === true,
+      createdAt: text(row.created_at),
+      reminder1hSentAt: text(row.reminder_1h_sent_at) || null,
+      reminder24hSentAt: text(row.reminder_24h_sent_at) || null,
+      smsConsent: contact.consent,
+      mobile: contact.phone || null,
+      resumeUrl: applicationResumeUrl(answers),
+      resumePath: applicationResumePath(answers),
+      timezone: applicationTimezone({
+        state: text(row.state),
+        country: text(row.country),
+        phone: contact.phone,
+      }),
+      existingMember,
+    }
+  }).filter((row) => row.id && !row.existingMember)
+  const stopped = await optedOutPhones(rows.map((row) => row.mobile || ''))
   return {
     unavailable: false,
-    rows: applications.map((row) => {
-      const doctor = doctorMap.get(text(row.doctor_id))
-      const profile = profileMap.get(text(row.user_id))
-      const contact = consentFromApplicationRow(row)
-      const fullName = text(profile?.full_name)
-      const answers = answersForResume(row, contact.phone)
-      return {
-        id: text(row.id),
-        email: text(profile?.email) || text(doctor?.email),
-        firstName: text(doctor?.first_name) || fullName.split(' ')[0] || 'there',
-        status: text(row.status) || 'draft',
-        cardOnFile: row.card_on_file === true,
-        createdAt: text(row.created_at),
-        reminder1hSentAt: text(row.reminder_1h_sent_at) || null,
-        reminder24hSentAt: text(row.reminder_24h_sent_at) || null,
-        smsConsent: contact.consent,
-        mobile: contact.phone || null,
-        resumeUrl: applicationResumeUrl(answers),
-        resumePath: applicationResumePath(answers),
-        timezone: applicationTimezone({
-          state: text(row.state),
-          country: text(row.country),
-          phone: contact.phone,
-        }),
-      }
-    }).filter((row) => row.id),
+    rows: rows.map((row) => ({
+      ...row,
+      smsOptedOut: stopped === 'unknown' ? true : Boolean(row.mobile && stopped.has(row.mobile)),
+    })),
   }
 }
 

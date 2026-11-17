@@ -1,7 +1,8 @@
-import { approvalSmsFor, paymentSmsFor, type ApprovalSms } from './approval-sms.ts'
+import { CARD_STEP_URL } from './apply-nav.ts'
+import { approvalSmsFor, newCardSmsFor, paymentSmsFor, type ApprovalSms } from './approval-sms.ts'
 import { applicationGaps, approveBlockMessage, type ChecklistInput } from './checklist.ts'
-import { approvedEmail, declinedEmail, unpaidEmail, type Mail } from './emails.ts'
-import { DOCTOR_PAY_URL, safePayUrl } from '../go-live/plan.ts'
+import { approvedEmail, declinedEmail, newCardEmail, unpaidEmail, type Mail } from './emails.ts'
+import { safePayUrl } from '../go-live/plan.ts'
 
 export type ApplicationStatus = 'draft' | 'under_review' | 'approved' | 'declined' | 'needs_action'
 export type BillingCycle = 'monthly' | 'annual'
@@ -60,7 +61,7 @@ export type DoctorWrite = {
   membership_tier?: 'pro'
   paid_at?: string
   verified_at?: string
-  stripe_subscription_id?: string
+  stripe_subscription_id?: string | null
 }
 
 export type ApplicationWrite = {
@@ -107,6 +108,7 @@ export async function approveApplication(
   billing: BillingPort,
   now: string,
   notes: string,
+  cardUpdateUrl = CARD_STEP_URL,
 ): Promise<Decision> {
   if (app.status === 'approved' && app.stripeSubscriptionId) {
     return {
@@ -199,31 +201,56 @@ export async function approveApplication(
   }
 
   if (charge.paymentState !== 'paid') {
-    const payUrl = safePayUrl(charge.hostedInvoiceUrl) || DOCTOR_PAY_URL
     const bank = charge.paymentState === 'requires_action'
+    const invoice = bank ? safePayUrl(charge.hostedInvoiceUrl) : null
+    if (bank && invoice) {
+      return {
+        ok: true,
+        message: 'Not published. Their bank still needs a confirmation. The email and text include a Stripe link.',
+        doctor: {
+          is_approved: false,
+          verification_status: 'hidden',
+          stripe_subscription_id: charge.subscriptionId,
+        },
+        application: {
+          status: 'needs_action',
+          stripe_subscription_id: charge.subscriptionId,
+          admin_notes: notesOrNull(notes),
+          reviewed_at: now,
+          charge_attempt: app.chargeAttempt,
+        },
+        email: unpaidEmail(app.email, app.firstName, invoice, 'bank'),
+        sms: paymentSmsFor({
+          smsConsent: app.smsConsent,
+          mobileE164: app.mobileE164,
+          lastName: app.lastName,
+          payUrl: invoice,
+        }),
+        charged: false,
+        detached: false,
+      }
+    }
     return {
-      ok: bank,
-      message: bank
-        ? 'Not published. Their bank still needs a confirmation. The email and text include a Stripe link.'
-        : charge.errorMessage || 'The card was declined. Nothing was published. The email and text include a Stripe link.',
+      ok: false,
+      message: charge.errorMessage || 'The card was declined. Nothing was published. They can save a new card on the application.',
       doctor: {
         is_approved: false,
         verification_status: 'hidden',
-        stripe_subscription_id: charge.subscriptionId,
+        stripe_subscription_id: null,
       },
       application: {
         status: 'needs_action',
-        stripe_subscription_id: charge.subscriptionId,
+        stripe_subscription_id: null,
         admin_notes: notesOrNull(notes),
         reviewed_at: now,
-        charge_attempt: bank ? app.chargeAttempt : app.chargeAttempt + 1,
+        charge_attempt: app.chargeAttempt + 1,
       },
-      email: unpaidEmail(app.email, app.firstName, payUrl, bank ? 'bank' : 'failed'),
-      sms: paymentSmsFor({
+      email: newCardEmail(app.email, app.firstName, cardUpdateUrl),
+      sms: newCardSmsFor({
         smsConsent: app.smsConsent,
         mobileE164: app.mobileE164,
         lastName: app.lastName,
-        payUrl,
+        cardUrl: cardUpdateUrl,
       }),
       charged: false,
       detached: false,
