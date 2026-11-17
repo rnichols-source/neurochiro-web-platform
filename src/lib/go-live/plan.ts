@@ -807,6 +807,42 @@ export function nudgeProgress(input: {
   }
 }
 
+/** Admin go-live log. Welcome can always resend. Portal can be created whenever it is not already ok. Other steps retry only after a failure. */
+export function goLiveStepRetry(step: string, status: string | null | undefined): 'welcome' | 'portal' | 'force' | null {
+  if (step === 'welcome') return 'welcome'
+  if (step === 'portal' && status !== 'ok') return 'portal'
+  if (status === 'failed') return 'force'
+  return null
+}
+
+/** A portal-only retry never emails the recovery link, so it must not mint one. Every other run still does. */
+export function portalRecoveryLinkWanted(input: { source: string; only?: readonly string[] | null }): boolean {
+  const only = input.only || []
+  if (input.source === 'retry' && only.length === 1 && only[0] === 'portal') return false
+  return true
+}
+
+const PAID_PROFILE_TIERS = new Set(['pro', 'growth', 'neuros'])
+
+/** Profile tier for a portal account created from a doctor listing. Paid memberships match peers at pro. */
+export function profileTierForDoctor(input: {
+  membershipTier?: string | null
+  isFoundingMember?: boolean | null
+  neurosTier?: string | null
+  paidAt?: string | null
+}): string {
+  const membership = (input.membershipTier || '').trim().toLowerCase()
+  const neuros = (input.neurosTier || '').trim().toLowerCase()
+  const paid = input.isFoundingMember === true
+    || PAID_PROFILE_TIERS.has(membership)
+    || neuros === 'neuros'
+    || neuros === 'neuros_founding'
+    || Boolean((input.paidAt || '').trim())
+  if (paid) return 'pro'
+  if (membership === 'basic' || membership === 'standard' || membership === 'free') return membership
+  return 'free'
+}
+
 export function portalPasswordIsSet(user: {
   encrypted_password?: string | null
   user_metadata?: Record<string, unknown> | null

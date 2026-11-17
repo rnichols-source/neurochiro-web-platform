@@ -31,6 +31,9 @@ import {
   nextBookingNudge,
   nudgeProgress,
   portalPasswordIsSet,
+  goLiveStepRetry,
+  portalRecoveryLinkWanted,
+  profileTierForDoctor,
   loginPasswordState,
   welcomeSendDecision,
   resumeClaimPlan,
@@ -991,5 +994,45 @@ describe('setup nudges after go-live', () => {
     assert.equal(mail.practiceName, 'Harbor Nervous System')
     assert.equal(mail.city, 'Greenville')
     assert.equal(WELCOME_REPLY_TO, 'drray@neurochirodirectory.com')
+  })
+})
+
+describe('portal login from the go-live log', () => {
+  it('shows create-portal whenever that step is not ok, and leaves other steps alone', () => {
+    assert.equal(goLiveStepRetry('portal', undefined), 'portal')
+    assert.equal(goLiveStepRetry('portal', 'skipped'), 'portal')
+    assert.equal(goLiveStepRetry('portal', 'failed'), 'portal')
+    assert.equal(goLiveStepRetry('portal', 'pending'), 'portal')
+    assert.equal(goLiveStepRetry('portal', 'ok'), null)
+    assert.equal(goLiveStepRetry('welcome', 'ok'), 'welcome')
+    assert.equal(goLiveStepRetry('welcome', 'failed'), 'welcome')
+    assert.equal(goLiveStepRetry('profile', 'failed'), 'force')
+    assert.equal(goLiveStepRetry('profile', undefined), null)
+    assert.equal(goLiveStepRetry('profile', 'skipped'), null)
+    assert.equal(goLiveStepRetry('waitlist', 'ok'), null)
+  })
+
+  it('mints a recovery link for a full run and skips it for a portal-only retry', () => {
+    assert.equal(portalRecoveryLinkWanted({ source: 'retry', only: ['portal'] }), false)
+    assert.equal(portalRecoveryLinkWanted({ source: 'stripe' }), true)
+    assert.equal(portalRecoveryLinkWanted({ source: 'admin' }), true)
+    assert.equal(portalRecoveryLinkWanted({ source: 'retry', only: ['portal', 'welcome'] }), true)
+    assert.equal(portalRecoveryLinkWanted({ source: 'retry', only: ['profile'] }), true)
+    assert.equal(portalRecoveryLinkWanted({
+      source: 'stripe',
+      only: ['checkout', 'profile', 'portal', 'welcome', 'waitlist', 'instagram', 'summary'],
+    }), true)
+  })
+
+  it('gives a new portal profile the same pro tier paid doctors already have', () => {
+    assert.equal(profileTierForDoctor({ membershipTier: 'pro' }), 'pro')
+    assert.equal(profileTierForDoctor({ membershipTier: 'growth' }), 'pro')
+    assert.equal(profileTierForDoctor({ membershipTier: 'neuros' }), 'pro')
+    assert.equal(profileTierForDoctor({ membershipTier: 'free', isFoundingMember: true }), 'pro')
+    assert.equal(profileTierForDoctor({ membershipTier: 'free', neurosTier: 'neuros_founding' }), 'pro')
+    assert.equal(profileTierForDoctor({ membershipTier: 'free', paidAt: '2026-11-15T00:00:00.000Z' }), 'pro')
+    assert.equal(profileTierForDoctor({ membershipTier: 'free' }), 'free')
+    assert.equal(profileTierForDoctor({ membershipTier: 'basic' }), 'basic')
+    assert.equal(profileTierForDoctor({}), 'free')
   })
 })

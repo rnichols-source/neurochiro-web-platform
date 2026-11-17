@@ -2,6 +2,7 @@ import { PlaceHeader } from '@/components/founder/header'
 import { Card, Tag } from '@/components/founder/bits'
 import { requireAdminPage } from '@/lib/founder/guard'
 import { GO_LIVE_STEPS, loadRecentGoLiveSteps, type GoLiveStepRow } from '@/lib/go-live/log'
+import { goLiveStepRetry } from '@/lib/go-live/plan'
 import { RetryStepButton } from './retry-button'
 
 export const dynamic = 'force-dynamic'
@@ -42,6 +43,7 @@ export default async function GoLivePage() {
             <ul className="mt-3 space-y-3">
               {GO_LIVE_STEPS.map((step) => {
                 const row = group.steps.find((item) => item.step === step)
+                const retry = goLiveStepRetry(step, row?.status)
                 return (
                   <li key={step} className="flex flex-wrap items-start justify-between gap-3 border-t border-[#EFECE7] pt-3">
                     <div className="min-w-0">
@@ -51,7 +53,7 @@ export default async function GoLivePage() {
                       </div>
                       <p className="mt-1 text-[13px] text-[#5b6773]">{row?.reason || 'This step has not run.'}</p>
                     </div>
-                    {step === 'welcome' || row?.status === 'failed' ? <RetryStepButton doctorId={doctorId} step={step} welcome={step === 'welcome'} /> : null}
+                    {retry ? <RetryStepButton doctorId={doctorId} step={step} welcome={retry === 'welcome'} portal={retry === 'portal'} /> : null}
                   </li>
                 )
               })}
