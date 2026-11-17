@@ -251,7 +251,7 @@ export function ApplyForm({
   }
 
   return (
-    <form noValidate onSubmit={onSubmit} className={`mx-auto max-w-2xl space-y-5 overflow-x-hidden px-4 py-6 ${clientSecret ? 'pb-44' : 'pb-40'}`}>
+    <form noValidate onSubmit={onSubmit} className={`nc-flow-page mx-auto max-w-2xl space-y-5 overflow-x-hidden px-4 py-6 ${clientSecret ? 'pb-44' : 'pb-40'}`}>
       <div>
         <p className="text-sm font-bold text-neuro-navy">NeuroChiro</p>
         <FlowProgress step={flowStep} />
@@ -425,7 +425,7 @@ export function ApplyForm({
       ) : null}
 
       {clientSecret ? null : (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-[#F5F3EF]/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div className="nc-flow-cta fixed inset-x-0 bottom-0 z-30 !mb-0 border-t border-black/10 bg-[#F5F3EF]/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
           <div className="mx-auto flex max-w-2xl flex-col gap-3">
           {error ? <p ref={buttonAlertRef} role="alert" className="text-base font-bold text-red-700">{error}</p> : null}
             {step < 3 ? (

@@ -188,7 +188,7 @@ function GetStartedInner({
   const inputClass = "w-full min-h-11 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-neuro-orange"
 
   return (
-    <div className="min-h-dvh overflow-x-hidden bg-neuro-cream pt-24 pb-32">
+    <div className="nc-flow-page min-h-dvh overflow-x-hidden bg-neuro-cream pt-24 pb-32">
       <div className="max-w-md mx-auto px-4 sm:px-6">
         {/* Contextual Banners */}
         {paramChiroscore && (
@@ -331,7 +331,7 @@ function GetStartedInner({
             </Link>
           ) : null}
 
-          <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="nc-flow-cta fixed inset-x-0 bottom-0 z-30 !mb-0 border-t border-black/10 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <button type="submit" disabled={loading}
             className="mx-auto flex min-h-11 w-full max-w-md py-4 bg-neuro-orange text-white text-base font-bold rounded-xl items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}

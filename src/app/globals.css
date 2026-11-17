@@ -117,13 +117,34 @@
   background: #D66829; 
 }
 
+/* Mobile cookie bar is one compact row. Signup and apply sticky actions use the same height. */
+:root {
+  --nc-cookie-bar-offset: calc(4rem + env(safe-area-inset-bottom));
+}
+
+@media (max-width: 767px) {
+  .nc-cookie-bar {
+    box-sizing: border-box;
+    height: var(--nc-cookie-bar-offset);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  html[data-cookie-bar="1"] .nc-flow-cta {
+    bottom: var(--nc-cookie-bar-offset) !important;
+  }
+
+  html[data-cookie-bar="1"] .nc-flow-page {
+    padding-bottom: calc(11rem + var(--nc-cookie-bar-offset)) !important;
+  }
+}
+
 /* The directory map/list pill sits above the slim cookie bar. */
 html[data-cookie-bar="1"] .nc-view-toggle {
-  bottom: calc(88px + env(safe-area-inset-bottom)) !important;
+  bottom: calc(var(--nc-cookie-bar-offset, 88px) + 8px) !important;
 }
 
 html[data-cookie-bar="1"] .nc-seminar-cta {
-  bottom: calc(72px + env(safe-area-inset-bottom));
+  bottom: var(--nc-cookie-bar-offset, 72px);
 }
 
 /* Legacy admin pages were written for a near-black shell. The cream canvas
