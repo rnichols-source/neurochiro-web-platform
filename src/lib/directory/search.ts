@@ -132,7 +132,10 @@ function doctorsQuery(sb: any, regionOrCountry: string, hiddenUserIds: string[] 
     .from('doctors')
     .select(SELECT_FIELDS)
     .in('verification_status', ['verified', 'pending'])))
-  if (hiddenUserIds.length) q = q.not('user_id', 'in', `(${hiddenUserIds.join(',')})`)
+  // Hide test accounts' listings, but keep listings with no linked account (user_id NULL).
+  // A bare NOT IN drops NULL rows too (SQL: NULL NOT IN (...) is never true), which hid
+  // every hand-built / imported listing from the map and directory search.
+  if (hiddenUserIds.length) q = q.or(`user_id.is.null,user_id.not.in.(${hiddenUserIds.join(',')})`)
   const code = (regionOrCountry || 'US').toUpperCase()
   if (code === 'ALL') return q
   if (code === 'EU') return q.in('country', EUROPEAN_ISO)
