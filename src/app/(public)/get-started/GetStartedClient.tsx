@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, Loader2, Shield, Users, BarChart3, MessageSquare, Briefcase, Calendar, Star, Zap } from "lucide-react";
 import { FlowProgress } from "@/components/applications/FlowProgress";
+import { APPLICATION_SMS_CONSENT } from "@/lib/applications/consent";
+import { APPLICATION_COUNTRIES } from "@/lib/applications/countries";
+import { LISTING_PASSWORD_EMAIL } from "@/lib/applications/existing-listing";
+import { toApplicationE164 } from "@/lib/applications/phone";
+import { currencyForCountry, knownPlanLabel } from "@/lib/applications/prices";
 import { continueAfterAccount } from "@/lib/applications/resume-path";
+import { defaultSignupCountry } from "@/lib/applications/signup-country";
 import { withReferralQuery } from "@/lib/member-referrals/logic";
 import { createFreeAccount } from "./actions";
 import { createClient } from "@/lib/supabase";
@@ -36,11 +42,21 @@ function GetStartedInner({
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [honeypot, setHoneypot] = useState("");
+  const [country, setCountry] = useState("US");
+  const [countryTouched, setCountryTouched] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [accountExists, setAccountExists] = useState(false);
+  const [checkEmail, setCheckEmail] = useState(false);
   const [success, setSuccess] = useState(false);
   const doctorFlow = applicationFlow && role === "doctor";
+  const currency = currencyForCountry(country);
+
+  useEffect(() => {
+    if (!doctorFlow || countryTouched) return;
+    setCountry(defaultSignupCountry({ email, phone }));
+  }, [doctorFlow, email, phone, countryTouched]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,8 +65,38 @@ function GetStartedInner({
     setLoading(true);
     setError("");
     setAccountExists(false);
+    setCheckEmail(false);
 
-    const result = await createFreeAccount({ name, email, password, role, phone, referralCode });
+    if (doctorFlow) {
+      if (/[a-z@]/i.test(phone)) {
+        setError("Enter a mobile number, not an email.");
+        setLoading(false);
+        return;
+      }
+      if (!toApplicationE164(phone, country)) {
+        setError(country === "OTHER"
+          ? "Enter a mobile number with + and the country code."
+          : "Enter a mobile number for the country you selected.");
+        setLoading(false);
+        return;
+      }
+    }
+
+    const result = await createFreeAccount({
+      name,
+      email,
+      password,
+      role,
+      phone,
+      country: doctorFlow ? country : undefined,
+      smsConsent: doctorFlow ? smsConsent : undefined,
+      referralCode,
+    });
+    if ("checkEmail" in result && result.checkEmail) {
+      setCheckEmail(true);
+      setLoading(false);
+      return;
+    }
     if (result.error) {
       setError(result.error);
       setAccountExists(result.error.includes("already exists"));
@@ -78,6 +124,19 @@ function GetStartedInner({
       window.location.href = `/student/subscribe?plan=${paramPlan}`;
     }
   };
+
+  if (checkEmail) {
+    return (
+      <div className="min-h-dvh bg-neuro-cream flex items-center justify-center px-6">
+        <div className="max-w-md w-full text-center">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-xl p-10">
+            <h1 className="text-2xl font-heading font-black text-neuro-navy mb-2">{LISTING_PASSWORD_EMAIL}</h1>
+            <p className="text-gray-500">The link goes to the email address already on the listing. The password from this form was not saved.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -162,7 +221,7 @@ function GetStartedInner({
           </h1>
           <p className="text-gray-500">
             {doctorFlow
-              ? "This is step 1 of 3. Next is your practice, then a plan and a card. The card is not charged unless you are approved."
+              ? "This is step 1 of 4. Next is how you practice, then your office, then a plan and a card. The card is not charged unless you are approved."
               : role === "doctor"
               ? "Full practice growth. Personal onboarding. Weekly promotion."
               : "Career tools, mentorship, and a monthly call with Dr. Ray."}
@@ -170,7 +229,9 @@ function GetStartedInner({
         </div>
 
         {doctorFlow ? (
-          <p className="text-sm text-neuro-navy/70 mb-6">$99 a month or $990 a year, per office.</p>
+          <p className="text-sm text-neuro-navy/70 mb-6">
+            Prices in {currency}. {knownPlanLabel(currency, "monthly")} or {knownPlanLabel(currency, "annual")}, per office.
+          </p>
         ) : null}
 
         {doctorFlow ? null : (
@@ -214,8 +275,35 @@ function GetStartedInner({
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
           <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
             inputMode="tel" autoComplete="tel"
-            placeholder="Phone number"
+            placeholder="Mobile number"
             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+          {doctorFlow ? (
+            <>
+              <label className="block text-sm font-bold text-neuro-navy">
+                Country
+                <select
+                  required
+                  value={country}
+                  onChange={(event) => { setCountryTouched(true); setCountry(event.target.value); }}
+                  className="mt-1 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
+                >
+                  {APPLICATION_COUNTRIES.map((item) => (
+                    <option key={item.code} value={item.code}>{item.name}</option>
+                  ))}
+                </select>
+              </label>
+              <p className="text-sm text-neuro-navy/80">Currency: {currency}. It updates as soon as you choose a country.</p>
+              <label className="flex items-start gap-3 text-sm text-neuro-navy">
+                <input
+                  type="checkbox"
+                  className="mt-1 h-5 w-5"
+                  checked={smsConsent}
+                  onChange={(event) => setSmsConsent(event.target.checked)}
+                />
+                <span><span className="font-bold">Optional. </span>{APPLICATION_SMS_CONSENT}</span>
+              </label>
+            </>
+          ) : null}
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
             placeholder="Create password (6+ characters)"

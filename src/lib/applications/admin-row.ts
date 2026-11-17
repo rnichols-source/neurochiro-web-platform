@@ -25,5 +25,8 @@ export type AdminApplicationRow = {
   smsConsent: string
   stoppedAt: string
   createdAt: string
+  lastActivity: string
+  missing: string[]
+  complete: boolean
   paymentReceived: boolean
 }

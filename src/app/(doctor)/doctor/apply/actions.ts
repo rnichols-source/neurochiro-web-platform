@@ -3,7 +3,9 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { currencyForAnswers, validateAnswers, validateStep1, validateStep2 } from '@/lib/applications/answers'
-import { createSetupCheckout, readPriceAmount } from '@/lib/applications/billing'
+import { applicationReturnUrl, cardElementsEnabled, createCardSetupIntent, createSetupCheckout, readPriceAmount } from '@/lib/applications/billing'
+import { chargeCopyFromLabel } from '@/lib/applications/charge-copy'
+import { gapsBeforeCard } from '@/lib/applications/checklist'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { currencyForCountry, planLabel, priceIdFor, type BillingCycle, type DoctorCurrency } from '@/lib/applications/prices'
 import { ensureDraftApplication, loadApplicationByDoctor, saveAnswers, saveDraftStep, savePlan } from '@/lib/applications/store'
@@ -117,26 +119,23 @@ export async function saveApplyStep(step: 1 | 2, input: {
       website: parsed.value.website || null,
       instagram: parsed.value.instagram || null,
     },
-    contact: {
-      mobileE164: parsed.value.mobileE164,
-      smsConsent: parsed.value.smsConsent,
-    },
+    contact: parsed.value.mobileE164
+      ? { mobileE164: parsed.value.mobileE164, smsConsent: parsed.value.smsConsent }
+      : null,
   })
   if (!saved) return { error: 'We could not save your answers. Please try again.' }
   return {}
 }
 
-export async function submitApplication(input: {
+export async function prepareCardSetup(input: {
   answers: unknown
   plan: BillingCycle
   referralCode?: string
   referrerName?: string | null
-}): Promise<{ error?: string; url?: string }> {
+}): Promise<{ error?: string; url?: string; clientSecret?: string; chargeCopy?: string; returnUrl?: string }> {
   if (!isApplicationFlowEnabled()) return { error: 'Applications are not open yet.' }
   const session = await requireDoctor()
   if ('error' in session) return { error: session.error }
-  const parsed = validateAnswers(input.answers)
-  if (!parsed.ok) return { error: parsed.error }
   if (input.plan !== 'monthly' && input.plan !== 'annual') return { error: 'Choose monthly or annual.' }
 
   const ready = await ensureDraftApplication({
@@ -147,12 +146,30 @@ export async function submitApplication(input: {
   })
   if (!ready) return { error: 'We could not save the application. The database step may still need to be run.' }
 
+  const existing = await loadApplicationByDoctor(session.doctor.id)
+  if (!existing?.id) return { error: 'The application record is missing.' }
+  const source = input.answers && typeof input.answers === 'object' ? input.answers as Record<string, unknown> : {}
+  const mobile = typeof source.mobile === 'string' && source.mobile.trim()
+    ? source.mobile
+    : (existing.mobileE164 || '')
+  const parsed = validateAnswers({
+    ...source,
+    mobile,
+    country: source.country || existing.answers.country,
+    smsConsent: source.smsConsent === true || existing.smsConsent === true,
+  })
+  if (!parsed.ok) return { error: parsed.error }
+  const gaps = gapsBeforeCard({
+    ...parsed.value,
+    mobile: parsed.value.mobileE164,
+    email: session.email,
+    plan: input.plan,
+  })
+  if (gaps.length > 0) return { error: `Missing: ${gaps.map((gap) => gap.label).join(', ')}.` }
+
   const referralCode = await keptReferral(input.referralCode, input.referrerName, session.doctor.id)
   const saved = await saveAnswers(session.doctor.id, session.user.id, parsed.value, referralCode)
   if (!saved) return { error: 'We could not save your answers. Please try again.' }
-
-  const existing = await loadApplicationByDoctor(session.doctor.id)
-  if (!existing?.id) return { error: 'The application record is missing.' }
 
   const currency = currencyForAnswers(parsed.value.country)
   const priceId = priceIdFor(currency, input.plan)
@@ -162,35 +179,52 @@ export async function submitApplication(input: {
     return { error: 'That price does not match the country you selected.' }
   }
   const label = planLabel(currency, input.plan, price?.unitAmount)
+  const chargeCopy = chargeCopyFromLabel(label, input.plan)
+  const name = `${session.doctor.first_name || ''} ${session.doctor.last_name || ''}`.trim()
 
   try {
-    const checkout = await createSetupCheckout({
-      customerId: existing.stripeCustomerId,
-      email: session.email,
-      name: `${session.doctor.first_name || ''} ${session.doctor.last_name || ''}`.trim(),
-      currency,
-      priceId,
-      applicationId: existing.id,
-      doctorId: session.doctor.id,
-      userId: session.user.id,
-      plan: input.plan,
-    })
+    const card = cardElementsEnabled()
+      ? await createCardSetupIntent({
+        customerId: existing.stripeCustomerId,
+        email: session.email,
+        name,
+        priceId,
+        applicationId: existing.id,
+        doctorId: session.doctor.id,
+        userId: session.user.id,
+        plan: input.plan,
+      })
+      : await createSetupCheckout({
+        customerId: existing.stripeCustomerId,
+        email: session.email,
+        name,
+        currency,
+        priceId,
+        applicationId: existing.id,
+        doctorId: session.doctor.id,
+        userId: session.user.id,
+        plan: input.plan,
+        chargeCopy,
+      })
     await savePlan(session.doctor.id, {
       plan: input.plan,
       currency,
       priceId,
       priceLabel: label,
-      customerId: checkout.customerId,
+      customerId: card.customerId,
     })
     if (session.user.id) {
       const admin = createAdminClient()
-      await admin.from('profiles').update({ stripe_customer_id: checkout.customerId }).eq('id', session.user.id)
+      await admin.from('profiles').update({ stripe_customer_id: card.customerId }).eq('id', session.user.id)
     }
     const jar = await cookies()
     jar.delete(MEMBER_REF_COOKIE)
-    return { url: checkout.url }
+    if ('clientSecret' in card) {
+      return { clientSecret: card.clientSecret, chargeCopy, returnUrl: applicationReturnUrl() }
+    }
+    return { url: card.url, chargeCopy }
   } catch (error) {
-    console.error('[application] setup checkout failed', error instanceof Error ? error.name : 'error')
+    console.error('[application] card setup failed', error instanceof Error ? error.name : 'error')
     const message = error instanceof Error ? error.message : ''
     const safe = message.startsWith('That Stripe price') || message.startsWith('Stripe did not')
       ? message
@@ -210,6 +244,7 @@ export async function loadApplyState() {
     enabled: true as const,
     doctorId: session.doctor.id,
     doctorName: session.doctor.first_name || '',
+    email: session.email,
     country,
     application,
     plans,

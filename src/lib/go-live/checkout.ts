@@ -7,6 +7,7 @@ import { resolveSupabaseAdminEnv } from '@/lib/supabase-runtime-env'
 import { doctorPriceIds, studentPriceIds } from '@/lib/member-referrals/catalog'
 import { isStudentProduct, type ProductHint } from './products.ts'
 import { goLiveStepAlreadyOk } from './log.ts'
+import { PAID_CHECKOUT_APPLICATION_STATUS } from '@/lib/applications/status'
 import {
   blocksNewDoctor,
   checkoutApplicationContact,
@@ -694,7 +695,7 @@ async function insertDoctorForUser(userId: string, identity: CheckoutIdentity): 
   await db().from('doctor_applications').insert({
     doctor_id: doctor.data.id,
     user_id: userId,
-    status: 'under_review',
+    status: PAID_CHECKOUT_APPLICATION_STATUS,
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
     payment_received_at: now,
@@ -753,7 +754,7 @@ async function markPaymentReceived(doctorId: string, identity: CheckoutIdentity,
   }).eq('id', doctorId).neq('verification_status', 'verified')
   const existing = await db().from('doctor_applications').select('id').eq('doctor_id', doctorId).maybeSingle()
   const patch = {
-    status: 'under_review',
+    status: PAID_CHECKOUT_APPLICATION_STATUS,
     stripe_customer_id: identity.customerId,
     stripe_subscription_id: identity.subscriptionId,
     payment_received_at: now,

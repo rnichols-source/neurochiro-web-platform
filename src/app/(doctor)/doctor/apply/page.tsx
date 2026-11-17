@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 export default async function ApplyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ canceled?: string; ref?: string; step?: string; part?: string }>
+  searchParams: Promise<{ canceled?: string; ref?: string; step?: string; part?: string; resume?: string }>
 }) {
   if (!isApplicationFlowEnabled()) redirect('/doctor/dashboard')
   const state = await loadApplyState()
@@ -65,7 +65,9 @@ export default async function ApplyPage({
   return (
     <ApplyForm
       doctorName={state.doctorName}
+      doctorEmail={state.email}
       canceled={params.canceled === '1'}
+      resumed={params.resume === '1'}
       referralCode={referralCode}
       referredBy={referredBy}
       initialCountry={state.country}

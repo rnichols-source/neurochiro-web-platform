@@ -1,6 +1,7 @@
 import { toE164 } from '../sms/phone.ts'
 import { escapeHtml } from '../students/html.ts'
 import { contactFromApplicationRow } from './contact.ts'
+import { reminderInQuietHours } from './quiet.ts'
 
 export const APPLY_URL = 'https://neurochiro.co/doctor/apply'
 const HOUR_MS = 60 * 60 * 1000
@@ -19,6 +20,17 @@ export type ReminderCandidate = {
   smsConsent: boolean
   mobile: string | null
   resumeUrl?: string
+  /** Path only, such as /doctor/apply?step=3&resume=1. Magic links reject a full URL. */
+  resumePath?: string
+  /** IANA zone for 9 PM–8 AM quiet hours. Office state or phone area code. */
+  timezone?: string
+}
+
+export type ReminderSendLog = {
+  applicationId: string
+  channel: 'email' | 'sms'
+  kind: ReminderKind
+  timezone: string
 }
 
 export function applicationReminderSmsEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
@@ -101,6 +113,9 @@ export async function deliverReminders(input: {
   release: (id: string, kind: ReminderKind) => Promise<void>
   sendEmail: (mail: { to: string; subject: string; html: string }) => Promise<boolean>
   sendSms: (message: { to: string; content: string }) => Promise<boolean>
+  /** One-time sign-in link for this row. Called only when a send is about to happen. */
+  resumeLink?: (row: ReminderCandidate) => Promise<string>
+  logSend?: (entry: ReminderSendLog) => Promise<void>
 }): Promise<{ emailed: number; texted: number; skipped: number; unavailable: boolean }> {
   let emailed = 0
   let texted = 0
@@ -111,15 +126,28 @@ export async function deliverReminders(input: {
       skipped += 1
       continue
     }
+    const zone = row.timezone || 'America/New_York'
+    if (reminderInQuietHours(zone, input.now)) {
+      skipped += 1
+      continue
+    }
     const claim = await input.claim(row.id, kind)
     if (claim === 'unavailable') return { emailed, texted, skipped, unavailable: true }
     if (claim !== 'claimed') {
       skipped += 1
       continue
     }
+    let resumeUrl = row.resumeUrl || APPLY_URL
+    if (input.resumeLink) {
+      try {
+        const linked = await input.resumeLink(row)
+        if (linked.startsWith('https://neurochiro.co/')) resumeUrl = linked
+      } catch {
+        resumeUrl = row.resumeUrl || APPLY_URL
+      }
+    }
     let sent = false
     try {
-      const resumeUrl = row.resumeUrl || APPLY_URL
       const mail = reminderMail(kind, row.firstName, resumeUrl)
       sent = await input.sendEmail({ to: row.email, subject: mail.subject, html: mail.html })
     } catch {
@@ -131,11 +159,27 @@ export async function deliverReminders(input: {
       continue
     }
     emailed += 1
+    if (input.logSend) {
+      try {
+        await input.logSend({ applicationId: row.id, channel: 'email', kind, timezone: zone })
+      } catch {
+        // The note already went out. A failed log does not undo it.
+      }
+    }
     const to = reminderSmsTo({ enabled: input.smsEnabled, consent: row.smsConsent, phone: row.mobile })
     if (!to) continue
     try {
-      const ok = await input.sendSms({ to, content: reminderText(kind, row.firstName, row.resumeUrl || APPLY_URL) })
-      if (ok) texted += 1
+      const ok = await input.sendSms({ to, content: reminderText(kind, row.firstName, resumeUrl) })
+      if (ok) {
+        texted += 1
+        if (input.logSend) {
+          try {
+            await input.logSend({ applicationId: row.id, channel: 'sms', kind, timezone: zone })
+          } catch {
+            // The text already went out.
+          }
+        }
+      }
     } catch {
       // The email already went out. A failed text does not undo it.
     }

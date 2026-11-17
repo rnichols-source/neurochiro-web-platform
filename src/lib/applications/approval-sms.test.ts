@@ -28,6 +28,17 @@ function application(overrides: Partial<ApplicationRecord> = {}): ApplicationRec
     mobileE164: '+18645550100',
     smsConsent: true,
     priceLabel: '$99 per month',
+    checklistAnswers: {
+      practiceApproach: 'We focus on the nervous system and how the body adapts.',
+      heardAbout: 'Instagram',
+      techniques: 'Toggle',
+      usesNervousSystemScans: false,
+      scanTypes: '',
+      yearsInPractice: 8,
+      officeAddress: '123 Main Street',
+      city: 'Greenville',
+      country: 'US',
+    },
     ...overrides,
   }
 }
@@ -145,7 +156,19 @@ describe('approval email and text', () => {
   })
 
   it('does not text a number outside the US and Canada', async () => {
-    const decision = await approveApplication(application({ mobileE164: '+447911123456' }), billing(paid), NOW, '')
+    const decision = await approveApplication(application({
+      mobileE164: '+447911123456',
+      checklistAnswers: {
+        practiceApproach: 'We focus on the nervous system and how the body adapts.',
+        heardAbout: 'Instagram',
+        techniques: 'Toggle',
+        usesNervousSystemScans: false,
+        yearsInPractice: 8,
+        officeAddress: '123 Main Street',
+        city: 'London',
+        country: 'GB',
+      },
+    }), billing(paid), NOW, '')
     assert.equal(decision.sms, null)
     assert.equal(decision.email?.subject, APPROVED_SUBJECT)
   })

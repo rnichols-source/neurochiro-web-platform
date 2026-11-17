@@ -146,17 +146,19 @@ export function validateStep2(input: unknown): { ok: true; value: Step2Answers }
     return { ok: false, error: 'The website should look like a normal link.' }
   }
   if (instagram.length > 80) return { ok: false, error: 'The Instagram name is too long.' }
-  if (source.smsConsent !== true) {
-    return { ok: false, error: 'Check the box so we can text you about new community member requests.' }
-  }
-  const mobileE164 = toApplicationE164(text(source.mobile), country)
-  if (!mobileE164) {
-    return {
-      ok: false,
-      error: country === 'OTHER'
-        ? 'Enter a mobile number with + and the country code.'
-        : 'Enter a mobile number for the country you selected.',
+  const mobileRaw = text(source.mobile)
+  let mobileE164 = ''
+  if (mobileRaw) {
+    const parsed = toApplicationE164(mobileRaw, country)
+    if (!parsed) {
+      return {
+        ok: false,
+        error: country === 'OTHER'
+          ? 'Enter a mobile number with + and the country code.'
+          : 'Enter a mobile number for the country you selected.',
+      }
     }
+    mobileE164 = parsed
   }
 
   return {
@@ -173,7 +175,7 @@ export function validateStep2(input: unknown): { ok: true; value: Step2Answers }
       website: website ? normalizeWebsite(website) : '',
       instagram,
       mobileE164,
-      smsConsent: true,
+      smsConsent: source.smsConsent === true,
     },
   }
 }
@@ -194,8 +196,8 @@ export function firstUnfinishedStep(input: unknown): 1 | 2 | 3 {
 }
 
 /**
- * The public flow is 3 steps: account, practice details, plan and card.
- * Practice details is two saved screens. `step=2` is the first. `step=2&part=2` is the office.
+ * The public flow has four labels: account, how you practice, your office, plan and card.
+ * `step=2` is how you practice. `step=2&part=2` is the office. `step=3` is the card.
  * A link opens that screen only when it is the one still unfinished.
  * A later link does not skip required answers. An earlier link does not rewind.
  */
@@ -218,9 +220,12 @@ function requestedFormStep(request: { step?: string | null; part?: string | null
 /** Path a reminder or a return visit should open. Account creation is already done. */
 export function applicationResumePath(input: unknown): string {
   const current = firstUnfinishedStep(input)
-  if (current === 3) return '/doctor/apply?step=3'
-  if (current === 2) return '/doctor/apply?step=2&part=2'
-  return '/doctor/apply?step=2'
+  const path = current === 3
+    ? '/doctor/apply?step=3'
+    : current === 2
+      ? '/doctor/apply?step=2&part=2'
+      : '/doctor/apply?step=2'
+  return `${path}&resume=1`
 }
 
 export function applicationResumeUrl(input: unknown): string {
@@ -229,8 +234,10 @@ export function applicationResumeUrl(input: unknown): string {
 
 export function applicationStopLabel(input: { status: string; cardOnFile: boolean; answers: unknown }): string {
   if (input.cardOnFile || input.status !== 'draft') return 'Submitted'
-  if (firstUnfinishedStep(input.answers) === 3) return 'Step 3 of 3 · Plan and card'
-  return 'Step 2 of 3 · Practice details'
+  const current = firstUnfinishedStep(input.answers)
+  if (current === 1) return 'Step 2 of 4 · How you practice'
+  if (current === 2) return 'Step 3 of 4 · Your office'
+  return 'Step 4 of 4 · Plan and card'
 }
 
 export function currencyForAnswers(country: string): DoctorCurrency {
