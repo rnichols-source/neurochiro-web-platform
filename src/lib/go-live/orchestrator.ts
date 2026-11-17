@@ -8,7 +8,7 @@ import { buildDoctorProfileNow } from '@/lib/profile-build/run'
 import { readSmsConfig } from '@/lib/sms/config'
 import { quoSend } from '@/lib/sms/quo'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { adminGoLiveSummary, minimumProfileGaps, PORTAL_LOGIN_URL, smsPromptRequired, welcomeSendDecision } from './plan.ts'
+import { adminGoLiveSummary, minimumProfileGaps, PORTAL_LOGIN_URL, portalRecoveryLinkWanted, profileTierForDoctor, smsPromptRequired, welcomeSendDecision } from './plan.ts'
 import {
   acquireGoLiveLock,
   claimWelcomeStep,
@@ -79,7 +79,56 @@ async function publishListing(doctor: Record<string, unknown>, source: GoLiveSou
   }).eq('id', doctor.id)
 }
 
-async function ensurePortal(doctor: Record<string, unknown>, live: boolean): Promise<GoLiveStepResult & { activateUrl: string }> {
+function expectedPortalTier(doctor: Record<string, unknown>): string {
+  return profileTierForDoctor({
+    membershipTier: text(doctor.membership_tier),
+    isFoundingMember: doctor.is_founding_member === true,
+    neurosTier: text(doctor.neuros_tier),
+    paidAt: text(doctor.paid_at),
+  })
+}
+
+async function saveNewPortalProfile(userId: string, email: string, doctor: Record<string, unknown>): Promise<boolean> {
+  const name = `${text(doctor.first_name)} ${text(doctor.last_name)}`.trim()
+  const saved = await db().from('profiles').upsert({
+    id: userId,
+    email,
+    full_name: name || email,
+    role: 'doctor',
+    tier: expectedPortalTier(doctor),
+  }, { onConflict: 'id' })
+  if (saved.error) {
+    console.error('[go-live] portal profile tier failed', saved.error.code || 'error')
+    return false
+  }
+  return true
+}
+
+/** Portal-only retry: a doctor profile found by email keeps a non-free tier. Empty or free becomes the membership tier. */
+async function alignUnlinkedDoctorTier(userId: string, doctor: Record<string, unknown>): Promise<boolean> {
+  const existing = await db().from('profiles').select('role, tier').eq('id', userId).maybeSingle()
+  if (existing.error) {
+    console.error('[go-live] portal profile read failed', existing.error.code || 'error')
+    return false
+  }
+  const role = text(existing.data?.role).toLowerCase()
+  if (role && !role.includes('doctor')) return true
+  const expected = expectedPortalTier(doctor)
+  const current = text(existing.data?.tier).toLowerCase()
+  if (current === expected || (current && current !== 'free')) return true
+  const saved = await db().from('profiles').update({ role: 'doctor', tier: expected }).eq('id', userId)
+  if (saved.error) {
+    console.error('[go-live] portal profile tier failed', saved.error.code || 'error')
+    return false
+  }
+  return true
+}
+
+async function ensurePortal(
+  doctor: Record<string, unknown>,
+  live: boolean,
+  options?: { recoveryLink?: boolean },
+): Promise<GoLiveStepResult & { activateUrl: string }> {
   const email = text(doctor.email)
   if (!email.includes('@')) {
     return { step: 'portal', status: 'failed', reason: 'The listing has no email, so no portal account was created.', activateUrl: PORTAL_LOGIN_URL }
@@ -93,6 +142,7 @@ async function ensurePortal(doctor: Record<string, unknown>, live: boolean): Pro
     }
   }
   let userId = text(doctor.user_id)
+  let createdNow = false
   if (!userId) {
     const created = await db().auth.admin.createUser({
       email,
@@ -101,20 +151,46 @@ async function ensurePortal(doctor: Record<string, unknown>, live: boolean): Pro
       user_metadata: { full_name: `${text(doctor.first_name)} ${text(doctor.last_name)}`.trim() },
     })
     userId = text(created.data?.user?.id)
+    if (userId) createdNow = true
     if (!userId) {
       const existing = await db().from('profiles').select('id').ilike('email', email).maybeSingle()
       userId = text(existing.data?.id)
+    }
+    if (userId && createdNow) {
+      const tierSaved = await saveNewPortalProfile(userId, email, doctor)
+      if (!tierSaved) {
+        return {
+          step: 'portal',
+          status: 'failed',
+          reason: 'The portal account was created, but the profile tier was not saved.',
+          activateUrl: PORTAL_LOGIN_URL,
+        }
+      }
+    } else if (userId && options?.recoveryLink === false) {
+      const tierSaved = await alignUnlinkedDoctorTier(userId, doctor)
+      if (!tierSaved) {
+        return {
+          step: 'portal',
+          status: 'failed',
+          reason: 'The portal account was found, but the profile tier was not saved.',
+          activateUrl: PORTAL_LOGIN_URL,
+        }
+      }
     }
     if (userId) await db().from('doctors').update({ user_id: userId }).eq('id', doctor.id)
   }
   if (!userId) {
     return { step: 'portal', status: 'failed', reason: 'The portal account was not created.', activateUrl: PORTAL_LOGIN_URL }
   }
-  const url = await activateUrl(email)
+  // Portal-only retry does not email this link. Full go-live still mints it.
+  const url = options?.recoveryLink === false ? PORTAL_LOGIN_URL : await activateUrl(email)
+  const ready = options?.recoveryLink === false
+    ? 'Portal account is ready. No welcome email or text was sent.'
+    : 'Portal account is ready. The welcome email explains how to set a password with the reset code.'
   return {
     step: 'portal',
     status: 'ok',
-    reason: 'Portal account is ready. The welcome email explains how to set a password with the reset code.',
+    reason: ready,
     activateUrl: url,
   }
 }
@@ -200,7 +276,9 @@ export async function runDoctorGoLive(input: {
       if (await done('portal')) {
         await keep({ step: 'portal', status: 'skipped', reason: 'Portal step already completed for this doctor.' })
       } else {
-        const portal = await ensurePortal(doctor, live)
+        const portal = await ensurePortal(doctor, live, {
+          recoveryLink: portalRecoveryLinkWanted({ source: input.source, only: input.only }),
+        })
         await keep(portal)
       }
     }
