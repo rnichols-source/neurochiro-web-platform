@@ -10,7 +10,7 @@ import { currencyForCountry } from './prices.ts'
 import { applicationTimezone, reminderInQuietHours } from './quiet.ts'
 import { deliverReminders, type ReminderCandidate } from './reminder-plan.ts'
 import { currencyForSignup, defaultSignupCountry } from './signup-country.ts'
-import { applicationQueue, applicationStatusAfterCard, PAID_CHECKOUT_APPLICATION_STATUS } from './status.ts'
+import { applicationQueue, applicationStatusAfterCard, PAID_CHECKOUT_APPLICATION_STATUS, shouldRechargeAfterNewCard } from './status.ts'
 
 const NOW = '2026-11-04T16:00:00.000Z'
 
@@ -76,12 +76,18 @@ describe('card confirmation and approval', () => {
     assert.equal(applicationStatusAfterCard({ setupStatus: 'canceled', currentStatus: 'draft', paymentReceived: false }), null)
     assert.equal(applicationStatusAfterCard({ setupStatus: null, currentStatus: 'draft', paymentReceived: false }), null)
     assert.equal(applicationStatusAfterCard({ setupStatus: 'succeeded', currentStatus: 'draft', paymentReceived: false }), 'under_review')
+    assert.equal(applicationStatusAfterCard({ setupStatus: 'succeeded', currentStatus: 'needs_action', paymentReceived: false }), 'under_review')
+    assert.equal(applicationStatusAfterCard({ setupStatus: 'succeeded', currentStatus: 'approved', paymentReceived: true }), 'approved')
     assert.equal(PAID_CHECKOUT_APPLICATION_STATUS, 'approved')
     assert.equal(applicationStatusAfterCard({ setupStatus: null, currentStatus: 'draft', paymentReceived: true }), 'approved')
     assert.equal(applicationQueue('under_review'), 'decision')
     assert.equal(applicationQueue('needs_action'), 'decision')
     assert.equal(applicationQueue('draft'), 'progress')
     assert.equal(applicationQueue('approved'), 'closed')
+    assert.equal(shouldRechargeAfterNewCard({ previousStatus: 'needs_action', paymentReceived: false, subscriptionId: null }), false)
+    assert.equal(shouldRechargeAfterNewCard({ previousStatus: 'approved', paymentReceived: true, subscriptionId: null }), false)
+    assert.equal(shouldRechargeAfterNewCard({ previousStatus: 'approved', paymentReceived: false, subscriptionId: 'sub_123' }), false)
+    assert.equal(shouldRechargeAfterNewCard({ previousStatus: 'approved', paymentReceived: false, subscriptionId: null }), true)
   })
 
   it('blocks approve when the checklist is incomplete', async () => {
@@ -94,7 +100,7 @@ describe('card confirmation and approval', () => {
     assert.equal(decision.ok, false)
     assert.equal(decision.doctor, null)
     assert.equal(decision.charged, false)
-    assert.match(decision.message, /How you practice/)
+    assert.match(decision.message, /how you practice/i)
     assert.match(decision.message, /Card on file/)
     assert.match(decision.message, /Mobile number/)
     const gaps = applicationGaps({

@@ -14,12 +14,9 @@ import { escapeHtml } from '@/lib/students/html'
 import { randomBytes } from 'crypto'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { toApplicationE164 } from '@/lib/applications/phone'
-import { currencyForCountry } from '@/lib/applications/prices'
 import { ACCOUNT_CONTINUE_PATH } from '@/lib/applications/resume-path'
-import { doctorSignupStatus } from '@/lib/applications/signup'
 import { defaultSignupCountry } from '@/lib/applications/signup-country'
-import { ensureDraftApplication, saveDraftStep } from '@/lib/applications/store'
-import { rememberApplicantReferral } from '@/lib/member-referrals/db'
+import { ensureSignupDoctor } from '@/lib/applications/signup-doctor'
 
 const COUNTRY_CODES = new Set<string>(APPLICATION_COUNTRIES.map((item) => item.code))
 
@@ -173,63 +170,18 @@ export async function createFreeAccount(data: {
       tier: 'free',
     });
 
-    // If doctor, create doctor record
     if (data.role === 'doctor') {
-      const nameParts = data.name.split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
-      const slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
-      const signupStatus = doctorSignupStatus();
-      const doctorCountry = flow ? country : 'US'
-
-      const { data: doctorRow } = await supabase.from('doctors').insert({
-        user_id: userId,
-        first_name: firstName,
-        last_name: lastName,
-        slug,
+      const doctorRow = await ensureSignupDoctor({
+        userId,
         email,
-        clinic_name: '',
-        city: '',
-        state: '',
-        country: doctorCountry,
-        address: '',
-        bio: '',
+        name: data.name,
         phone: mobile || data.phone || '',
-        specialties: [],
-        verification_status: flow ? 'hidden' : signupStatus,
-        membership_tier: 'free',
-        region_code: doctorCountry === 'OTHER' ? 'US' : doctorCountry,
-        is_approved: false,
-        onboarding_call_status: 'not_booked',
-      } as any).select('id').maybeSingle();
-
-      if (flow && doctorRow?.id) {
-        await ensureDraftApplication({
-          doctorId: doctorRow.id,
-          userId,
-          email,
-          referralCode: (data.referralCode || '').slice(0, 80),
-        });
-        await saveDraftStep({
-          doctorId: doctorRow.id,
-          userId,
-          stepReached: 1,
-          referralCode: (data.referralCode || '').slice(0, 80),
-          fields: {
-            country: doctorCountry,
-            currency: currencyForCountry(doctorCountry),
-          },
-          contact: {
-            mobileE164: mobile,
-            smsConsent: data.smsConsent === true,
-          },
-        })
-        if (data.referralCode) {
-          await rememberApplicantReferral({
-            applicantDoctorId: doctorRow.id,
-            requestedSlug: data.referralCode,
-          });
-        }
+        country: flow ? country : 'US',
+        smsConsent: data.smsConsent === true,
+        referralCode: data.referralCode,
+      })
+      if (!doctorRow?.id) {
+        return { error: 'Your account was created, but the doctor profile did not save. Log in and we will finish setting it up.' }
       }
     }
 

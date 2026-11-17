@@ -7,10 +7,16 @@ import {
   composeHeardAbout,
   firstUnfinishedStep,
   formStepFromRequest,
+  normalizeWebsite,
+  officeAddressWithPostal,
   parseHeardAbout,
+  parseYearsInPractice,
   validateAnswers,
   validateStep1,
+  validateStep2,
 } from './answers.ts'
+import { applyStepPath } from './apply-nav.ts'
+import { clientGapMessage, gapsBeforeCard } from './checklist.ts'
 import { ACCOUNT_CONTINUE_PATH } from './resume-path.ts'
 
 const office = {
@@ -102,9 +108,55 @@ describe('application steps', () => {
     assert.equal(formStepFromRequest({}, { step: '2' }), 1)
     assert.equal(formStepFromRequest({}, { step: '3' }), 1)
     assert.equal(formStepFromRequest(started, { step: '2', part: '2' }), 2)
-    assert.equal(formStepFromRequest(started, { step: '2' }), 2)
-    assert.equal(formStepFromRequest(ready, { step: '2', part: '2' }), 3)
+    assert.equal(formStepFromRequest(started, { step: '2' }), 1)
+    assert.equal(formStepFromRequest(ready, { step: '2', part: '2' }), 2)
     assert.equal(formStepFromRequest(ready, { step: '3' }), 3)
     assert.equal(formStepFromRequest(ready, {}), 3)
+    assert.equal(applyStepPath('/doctor/apply', 'step=3&resume=1', 2), '/doctor/apply?step=2&resume=1&part=2')
+    assert.equal(applyStepPath('/doctor/apply', '?step=2&part=2', 1), '/doctor/apply?step=2')
+  })
+
+  it('accepts years like 15+ and a website without https', () => {
+    assert.equal(parseYearsInPractice('15+'), 15)
+    assert.equal(parseYearsInPractice('15 years'), 15)
+    assert.equal(parseYearsInPractice(''), null)
+    assert.equal(normalizeWebsite('example.com'), 'https://example.com')
+    assert.equal(officeAddressWithPostal('123 Main Street', '29601'), '123 Main Street 29601')
+    const saved = validateStep2({ ...office, yearsInPractice: '15+', website: 'example.com' })
+    assert.equal(saved.ok, true)
+    if (saved.ok) {
+      assert.equal(saved.value.yearsInPractice, 15)
+      assert.equal(saved.value.website, 'https://example.com')
+    }
+    const practice = 'We focus on the nervous system and how the body adapts.'
+    const gaps = gapsBeforeCard({
+      practiceApproach: practice,
+      heardAbout: 'Google',
+      techniques: 'Toggle',
+      usesNervousSystemScans: false,
+      yearsInPractice: '81 years',
+      officeAddress: '123 Main Street',
+      city: 'Greenville',
+      country: 'US',
+      website: 'example.com',
+      email: 'ada@example.com',
+      mobile: '(864) 555-0100',
+      plan: 'monthly',
+    })
+    assert.match(clientGapMessage(gaps), /Years in practice should be a whole number from 0 to 80/)
+    assert.equal(clientGapMessage(gaps).includes('Missing: Years in practice'), false)
+    const blank = gapsBeforeCard({
+      practiceApproach: '',
+      heardAbout: '',
+      techniques: '',
+      yearsInPractice: '',
+      officeAddress: '',
+      city: '',
+      country: 'US',
+      email: 'ada@example.com',
+      mobile: '(864) 555-0100',
+      plan: 'monthly',
+    })
+    assert.match(clientGapMessage(blank), /Missing: How you practice/)
   })
 })

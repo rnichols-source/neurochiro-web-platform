@@ -1,6 +1,9 @@
 import 'server-only'
 
-import { deliverApprovalNotices } from '@/lib/applications/approval-sms'
+import { CARD_STEP_PATH } from '@/lib/applications/apply-nav'
+import { deliverApprovalNotices, newCardText } from '@/lib/applications/approval-sms'
+import { resumeMagicLink } from '@/lib/applications/reminder-run'
+import { optedOutPhones } from '@/lib/applications/sms-opt-out'
 import type { StoredApplication } from '@/lib/applications/store'
 import { persistDecision, saveDoctorAlertPhone } from '@/lib/applications/store'
 import { sendApplicationEmail } from '@/lib/applications/notify'
@@ -11,7 +14,7 @@ import { readSmsConfig } from '@/lib/sms/config'
 import { quoSend } from '@/lib/sms/quo'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { enqueueDoctorNotification } from '@/lib/doctor-joined-notify'
-import { approvedWelcomeEmail } from '@/lib/applications/emails'
+import { approvedWelcomeEmail, newCardEmail } from '@/lib/applications/emails'
 import {
   canTextNumber,
   duplicateKey,
@@ -263,6 +266,16 @@ export async function finishDecision(input: {
     await writeDroppingMissing('doctor_applications', 'id', input.application.id, { payment_link_sent_at: now })
     if (input.application.smsConsent && input.application.mobileE164 && canTextNumber(input.application.mobileE164)) {
       await saveDoctorAlertPhone(input.application.doctorId, input.application.mobileE164, true, now)
+    }
+  }
+
+  if (decision.application?.status === 'needs_action' && decision.email?.html.includes('/doctor/apply?step=3')) {
+    const linked = await resumeMagicLink(input.application.email, CARD_STEP_PATH)
+    decision.email = newCardEmail(input.application.email, input.application.firstName, linked)
+    if (decision.sms) {
+      const stopped = await optedOutPhones([decision.sms.to])
+      if (stopped === 'unknown' || stopped.has(decision.sms.to)) decision.sms = null
+      else decision.sms = { to: decision.sms.to, body: newCardText(input.application.lastName, linked) }
     }
   }
 

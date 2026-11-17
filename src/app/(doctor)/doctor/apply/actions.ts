@@ -5,7 +5,8 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { currencyForAnswers, validateAnswers, validateStep1, validateStep2 } from '@/lib/applications/answers'
 import { applicationReturnUrl, cardElementsEnabled, createCardSetupIntent, createSetupCheckout, readPriceAmount } from '@/lib/applications/billing'
 import { chargeCopyFromLabel } from '@/lib/applications/charge-copy'
-import { gapsBeforeCard } from '@/lib/applications/checklist'
+import { clientGapMessage, gapsBeforeCard } from '@/lib/applications/checklist'
+import { ensureSignupDoctor } from '@/lib/applications/signup-doctor'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { currencyForCountry, planLabel, priceIdFor, type BillingCycle, type DoctorCurrency } from '@/lib/applications/prices'
 import { ensureDraftApplication, loadApplicationByDoctor, saveAnswers, saveDraftStep, savePlan } from '@/lib/applications/store'
@@ -30,7 +31,18 @@ async function requireDoctor() {
     .select('id, first_name, last_name, email, country, city')
     .eq('user_id', user.id)
     .maybeSingle()
-  if (!doctor) return { error: 'Your doctor profile is not ready yet.' as const }
+  if (!doctor) {
+    const repaired = await ensureSignupDoctor({
+      userId: user.id,
+      email: user.email || '',
+      name: typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '',
+      phone: typeof user.user_metadata?.phone === 'string' ? user.user_metadata.phone : '',
+    })
+    if (!repaired) return { error: 'Your doctor profile is not ready yet.' as const }
+    const again = await admin.from('doctors').select('id, first_name, last_name, email, country, city').eq('id', repaired.id).maybeSingle()
+    if (!again.data) return { error: 'Your doctor profile is not ready yet.' as const }
+    return { user, doctor: again.data, email: user.email || again.data.email || '' }
+  }
   return { user, doctor, email: user.email || doctor.email || '' }
 }
 
@@ -48,7 +60,7 @@ export async function plansForCountry(country: string): Promise<{ currency: Doct
       label: planLabel(currency, cycle, currencyMatches ? price?.unitAmount : null),
     }
   }))
-  return { currency, plans }
+  return { currency, plans: plans.filter((plan) => plan.available) }
 }
 
 async function keptReferral(requested: string | undefined, typedName: string | null | undefined, doctorId: string): Promise<string> {
@@ -165,7 +177,7 @@ export async function prepareCardSetup(input: {
     email: session.email,
     plan: input.plan,
   })
-  if (gaps.length > 0) return { error: `Missing: ${gaps.map((gap) => gap.label).join(', ')}.` }
+  if (gaps.length > 0) return { error: clientGapMessage(gaps) }
 
   const referralCode = await keptReferral(input.referralCode, input.referrerName, session.doctor.id)
   const saved = await saveAnswers(session.doctor.id, session.user.id, parsed.value, referralCode)

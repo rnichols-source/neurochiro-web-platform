@@ -1,8 +1,12 @@
 import 'server-only'
 
-import { paymentMethodFromSetupIntent, paymentMethodFromSetupSession } from './billing.ts'
+import { cancelUnpaidSubscription, paymentMethodFromSetupIntent, paymentMethodFromSetupSession, stripeBilling } from './billing.ts'
+import { approveApplication } from './decide.ts'
 import { pingApplicationDiscord } from './notify.ts'
 import { markCardOnFile } from './store.ts'
+import { finishDecision } from '@/lib/go-live/finish'
+
+type SavedCard = NonNullable<Awaited<ReturnType<typeof markCardOnFile>>>
 
 type SessionLike = { id?: string | null }
 
@@ -22,9 +26,7 @@ export async function fulfillDoctorApplicationSetup(session: SessionLike, expect
     confirmed: true,
   })
   if (!savedCard) return false
-  if (savedCard.notify) {
-    await pingApplicationDiscord({ ...savedCard.application.answers, cardOnFile: true })
-  }
+  await settleSavedCard(savedCard, saved.userId)
   return true
 }
 
@@ -44,8 +46,20 @@ export async function fulfillDoctorApplicationSetupIntent(setupIntentId: string,
     confirmed: true,
   })
   if (!savedCard) return false
+  await settleSavedCard(savedCard, saved.userId)
+  return true
+}
+
+async function settleSavedCard(savedCard: SavedCard, userId: string): Promise<void> {
   if (savedCard.notify) {
     await pingApplicationDiscord({ ...savedCard.application.answers, cardOnFile: true })
   }
-  return true
+  if (savedCard.cancelSubscriptionId) await cancelUnpaidSubscription(savedCard.cancelSubscriptionId)
+  if (!savedCard.recharge) return
+  const decision = await approveApplication(savedCard.application, stripeBilling(), new Date().toISOString(), '')
+  await finishDecision({
+    application: savedCard.application,
+    decision,
+    reviewerId: userId || null,
+  })
 }

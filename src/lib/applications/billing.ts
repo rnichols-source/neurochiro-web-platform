@@ -90,6 +90,7 @@ export function stripeBilling(): BillingPort {
         } catch (error) {
           console.error('[application] could not cancel a declined subscription', error instanceof Error ? error.name : 'error')
         }
+        return { ...result, hostedInvoiceUrl: null }
       }
       return result
     },
@@ -185,7 +186,7 @@ export async function createCardSetupIntent(input: {
   const intent = await stripe.setupIntents.create({
     customer: customerId,
     usage: 'off_session',
-    payment_method_types: ['card'],
+    automatic_payment_methods: { enabled: true },
     metadata: {
       type: 'doctor_application_setup',
       applicationId: input.applicationId,
@@ -299,4 +300,18 @@ export async function paymentMethodFromSetupIntent(setupIntentId: string): Promi
 
 export function applicationReturnUrl(): string {
   return `${siteUrl()}/doctor/apply/complete`
+}
+
+/** Cancels an incomplete subscription left by a failed approval. Leaves an active membership alone. */
+export async function cancelUnpaidSubscription(subscriptionId: string): Promise<void> {
+  if (!subscriptionId) return
+  try {
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    if (subscription.status === 'active' || subscription.status === 'trialing' || subscription.status === 'canceled') return
+    await stripe.subscriptions.cancel(subscriptionId, {}, { idempotencyKey: `doctor-card-replace-${subscriptionId}` })
+  } catch (error) {
+    const code = error && typeof error === 'object' && 'code' in error ? String(error.code) : ''
+    if (code === 'resource_missing') return
+    console.error('[application] could not cancel an unpaid subscription', error instanceof Error ? error.name : 'error')
+  }
 }

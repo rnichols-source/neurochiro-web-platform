@@ -185,9 +185,11 @@ function GetStartedInner({
     { icon: Zap, label: "Contract Lab for reviewing offers" },
   ];
 
+  const inputClass = "w-full min-h-11 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-base focus:outline-none focus:border-neuro-orange"
+
   return (
-    <div className="min-h-dvh bg-neuro-cream pt-24 pb-20">
-      <div className="max-w-md mx-auto px-6">
+    <div className="min-h-dvh overflow-x-hidden bg-neuro-cream pt-24 pb-32">
+      <div className="max-w-md mx-auto px-4 sm:px-6">
         {/* Contextual Banners */}
         {paramChiroscore && (
           <div className="bg-neuro-navy rounded-2xl p-4 mb-4 flex items-center gap-3">
@@ -229,9 +231,16 @@ function GetStartedInner({
         </div>
 
         {doctorFlow ? (
-          <p className="text-sm text-neuro-navy/70 mb-6">
-            Prices in {currency}. {knownPlanLabel(currency, "monthly")} or {knownPlanLabel(currency, "annual")}, per office.
-          </p>
+          <>
+            <p className="text-base text-neuro-navy/70 mb-4">
+              Prices in {currency}. {knownPlanLabel(currency, "monthly")} or {knownPlanLabel(currency, "annual")}, per office.
+            </p>
+            <ul className="mb-6 space-y-2 text-base text-neuro-navy">
+              <li>Patients searching for nervous system chiropractors near them find you.</li>
+              <li>Patient request alerts come by text and by email.</li>
+              <li>You are only charged if you are approved.</li>
+            </ul>
+          </>
         ) : null}
 
         {doctorFlow ? null : (
@@ -253,30 +262,31 @@ function GetStartedInner({
 
         {/* Form */}
         {referredBy ? <p className="text-center text-sm font-bold text-neuro-navy">Referred by {referredBy}</p> : null}
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-neuro-orange p-8 shadow-lg space-y-4">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-neuro-orange p-4 sm:p-8 shadow-lg space-y-4">
           {/* Role selector */}
           <div className="grid grid-cols-2 gap-3">
             <button type="button" onClick={() => setRole("doctor")}
-              className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "doctor" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
+              className={`min-h-11 py-3 rounded-xl text-base font-bold transition-all border-2 ${role === "doctor" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
               Doctor
             </button>
             <button type="button" onClick={() => setRole("student")}
-              className={`py-3 rounded-xl text-sm font-bold transition-all border-2 ${role === "student" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
+              className={`min-h-11 py-3 rounded-xl text-base font-bold transition-all border-2 ${role === "student" ? "bg-neuro-orange text-white border-neuro-orange" : "bg-white text-gray-500 border-gray-200"}`}>
               Student
             </button>
           </div>
 
           <input type="text" required value={name} onChange={(e) => setName(e.target.value)}
+            autoComplete="name"
             placeholder="Full name"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+            className={inputClass} />
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
             inputMode="email" autoComplete="email"
             placeholder="Email address"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+            className={inputClass} />
           <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)}
             inputMode="tel" autoComplete="tel"
             placeholder="Mobile number"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+            className={inputClass} />
           {doctorFlow ? (
             <>
               <label className="block text-sm font-bold text-neuro-navy">
@@ -285,7 +295,7 @@ function GetStartedInner({
                   required
                   value={country}
                   onChange={(event) => { setCountryTouched(true); setCountry(event.target.value); }}
-                  className="mt-1 w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange"
+                  className={inputClass}
                 >
                   {APPLICATION_COUNTRIES.map((item) => (
                     <option key={item.code} value={item.code}>{item.name}</option>
@@ -293,7 +303,7 @@ function GetStartedInner({
                 </select>
               </label>
               <p className="text-sm text-neuro-navy/80">Currency: {currency}. It updates as soon as you choose a country.</p>
-              <label className="flex items-start gap-3 text-sm text-neuro-navy">
+              <label className="flex min-h-11 items-start gap-3 text-base text-neuro-navy">
                 <input
                   type="checkbox"
                   className="mt-1 h-5 w-5"
@@ -307,25 +317,27 @@ function GetStartedInner({
           <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
             autoComplete="new-password"
             placeholder="Create password (6+ characters)"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-neuro-orange" />
+            className={inputClass} />
 
           {/* Honeypot */}
           <div className="absolute -left-[9999px]" aria-hidden="true">
             <input type="text" name="website_url" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
           </div>
 
-          {error && <p className="text-red-500 text-sm font-medium">{error}</p>}
-          {accountExists && doctorFlow ? (
-            <Link href={continueAfterAccount(false, continuePath)} className="block text-center text-sm font-bold text-neuro-orange hover:underline">
+          {error && <p role="alert" className="text-base text-red-500 font-medium">{error}</p>}
+          {(accountExists || error.includes("Log in")) && doctorFlow ? (
+            <Link href={continueAfterAccount(false, continuePath)} className="flex min-h-11 items-center justify-center text-center text-base font-bold text-neuro-orange hover:underline">
               Log in and continue your application
             </Link>
           ) : null}
 
+          <div className="fixed inset-x-0 bottom-0 z-20 border-t border-black/10 bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <button type="submit" disabled={loading}
-            className="w-full min-h-11 py-4 bg-neuro-orange text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
+            className="mx-auto flex min-h-11 w-full max-w-md py-4 bg-neuro-orange text-white text-base font-bold rounded-xl items-center justify-center gap-2 hover:bg-neuro-orange/90 transition-colors disabled:opacity-50">
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
             {loading ? "Saving…" : doctorFlow ? "Continue" : role === "doctor" ? "Join — $99/mo" : "Join Free"}
           </button>
+          </div>
 
           <p className="text-center text-xs text-gray-400">
             {doctorFlow

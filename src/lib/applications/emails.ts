@@ -1,5 +1,6 @@
 import { escapeHtml } from '../students/html.ts'
 import { PORTAL_LOGIN_URL, REFERRAL_URL, REQUESTS_URL } from '../go-live/plan.ts'
+import { safeApplicationUrl } from './apply-nav.ts'
 
 export const ONBOARDING_CALL_URL = 'https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call'
 
@@ -71,9 +72,24 @@ export function approvedWelcomeEmail(input: ApprovedWelcome): Mail {
       <p>Your profile is live.</p>
       <p><a href="${escapeHtml(profile)}">${escapeHtml(profile)}</a></p>
       <p>${started}${receiptHtml}</p>
-      <p>New community member requests arrive by text and by email as soon as someone asks for your office. Reply to that text or email. Each request includes a one-click link: they came in, or they did not come in. The same list is in your portal: <a href="${escapeHtml(REQUESTS_URL)}">community member requests</a>.</p>
+      <p>New patient requests arrive by text and by email as soon as someone asks for your office. Reply to that text or email. Each request includes a one-click link: they came in, or they did not come in. The same list is in your portal: <a href="${escapeHtml(REQUESTS_URL)}">patient requests</a>.</p>
       <p>The next step is your onboarding call. <a href="${escapeHtml(ONBOARDING_CALL_URL)}">Pick a time with Dr. Ray</a>.</p>
       <p>When a colleague joins from your link, you get a free month. <a href="${escapeHtml(REFERRAL_URL)}">Your referral program</a>.</p>
+      <p>Dr. Ray</p>
+    `,
+  }
+}
+
+export function newCardEmail(to: string, firstName: string, cardUrl: string): Mail {
+  const name = escapeHtml(firstName || 'there')
+  const href = safeApplicationUrl(cardUrl)
+  return {
+    to,
+    subject: 'Save a new card for your NeuroChiro application',
+    html: `
+      <h1>Dr. ${name}, the card did not go through.</h1>
+      <p>Nothing was charged. Save a new card in your currency and the application goes back to review. You're only charged once approved.</p>
+      ${button(href, 'Update your card')}
       <p>Dr. Ray</p>
     `,
   }

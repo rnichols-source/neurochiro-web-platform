@@ -1,3 +1,4 @@
+import { safeApplicationUrl } from './apply-nav.ts'
 import { ONBOARDING_CALL_URL } from './emails.ts'
 import { canTextNumber, safePayUrl } from '../go-live/plan.ts'
 import { last4 } from '../sms/phone.ts'
@@ -69,6 +70,32 @@ export function paymentLinkText(lastName: string, payUrl: string): string {
     body = build(name || 'there')
   }
   return body
+}
+
+export function newCardText(lastName: string, cardUrl: string): string {
+  const url = safeApplicationUrl(cardUrl)
+  const cleaned = (lastName || 'there').replace(/\s+/g, ' ').trim() || 'there'
+  const build = (who: string) =>
+    `Dr. ${who}, your NeuroChiro card didn't go through. Nothing was charged. Update it: ${url} Reply STOP to opt out.`
+  let name = cleaned
+  let body = build(name)
+  while (body.length > TEXT_LIMIT && name.length > 1) {
+    name = name.slice(0, -1).trim()
+    body = build(name || 'there')
+  }
+  return body
+}
+
+export function newCardSmsFor(input: {
+  smsConsent: boolean
+  mobileE164: string | null
+  lastName: string
+  cardUrl: string
+}): ApprovalSms | null {
+  if (input.smsConsent !== true) return null
+  const to = input.mobileE164 || ''
+  if (!E164.test(to) || !canTextNumber(to)) return null
+  return { to, body: newCardText(input.lastName, input.cardUrl) }
 }
 
 export function approvalSmsFor(input: {

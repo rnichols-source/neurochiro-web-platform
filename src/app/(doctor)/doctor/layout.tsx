@@ -56,12 +56,12 @@ export default async function DoctorLayout({ children }: { children: React.React
   if (applicationGate === 'finish' && path && !applying) redirect('/doctor/apply');
 
   if (applying) {
-    const terminal = applicationGate && applicationGate !== 'finish';
     const completing = path === '/doctor/apply/complete' || path.startsWith('/doctor/apply/complete/');
-    if (terminal && !completing) redirect('/doctor/dashboard');
+    const canStay = !applicationGate || applicationGate === 'finish' || applicationGate === 'needs_action';
+    if (!canStay && !completing) redirect('/doctor/dashboard');
     return (
       <AuthProvider>
-        <div className="min-h-dvh bg-neuro-cream" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
+        <div className="min-h-dvh overflow-x-hidden bg-neuro-cream" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
           <PortalProvider value={ctx}>
             {children}
           </PortalProvider>

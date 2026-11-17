@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { pinDoctor } from '@/lib/go-live/pin'
 import { isMissingColumn } from '@/lib/leads/schema'
 import { applicationGaps } from './checklist.ts'
-import { applicationStatusAfterCard } from './status.ts'
+import { applicationStatusAfterCard, shouldRechargeAfterNewCard } from './status.ts'
 import { applicationStopLabel, type ApplicationAnswers } from './answers.ts'
 import type { AdminApplicationRow } from './admin-row.ts'
 import { doctorProfileUrl } from './approval-sms.ts'
@@ -406,55 +406,69 @@ export async function markCardOnFile(input: {
   doctorId: string
   /** True only after Stripe reports the SetupIntent status is succeeded. */
   confirmed: boolean
-}): Promise<{ application: StoredApplication; notify: boolean } | null> {
+}): Promise<{ application: StoredApplication; notify: boolean; recharge: boolean; cancelSubscriptionId: string | null } | null> {
   const client = db()
   const current = await client.from('doctor_applications').select('*').eq('id', input.applicationId).maybeSingle()
   const currentRow = one(current)
   if (current.error || !currentRow) return null
   if (text(currentRow.user_id) && input.userId && text(currentRow.user_id) !== input.userId) return null
-  const terminal = currentRow.status === 'approved' || currentRow.status === 'declined'
+  const previousStatus = text(currentRow.status) || 'draft'
+  const terminal = previousStatus === 'approved' || previousStatus === 'declined'
   const alreadySaved = currentRow.card_on_file === true
   const paymentReceived = typeof currentRow.payment_received_at === 'string' && currentRow.payment_received_at.length > 0
+  const subscriptionId = text(currentRow.stripe_subscription_id) || null
   const nextStatus = applicationStatusAfterCard({
     setupStatus: input.confirmed ? 'succeeded' : null,
-    currentStatus: text(currentRow.status) || 'draft',
+    currentStatus: previousStatus,
     paymentReceived,
   })
   if (!input.confirmed || !nextStatus) return null
+  const sameMethod = text(currentRow.stripe_payment_method_id) === input.paymentMethodId
+  if (alreadySaved && sameMethod && previousStatus === nextStatus && previousStatus !== 'needs_action') {
+    const application = await loadApplicationById(input.applicationId)
+    if (!application) return null
+    return { application, notify: false, recharge: false, cancelSubscriptionId: null }
+  }
   const notify = !alreadySaved && !terminal && nextStatus === 'under_review'
-  if (!alreadySaved) {
-    const updated = await client.from('doctor_applications').update({
-      stripe_customer_id: input.customerId,
-      stripe_payment_method_id: input.paymentMethodId,
-      stripe_setup_session_id: input.sessionId,
-      card_on_file: true,
-      status: nextStatus,
-      updated_at: new Date().toISOString(),
-    }).eq('id', input.applicationId)
-    if (updated.error) return null
-    if (input.userId) {
-      await client.from('profiles').update({ stripe_customer_id: input.customerId }).eq('id', input.userId)
-    }
-    if (input.doctorId) {
-      const doctorPatch: Record<string, string> = { stripe_customer_id: input.customerId }
-      const city = text(currentRow.city)
-      const state = text(currentRow.state)
-      const country = text(currentRow.country)
-      const address = text(currentRow.office_address)
-      const website = text(currentRow.website)
-      const instagram = text(currentRow.instagram)
-      if (city) doctorPatch.city = city
-      if (state) doctorPatch.state = state
-      if (country) doctorPatch.country = country === 'OTHER' ? 'US' : country
-      if (address) doctorPatch.address = address
-      if (website) doctorPatch.website_url = website
-      if (instagram) doctorPatch.instagram_url = `https://www.instagram.com/${instagram}/`
-      await client.from('doctors').update(doctorPatch).eq('id', input.doctorId)
-    }
+  const recharge = shouldRechargeAfterNewCard({ previousStatus, paymentReceived, subscriptionId })
+  const cancelSubscriptionId = previousStatus === 'needs_action' && subscriptionId && !paymentReceived ? subscriptionId : null
+  const patch: Record<string, unknown> = {
+    stripe_customer_id: input.customerId,
+    stripe_payment_method_id: input.paymentMethodId,
+    stripe_setup_session_id: input.sessionId,
+    card_on_file: true,
+    status: nextStatus,
+    updated_at: new Date().toISOString(),
+  }
+  if (previousStatus === 'needs_action') patch.stripe_subscription_id = null
+  // The old create call used this attempt's idempotency key. A fresh key lets the next approval start a new subscription.
+  if (cancelSubscriptionId) {
+    patch.charge_attempt = (typeof currentRow.charge_attempt === 'number' ? currentRow.charge_attempt : 0) + 1
+  }
+  const updated = await client.from('doctor_applications').update(patch).eq('id', input.applicationId)
+  if (updated.error) return null
+  if (input.userId) {
+    await client.from('profiles').update({ stripe_customer_id: input.customerId }).eq('id', input.userId)
+  }
+  if (input.doctorId && !alreadySaved) {
+    const doctorPatch: Record<string, string> = { stripe_customer_id: input.customerId }
+    const city = text(currentRow.city)
+    const state = text(currentRow.state)
+    const country = text(currentRow.country)
+    const address = text(currentRow.office_address)
+    const website = text(currentRow.website)
+    const instagram = text(currentRow.instagram)
+    if (city) doctorPatch.city = city
+    if (state) doctorPatch.state = state
+    if (country) doctorPatch.country = country === 'OTHER' ? 'US' : country
+    if (address) doctorPatch.address = address
+    if (website) doctorPatch.website_url = website
+    if (instagram) doctorPatch.instagram_url = `https://www.instagram.com/${instagram}/`
+    await client.from('doctors').update(doctorPatch).eq('id', input.doctorId)
   }
   const application = await loadApplicationById(input.applicationId)
   if (!application) return null
-  return { application, notify }
+  return { application, notify, recharge, cancelSubscriptionId }
 }
 
 export async function persistDecision(input: {

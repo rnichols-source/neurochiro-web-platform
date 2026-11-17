@@ -49,6 +49,18 @@ export function priceIdFor(
   return value.startsWith('price_') ? value : ''
 }
 
+/** Env names with no Stripe price id. The plan option is hidden when one of these is missing. */
+export function unconfiguredDoctorPriceEnvs(env: NodeJS.ProcessEnv = process.env): string[] {
+  const missing: string[] = []
+  for (const currency of Object.keys(ENV_KEY) as DoctorCurrency[]) {
+    for (const cycle of ['monthly', 'annual'] as const) {
+      const name = priceEnvName(currency, cycle)
+      if (!priceIdFor(currency, cycle, env)) missing.push(name)
+    }
+  }
+  return missing
+}
+
 export function knownPlanLabel(currency: DoctorCurrency, cycle: BillingCycle): string {
   return KNOWN_LABELS[currency]?.[cycle] || `${cycle === 'monthly' ? 'Monthly' : 'Annual'} (${currency})`
 }

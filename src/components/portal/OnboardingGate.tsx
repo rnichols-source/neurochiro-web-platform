@@ -8,17 +8,24 @@ import { DOCTOR_PRO_FEATURES_MINIMAL } from '@/lib/membership-value';
 import { createClient } from '@/lib/supabase';
 import { firstName } from '@/lib/portal/greeting';
 import type { ApplicationGate } from '@/lib/applications/gate-kind';
+import { DR_RAY_REVIEW_STEPS, DR_RAY_SIGN_OFF } from '@/lib/applications/next-steps';
 
 const CALENDLY_URL = 'https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call';
 
-function ReviewScreen({ title, body, action }: { title: string; body: string; action?: { href: string; label: string } }) {
+function ReviewScreen({ title, body, steps, signOff, action }: { title: string; body?: string; steps?: readonly string[]; signOff?: string; action?: { href: string; label: string } }) {
   return (
-    <div className="onboarding-gate min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
+    <div className="onboarding-gate min-h-dvh overflow-x-hidden bg-[#0F1A24] flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full text-center">
         <h1 className="text-2xl font-bold text-white mb-3">{title}</h1>
-        <p className="text-white/70 leading-relaxed mb-6">{body}</p>
+        {body ? <p className="text-base text-white/70 leading-relaxed mb-6">{body}</p> : null}
+        {steps ? (
+          <ul className="mb-6 space-y-3 text-left text-base text-white/80">
+            {steps.map((step) => <li key={step}>{step}</li>)}
+          </ul>
+        ) : null}
+        {signOff ? <p className="mb-6 text-base font-bold text-white">{signOff}</p> : null}
         {action ? (
-          <Link href={action.href} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-neuro-orange px-5 font-bold text-white">
+          <Link href={action.href} className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-neuro-orange px-5 text-base font-bold text-white">
             {action.label}
           </Link>
         ) : null}
@@ -57,21 +64,24 @@ export default function OnboardingGate({
     window.location.replace('/doctor/apply');
   }, [applicationGate, onApply]);
 
-  if (applicationGate === 'finish' && onApply) return children;
+  if ((applicationGate === 'finish' || applicationGate === 'needs_action') && onApply) return children;
   if (applicationGate === 'finish') return null;
   if (applicationGate === 'review') {
     return (
       <ReviewScreen
         title="Application under review"
-        body="Raymond has your application and the card on file. Nothing has been charged. Your listing stays off the directory until he approves it."
+        body="Your card is saved and you have not been charged. Your listing stays off the directory until you are approved."
+        steps={DR_RAY_REVIEW_STEPS}
+        signOff={DR_RAY_SIGN_OFF}
       />
     );
   }
   if (applicationGate === 'needs_action') {
     return (
       <ReviewScreen
-        title="Confirm your card"
-        body="Your application is approved, and your bank needs one more confirmation. Use the Stripe link in your email. The onboarding call link is in that email too."
+        title="Update your card"
+        body="The card didn't go through, so nothing was charged. Save a new card in your currency. After that, Dr. Ray reviews the application again. You're only charged once approved."
+        action={{ href: '/doctor/apply?step=3&resume=1', label: 'Update your card' }}
       />
     );
   }

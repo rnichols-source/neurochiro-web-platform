@@ -19,7 +19,8 @@ export default async function ApplyPage({
   const state = await loadApplyState()
   if (!state.enabled) redirect('/doctor/dashboard')
   if ('error' in state) redirect(loginPathWithReturn('/doctor/apply'))
-  if (state.application && (state.application.cardOnFile || state.application.status !== 'draft')) {
+  const updatingCard = state.application?.status === 'needs_action'
+  if (state.application && !updatingCard && (state.application.cardOnFile || state.application.status !== 'draft')) {
     redirect('/doctor/dashboard')
   }
 

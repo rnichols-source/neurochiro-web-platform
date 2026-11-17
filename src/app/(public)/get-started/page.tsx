@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
+import { ensureSignupDoctor } from '@/lib/applications/signup-doctor'
 import { loadApplicationGate } from '@/lib/applications/gate'
 import { referrerLabelForSlug } from '@/lib/member-referrals/db'
 import { MEMBER_REF_COOKIE, persistedRef, withReferralQuery } from '@/lib/member-referrals/logic'
@@ -29,8 +30,15 @@ export default async function GetStartedPage({
       if (role === 'doctor' || role.startsWith('doctor')) {
         const admin = createAdminClient()
         const { data: doctor } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-        if (doctor?.id) {
-          const gate = await loadApplicationGate(doctor.id)
+        const doctorId = doctor?.id || (await ensureSignupDoctor({
+          userId: user.id,
+          email: user.email || '',
+          name: typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '',
+          phone: typeof user.user_metadata?.phone === 'string' ? user.user_metadata.phone : '',
+          referralCode: referralSlug,
+        }))?.id
+        if (doctorId) {
+          const gate = await loadApplicationGate(doctorId)
           redirect(gate === 'finish' ? withReferralQuery('/doctor/apply', referralSlug) : '/doctor/dashboard')
         }
       }
