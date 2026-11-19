@@ -12,11 +12,19 @@ const RULES: Record<string, Rule> = {
   NZ: { code: '64', national: (n) => /^2\d{7,9}$/.test(n) },
   AE: { code: '971', national: (n) => /^5\d{8}$/.test(n) },
   IE: { code: '353', national: (n) => /^8\d{8}$/.test(n) },
+  IN: { code: '91', national: (n) => /^[6-9]\d{9}$/.test(n) },
   DE: { code: '49', national: (n) => /^1[567]\d{8,10}$/.test(n) },
   FR: { code: '33', national: (n) => /^[67]\d{8}$/.test(n) },
   NL: { code: '31', national: (n) => /^6\d{8}$/.test(n) },
   ES: { code: '34', national: (n) => /^[67]\d{8}$/.test(n) },
   IT: { code: '39', national: (n) => /^3\d{8,9}$/.test(n) },
+}
+
+/** Helper under the mobile field. Listed countries vs Another country. */
+export function applicationMobileHelper(country: string): string {
+  return country.trim().toUpperCase() === 'OTHER'
+    ? 'Start with + and the country code.'
+    : 'Use a mobile number in the country you selected.'
 }
 
 function regionOf(country: string): string {

@@ -112,6 +112,12 @@ describe('application steps', () => {
     assert.equal(formStepFromRequest(ready, { step: '2', part: '2' }), 2)
     assert.equal(formStepFromRequest(ready, { step: '3' }), 3)
     assert.equal(formStepFromRequest(ready, {}), 3)
+    const officeNoCity = { ...office, city: '', mobile: '' }
+    assert.equal(firstUnfinishedStep({ ...started, ...officeNoCity }), 2)
+    assert.equal(applicationResumePath({ ...started, ...officeNoCity }), '/doctor/apply?step=2&part=2&resume=1')
+    const officeNoMobile = { ...office, mobile: '', smsConsent: false }
+    assert.equal(firstUnfinishedStep({ ...started, ...officeNoMobile }), 3)
+    assert.equal(applicationResumePath({ ...started, ...officeNoMobile }), '/doctor/apply?step=3&resume=1')
     assert.equal(applyStepPath('/doctor/apply', 'step=3&resume=1', 2), '/doctor/apply?step=2&resume=1&part=2')
     assert.equal(applyStepPath('/doctor/apply', '?step=2&part=2', 1), '/doctor/apply?step=2')
   })
