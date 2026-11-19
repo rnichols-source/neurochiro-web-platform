@@ -12,9 +12,10 @@ import {
 } from '@/lib/applications/answers'
 import { chargeCopyFromLabel } from '@/lib/applications/charge-copy'
 import { clientGapMessage, gapsBeforeCard, type ApplicationGap } from '@/lib/applications/checklist'
+import { applicationSmsConsentError, APPLICATION_SMS_CONSENT } from '@/lib/applications/consent'
 import { APPLICATION_COUNTRIES } from '@/lib/applications/countries'
 import { flowStepLabel, type ApplicationFlowStep } from '@/lib/applications/flow-steps'
-import { toApplicationE164 } from '@/lib/applications/phone'
+import { applicationMobileHelper, toApplicationE164 } from '@/lib/applications/phone'
 import type { BillingCycle, DoctorCurrency } from '@/lib/applications/prices'
 import { plansForCountry, prepareCardSetup, saveApplyStep, type PlanChoice } from './actions'
 
@@ -225,6 +226,12 @@ export function ApplyForm({
       setLoading(false)
       return
     }
+    const consentError = applicationSmsConsentError(values.smsConsent)
+    if (consentError) {
+      showError(consentError)
+      setLoading(false)
+      return
+    }
     const result = await prepareCardSetup({
       plan,
       referralCode,
@@ -397,21 +404,35 @@ export function ApplyForm({
             )}
           </fieldset>
           {selectedPlan ? <p className="rounded-xl bg-white px-3 py-3 text-base font-bold text-neuro-navy">{chargeCopy}</p> : null}
-          {!values.mobile ? (
-            <label className="block text-base font-bold">
-              Mobile number
-              <input
-                required
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                value={values.mobile}
-                onChange={(event) => set('mobile', event.target.value)}
-                className={fieldClass}
-                placeholder={values.country === 'OTHER' ? '+ country code' : ''}
-              />
-            </label>
-          ) : null}
+          <label className="block text-base font-bold">
+            Mobile number
+            <input
+              required
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={values.mobile}
+              onChange={(event) => set('mobile', event.target.value)}
+              className={fieldClass}
+              placeholder={values.country === 'OTHER' ? '+ country code' : ''}
+            />
+            <span className="mt-1 block text-sm font-normal text-neuro-navy/70">
+              {applicationMobileHelper(values.country)}
+            </span>
+          </label>
+          <label className="flex min-h-11 items-start gap-3 text-base text-neuro-navy">
+            <input
+              type="checkbox"
+              required
+              className="mt-1 h-5 w-5 shrink-0"
+              checked={values.smsConsent}
+              onChange={(event) => set('smsConsent', event.target.checked)}
+            />
+            <span>
+              <span className="font-bold">Required. </span>
+              {APPLICATION_SMS_CONSENT}
+            </span>
+          </label>
           {clientSecret ? (
             <CardSetup
               publishableKey={publishableKey}

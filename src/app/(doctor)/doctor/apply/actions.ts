@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { currencyForAnswers, validateAnswers, validateStep1, validateStep2 } from '@/lib/applications/answers'
+import { applicationSmsConsentError } from '@/lib/applications/consent'
 import { applicationReturnUrl, cardElementsEnabled, createCardSetupIntent, createSetupCheckout, readPriceAmount } from '@/lib/applications/billing'
 import { chargeCopyFromLabel } from '@/lib/applications/charge-copy'
 import { clientGapMessage, gapsBeforeCard } from '@/lib/applications/checklist'
@@ -178,6 +179,8 @@ export async function prepareCardSetup(input: {
     plan: input.plan,
   })
   if (gaps.length > 0) return { error: clientGapMessage(gaps) }
+  const consentError = applicationSmsConsentError(source.smsConsent)
+  if (consentError) return { error: consentError }
 
   const referralCode = await keptReferral(input.referralCode, input.referrerName, session.doctor.id)
   const saved = await saveAnswers(session.doctor.id, session.user.id, parsed.value, referralCode)
