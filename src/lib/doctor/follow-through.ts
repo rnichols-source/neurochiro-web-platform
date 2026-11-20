@@ -6,6 +6,39 @@ export type FollowRow = {
   recommendedAt: string
   openedAt: string | null
   lastTickAt: string | null
+  profileId?: string | null
+  email?: string | null
+}
+
+export type RecommendChannel = 'assign' | 'invite' | 'email_steps'
+
+/** One tap sends an in-app plan when they have an account, otherwise the email they already shared. */
+export function recommendDelivery(input: {
+  profileId: string | null
+  email: string | null
+  kind: 'library' | 'custom' | 'new'
+}): { ok: true; channel: RecommendChannel } | { ok: false; error: string } {
+  const email = (input.email || '').trim()
+  if (input.profileId) return { ok: true, channel: 'assign' }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: 'They did not share an email, so the plan cannot be sent.' }
+  }
+  if (input.kind === 'library') return { ok: true, channel: 'invite' }
+  return { ok: true, channel: 'email_steps' }
+}
+
+export function followLabelForPerson(
+  person: { profileId?: string | null; email?: string | null },
+  rows: FollowRow[],
+  now: Date,
+  timeZone: string,
+): string | null {
+  const email = (person.email || '').trim().toLowerCase()
+  const match = rows.find((row) => {
+    if (person.profileId && row.profileId === person.profileId) return true
+    return Boolean(email) && (row.email || '').trim().toLowerCase() === email
+  })
+  return match ? followStatusLabel(match, now, timeZone) : null
 }
 
 export type FollowCounts = {

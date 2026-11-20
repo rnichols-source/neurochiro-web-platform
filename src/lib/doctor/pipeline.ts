@@ -65,6 +65,42 @@ export function stageFromLegacy(stage: string | null | undefined): string {
   return 'requested'
 }
 
+export const PIPELINE_UPDATE_NEEDED = 'That step needs the patient pipeline update. It has not been applied on the database yet.'
+
+export type StageMirror = 'none' | 'lead' | 'contact' | 'visit_seen' | 'visit_closed'
+
+/**
+ * What a stage tap is allowed to write.
+ * Scheduled, Started care, and close reasons are not written onto a visit
+ * until the pipeline table exists, so a failed save cannot mark the visit seen.
+ */
+export function stageWritePlan(input: {
+  source: 'visit' | 'lead' | 'contact_request'
+  stage: PipelineStage
+  pipelineReady: boolean
+}): { ok: true; mirror: StageMirror; message: string } | { ok: false; error: string; mirror: 'none' } {
+  const leadStage = input.source === 'lead' ? legacyLeadStage(input.stage) : null
+  const contactOk = input.source === 'contact_request' && (input.stage === 'contacted' || input.stage === 'scheduled' || input.stage === 'started_care')
+  const visitClose = input.source === 'visit' && (input.stage === 'not_a_fit' || input.stage === 'no_answer' || input.stage === 'went_elsewhere')
+  if (input.pipelineReady) {
+    if (leadStage) return { ok: true, mirror: 'lead', message: 'Saved.' }
+    if (contactOk) return { ok: true, mirror: 'contact', message: 'Saved.' }
+    if (visitClose) return { ok: true, mirror: 'visit_closed', message: 'Saved.' }
+    if (input.source === 'visit') return { ok: true, mirror: 'visit_seen', message: 'Saved.' }
+    return { ok: true, mirror: 'none', message: 'Saved.' }
+  }
+  if (leadStage) {
+    return { ok: true, mirror: 'lead', message: 'Saved on the request. Dated history starts after the pipeline update.' }
+  }
+  if (contactOk) {
+    return { ok: true, mirror: 'contact', message: 'Saved on the request. Dated history starts after the pipeline update.' }
+  }
+  if (input.source === 'visit' && input.stage === 'contacted') {
+    return { ok: true, mirror: 'visit_seen', message: 'Marked contacted. Scheduled and Started care save after the pipeline update.' }
+  }
+  return { ok: false, error: PIPELINE_UPDATE_NEEDED, mirror: 'none' }
+}
+
 /** leads.stage check allows only these four. Close reasons stay on the pipeline table. */
 export function legacyLeadStage(stage: PipelineStage): 'new' | 'contacted' | 'scheduled' | 'converted' | null {
   if (stage === 'requested') return 'new'

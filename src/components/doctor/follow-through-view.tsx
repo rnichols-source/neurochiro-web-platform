@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { nudgeHomePlan } from '@/lib/doctor/pipeline-actions'
 import { followFlags, followStatusLabel, type FollowCounts, type FollowRow } from '@/lib/doctor/follow-through'
 
@@ -25,7 +27,8 @@ export function FollowThroughView({
   timeZone: string
 }) {
   const now = new Date(nowIso)
-  const [filter, setFilter] = useState<FilterId>('recommended')
+  const router = useRouter()
+  const [filter, setFilter] = useState<FilterId>(counts.slipping > 0 ? 'slipping' : 'recommended')
   const [note, setNote] = useState('')
   const [pending, start] = useTransition()
   const numbers: Record<FilterId, number> = {
@@ -44,9 +47,9 @@ export function FollowThroughView({
 
   return (
     <section className="mt-4 rounded-[22px] bg-white p-4">
-      <h2 className="dp-ui text-[18px] font-extrabold text-[#15202B]">Follow-through</h2>
-      <p className="mt-1 text-[14px] text-[#5b6773]">Who you recommended a home plan to, and who marked exercises done this week.</p>
-      <div className="mt-3 flex gap-2 overflow-x-auto">
+      <h2 className="dp-ui text-[18px] font-extrabold text-[#15202B]">Who is following the plan</h2>
+      <p className="mt-1 text-[14px] text-[#5b6773]">Send a plan from People. This page shows who opened it, who did exercises this week, and who needs a nudge.</p>
+      <div className="mt-3 flex flex-wrap gap-2">
         {FILTERS.map((item) => {
           const on = filter === item.id
           return (
@@ -56,7 +59,9 @@ export function FollowThroughView({
           )
         })}
       </div>
-      {shown.length === 0 ? <p className="mt-4 text-[14px] text-[#5b6773]">No one in this group yet.</p> : (
+      {shown.length === 0 ? (
+        <p className="mt-4 text-[14px] text-[#5b6773]">No one here yet. <Link href="/doctor/people" className="font-extrabold text-[#0A6159] underline">Open People and send a home plan.</Link></p>
+      ) : (
         <ul className="mt-3 divide-y divide-[#ECEAE5]">
           {shown.map((row) => (
             <li key={row.id} className="flex flex-wrap items-center gap-3 py-3">
@@ -71,6 +76,7 @@ export function FollowThroughView({
                   onClick={() => start(async () => {
                     const result = await nudgeHomePlan(row.assignmentId || '')
                     setNote(result.ok ? (result.message || 'Nudge sent.') : result.error)
+                    if (result.ok) router.refresh()
                   })}
                   className="dp-ui inline-flex h-11 items-center rounded-xl bg-[#0E857A] px-4 text-[14px] font-extrabold text-white"
                 >

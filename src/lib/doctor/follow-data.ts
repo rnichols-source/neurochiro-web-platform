@@ -43,9 +43,9 @@ export async function loadFollowThrough(doctorId: string, now = new Date(), time
   }
   const profileIds = [...new Set(assignmentRows.map((row: { profile_id?: string | null }) => row.profile_id).filter(Boolean))] as string[]
   const profiles = profileIds.length
-    ? await admin.from('profiles').select('id, full_name').in('id', profileIds)
+    ? await admin.from('profiles').select('id, full_name, email').in('id', profileIds)
     : { data: [] }
-  const names = new Map((profiles.data || []).map((row: { id: string; full_name?: string | null }) => [row.id, (row.full_name || '').trim()]))
+  const names = new Map<string, { name: string; email: string | null }>((profiles.data || []).map((row: { id: string; full_name?: string | null; email?: string | null }) => [row.id, { name: (row.full_name || '').trim(), email: row.email || null }]))
   const setIds = assignmentRows.map((row: { set_id?: string | null }) => row.set_id).filter(Boolean)
   const sets = setIds.length
     ? await admin.from('community_exercise_sets').select('id, title').in('id', setIds)
@@ -53,15 +53,20 @@ export async function loadFollowThrough(doctorId: string, now = new Date(), time
   const setNames = new Map((sets.data || []).map((row: { id: string; title: string }) => [row.id, row.title]))
   const plans = libraryPlans()
   const claimed = new Set((invites.data || []).filter((row: { claimed_profile_id?: string | null; plan_slug?: string | null }) => row.claimed_profile_id).map((row: { claimed_profile_id: string; plan_slug?: string | null }) => `${row.claimed_profile_id}:${row.plan_slug || ''}`))
-  const rows: FollowRow[] = assignmentRows.map((row: Record<string, string | null>) => ({
-    id: `assignment-${row.id}`,
-    name: names.get(String(row.profile_id)) || 'Patient',
-    plan: (row.library_plan_slug ? planBySlug(plans, row.library_plan_slug)?.name : null) || setNames.get(String(row.set_id || '')) || 'Home plan',
-    assignmentId: String(row.id),
-    recommendedAt: String(row.created_at || now.toISOString()),
-    openedAt: row.opened_at || null,
-    lastTickAt: ticks.get(String(row.id)) || null,
-  }))
+  const rows: FollowRow[] = assignmentRows.map((row: Record<string, string | null>) => {
+    const who = names.get(String(row.profile_id))
+    return {
+      id: `assignment-${row.id}`,
+      name: who?.name || 'Patient',
+      plan: (row.library_plan_slug ? planBySlug(plans, row.library_plan_slug)?.name : null) || setNames.get(String(row.set_id || '')) || 'Home plan',
+      assignmentId: String(row.id),
+      recommendedAt: String(row.created_at || now.toISOString()),
+      openedAt: row.opened_at || null,
+      lastTickAt: ticks.get(String(row.id)) || null,
+      profileId: row.profile_id,
+      email: who?.email || null,
+    }
+  })
   for (const invite of invites.error ? [] : (invites.data || [])) {
     if (invite.claimed_profile_id && claimed.has(`${invite.claimed_profile_id}:${invite.plan_slug || ''}`)) continue
     if (invite.claimed_profile_id) continue
@@ -73,6 +78,8 @@ export async function loadFollowThrough(doctorId: string, now = new Date(), time
       recommendedAt: invite.sent_at || invite.created_at,
       openedAt: invite.claimed_at || null,
       lastTickAt: null,
+      profileId: invite.claimed_profile_id,
+      email: invite.email,
     })
   }
   return { rows, counts: followCounts(rows, now, timeZone), ready: true }

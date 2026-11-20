@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useMemo, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { setRequestStage } from '@/lib/doctor/pipeline-actions'
 import { isClosedStage, nextStage, stageLabel } from '@/lib/doctor/pipeline'
+import { followLabelForPerson, type FollowRow } from '@/lib/doctor/follow-through'
 import { doctorClock } from '@/lib/doctor/places'
 import type { PersonCard } from '@/lib/doctor/portal-data'
 import { EmptyNote } from '@/components/doctor/chrome'
@@ -62,12 +64,18 @@ export function PeopleDesk({
   timeZone,
   plans,
   customSets,
+  followRows = [],
+  nowIso,
+  openCard = false,
 }: {
   people: PersonCard[]
   ready: boolean
   timeZone: string
   plans: { slug: string; name: string }[]
   customSets: { id: string; title: string }[]
+  followRows?: FollowRow[]
+  nowIso?: string
+  openCard?: boolean
 }) {
   const counts = useMemo(() => {
     const map = new Map<StageId, number>()
@@ -78,9 +86,18 @@ export function PeopleDesk({
   const [filter, setFilter] = useState<StageId>(firstStage)
   const rows = people.filter((row) => inStage(row, filter))
   const [selectedId, setSelectedId] = useState(rows[0]?.id || '')
+  const [mobileCard, setMobileCard] = useState(openCard)
   const selected = rows.find((row) => row.id === selectedId) || rows[0] || null
   const [pending, start] = useTransition()
   const [note, setNote] = useState('')
+  const router = useRouter()
+  const now = new Date(nowIso || Date.now())
+  const followLabel = selected ? followLabelForPerson(selected, followRows, now, timeZone) : null
+
+  function pick(id: string) {
+    setSelectedId(id)
+    setMobileCard(true)
+  }
 
   function move(stage: string) {
     if (!selected?.source || !selected.sourceId) return
@@ -88,6 +105,7 @@ export function PeopleDesk({
     start(async () => {
       const result = await setRequestStage(selected.source || '', selected.sourceId || '', stage)
       setNote(result.ok ? (result.message || 'Saved.') : result.error)
+      if (result.ok) router.refresh()
     })
   }
 
@@ -95,7 +113,7 @@ export function PeopleDesk({
 
   return (
     <div className="mt-4 grid gap-4 lg:grid-cols-[420px_1fr]">
-      <div>
+      <div className={mobileCard ? 'max-lg:hidden' : ''}>
         <div className="flex flex-wrap gap-1 rounded-2xl bg-white p-1">
           {STAGES.map((item) => {
             const on = filter === item.id
@@ -109,7 +127,12 @@ export function PeopleDesk({
         {!ready ? <p className="mt-3 text-[14px] text-[#5b6773]">Some lists are still catching up. Everyone already here is shown.</p> : null}
         {rows.length === 0 ? (
           <div className="mt-3">
-            <EmptyNote title="No one in this step" sentence="New patient requests show up under Requested. Referrals and messages are under Other." />
+            <EmptyNote
+              title={people.filter(pipelineRow).length === 0 ? 'No requests yet' : 'No one in this step'}
+              sentence={people.filter(pipelineRow).length === 0
+                ? 'When someone asks to see you from your public profile, they show up here. Open the name, call them, then move the stage.'
+                : 'New requests show up under Requested. Referrals and messages are under Other.'}
+            />
           </div>
         ) : (
           <ul className="mt-3 space-y-2">
@@ -117,12 +140,12 @@ export function PeopleDesk({
               const on = selected?.id === row.id
               return (
                 <li key={row.id}>
-                  <button type="button" onClick={() => setSelectedId(row.id)} className={`flex w-full items-center gap-3 rounded-[18px] bg-white px-3 py-3 text-left ${on ? 'outline outline-2 outline-[#2C6BB4]' : ''}`}>
+                  <button type="button" onClick={() => pick(row.id)} className={`flex w-full items-center gap-3 rounded-[18px] bg-white px-3 py-3 text-left ${on ? 'outline outline-2 outline-[#2C6BB4]' : ''}`}>
                     <span className="min-w-0 flex-1">
                       <span className="dp-ui block truncate text-[16px] font-extrabold text-[#15202B]">{row.name}</span>
                       <span className="block truncate text-[13px] text-[#5b6773]">{row.detail}</span>
                     </span>
-                    <span className="dp-ui rounded-full bg-[#F5F3EF] px-2 py-1 text-[12px] font-extrabold text-[#3d4a57]">{rowLabel(row)}</span>
+                    <span className="dp-ui shrink-0 rounded-full bg-[#F5F3EF] px-2 py-1 text-[12px] font-extrabold text-[#3d4a57]">{rowLabel(row)}</span>
                   </button>
                 </li>
               )
@@ -130,12 +153,16 @@ export function PeopleDesk({
           </ul>
         )}
       </div>
-      <div>
+      <div className={mobileCard ? '' : 'max-lg:hidden'}>
+        {mobileCard ? (
+          <button type="button" onClick={() => setMobileCard(false)} className="dp-ui mb-3 inline-flex min-h-11 items-center text-[15px] font-extrabold text-[#1F4F8C] lg:hidden">Back to the list</button>
+        ) : null}
         {selected ? (
           <article className="rounded-[26px] bg-white p-6 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.3)]">
             <p className="dp-ui text-[12px] font-extrabold text-[#2C6BB4]">{pipelineRow(selected) ? 'Patient request' : selected.kind.replace('_', ' ')}</p>
             <h2 className="dp-ui mt-1 text-[28px] font-extrabold tracking-[-0.02em] text-[#15202B]">{selected.name}</h2>
             <p className="mt-2 text-[15px] font-bold text-[#15202B]">{rowLabel(selected)}</p>
+            {followLabel ? <p className="mt-1 text-[14px] text-[#0A6159]">Home plan: {followLabel}. <Link href="/doctor/care-sets" className="font-extrabold underline">Open follow-through</Link></p> : null}
             {pipelineRow(selected) ? (
               <div className="mt-4 space-y-2 text-[15px] text-[#15202B]">
                 <p>{selected.phone ? selected.phone : 'No phone was shared.'}</p>

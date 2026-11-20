@@ -36,13 +36,15 @@ export default async function DoctorHomePage() {
       <Suspense fallback={null}>
         <ReferralBanner invite={invite} />
       </Suspense>
-      {dismissed ? null : (
-        <GettingStarted
-          profileDone={data.checklist.complete}
-          instagramDone={Boolean(instagram.data?.instagram_url)}
-        />
-      )}
-      <TodayView data={data} />
+      <TodayView
+        data={data}
+        intro={dismissed ? null : (
+          <GettingStarted
+            profileDone={data.checklist.complete}
+            instagramDone={Boolean(instagram.data?.instagram_url)}
+          />
+        )}
+      />
     </>
   )
 }

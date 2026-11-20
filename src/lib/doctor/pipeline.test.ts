@@ -7,6 +7,7 @@ import {
   nextStage,
   stageFromLegacy,
   stageLabel,
+  stageWritePlan,
   visibleRequestContact,
 } from './pipeline.ts'
 
@@ -78,6 +79,26 @@ test('only the requested doctor sees shared contact, and a referral phone stays 
     phone: '555',
     referralStatus: 'accepted',
   }).phone, '555')
+})
+
+test('stage taps do not mark a visit seen when the pipeline table is missing', () => {
+  const scheduled = stageWritePlan({ source: 'visit', stage: 'scheduled', pipelineReady: false })
+  assert.equal(scheduled.ok, false)
+  assert.equal(scheduled.mirror, 'none')
+  const contacted = stageWritePlan({ source: 'visit', stage: 'contacted', pipelineReady: false })
+  assert.equal(contacted.ok, true)
+  if (contacted.ok) assert.equal(contacted.mirror, 'visit_seen')
+  const closed = stageWritePlan({ source: 'visit', stage: 'no_answer', pipelineReady: false })
+  assert.equal(closed.ok, false)
+  const lead = stageWritePlan({ source: 'lead', stage: 'scheduled', pipelineReady: false })
+  assert.equal(lead.ok, true)
+  if (lead.ok) assert.equal(lead.mirror, 'lead')
+  const saved = stageWritePlan({ source: 'visit', stage: 'started_care', pipelineReady: true })
+  assert.equal(saved.ok, true)
+  if (saved.ok) assert.equal(saved.mirror, 'visit_seen')
+  const savedClose = stageWritePlan({ source: 'visit', stage: 'went_elsewhere', pipelineReady: true })
+  assert.equal(savedClose.ok, true)
+  if (savedClose.ok) assert.equal(savedClose.mirror, 'visit_closed')
 })
 
 test('monthly ROI counts scheduled and started care events', () => {

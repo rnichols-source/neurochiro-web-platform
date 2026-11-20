@@ -12,7 +12,7 @@ const TILES = [
   { id: 'practice' as const, href: '/doctor/practice', title: 'Practice' },
 ]
 
-export function TodayView({ data }: { data: TodayData }) {
+export function TodayView({ data, intro }: { data: TodayData; intro?: React.ReactNode }) {
   const step = data.step
   const careLine = data.plansInUse == null
     ? `${data.libraryCount} plans in the library`
@@ -68,8 +68,9 @@ export function TodayView({ data }: { data: TodayData }) {
           </div>
         </div>
       </header>
+      {intro ? <div className="relative z-[1] -mt-8 mb-4">{intro}</div> : null}
 
-      <div className="relative z-[1] -mt-10 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+      <div className={`relative z-[1] grid gap-4 lg:grid-cols-[1.25fr_1fr] ${intro ? '' : '-mt-10'}`}>
         <article className="rounded-[26px] bg-white p-5 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.35)]">
           <p className="dp-ui text-[12px] font-extrabold tracking-[0.1em] text-[#D66829]" style={{ textTransform: 'uppercase' }}>
             {step.id === 'clear' ? 'Today' : `Your next step · ${data.stepIndex} of ${Math.max(data.stepTotal, 1)}`}

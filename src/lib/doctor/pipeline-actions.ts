@@ -13,7 +13,8 @@ import { outcomePatch, stageToAckAction } from '@/lib/leads/outcomes'
 import { updateContactRequest } from '@/lib/leads/schema'
 import { FROM_ADDRESS } from '@/lib/leads/config'
 import { doctorMayAssignProfile } from '@/lib/doctor/assign-access'
-import { isPipelineStage, legacyLeadStage, type PipelineStage } from '@/lib/doctor/pipeline'
+import { isPipelineStage, stageWritePlan, type PipelineStage } from '@/lib/doctor/pipeline'
+import { recommendDelivery } from '@/lib/doctor/follow-through'
 
 type Result = { ok: true; message?: string } | { ok: false; error: string }
 
@@ -50,13 +51,14 @@ export async function setRequestStage(source: string, sourceId: string, stage: s
   if (!owned) return fail('That request is not in your list.')
 
   const saved = await savePipelineStage(admin, doctor.doctorId, source, sourceId, stage)
-  const mirrored = await mirrorLegacyStage(admin, doctor.doctorId, source, sourceId, stage)
-  if (!saved.ok && !mirrored.ok) return fail(saved.error || PIPELINE_MISSING)
-  if (!saved.ok && mirrored.ok && (stage === 'not_a_fit' || stage === 'no_answer' || stage === 'went_elsewhere' || (source === 'visit' && (stage === 'scheduled' || stage === 'started_care')))) {
-    return fail(PIPELINE_MISSING)
+  const plan = stageWritePlan({ source, stage, pipelineReady: saved.ok })
+  if (!plan.ok) return fail(plan.error)
+  if (plan.mirror !== 'none') {
+    const mirrored = await mirrorLegacyStage(admin, doctor.doctorId, sourceId, stage, plan.mirror)
+    if (!mirrored.ok && !saved.ok) return fail(mirrored.error || 'The stage was not saved.')
   }
   refresh()
-  return { ok: true, message: saved.ok ? 'Saved.' : 'Saved on the request. Dated history starts after the pipeline update.' }
+  return { ok: true, message: plan.message }
 }
 
 async function sourceOwned(admin: any, doctorId: string, source: string, sourceId: string): Promise<boolean> {
@@ -97,9 +99,9 @@ async function savePipelineStage(admin: any, doctorId: string, source: string, s
   return { ok: true, id }
 }
 
-async function mirrorLegacyStage(admin: any, doctorId: string, source: string, sourceId: string, stage: PipelineStage): Promise<Result> {
-  if (source === 'lead') {
-    const legacy = legacyLeadStage(stage)
+async function mirrorLegacyStage(admin: any, doctorId: string, sourceId: string, stage: PipelineStage, mirror: 'lead' | 'contact' | 'visit_seen' | 'visit_closed'): Promise<Result> {
+  if (mirror === 'lead') {
+    const legacy = stage === 'requested' ? 'new' : stage === 'contacted' ? 'contacted' : stage === 'scheduled' ? 'scheduled' : stage === 'started_care' ? 'converted' : null
     if (!legacy) return fail(PIPELINE_MISSING)
     const patch: Record<string, string> = { stage: legacy }
     if (stage === 'contacted') patch.last_contacted_at = new Date().toISOString()
@@ -108,7 +110,7 @@ async function mirrorLegacyStage(admin: any, doctorId: string, source: string, s
     if (updated.error || !updated.data?.length) return fail('The lead stage was not saved.')
     return { ok: true }
   }
-  if (source === 'contact_request') {
+  if (mirror === 'contact') {
     const action = stageToAckAction(stage === 'started_care' ? 'converted' : stage)
     if (!action) return fail(PIPELINE_MISSING)
     const existing = await admin.from('contact_requests').select('id, acknowledged_at').eq('id', sourceId).eq('doctor_id', doctorId).maybeSingle()
@@ -117,7 +119,7 @@ async function mirrorLegacyStage(admin: any, doctorId: string, source: string, s
     if (!updated.ok) return fail(updated.error || 'The request was not updated.')
     return { ok: true }
   }
-  if (stage === 'contacted' || stage === 'scheduled' || stage === 'started_care') {
+  if (mirror === 'visit_seen') {
     const updated = await admin.from('community_visit_requests').update({
       status: 'seen',
       seen_at: new Date().toISOString(),
@@ -125,7 +127,7 @@ async function mirrorLegacyStage(admin: any, doctorId: string, source: string, s
     if (updated.error) return fail('The visit was not updated.')
     return { ok: true }
   }
-  if (stage === 'not_a_fit' || stage === 'no_answer' || stage === 'went_elsewhere') {
+  if (mirror === 'visit_closed') {
     const updated = await admin.from('community_visit_requests').update({ status: 'closed' }).eq('id', sourceId).eq('doctor_id', doctorId).select('id')
     if (updated.error || !updated.data?.length) return fail(PIPELINE_MISSING)
     return { ok: true }
@@ -143,6 +145,8 @@ export async function recommendHomePlan(input: { source: string; sourceId: strin
   if (!doctor) return fail('A doctor profile is required.')
   const target = await requestTarget(doctor.doctorId, input.source, input.sourceId)
   if (!target) return fail('That patient is not in your list.')
+  const delivery = recommendDelivery({ profileId: target.profileId, email: target.email, kind: input.plan.kind })
+  if (!delivery.ok) return fail(delivery.error)
   const admin = createAdminClient() as any
 
   if (input.plan.kind === 'library') {

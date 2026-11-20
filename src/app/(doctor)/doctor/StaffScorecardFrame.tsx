@@ -27,7 +27,10 @@ export default function StaffScorecardFrame({ children }: { children: React.Reac
   return (
     <div className="min-h-dvh bg-portal-canvas">
       <header className="flex items-center justify-between gap-3 border-b border-portal-border bg-white px-4 py-3">
-        <p className="font-bold text-portal-ink">Office scorecard</p>
+        <div>
+          <p className="font-bold text-portal-ink">Office scorecard</p>
+          <p className="text-sm text-portal-ink-2">You are signed in as office staff. This scorecard is what you can open. Patient requests and home plans stay on the doctor login.</p>
+        </div>
         <button type="button" onClick={signOut} className="min-h-11 px-3 text-sm font-bold text-portal-ink">Sign out</button>
       </header>
       <main className="p-4">{children}</main>

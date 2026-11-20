@@ -56,15 +56,18 @@ export default async function CareSetsPage({ searchParams }: { searchParams: Pro
         </span>
       </DoctorBand>
       <FollowThroughView rows={follow.rows} counts={follow.counts} nowIso={new Date().toISOString()} timeZone={timeZone} />
-      <p className="mt-4 text-[14px] text-[#5b6773]">
-        {inUse ? `${inUse} plans in use. ` : ''}Browse the library, preview a plan, and recommend it. They only see plans you send.
-      </p>
-      <CareDesk plans={previews} categories={categories} members={members} usage={usage} initialMember={member} />
-      <div className="mt-8 rounded-2xl bg-white p-4">
-        <h2 className="dp-ui text-[18px] font-extrabold text-[#15202B]">Or write a short home plan</h2>
-        <p className="mb-4 mt-1 text-[14px] text-[#5b6773]">{LIBRARY_COPY.customHint}</p>
-        {ctx.doctor?.id ? <AssignForm members={members} /> : <p className="text-[14px] text-[#5b6773]">A doctor profile is required.</p>}
-      </div>
+      <details className="mt-4 rounded-2xl bg-white p-4">
+        <summary className="dp-ui cursor-pointer text-[16px] font-extrabold text-[#15202B]">Browse the library ({LIBRARY_PLAN_COUNT} plans)</summary>
+        <p className="mt-2 text-[14px] text-[#5b6773]">
+          {inUse ? `${inUse} plans in use. ` : ''}Preview a plan here. Sending from a person's card in People is the faster way.
+        </p>
+        <CareDesk plans={previews} categories={categories} members={members} usage={usage} initialMember={member} />
+        <div className="mt-6 border-t border-[#ECEAE5] pt-4">
+          <h2 className="dp-ui text-[18px] font-extrabold text-[#15202B]">Or write a short home plan</h2>
+          <p className="mb-4 mt-1 text-[14px] text-[#5b6773]">{LIBRARY_COPY.customHint}</p>
+          {ctx.doctor?.id ? <AssignForm members={members} /> : <p className="text-[14px] text-[#5b6773]">A doctor profile is required.</p>}
+        </div>
+      </details>
     </div>
   )
 }

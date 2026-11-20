@@ -10,7 +10,6 @@ import { createClient } from '@/lib/supabase'
 import {
   DOCTOR_PLACE_LIST,
   DOCTOR_PLACES,
-  DOCTOR_TOOL_LINKS,
   doctorNavId,
   legacyTitle,
   usesOwnChrome,
@@ -40,8 +39,8 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
     { href: '/doctor/messages', label: 'Messages' },
     { href: '/doctor/network', label: 'Network' },
     { href: '/doctor/practice', label: 'Practice' },
-    ...DOCTOR_TOOL_LINKS.filter((link) => link.href !== '/doctor/profile' && link.href !== '/doctor/help').map((link) => ({ href: link.href, label: link.label })),
-    { href: '/doctor/coming-soon', label: 'Coming soon' },
+    { href: '/doctor/billing', label: 'Billing' },
+    { href: '/doctor/settings', label: 'Settings' },
   ]
 
   function signOut() {
