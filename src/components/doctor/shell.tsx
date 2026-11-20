@@ -59,7 +59,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
           </span>
           <span className="min-w-0">
             <span className="dp-ui block text-[14px] font-extrabold tracking-[0.08em] text-[#15202B]">NEUROCHIRO</span>
-            <span className="dp-ui block text-[11px] font-extrabold tracking-[0.12em] text-[#8a95a1]">DOCTOR PORTAL</span>
+            <span className="dp-ui block text-[12px] font-extrabold tracking-[0.08em] text-[#5b6773]">DOCTOR PORTAL</span>
           </span>
         </Link>
         <nav className="flex min-h-0 flex-1 flex-col" aria-label="Doctor portal">
@@ -104,9 +104,9 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
               href="/doctor/help"
               aria-current={path === '/doctor/help' ? 'page' : undefined}
               className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-extrabold"
-              style={path === '/doctor/help' ? { background: '#FCEBDF', color: '#B4501A' } : { color: '#3d4a57' }}
+              style={path === '/doctor/help' ? { background: '#FCEBDF', color: '#8C3A12' } : { color: '#3d4a57' }}
             >
-              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#FCEBDF] text-[16px] font-extrabold text-[#D66829]">?</span>
+              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#FCEBDF] text-[16px] font-extrabold text-[#8C3A12]">?</span>
               Help
             </Link>
             <button

@@ -13,7 +13,7 @@ export function RemindButton({ assignmentId, enabled }: { assignmentId: string |
 
   if (!assignmentId) {
     return (
-      <p className="nc-ui mt-3 flex min-h-11 items-center justify-center gap-2 text-center text-[14px] font-bold text-white/95">
+      <p className="nc-ui mt-3 flex min-h-11 items-center justify-center gap-2 text-center text-[14px] font-bold text-white">
         A reminder shows on This Week when your doctor assigns a plan.
       </p>
     )
@@ -42,7 +42,7 @@ export function RemindButton({ assignmentId, enabled }: { assignmentId: string |
         {on ? 'Reminder on' : 'Remind me'}
       </button>
       {error ? <p className="mt-2 text-center text-[13px] text-white" role="alert">{error}</p> : null}
-      <p className="mt-2 text-center text-[12px] leading-snug text-white/85">In the app only. No extra emails.</p>
+      <p className="mt-2 text-center text-[12px] leading-snug text-white">In the app only. No extra emails.</p>
     </div>
   )
 }

@@ -42,7 +42,7 @@ export function WeekView({
         <div className="rounded-3xl bg-gradient-to-br from-[#2B1D3A] to-[#5C3473] p-[18px] text-white">
           <div className="flex items-center justify-between gap-3">
             <span className="nc-ui inline-flex min-h-11 items-center gap-1.5 rounded-full bg-[#B4501A] px-2.5 text-[12px] font-extrabold tracking-[0.06em] text-white">LIVE Q&A</span>
-            <span className="nc-ui text-[13px] font-bold text-white/95">{whenLabel}</span>
+            <span className="nc-ui text-[13px] font-bold text-white">{whenLabel}</span>
           </div>
           <h3 className="nc-ui my-3 text-[22px] font-extrabold text-white">The Weekly Adjustment</h3>
           <ShowCountdown initial={countdown} />
@@ -94,7 +94,7 @@ function AskQuestion() {
             placeholder="A question for the show"
             className="w-full rounded-[14px] border-2 border-white/30 bg-white px-3 py-2 text-[15px] text-[#15202B] outline-none"
           />
-          <p className="text-[12.5px] leading-snug text-white/85">Your name is not shown with it. A question is not a visit, and NeuroChiro is not your doctor.</p>
+          <p className="text-[12.5px] leading-snug text-white">Your name is not shown with it. A question is not a visit, and NeuroChiro is not your doctor.</p>
           {error ? <p className="text-[13px] text-white" role="alert">{error}</p> : null}
           <button type="submit" disabled={pending} className="nc-ui min-h-11 rounded-[14px] bg-white px-4 text-[14px] font-extrabold text-[#5C3473] disabled:opacity-60">
             {pending ? 'Saving…' : 'Send for the show'}

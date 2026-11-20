@@ -98,7 +98,7 @@ function SectionGo() {
                 <AreaIcon id={tile.id} size={26} />
               </span>
               <span className="nc-ui text-[18px] font-extrabold tracking-[-0.02em]">{tile.title}</span>
-              <span className="text-[13px] text-white/95">{tile.line}</span>
+              <span className="text-[13px] text-white">{tile.line}</span>
             </Link>
           )
         })}

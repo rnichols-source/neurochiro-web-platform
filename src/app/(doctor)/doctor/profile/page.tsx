@@ -170,7 +170,7 @@ function ProfileFold({ title, children }: { title: string; openOnDesktop?: boole
     <section className="rounded-[20px] bg-white">
       <button type="button" onClick={() => setOpen((value) => !value)} className="flex min-h-14 w-full items-center gap-3 px-4 text-left lg:cursor-default">
         <span className="dp-ui text-[15px] font-extrabold text-[#15202B]">{title}</span>
-        <span className="ml-auto text-[12px] font-bold text-[#6b7785] lg:hidden">{open ? "Hide" : "Show"}</span>
+        <span className="ml-auto text-[12px] font-bold text-[#5b6773] lg:hidden">{open ? "Hide" : "Show"}</span>
       </button>
       <div className={`${open ? "block" : "hidden"} space-y-4 px-4 pb-4 lg:block`}>{children}</div>
     </section>
@@ -529,7 +529,7 @@ function ProfileEditor() {
             <ul className="mt-3 space-y-1">
               {checks.map((item) => (
                 <li key={item.label} className="flex items-center gap-2 text-[13px] text-[#3d4a57]">
-                  <span className={`grid h-5 w-5 place-items-center rounded-full text-[11px] font-extrabold ${item.done ? 'bg-[#E8F5EE] text-[#1f8a4c]' : 'bg-[#F5F3EF] text-[#6b7785]'}`}>{item.done ? 'OK' : ''}</span>
+                  <span className={`grid h-5 w-5 place-items-center rounded-full text-[12px] font-extrabold ${item.done ? 'bg-[#E8F5EE] text-[#0e6a36]' : 'bg-[#F5F3EF] text-[#5b6773]'}`}>{item.done ? 'OK' : ''}</span>
                   {item.label}
                 </li>
               ))}
@@ -927,7 +927,7 @@ function ProfileEditor() {
           </form>
           </div>
           <aside className="hidden h-fit rounded-[24px] bg-[#F4F7FA] p-4 lg:block">
-            <p className="dp-ui text-[11px] font-extrabold tracking-[0.1em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Live preview</p>
+            <p className="dp-ui text-[12px] font-extrabold tracking-[0.04em] text-[#5b6773]">Live preview</p>
             <div className="mt-3 rounded-[20px] bg-white p-4">
               <div className="flex items-center gap-3">
                 {profile?.photo_url ? <img src={profile.photo_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : (

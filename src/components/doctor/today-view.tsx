@@ -50,7 +50,7 @@ export function TodayView({ data, intro }: { data: TodayData; intro?: React.Reac
             <span className="dp-ui rounded-full bg-white/20 px-2 py-1 text-[11px] font-extrabold">Doctor</span>
           </div>
           <div className="col-span-2 lg:col-span-1 lg:row-start-1">
-            <p className="text-[16px] text-white/90">{data.dateLabel}</p>
+            <p className="text-[16px] text-white">{data.dateLabel}</p>
             <h1 className="dp-ui mt-1 text-[34px] font-extrabold leading-none tracking-[-0.03em] lg:text-[40px]">
               {data.greetingLine}, {data.doctorName}
             </h1>
@@ -135,7 +135,7 @@ export function TodayView({ data, intro }: { data: TodayData; intro?: React.Reac
               </span>
               <span className="dp-ui absolute right-4 top-3 text-[32px] font-extrabold leading-none lg:text-[40px]">{numbers[tile.id]}</span>
               <span className="dp-ui text-[18px] font-extrabold">{tile.title}</span>
-              <span className="text-[13px] text-white/90">{lines[tile.id]}</span>
+              <span className="text-[13px] text-white">{lines[tile.id]}</span>
             </Link>
           )
         })}
@@ -148,7 +148,7 @@ function Stat({ value, label, light = false }: { value: string; label: string; l
   return (
     <div className={`min-w-[108px] rounded-2xl px-3 py-2 ${light ? 'bg-[#F7F6F3] text-[#15202B]' : 'bg-white/15 text-white'}`}>
       <b className="dp-ui block text-[22px] font-extrabold leading-none">{value}</b>
-      <span className={`mt-1 block text-[12px] ${light ? 'text-[#5b6773]' : 'text-white/90'}`}>{label}</span>
+      <span className={`mt-1 block text-[12px] ${light ? 'text-[#5b6773]' : 'text-white'}`}>{label}</span>
     </div>
   )
 }

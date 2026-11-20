@@ -39,7 +39,7 @@ export function ReferView({ trip, invites }: { trip: ReferTrip | null; invites: 
         </span>
         <span className="min-w-0 flex-1">
           <span className="nc-ui block text-[17px] font-extrabold tracking-[-0.02em]">Send someone you love</span>
-          <span className="block text-[13.5px] leading-snug text-white/90">Invite family or a friend to a doctor near them</span>
+          <span className="block text-[13.5px] leading-snug text-white">Invite family or a friend to a doctor near them</span>
         </span>
         <ChevronIcon />
       </Link>

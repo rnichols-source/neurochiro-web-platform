@@ -299,7 +299,7 @@ export default function ExercisesPage() {
         <p className="text-xs text-white/35 mt-1">
           Safe stretches and movements you can do at home to support your chiropractic care. Start with what feels right for you.
         </p>
-        <p className="text-xs text-amber-400/60 mt-2">
+        <p className="text-xs text-amber-400 mt-2">
           Stop any exercise that causes pain. If you&apos;re unsure whether an exercise is right for you, ask your chiropractor first.
         </p>
       </header>

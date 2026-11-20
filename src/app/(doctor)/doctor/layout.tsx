@@ -14,6 +14,7 @@ import { SavedItemsSeed } from '@/components/portal/saved-seed';
 import { SmsPromptBanner } from '@/components/doctor/SmsPromptBanner';
 import type { ApplicationGate } from '@/lib/applications/gate';
 import StaffScorecardFrame from './StaffScorecardFrame';
+import '@/styles/doctor-portal.css';
 import { practiceAccessForUser } from '@/lib/doctor/practice-access';
 
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,7 @@ export default async function DoctorLayout({ children }: { children: React.React
     const practice = await practiceAccessForUser(ctx.userId);
     return (
       <AuthProvider>
-        <div className="portal min-h-dvh" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
+        <div className="portal doctor-portal min-h-dvh" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
           <PortalProvider value={ctx}>
             <StaffScorecardFrame clinic={practice?.clinicName || null}>{children}</StaffScorecardFrame>
           </PortalProvider>

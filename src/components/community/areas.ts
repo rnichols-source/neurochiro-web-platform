@@ -1,5 +1,5 @@
 export const AREAS = {
-  home: { id: 'home', href: '/portal', label: 'Home', color: '#D66829', ink: '#B4501A', dark: '#B4501A', tint: '#FCEBDF' },
+  home: { id: 'home', href: '/portal', label: 'Home', color: '#B4501A', ink: '#8C3A12', dark: '#8C3A12', tint: '#FCEBDF' },
   care: { id: 'care', href: '/portal/care', label: 'Care', color: '#0E857A', ink: '#0A6159', dark: '#0A6159', tint: '#DCF1EE' },
   week: { id: 'week', href: '/portal/week', label: 'This Week', color: '#7A4A94', ink: '#5C3473', dark: '#5C3473', tint: '#EFE5F5' },
   refer: { id: 'refer', href: '/portal/refer', label: 'Find & Refer', color: '#2C6BB4', ink: '#1F4F8C', dark: '#1F4F8C', tint: '#E2ECF8' },

@@ -36,7 +36,7 @@ export function DoctorBand({
         )}
         <div className="min-w-0 flex-1">
           <h1 className="dp-ui text-[30px] font-extrabold leading-[1.1] tracking-[-0.03em] text-white lg:text-[34px]">{title}</h1>
-          {subtitle ? <p className="mt-1.5 text-[15px] leading-snug text-white/90 lg:text-[16px]">{subtitle}</p> : null}
+          {subtitle ? <p className="mt-1.5 text-[15px] leading-snug text-white lg:text-[16px]">{subtitle}</p> : null}
         </div>
         <HeaderTools />
         {children}
@@ -62,7 +62,7 @@ export function SubTabs({
             key={tab.href}
             href={tab.href}
             aria-current={on ? 'page' : undefined}
-            className={`dp-ui flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 text-[14px] font-extrabold ${on ? 'bg-white text-[#5C3473]' : 'text-white/90'}`}
+            className={`dp-ui flex min-h-11 flex-1 items-center justify-center rounded-xl px-2 text-[14px] font-extrabold ${on ? 'bg-white text-[#5C3473]' : 'text-white'}`}
           >
             {tab.label}
           </Link>

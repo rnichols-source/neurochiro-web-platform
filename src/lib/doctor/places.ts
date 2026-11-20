@@ -1,5 +1,5 @@
 export const DOCTOR_PLACES = {
-  today: { id: 'today', href: '/doctor', label: 'Today', color: '#D66829', ink: '#B4501A', dark: '#B4501A', tint: '#FCEBDF' },
+  today: { id: 'today', href: '/doctor', label: 'Today', color: '#B4501A', ink: '#8C3A12', dark: '#8C3A12', tint: '#FCEBDF' },
   people: { id: 'people', href: '/doctor/people', label: 'People', color: '#2C6BB4', ink: '#1F4F8C', dark: '#1F4F8C', tint: '#E2ECF8' },
   care: { id: 'care', href: '/doctor/care-sets', label: 'Home plans', color: '#0E857A', ink: '#0A6159', dark: '#0A6159', tint: '#DCF1EE' },
   network: { id: 'network', href: '/doctor/network', label: 'Network', color: '#7A4A94', ink: '#5C3473', dark: '#5C3473', tint: '#EFE5F5' },

@@ -35,16 +35,16 @@ export default function BadgesPage() {
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Award className="w-6 h-6 text-neuro-orange" />
-          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Achievements</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#15202B] tracking-tight">Achievements</h1>
         </div>
-        <p className="text-white/30 text-sm">{earnedIds.size} of {BADGE_DEFINITIONS.length} badges earned</p>
+        <p className="text-sm text-[#5b6773]">{earnedIds.size} of {BADGE_DEFINITIONS.length} badges earned</p>
       </div>
 
       {/* Progress Bar */}
       <div className="bg-[#162231] rounded-2xl border border-white/[0.06] p-5">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-white/40">Badge Progress</span>
-          <span className="text-xs font-bold text-neuro-orange">{Math.round((earnedIds.size / BADGE_DEFINITIONS.length) * 100)}%</span>
+          <span className="text-xs text-[#d5dde6]">Badge Progress</span>
+          <span className="text-xs font-bold text-[#f0c7a8]">{Math.round((earnedIds.size / BADGE_DEFINITIONS.length) * 100)}%</span>
         </div>
         <div className="h-3 bg-white/[0.06] rounded-full overflow-hidden">
           <div className="h-full rounded-full bg-gradient-to-r from-neuro-orange to-neuro-orange-light transition-all" style={{ width: `${(earnedIds.size / BADGE_DEFINITIONS.length) * 100}%` }} />
@@ -63,7 +63,7 @@ export default function BadgesPage() {
             <div
               key={badge.id}
               className={`rounded-2xl border p-5 text-center transition-all ${
-                isEarned ? `${colors.bg} ${colors.border}` : 'bg-white/[0.02] border-white/[0.06] opacity-40'
+                isEarned ? `${colors.bg} ${colors.border}` : 'bg-white border-[#e3e0da]'
               }`}
             >
               <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${
@@ -72,11 +72,11 @@ export default function BadgesPage() {
                 {isEarned ? (
                   <Icon className={`w-6 h-6 ${colors.icon}`} />
                 ) : (
-                  <Lock className="w-5 h-5 text-white/20" />
+                  <Lock className="w-5 h-5 text-[#5b6773]" />
                 )}
               </div>
-              <p className={`text-sm font-bold mb-1 ${isEarned ? 'text-white' : 'text-white/30'}`}>{badge.name}</p>
-              <p className={`text-xs ${isEarned ? 'text-white/50' : 'text-white/15'}`}>{badge.description}</p>
+              <p className={`text-sm font-bold mb-1 ${isEarned ? 'text-[#15202B]' : 'text-[#5b6773]'}`}>{badge.name}</p>
+              <p className="text-xs text-[#5b6773]">{badge.description}</p>
               {isEarned && earnedData && (
                 <p className="text-xs text-neuro-orange font-bold mt-2">
                   Earned {new Date(earnedData.earned_at).toLocaleDateString()}

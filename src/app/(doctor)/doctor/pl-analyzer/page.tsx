@@ -154,10 +154,10 @@ function HealthGauge({ score }: { score: number }) {
   const dashOffset = circumference * (1 - safe / 100);
   let color = "#c0362c";
   let label = "Critical";
-  if (safe >= 85) { color = "#1f8a4c"; label = "Exceptional"; }
+  if (safe >= 85) { color = "#0e6a36"; label = "Exceptional"; }
   else if (safe >= 70) { color = "#2a5d8f"; label = "Strong"; }
-  else if (safe >= 50) { color = "#1f8a4c"; label = "Healthy"; }
-  else if (safe >= 30) { color = "#a86400"; label = "Needs work"; }
+  else if (safe >= 50) { color = "#0e6a36"; label = "Healthy"; }
+  else if (safe >= 30) { color = "#7a4800"; label = "Needs work"; }
 
   return (
     <div className="flex flex-col items-center">
@@ -265,7 +265,7 @@ function TrendChart({
           <text x={pad - 8} y={yFor(tick) + 4} textAnchor="end" fontSize="12" fill="#3d4a57">{tick}%</text>
         </g>
       ))}
-      <line x1={pad} y1={yFor(40)} x2={width - pad} y2={yFor(40)} stroke="#1f8a4c" strokeDasharray="6 3" />
+      <line x1={pad} y1={yFor(40)} x2={width - pad} y2={yFor(40)} stroke="#0e6a36" strokeDasharray="6 3" />
       <polyline
         fill="none"
         stroke="#16202a"
@@ -274,13 +274,13 @@ function TrendChart({
       />
       {points.map((point, index) => (
         <g key={point.label}>
-          <circle cx={pad + index * step} cy={yFor(point.margin ?? 0)} r="4" fill={(point.margin ?? 0) >= 40 ? "#1f8a4c" : "#c0362c"} />
+          <circle cx={pad + index * step} cy={yFor(point.margin ?? 0)} r="4" fill={(point.margin ?? 0) >= 40 ? "#0e6a36" : "#c0362c"} />
           {(index % labelStep === 0 || index === points.length - 1) && (
             <text x={pad + index * step} y={height - 8} textAnchor="middle" fontSize="12" fill="#3d4a57">{point.label}</text>
           )}
         </g>
       ))}
-      <text x={width - pad} y={16} textAnchor="end" fontSize="12" fill="#1f8a4c">40% target</text>
+      <text x={width - pad} y={16} textAnchor="end" fontSize="12" fill="#0e6a36">40% target</text>
       <title>{points.map((point) => `${point.label}: income ${formatMoney(point.income, currency)}, costs ${formatMoney(point.costs, currency)}`).join(". ")}</title>
     </svg>
   );
@@ -728,7 +728,7 @@ export function PLAnalyzerContent({ preview }: { preview?: PlPreview }) {
 
         <div className={draftReady ? "" : "opacity-60 pointer-events-none"}>
           {PL_SECTIONS.map((section) => {
-            const accent = section.type === "income" ? "#1f8a4c" : section.type === "cogs" ? "#a86400" : "#c0362c";
+            const accent = section.type === "income" ? "#0e6a36" : section.type === "cogs" ? "#7a4800" : "#c0362c";
             return (
               <section key={section.id} className="mb-5">
                 <h2 className="text-sm font-bold mb-2 pl-3" style={{ borderLeft: `4px solid ${accent}`, color: accent }}>{section.label}</h2>

@@ -65,7 +65,7 @@ export function ReferDesk({
       <div>
         <section className="rounded-[24px] bg-[#7A4A94] p-5 text-white">
           <h2 className="dp-ui text-[22px] font-extrabold tracking-[-0.02em]">Refer a community member</h2>
-          <p className="mt-1 text-[14px] leading-snug text-white/90">You can refer anywhere in the world. Type a doctor's name, a city, a state, a country, or a postal code. London, Sydney, Toronto, or 90210 all work. The nearest NeuroChiro doctors come up. Their phone is shared only after that doctor accepts.</p>
+          <p className="mt-1 text-[14px] leading-snug text-white">You can refer anywhere in the world. Type a doctor's name, a city, a state, a country, or a postal code. London, Sydney, Toronto, or 90210 all work. The nearest NeuroChiro doctors come up. Their phone is shared only after that doctor accepts.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block text-[13px] font-bold">
               Who
@@ -95,7 +95,7 @@ export function ReferDesk({
               <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Why you are sending them" className="mt-1 h-12 w-full rounded-xl border-0 bg-white px-3 text-[16px] text-[#15202B]" />
             </label>
           </div>
-          <label className="mt-3 flex items-start gap-2 text-[13px] leading-snug text-white/95">
+          <label className="mt-3 flex items-start gap-2 text-[13px] leading-snug text-white">
             <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} className="mt-1" />
             I have their permission to share their name and phone with the doctor I pick.
           </label>

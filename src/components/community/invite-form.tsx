@@ -114,7 +114,7 @@ export function InviteForm() {
       </button>
       {message && links ? (
         <div className="rounded-[18px] bg-[#15202B] px-4 py-4 text-white">
-          <p className="text-[12px] font-semibold text-white/70">Private message</p>
+          <p className="text-[12px] font-semibold text-white">Private message</p>
           <p className="mt-2 whitespace-pre-wrap text-[13.5px] leading-relaxed">{message}</p>
           <div className="mt-3 flex flex-wrap gap-3 text-[13px] font-semibold">
             <button
@@ -135,7 +135,7 @@ export function InviteForm() {
             <a className="text-[#F3C2A4]" href={links.email}>Email</a>
             <a className="text-[#F3C2A4]" href={links.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
           </div>
-          <p className="mt-3 text-[12px] leading-snug text-white/70">This is not posted anywhere. You send it the way you already talk to them.</p>
+          <p className="mt-3 text-[12px] leading-snug text-white">This is not posted anywhere. You send it the way you already talk to them.</p>
         </div>
       ) : null}
     </div>

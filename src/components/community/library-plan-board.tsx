@@ -100,7 +100,7 @@ export function LibraryPlanBoard({ assignments }: { assignments: LibraryAssignme
                 role="tab"
                 aria-selected={on}
                 onClick={() => setPickedPhase(index)}
-                className={`nc-ui min-h-11 flex-1 rounded-[11px] px-1 py-1.5 text-center text-[13px] font-extrabold ${on ? 'bg-white text-[#0A6159]' : 'text-white/90'}`}
+                className={`nc-ui min-h-11 flex-1 rounded-[11px] px-1 py-1.5 text-center text-[13px] font-extrabold ${on ? 'bg-white text-[#0A6159]' : 'text-white'}`}
               >
                 {chip.short}
                 <small className="mt-0.5 block text-[12px] font-semibold">{item.week}</small>
@@ -221,7 +221,7 @@ function PlanHeader({ title, crumb, children }: { title: string; crumb: string; 
         <BackIcon />
         Care
       </Link>
-      <p className="mt-3 text-[12px] font-bold text-white/90">{crumb}</p>
+      <p className="mt-3 text-[12px] font-bold text-white">{crumb}</p>
       <h1 className="nc-ui mt-1 text-[23px] font-extrabold leading-[1.15] tracking-[-0.025em] text-white">{title}</h1>
       {children}
     </header>
