@@ -87,8 +87,16 @@ export function FollowThroughView({
           {shown.map((row) => {
             const status = boardStatus(row, now, timeZone)
             const tone = TONE[status.tone]
-            const since = status.sinceExpected > 0 ? `${status.sinceDone} of ${status.sinceExpected} since it was sent` : 'Just sent'
-            const week = `${status.weekDone} of ${status.weekExpected} this week`
+            const since = status.sinceExpected > 0
+              ? `${status.sinceDone} of ${status.sinceExpected} since it was sent`
+              : status.sinceDone > 0
+                ? `${status.sinceDone} since it was sent`
+                : 'Just sent'
+            const week = status.weekExpected > 0
+              ? `${status.weekDone} of ${status.weekExpected} this week`
+              : status.weekDone > 0
+                ? `${status.weekDone} this week`
+                : '0 this week'
             const canNudge = status.tone !== 'green' && Boolean(row.assignmentId || row.remedyId)
             return (
               <li key={row.id} className="py-3">

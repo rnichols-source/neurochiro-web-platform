@@ -42,8 +42,6 @@ export const DOCTOR_TOOL_LINKS: DoctorToolLink[] = [
   { href: '/doctor/introductions', label: 'Introductions', detail: 'When someone travels with their care', place: 'people', group: 'people' },
   { href: '/doctor/referrals', label: 'Referral network', detail: 'Referrals you have sent and received', place: 'network', group: 'network' },
   { href: '/doctor/students', label: 'Students', chipLabel: 'Browse students', detail: 'Browse students looking for a practice', place: 'network', group: 'network' },
-  { href: '/doctor/match', label: 'ChiroMatch', detail: 'See which students line up with your practice', place: 'network', group: 'network' },
-  { href: '/doctor/community', label: 'Community', detail: 'Announcements and spotlights', place: 'network', group: 'network' },
   { href: '/doctor/community-interest', label: 'Community interest', detail: 'People near you raising a hand', place: 'network', group: 'network' },
   { href: '/doctor/profile', label: 'Profile', detail: 'Edit what community members see', place: 'practice', group: 'account' },
   { href: '/doctor/analytics', label: 'Analytics', detail: 'Views and where they came from', place: 'practice', group: 'account' },

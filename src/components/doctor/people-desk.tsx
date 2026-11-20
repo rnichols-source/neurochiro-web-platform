@@ -91,7 +91,7 @@ export function PeopleDesk({
   const rows = people.filter((row) => inStage(row, filter))
   const [selectedId, setSelectedId] = useState(rows[0]?.id || '')
   const [mobileCard, setMobileCard] = useState(openCard)
-  const selected = rows.find((row) => row.id === selectedId) || rows[0] || null
+  const selected = people.find((row) => row.id === selectedId) || rows[0] || null
   const [pending, start] = useTransition()
   const [note, setNote] = useState('')
   const router = useRouter()
@@ -109,7 +109,11 @@ export function PeopleDesk({
     start(async () => {
       const result = await setRequestStage(selected.source || '', selected.sourceId || '', stage)
       setNote(result.ok ? (result.message || 'Saved.') : result.error)
-      if (result.ok) router.refresh()
+      if (result.ok) {
+        if (isClosedStage(stage)) setFilter('closed')
+        else if (STAGES.some((item) => item.id === stage)) setFilter(stage as StageId)
+        router.refresh()
+      }
     })
   }
 

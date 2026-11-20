@@ -15,7 +15,7 @@ const FAQ = [
   { q: 'How do community members find me?', a: 'Your profile is on neurochiro.co. Community members search by city, then request a visit from your page.' },
   { q: 'When do I see a visit request?', a: 'Requests show under People, and the full list is on Visit requests. Call them back while they are still deciding.' },
   { q: 'How do I change my plan?', a: "If you pay by card, open Billing and tap Manage billing to update your card, see invoices or cancel. Founding members have Pro included, so there's nothing to manage. Email support@neurochirodirectory.com with any plan question." },
-  { q: 'How do seminars work?', a: 'Create one, share the link, and see who registered. Hosting prices are on the Seminars page.' },
+  { q: 'How do seminars work?', a: 'Seminars are not open in the portal yet. Use this form if you want to host one, and we will write back.' },
   { q: 'Who do I email?', a: 'Email support@neurochirodirectory.com. We read every message.' },
   { q: 'Can I preview what community members see?', a: 'Open Profile and use View public profile. It opens your directory page in a new tab.' },
 ];

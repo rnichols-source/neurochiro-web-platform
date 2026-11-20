@@ -65,7 +65,7 @@ export function ReferDesk({
       <div>
         <section className="rounded-[24px] bg-[#7A4A94] p-5 text-white">
           <h2 className="dp-ui text-[22px] font-extrabold tracking-[-0.02em]">Refer a community member</h2>
-          <p className="mt-1 text-[14px] leading-snug text-white/90">You can refer anywhere in the world. Type a doctor’s name, a city, a state, a country, or a postal code — London, Sydney Australia, Toronto, or 90210. The nearest NeuroChiro doctors come up. Their phone is shared only after that doctor accepts.</p>
+          <p className="mt-1 text-[14px] leading-snug text-white/90">You can refer anywhere in the world. Type a doctor's name, a city, a state, a country, or a postal code. London, Sydney, Toronto, or 90210 all work. The nearest NeuroChiro doctors come up. Their phone is shared only after that doctor accepts.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <label className="block text-[13px] font-bold">
               Who

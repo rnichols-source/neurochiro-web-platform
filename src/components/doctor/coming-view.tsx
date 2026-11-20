@@ -6,17 +6,13 @@ const EARLIER = [
   {
     key: 'community',
     title: 'The Network feed',
-    body: 'Announcements and member spotlights. A few notes are already posted.',
-    href: '/doctor/community',
-    action: 'Open the feed',
+    body: 'Announcements and member spotlights. The feed is not open yet.',
     border: '#7A4A94',
   },
   {
     key: 'shadow_requests',
     title: 'Shadow requests',
-    body: 'Students ask to shadow you, right from Network.',
-    href: '/doctor/students/shadow',
-    action: 'Open the inbox',
+    body: 'Students will be able to ask to shadow you from Network. That inbox is not open yet.',
     border: '#D66829',
   },
 ]
@@ -39,7 +35,6 @@ export function ComingView() {
             <h2 className="dp-ui mt-2 text-[20px] font-extrabold text-[#15202B]">{card.title}</h2>
             <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">{card.body}</p>
             <div className="mt-3"><NotifyButton featureKey={card.key} /></div>
-            <Link prefetch href={card.href} className="dp-ui mt-2 inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#1E2D3B]">{card.action}</Link>
           </article>
         ))}
       </div>

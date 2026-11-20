@@ -112,6 +112,8 @@ test('desktop sidebar leads with today, people, home plans, profile, and help', 
   assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Profile')?.href, '/doctor/profile')
   assert.equal(desktopClicks('/doctor/match'), 2)
   assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/marketplace'), false)
+  assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/match'), false)
+  assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/community'), false)
   assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/lives'), false)
   assert.equal(mobileClicks('/doctor/messages'), 1)
 })
