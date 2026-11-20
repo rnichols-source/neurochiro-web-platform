@@ -24,12 +24,16 @@ async function loadContactRequests(admin: any, docId: string) {
 
 export async function loadLeadPipeline(doctorId: string) {
   const admin = createAdminClient() as any;
+  const doctor = await admin.from('doctors').select('user_id').eq('id', doctorId).maybeSingle();
+  const leadOwnerId = typeof doctor.data?.user_id === 'string' ? doctor.data.user_id : '';
   const [leadsRes, contactReqRes] = await Promise.all([
-    admin
-      .from('leads')
-      .select('id, first_name, last_name, email, phone, source, stage, notes, last_contacted_at, confirmed_at, created_at')
-      .eq('doctor_id', doctorId)
-      .order('created_at', { ascending: false }),
+    leadOwnerId
+      ? admin
+          .from('leads')
+          .select('id, first_name, last_name, email, phone, source, stage, notes, last_contacted_at, confirmed_at, created_at')
+          .eq('doctor_id', leadOwnerId)
+          .order('created_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
     loadContactRequests(admin, doctorId),
   ]);
 

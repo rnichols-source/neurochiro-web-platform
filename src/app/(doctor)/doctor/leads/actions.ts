@@ -51,7 +51,7 @@ export async function updateLeadStage(leadId: string, stage: string, leadType?: 
   if (stage === 'contacted') updateData.last_contacted_at = new Date().toISOString();
   if (stage === 'converted') updateData.confirmed_at = new Date().toISOString();
 
-  const { data, error } = await admin.from('leads').update(updateData).eq('id', leadId).eq('doctor_id', docId).select('id');
+  const { data, error } = await admin.from('leads').update(updateData).eq('id', leadId).eq('doctor_id', user.id).select('id');
   if (error) return { error: error.message };
   if (!data?.length) return { error: 'Lead was not updated.' };
   return { success: true };
@@ -66,7 +66,7 @@ export async function updateLeadNotes(leadId: string, notes: string) {
   if (!docId) return { error: 'Doctor not found' };
 
   const admin = createAdminClient() as any;
-  const lead = await admin.from('leads').update({ notes }).eq('id', leadId).eq('doctor_id', docId).select('id');
+  const lead = await admin.from('leads').update({ notes }).eq('id', leadId).eq('doctor_id', user.id).select('id');
   if (lead.error) return { error: lead.error.message };
   if (lead.data?.length) return { success: true };
 

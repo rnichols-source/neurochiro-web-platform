@@ -130,28 +130,15 @@ async function loadDoctorAlerts(db: { from: (table: string) => AlertQuery }, doc
 async function loadDoctor(db: any, doctorId: string): Promise<{ doctor: any | null; error?: string }> {
   const withListing = `${DOCTOR_COLUMNS}, listing_format`
   const first = await db.from('doctors').select(withListing).eq('id', doctorId).maybeSingle()
-  if (!first.error && first.data) return { doctor: first.data }
-  if (!first.error) {
-    const byUser = await db.from('doctors').select(withListing).eq('user_id', doctorId).maybeSingle()
-    if (!byUser.error && byUser.data) return { doctor: byUser.data }
-    if (byUser.error && !isMissingColumn(byUser.error)) return { doctor: null, error: byUser.error.message }
-  }
-  if (!first.error) return { doctor: null }
+  if (!first.error) return { doctor: first.data }
   if (!isMissingColumn(first.error)) return { doctor: null, error: first.error.message }
   const second = await db.from('doctors').select(DOCTOR_COLUMNS).eq('id', doctorId).maybeSingle()
-  if (!second.error && second.data) return { doctor: second.data }
-  if (!second.error) {
-    const byUser = await db.from('doctors').select(DOCTOR_COLUMNS).eq('user_id', doctorId).maybeSingle()
-    if (!byUser.error) return { doctor: byUser.data }
-  }
+  if (!second.error) return { doctor: second.data }
   if (!isMissingColumn(second.error)) return { doctor: null, error: second.error.message }
   console.error('[LEADS] doctors.lead_notification_emails is missing. Apply migration 20261030000000_lead_followup.sql.', second.error.message)
   const third = await db.from('doctors').select(DOCTOR_COLUMNS_BASE).eq('id', doctorId).maybeSingle()
   if (third.error) return { doctor: null, error: third.error.message }
-  if (third.data) return { doctor: third.data }
-  const byUser = await db.from('doctors').select(DOCTOR_COLUMNS_BASE).eq('user_id', doctorId).maybeSingle()
-  if (byUser.error) return { doctor: null, error: byUser.error.message }
-  return { doctor: byUser.data }
+  return { doctor: third.data }
 }
 
 export async function createLead(input: CreateLeadInput): Promise<CreateLeadResult> {
@@ -198,7 +185,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   const note = noteFor({ preferredTime, email, message })
 
   const baseRow = {
-    doctor_id: doctor.id,
+    doctor_id: input.doctorId,
     name,
     phone: phoneOk ? phone : '',
     note,

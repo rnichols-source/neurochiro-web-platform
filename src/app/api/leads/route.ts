@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase-admin';
-import { resolveDoctorRowId } from '@/lib/leads/doctor-id';
 
 // Simple in-memory rate limiter: max 5 requests per IP per minute
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -56,7 +55,6 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createAdminClient();
-    const doctorId = await resolveDoctorRowId(supabase as never, doctor_id);
 
     // Upsert to avoid duplicates
     const { error } = await supabase
@@ -67,7 +65,7 @@ export async function POST(request: NextRequest) {
         role: role || 'patient',
         location: location || null,
         first_name: first_name || null,
-        doctor_id: doctorId,
+        doctor_id: doctor_id || null,
         status: 'new',
         metadata: {
           timestamp: new Date().toISOString(),
@@ -82,7 +80,7 @@ export async function POST(request: NextRequest) {
         role: role || 'patient',
         location: location || null,
         first_name: first_name || null,
-        doctor_id: doctorId,
+        doctor_id: doctor_id || null,
         status: 'new',
         metadata: { timestamp: new Date().toISOString() }
       });

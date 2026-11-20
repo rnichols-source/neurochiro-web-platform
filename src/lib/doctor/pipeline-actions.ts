@@ -75,8 +75,19 @@ export async function setRequestStage(source: string, sourceId: string, stage: s
   return { ok: true, message: plan.message }
 }
 
+async function leadOwnerUserId(admin: any, doctorId: string): Promise<string | null> {
+  const row = await admin.from('doctors').select('user_id').eq('id', doctorId).maybeSingle()
+  return typeof row.data?.user_id === 'string' && row.data.user_id ? row.data.user_id : null
+}
+
 async function sourceOwned(admin: any, doctorId: string, source: string, sourceId: string): Promise<boolean> {
-  const table = source === 'visit' ? 'community_visit_requests' : source === 'lead' ? 'leads' : 'contact_requests'
+  if (source === 'lead') {
+    const userId = await leadOwnerUserId(admin, doctorId)
+    if (!userId) return false
+    const row = await admin.from('leads').select('id').eq('id', sourceId).eq('doctor_id', userId).maybeSingle()
+    return Boolean(row.data?.id)
+  }
+  const table = source === 'visit' ? 'community_visit_requests' : 'contact_requests'
   const row = await admin.from(table).select('id').eq('id', sourceId).eq('doctor_id', doctorId).maybeSingle()
   return Boolean(row.data?.id)
 }
@@ -120,7 +131,9 @@ async function mirrorLegacyStage(admin: any, doctorId: string, sourceId: string,
     const patch: Record<string, string> = { stage: legacy }
     if (stage === 'contacted') patch.last_contacted_at = new Date().toISOString()
     if (stage === 'started_care') patch.confirmed_at = new Date().toISOString()
-    const updated = await admin.from('leads').update(patch).eq('id', sourceId).eq('doctor_id', doctorId).select('id')
+    const userId = await leadOwnerUserId(admin, doctorId)
+    if (!userId) return fail('The lead stage was not saved.')
+    const updated = await admin.from('leads').update(patch).eq('id', sourceId).eq('doctor_id', userId).select('id')
     if (updated.error || !updated.data?.length) return fail('The lead stage was not saved.')
     return { ok: true }
   }
@@ -253,7 +266,9 @@ async function requestTarget(doctorId: string, source: string, sourceId: string)
     return { profileId: row.data.profile_id || null, email: row.data.shared_email || null }
   }
   if (source === 'lead') {
-    const row = await admin.from('leads').select('id, email').eq('id', sourceId).eq('doctor_id', doctorId).maybeSingle()
+    const userId = await leadOwnerUserId(admin, doctorId)
+    if (!userId) return null
+    const row = await admin.from('leads').select('id, email').eq('id', sourceId).eq('doctor_id', userId).maybeSingle()
     if (!row.data?.id) return null
     return { profileId: null, email: row.data.email || null }
   }

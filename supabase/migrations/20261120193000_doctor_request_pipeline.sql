@@ -38,22 +38,8 @@ create table if not exists public.doctor_request_stage_events (
 create index if not exists doctor_request_stage_events_doctor_month_idx
   on public.doctor_request_stage_events (doctor_id, happened_at);
 
--- Some older leads stored the doctor's user id in doctor_id. Point those at doctors.id
--- before anything copies the column. A value that is already a doctors.id is left alone.
-update public.leads l
-set doctor_id = resolved.doctor_id
-from (
-  select distinct on (l2.id) l2.id as lead_id, d.id as doctor_id
-  from public.leads l2
-  join public.doctors d on d.user_id = l2.doctor_id
-  where l2.doctor_id is not null
-    and not exists (select 1 from public.doctors existing where existing.id = l2.doctor_id)
-  order by l2.id, d.id
-) resolved
-where l.id = resolved.lead_id;
-
 -- Current lead stage only. Contact columns are not copied.
--- doctor_id may be doctors.id or, on older rows, the doctor's user id.
+-- leads.doctor_id references profiles(id), the doctor's login. The pipeline stores doctors.id.
 insert into public.doctor_request_pipeline (doctor_id, source, source_id, stage, created_at, updated_at)
 select
   coalesce(d1.id, d2.id),
@@ -89,6 +75,7 @@ select
   case when v.status = 'seen' then 'contacted' else 'requested' end,
   v.created_at,
   now()
+-- community_visit_requests.doctor_id references doctors(id). d1 is the normal match.
 from public.community_visit_requests v
 left join public.doctors d1 on d1.id = v.doctor_id
 left join public.doctors d2 on d2.user_id = v.doctor_id

@@ -59,6 +59,8 @@ export async function getSetupFields(doctorId: string): Promise<SetupFields> {
 export async function getAttention(doctorId: string, unreadMessages: number): Promise<AttentionItem[]> {
   const admin = createAdminClient() as any;
   const staleBefore = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+  const doctor = await admin.from('doctors').select('user_id').eq('id', doctorId).maybeSingle();
+  const leadOwnerId = typeof doctor.data?.user_id === 'string' ? doctor.data.user_id : '';
   const [contacts, leads] = await Promise.all([
     admin
       .from('contact_requests')
@@ -66,13 +68,15 @@ export async function getAttention(doctorId: string, unreadMessages: number): Pr
       .eq('doctor_id', doctorId)
       .order('created_at', { ascending: false })
       .limit(6),
-    admin
-      .from('leads')
-      .select('id, name, created_at')
-      .eq('doctor_id', doctorId)
-      .eq('stage', 'new')
-      .lt('created_at', staleBefore)
-      .limit(4),
+    leadOwnerId
+      ? admin
+          .from('leads')
+          .select('id, name, created_at')
+          .eq('doctor_id', leadOwnerId)
+          .eq('stage', 'new')
+          .lt('created_at', staleBefore)
+          .limit(4)
+      : Promise.resolve({ data: [], error: null }),
   ]);
   const items: AttentionItem[] = [];
   if (!contacts.error && Array.isArray(contacts.data)) {

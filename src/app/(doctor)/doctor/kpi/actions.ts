@@ -375,10 +375,14 @@ async function loadLeadEvents(doctorId: string | null, valuesFrom: string): Prom
   if (!doctorId) return { events: [], ready: false }
   try {
     const admin = createAdminClient() as unknown as Loose
+    const owner = await admin.from('doctors').select('user_id').eq('id', doctorId).maybeSingle()
+    const leadOwnerId = typeof record(owner.data).user_id === 'string' ? String(record(owner.data).user_id) : ''
     const contacts = await admin.from('contact_requests').select('id, email, phone, created_at').eq('doctor_id', doctorId).gte('created_at', valuesFrom).limit(5000)
-    let leads = await admin.from('leads').select('id, email, phone, created_at').eq('doctor_id', doctorId).gte('created_at', valuesFrom).limit(5000)
+    let leads = leadOwnerId
+      ? await admin.from('leads').select('id, email, phone, created_at').eq('doctor_id', leadOwnerId).gte('created_at', valuesFrom).limit(5000)
+      : { data: [], error: null }
     if (leads.error && /column/i.test(leads.error.message || '')) {
-      leads = await admin.from('leads').select('id, email, created_at').eq('doctor_id', doctorId).gte('created_at', valuesFrom).limit(5000)
+      leads = await admin.from('leads').select('id, email, created_at').eq('doctor_id', leadOwnerId).gte('created_at', valuesFrom).limit(5000)
     }
     if (contacts.error && leads.error) return { events: [], ready: false }
     const events: LeadEvent[] = []

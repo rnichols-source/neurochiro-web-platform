@@ -136,7 +136,9 @@ export async function loadEarnedBadgeIds(doctor: {
     if (peerQuery && doctor.state) peerQuery = peerQuery.eq('state', doctor.state);
 
     const [leadsRes, contactsRes, seminarsRes, jobsRes, ceRes, matchProfileRes, matchPositionRes, peersRes, referralsRes] = await Promise.all([
-      admin.from('leads').select('id, stage, created_at, email, phone').eq('doctor_id', doctor.id),
+      userId
+        ? admin.from('leads').select('id, stage, created_at, email, phone').eq('doctor_id', userId)
+        : Promise.resolve({ data: [], error: null }),
       admin.from('contact_requests').select('id, contact_outcome, outcome_detail, created_at, email, phone').eq('doctor_id', doctor.id),
       userId
         ? admin.from('seminars').select('id, dates, is_past, is_approved').eq('host_id', userId).eq('is_approved', true)
