@@ -12,20 +12,11 @@ export default async function FeatureGate({ feature, children }: { feature: stri
   if (state === 'hidden') redirect('/doctor/dashboard');
   if (state === 'coming_soon') redirect(`/doctor/coming-soon#${spec.key}`);
   if (!requirementMet(spec, navCtx)) {
-    const alreadyPro = ctx.membership.tier === 'pro' || ctx.membership.tier === 'neuros' || ctx.membership.isFounder
-    const officeTool = spec.requires === 'practice_tools'
-    const body = officeTool
-      ? 'This office tool is for founding members and Pro accounts opened before July 15, 2026. Activating Pro does not open it.'
-      : 'This is part of Pro. Activate Pro to open it.'
     return (
       <div className="bg-white border border-portal-border rounded-xl p-6 max-w-lg">
         <h1 className="text-[26px] leading-8 font-bold text-portal-ink">{spec.label}</h1>
-        <p className="mt-2 text-[15px] leading-6 text-portal-ink-2">{body}</p>
-        {officeTool ? (
-          <Link href="/doctor/help" className="mt-4 min-h-11 inline-flex items-center px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">Ask about this tool</Link>
-        ) : alreadyPro ? null : (
-          <Link href="/doctor/billing" className="mt-4 min-h-11 inline-flex items-center px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">Activate Pro</Link>
-        )}
+        <p className="mt-2 text-[15px] leading-6 text-portal-ink-2">This is part of Pro. Activate Pro to open it.</p>
+        <Link href="/doctor/billing" className="mt-4 min-h-11 inline-flex items-center px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">Activate Pro</Link>
       </div>
     );
   }

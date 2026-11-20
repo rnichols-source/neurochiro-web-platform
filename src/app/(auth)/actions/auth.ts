@@ -144,7 +144,7 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const admin = createAdminClient() as any
     const staff = await admin.from('kpi_office_members').select('id').eq('member_user_id', data.user.id).eq('status', 'active').limit(1)
-    destination = !staff.error && staff.data?.length ? '/doctor/kpi' : '/'
+    destination = !staff.error && staff.data?.length ? '/doctor/people' : '/'
   }
 
   return redirect(destination)

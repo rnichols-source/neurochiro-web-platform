@@ -26,7 +26,7 @@ test('comped pro', () => {
   assert.equal(membership.tier, 'pro');
   assert.equal(membership.source, 'comped');
   assert.equal(membership.priceLabel, '$99/mo');
-  assert.equal(membership.hasPracticeTools, false);
+  assert.equal(membership.hasPracticeTools, true);
 });
 
 test('stripe active', () => {

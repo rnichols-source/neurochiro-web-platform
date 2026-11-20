@@ -48,7 +48,7 @@ export function PracticeView({
       <section className="rounded-[20px] bg-white p-4">
         <h2 className="dp-ui text-[16px] font-extrabold text-[#15202B]">Practice tools</h2>
         <p className="mt-1 text-[13px] text-[#5b6773]">Care plan, P&L, KPI, billing guide, achievements, and this month.</p>
-        {!hasPracticeTools ? <p className="mt-2 text-[14px] text-[#5b6773]">Some office tools open fully for founding members and Pro accounts created before July 15, 2026.</p> : null}
+        {!hasPracticeTools ? <p className="mt-2 text-[14px] text-[#5b6773]">Activate Pro to open these tools.</p> : null}
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {TOOLS.map((tool) => (
             <li key={tool.href}>

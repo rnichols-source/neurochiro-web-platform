@@ -8,13 +8,17 @@ import { libraryPlans, remedyGuide } from '@/lib/community/library-content'
 import { remedyChoices } from '@/lib/community/library-model'
 import { defaultTimesPerWeek } from '@/lib/doctor/follow-through'
 import { getDoctorTimezone } from '@/lib/doctor-timezone'
+import { practiceAccessForUser, staffMaySendHomePlan } from '@/lib/doctor/practice-access'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PeoplePage() {
   const ctx = await getPortalContext()
   if (!ctx) redirect('/login')
-  if (!ctx.doctor?.id) {
+  const practice = ctx.doctor?.id
+    ? { doctorId: ctx.doctor.id, state: ctx.doctor.state, country: ctx.doctor.country, staff: false }
+    : await practiceAccessForUser(ctx.userId)
+  if (!practice?.doctorId) {
     return (
       <div>
         <DoctorBand place="people" title="People" subtitle="People who ask to see you show up here." />
@@ -22,11 +26,11 @@ export default async function PeoplePage() {
       </div>
     )
   }
-  const timeZone = getDoctorTimezone(ctx.doctor.state, ctx.doctor.country, 'America/New_York') || 'America/New_York'
+  const timeZone = getDoctorTimezone(practice.state, practice.country, 'America/New_York') || 'America/New_York'
   const [data, choices, follow] = await Promise.all([
-    loadPeople(ctx.doctor.id, timeZone),
-    loadDoctorPlanChoices(ctx.doctor.id),
-    loadFollowThrough(ctx.doctor.id, new Date(), timeZone),
+    loadPeople(practice.doctorId, timeZone),
+    loadDoctorPlanChoices(practice.doctorId),
+    loadFollowThrough(practice.doctorId, new Date(), timeZone),
   ])
   const plans = libraryPlans().map((plan) => ({
     slug: plan.slug,
@@ -37,8 +41,8 @@ export default async function PeoplePage() {
   const nowIso = new Date().toISOString()
   return (
     <div>
-      <DoctorBand place="people" title="People" subtitle="Open a name, call them, then move the stage. Send a home plan in one tap." />
-      <PeopleDesk people={data.people} ready={data.ready} timeZone={timeZone} plans={plans} customSets={choices.customSets} remedies={remedies} followRows={follow.rows} nowIso={nowIso} />
+      <DoctorBand place="people" title="People" subtitle={practice.staff ? 'Open a name, call or text them, then move the stage.' : 'Open a name, call them, then move the stage. Send a home plan in one tap.'} />
+      <PeopleDesk people={data.people} ready={data.ready} timeZone={timeZone} plans={plans} customSets={choices.customSets} remedies={remedies} followRows={follow.rows} nowIso={nowIso} canSendPlans={staffMaySendHomePlan(practice.staff)} />
     </div>
   )
 }

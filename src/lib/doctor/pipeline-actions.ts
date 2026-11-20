@@ -16,6 +16,7 @@ import { updateContactRequest } from '@/lib/leads/schema'
 import { FROM_ADDRESS } from '@/lib/leads/config'
 import { doctorMayAssignProfile } from '@/lib/doctor/assign-access'
 import { isPipelineStage, stageWritePlan, type PipelineStage } from '@/lib/doctor/pipeline'
+import { requirePracticeAccess, staffMaySendHomePlan } from '@/lib/doctor/practice-access'
 type Result = { ok: true; message?: string } | { ok: false; error: string }
 
 async function insertWithTimes(admin: any, table: string, row: Record<string, unknown>, times: number) {
@@ -48,7 +49,7 @@ function refresh() {
 const PIPELINE_MISSING = 'That step needs the patient pipeline update from this change. It has not been applied on the database yet.'
 
 export async function setRequestStage(source: string, sourceId: string, stage: string): Promise<Result> {
-  const doctor = await requireDoctor()
+  const doctor = await requirePracticeAccess()
   if (!doctor) return fail('A doctor profile is required.')
   if (source !== 'visit' && source !== 'lead' && source !== 'contact_request') return fail('That request is not in your list.')
   if (!isPipelineStage(stage)) return fail('That stage is not one of the patient steps.')
@@ -149,8 +150,10 @@ type RecommendPlan =
   | { kind: 'remedy'; key: string; timesPerWeek?: number }
 
 export async function recommendHomePlan(input: { source: string; sourceId: string; plan: RecommendPlan }): Promise<Result> {
-  const doctor = await requireDoctor()
-  if (!doctor) return fail('A doctor profile is required.')
+  const access = await requirePracticeAccess()
+  if (!access) return fail('A doctor profile is required.')
+  if (!staffMaySendHomePlan(access.staff)) return fail('Sending a home plan stays on the doctor login.')
+  const doctor = { userId: access.userId, doctorId: access.doctorId }
   const target = await requestTarget(doctor.doctorId, input.source, input.sourceId)
   if (!target) return fail('That patient is not in your list.')
   const delivery = recommendDelivery({ profileId: target.profileId, email: target.email, kind: input.plan.kind })

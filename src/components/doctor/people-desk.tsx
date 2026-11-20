@@ -69,6 +69,7 @@ export function PeopleDesk({
   nowIso,
   openCard = false,
   plansOpen = false,
+  canSendPlans = true,
 }: {
   people: PersonCard[]
   ready: boolean
@@ -80,6 +81,7 @@ export function PeopleDesk({
   nowIso?: string
   openCard?: boolean
   plansOpen?: boolean
+  canSendPlans?: boolean
 }) {
   const counts = useMemo(() => {
     const map = new Map<StageId, number>()
@@ -213,7 +215,7 @@ export function PeopleDesk({
                 </button>
               )) : null}
             </div>
-            {pipelineRow(selected) && selected.source && selected.sourceId ? (
+            {canSendPlans && pipelineRow(selected) && selected.source && selected.sourceId ? (
               <RecommendPlan
                 source={selected.source}
                 sourceId={selected.sourceId}
