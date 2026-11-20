@@ -16,6 +16,7 @@ import {
 } from '@/lib/community/library-model'
 import { setExercisePassportShare, setExerciseReminder } from '@/lib/community/phase-actions'
 import { firstOpenPhase, splitPhaseName } from '@/lib/community/today'
+import { doctorCanSeeDoneLine } from '@/lib/doctor/follow-through'
 
 const care = AREAS.care
 
@@ -120,6 +121,7 @@ export function LibraryPlanBoard({ assignments }: { assignments: LibraryAssignme
         </div>
       </div>
       <p className="mt-3 text-[13px] text-[#5b6773]">{assignedByLine(assignment.doctorName)} · {parts.rest || phase.name}</p>
+      <p className="mt-1 text-[13px] text-[#3d4a57]">{doctorCanSeeDoneLine(assignment.doctorName)}</p>
       {assignment.note ? (
         <p className="mt-3 rounded-2xl bg-white px-3 py-2 text-[13px] leading-snug text-[#15202B]">
           <span className="font-semibold">{LIBRARY_COPY.doctorNoteHeading}. </span>

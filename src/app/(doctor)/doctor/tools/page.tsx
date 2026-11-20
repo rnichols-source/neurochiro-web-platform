@@ -2,6 +2,7 @@ import Link from 'next/link';
 import PageHeader from '@/components/portal/PageHeader';
 import { getPortalContext } from '@/lib/portal/context';
 import { redirect } from 'next/navigation';
+import { doctorCheckoutPrice } from '@/lib/portal/checkout-price';
 
 const TOOLS = [
   { href: '/doctor/care-plan', title: 'Care plan', detail: 'A visit-by-visit plan you can edit for your office.' },
@@ -51,7 +52,7 @@ export default async function ToolsPage() {
       ) : (
         <section className="bg-white border border-portal-border rounded-xl p-6">
           <h2 className="text-lg font-bold">Practice tools are not on this account</h2>
-          <p className="mt-2 text-sm text-portal-ink-2">Founding members and Pro accounts created before July 15, 2026 include these tools. The links stay off so nothing here dead-ends.</p>
+          <p className="mt-2 text-sm text-portal-ink-2">Founding members and Pro accounts created before July 15, 2026 include these tools. New memberships are {doctorCheckoutPrice().lockLine}. Your own locked rate does not change.</p>
         </section>
       )}
     </div>

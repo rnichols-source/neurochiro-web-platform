@@ -7,7 +7,7 @@ import type { TodayData } from '@/lib/doctor/portal-data'
 
 const TILES = [
   { id: 'people' as const, href: '/doctor/people', title: 'People' },
-  { id: 'care' as const, href: '/doctor/care-sets', title: 'Care sets' },
+  { id: 'care' as const, href: '/doctor/care-sets', title: 'Home plans' },
   { id: 'network' as const, href: '/doctor/network', title: 'Network' },
   { id: 'practice' as const, href: '/doctor/practice', title: 'Practice' },
 ]

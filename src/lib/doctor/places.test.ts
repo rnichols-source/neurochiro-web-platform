@@ -82,15 +82,13 @@ test('profile checklist counts six sections and names what is left', () => {
   assert.equal(done.percent, 100)
 })
 
-test('old sidebar tools open in one desktop click and two taps on a phone', () => {
-  const oldSidebar = [
-    '/doctor/dashboard',
-    '/doctor/profile',
+test('desktop sidebar leads with today, people, home plans, profile, and help', () => {
+  const primary = ['/doctor/dashboard', '/doctor/people', '/doctor/care-sets', '/doctor/profile', '/doctor/help']
+  const more = [
     '/doctor/messages',
     '/doctor/referral-network',
     '/doctor/notifications',
     '/doctor/visit-requests',
-    '/doctor/care-sets',
     '/doctor/introductions',
     '/doctor/community-interest',
     '/doctor/students',
@@ -98,14 +96,17 @@ test('old sidebar tools open in one desktop click and two taps on a phone', () =
     '/doctor/analytics',
     '/doctor/settings',
     '/doctor/billing',
-    '/doctor/help',
     '/doctor/care-plan',
     '/doctor/kpi',
     '/doctor/pl-analyzer',
     '/doctor/billing-guide',
   ]
-  for (const href of oldSidebar) {
+  for (const href of primary) {
     assert.equal(desktopClicks(href), 1, href)
+    assert.ok(mobileClicks(href) <= 2, href)
+  }
+  for (const href of more) {
+    assert.equal(desktopClicks(href), 2, href)
     assert.ok(mobileClicks(href) <= 2, href)
   }
   assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Profile')?.href, '/doctor/profile')

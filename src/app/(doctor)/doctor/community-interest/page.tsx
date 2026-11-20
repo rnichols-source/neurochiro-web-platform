@@ -26,7 +26,7 @@ export default async function CommunityInterestPage() {
       />
       {!ctx.doctor?.id ? <p className="text-sm text-portal-ink-2">A doctor profile is required.</p> : null}
       {ctx.doctor?.id && !located ? <p className="text-sm text-portal-ink-2">Add a state on your profile so interest near your office can show up here.</p> : null}
-      {!loaded.ready ? <p className="text-sm text-portal-ink-2">This saves with the latest database update.</p> : null}
+      {!loaded.ready ? <p className="text-sm text-portal-ink-2">Nothing is waiting here yet.</p> : null}
       {loaded.ready && located && loaded.rows.length === 0 ? (
         <EmptyState icon={Users} title="No open interest nearby" sentence="When a community member near your office raises a hand, it shows up here." />
       ) : null}

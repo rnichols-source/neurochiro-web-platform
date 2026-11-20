@@ -895,7 +895,7 @@ function ProfileEditor() {
                 </Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Label label="Instagram">
-                    <input name="instagram_url" defaultValue={profile?.instagram_url || ""} placeholder="https://instagram.com/yourpractice" className={INPUT} />
+                    <input id="instagram" name="instagram_url" defaultValue={profile?.instagram_url || ""} placeholder="https://instagram.com/yourpractice" className={INPUT} />
                   </Label>
                   <Label label="Facebook">
                     <input name="facebook_url" defaultValue={profile?.facebook_url || ""} placeholder="https://facebook.com/yourpractice" className={INPUT} />

@@ -1,7 +1,7 @@
 export const DOCTOR_PLACES = {
   today: { id: 'today', href: '/doctor', label: 'Today', color: '#D66829', ink: '#B4501A', dark: '#B4501A', tint: '#FCEBDF' },
   people: { id: 'people', href: '/doctor/people', label: 'People', color: '#2C6BB4', ink: '#1F4F8C', dark: '#1F4F8C', tint: '#E2ECF8' },
-  care: { id: 'care', href: '/doctor/care-sets', label: 'Care sets', color: '#0E857A', ink: '#0A6159', dark: '#0A6159', tint: '#DCF1EE' },
+  care: { id: 'care', href: '/doctor/care-sets', label: 'Home plans', color: '#0E857A', ink: '#0A6159', dark: '#0A6159', tint: '#DCF1EE' },
   network: { id: 'network', href: '/doctor/network', label: 'Network', color: '#7A4A94', ink: '#5C3473', dark: '#5C3473', tint: '#EFE5F5' },
   practice: { id: 'practice', href: '/doctor/practice', label: 'Practice', color: '#1E2D3B', ink: '#1E2D3B', dark: '#15202B', tint: '#E5E9EE' },
 } as const
@@ -84,19 +84,18 @@ export const PARKED_TOOL_PREFIXES = [
   '/doctor/marketplace',
 ] as const
 
-const ONE_CLICK_DESKTOP = new Set<string>([
+const PRIMARY_DESKTOP = new Set<string>([
   '/doctor',
   '/doctor/dashboard',
-  '/doctor/messages',
-  '/doctor/coming-soon',
-  ...DOCTOR_PLACE_LIST.map((item) => item.href),
-  ...DOCTOR_TOOL_LINKS.map((item) => item.href),
+  '/doctor/people',
+  '/doctor/care-sets',
+  '/doctor/profile',
+  '/doctor/help',
 ])
 
 export function desktopClicks(href: string): number {
   const path = (href.split('?')[0] || '/').replace(/\/$/, '') || '/'
-  if (path === '/doctor/referral-network') return 1
-  return ONE_CLICK_DESKTOP.has(path) ? 1 : 2
+  return PRIMARY_DESKTOP.has(path) ? 1 : 2
 }
 
 export function mobileClicks(href: string): number {
@@ -378,7 +377,7 @@ export function communityMemberCopy(error: string): string {
     .replace(/patient/gi, 'community member')
 }
 
-export function agoLabel(iso: string, now = Date.now()): string {
+export function agoLabel(iso: string, now = Date.now(), timeZone?: string): string {
   const ms = now - new Date(iso).getTime()
   if (!Number.isFinite(ms) || ms < 0) return ''
   const min = Math.round(ms / 60000)
@@ -388,7 +387,28 @@ export function agoLabel(iso: string, now = Date.now()): string {
   if (hr < 24) return `${hr}h ago`
   const day = Math.round(hr / 24)
   if (day < 14) return `${day}d ago`
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(iso))
+  return doctorClock(iso, timeZone, false)
+}
+
+/** Clock time in the doctor's zone. Dates older than two weeks omit the hour when short is set. */
+export function doctorClock(iso: string, timeZone?: string | null, withTime = true): string {
+  const date = new Date(iso)
+  if (!Number.isFinite(date.getTime())) return ''
+  const zone = timeZone || undefined
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      ...(withTime ? { hour: 'numeric', minute: '2-digit' } : {}),
+      timeZone: zone,
+    }).format(date)
+  } catch {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      ...(withTime ? { hour: 'numeric', minute: '2-digit' } : {}),
+    }).format(date)
+  }
 }
 
 export function initialsFrom(name: string): string {

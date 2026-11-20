@@ -15,7 +15,7 @@ export function AssignForm({ members }: { members: { id: string; label: string }
   const [pending, start] = useTransition()
 
   if (members.length === 0) {
-    return <p className="text-sm text-portal-ink-2">When a community member chooses you as their home doctor, you can assign a set in your own words.</p>
+    return <p className="text-sm text-portal-ink-2">When someone with an account is in your People list, you can write a short plan for them here. From their card you can also email a plan.</p>
   }
 
   return (
@@ -41,7 +41,7 @@ export function AssignForm({ members }: { members: { id: string; label: string }
     >
       {error ? <p className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-neuro-orange" role="alert">{error}</p> : null}
       <label className="block text-sm font-semibold text-portal-ink">
-        Community member
+        Person
         <select className="mt-1 min-h-11 w-full rounded-lg border border-portal-border px-3 text-sm" value={profileId} onChange={(event) => setProfileId(event.target.value)}>
           {members.map((member) => <option key={member.id} value={member.id}>{member.label}</option>)}
         </select>

@@ -9,6 +9,7 @@ import {
   trySampleSet,
 } from '@/lib/community/phase-actions'
 import { FormError } from '@/components/community/ui'
+import { doctorCanSeeDoneLine } from '@/lib/doctor/follow-through'
 
 type ExerciseCard = {
   id: string
@@ -18,6 +19,7 @@ type ExerciseCard = {
   reminder: boolean
   shareOnPassport: boolean
   status: 'active' | 'done'
+  doctorName?: string | null
   steps: { id: string; position: number; label: string; done: boolean }[]
 }
 
@@ -45,6 +47,7 @@ export function ExerciseBoard({ assignments, sampleReady }: { assignments: Exerc
           <h2 className="mt-1 font-heading text-[16px] font-bold text-neuro-navy">{assignment.title}</h2>
           {assignment.note ? <p className="mt-1 text-[13px] leading-snug text-[#3d4a57]">{assignment.note}</p> : null}
           <p className="mt-1 text-[12.5px] text-[#6b7785]">{assignment.status === 'done' ? 'Marked done' : 'In progress'}</p>
+          {assignment.sample ? null : <p className="mt-1 text-[13px] text-[#3d4a57]">{doctorCanSeeDoneLine(assignment.doctorName)}</p>}
           <ul className="mt-3 space-y-2">
             {assignment.steps.map((step) => (
               <li key={step.id}>
@@ -95,7 +98,7 @@ export function ExerciseBoard({ assignments, sampleReady }: { assignments: Exerc
             onClick={() => run(() => trySampleSet())}
             className="mt-2 min-h-11 rounded-[11px] bg-neuro-navy px-3 text-[13px] font-semibold text-white disabled:opacity-60"
           >
-            {sampleReady ? 'Try the sample set' : 'Sample set saves with the database update'}
+            {sampleReady ? 'Try the sample set' : 'The sample set is not ready yet'}
           </button>
         </div>
       ) : null}

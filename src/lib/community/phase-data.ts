@@ -194,7 +194,7 @@ export async function loadExercises(profileId: string): Promise<{ ready: boolean
   const admin = createAdminClient() as any
   const rich = await admin
     .from('community_exercise_assignments')
-    .select('id, set_id, library_plan_slug, doctor_id, doctor_note, reminder_enabled, share_on_passport, status, created_at')
+    .select('id, set_id, library_plan_slug, doctor_id, doctor_note, reminder_enabled, share_on_passport, status, created_at, opened_at')
     .eq('profile_id', profileId)
     .order('created_at', { ascending: false })
     .limit(24)
@@ -207,6 +207,12 @@ export async function loadExercises(profileId: string): Promise<{ ready: boolean
       .limit(24)
     : rich
   if (rows.error) return { ready: false, assignments: [], sampleReady: false }
+  if (!rich.error && rich.data) {
+    const unseen = (rich.data as { id: string; opened_at?: string | null }[]).filter((row) => row.id && !row.opened_at).map((row) => row.id)
+    if (unseen.length) {
+      await admin.from('community_exercise_assignments').update({ opened_at: new Date().toISOString() }).in('id', unseen).is('opened_at', null)
+    }
+  }
   const data = rows.data || []
   const setIds = [...new Set(data.map((row: { set_id?: string | null }) => row.set_id).filter(Boolean))] as string[]
   const sets = setIds.length

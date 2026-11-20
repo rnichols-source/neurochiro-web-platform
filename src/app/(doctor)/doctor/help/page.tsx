@@ -5,6 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/portal/PageHeader';
 import { usePortal } from '@/components/portal/PortalProvider';
 import { Suspense } from 'react';
+import { sendHelpMessage } from './actions';
+import { ONBOARDING_CONFIG } from '@/lib/onboarding-config';
+import { REPLY_TO } from '@/lib/leads/config';
 
 const TOPICS = ['Profile', 'Visit requests', 'Billing', 'Seminars', 'Bug', 'Other'];
 
@@ -25,34 +28,44 @@ function HelpForm() {
     const match = TOPICS.find((item) => item.toLowerCase() === topic.toLowerCase());
     return match || (topic ? 'Other' : 'Profile');
   }, [topic]);
-  const [status, setStatus] = useState<'idle' | 'sent'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sent' | 'error'>('idle');
+  const [error, setError] = useState('');
+  const [sending, setSending] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    await fetch('/api/leads', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: ctx.email,
-        first_name: ctx.fullName,
-        source: 'contact_form',
-        role: 'contact',
-        location: ctx.doctor?.clinic_name || null,
-        metadata: {
-          subject: String(form.get('topic') || initialTopic),
-          message: String(form.get('message') || ''),
-          clinic: ctx.doctor?.clinic_name || '',
-        },
-      }),
-    });
-    setStatus('sent');
+    setSending(true);
+    setError('');
+    try {
+      const result = await sendHelpMessage({
+        name: String(form.get('name') || ''),
+        email: String(form.get('email') || ''),
+        clinic: String(form.get('clinic') || ''),
+        topic: String(form.get('topic') || initialTopic),
+        message: String(form.get('message') || ''),
+      });
+      setSending(false);
+      if (!result.ok) {
+        setStatus('error');
+        setError(result.error);
+        return;
+      }
+      setStatus('sent');
+    } catch {
+      setSending(false);
+      setStatus('error');
+      setError('The message was not sent. Try again.');
+    }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader title="Help" description="Ask us anything about your account." />
-      <p className="text-sm">Email us: <a className="text-portal-accent font-bold" href="mailto:support@neurochirodirectory.com">support@neurochirodirectory.com</a></p>
+      <p className="text-sm">
+        <a className="font-bold text-portal-accent" href={ONBOARDING_CONFIG.CALENDLY_SPOTLIGHT} target="_blank" rel="noreferrer">Book a Spotlight interview</a>
+      </p>
+      <p className="text-sm">Email us: <a className="text-portal-accent font-bold" href={`mailto:${REPLY_TO}`}>{REPLY_TO}</a></p>
       {status === 'sent' ? (
         <p className="bg-white border border-portal-border rounded-xl p-4 text-sm">Message received. We will reply within 24 hours.</p>
       ) : (
@@ -74,7 +87,8 @@ function HelpForm() {
           <label className="block text-sm font-bold">Message
             <textarea name="message" required rows={5} className="mt-1 w-full px-3 py-2 rounded-lg border border-portal-border text-base" />
           </label>
-          <button type="submit" className="min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">Send</button>
+          <button type="submit" disabled={sending} className="min-h-11 px-4 rounded-lg bg-portal-accent text-white text-sm font-bold disabled:opacity-60">{sending ? 'Sending…' : 'Send'}</button>
+          {status === 'error' ? <p className="text-sm text-neuro-orange" role="alert">{error}</p> : null}
         </form>
       )}
       <section className="space-y-3">

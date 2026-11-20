@@ -18,6 +18,7 @@ import {
   todayKey,
 } from '@/lib/community/library-model'
 import { schemaNotReady } from '@/lib/community/phase-data'
+import { doctorMayAssignProfile } from '@/lib/doctor/assign-access'
 
 type Result = { ok: true } | { ok: false; error: string }
 
@@ -59,8 +60,8 @@ export async function assignLibraryPlan(input: { profileId: string; slug: string
   const note = parseDoctorNote(input.note || '')
   if ('error' in note) return fail(note.error)
   const admin = createAdminClient() as any
-  const link = await admin.from('community_home_doctors').select('profile_id').eq('doctor_id', doctor.doctorId).eq('profile_id', input.profileId).maybeSingle()
-  if (!link.data?.profile_id) return fail(LIBRARY_COPY.notHomeDoctor)
+  const allowed = await doctorMayAssignProfile(admin, doctor.doctorId, input.profileId)
+  if (!allowed) return fail('That patient is not in your list.')
   const existing = await admin
     .from('community_exercise_assignments')
     .select('id')

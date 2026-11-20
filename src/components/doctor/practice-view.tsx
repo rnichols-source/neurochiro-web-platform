@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ProfileChecklist } from '@/lib/doctor/places'
+import { ONBOARDING_CONFIG } from '@/lib/onboarding-config'
 
 const TOOLS = [
   { href: '/doctor/care-plan', title: 'Care plan', detail: 'A visit-by-visit plan for your office' },
@@ -69,6 +70,7 @@ export function PracticeView({
       </section>
       <Row href="/doctor/notifications" title="Notifications" detail="Alerts for your office" iconBg="#D66829" />
       <Row href="/doctor/settings" title="Settings" detail="Notifications, account, and text alerts" iconBg="#0E857A" />
+      <a href={ONBOARDING_CONFIG.CALENDLY_SPOTLIGHT} target="_blank" rel="noreferrer" className="dp-ui flex min-h-11 items-center rounded-[20px] bg-white px-4 text-[16px] font-extrabold text-[#15202B]">Book a Spotlight interview</a>
       <Link prefetch href="/doctor/help" className="dp-ui inline-flex min-h-11 items-center px-1 text-[14px] font-extrabold text-[#1E2D3B]">Help</Link>
       <Link prefetch href="/doctor/coming-soon" className="flex items-center justify-between rounded-[20px] border border-dashed border-[#E3C27A] bg-[#FFF8F1] px-4 py-4">
         <span>
