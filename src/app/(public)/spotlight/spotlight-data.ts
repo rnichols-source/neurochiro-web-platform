@@ -397,6 +397,21 @@ export const spotlightEpisodes: SpotlightEpisode[] = [
     episodeNumber: 24,
     publishedAt: "2026-11-13T12:00:00Z",
   },
+  {
+    id: "ep-028",
+    doctorName: "Dr. Kai Bennett",
+    doctorSlug: "kai-bennett",
+    clinicName: "Optimal Health and Performance",
+    city: "Prescott Valley",
+    state: "AZ",
+    videoUrl: "https://www.youtube.com/embed/jRh_ccAbbQk",
+    thumbnail: "https://img.youtube.com/vi/jRh_ccAbbQk/hqdefault.jpg",
+    quote: "The reset button is in the brain.",
+    description:
+      "Dr. Kai Bennett leads Optimal Health and Performance in Prescott Valley, Arizona, and has been in practice for 27 years. He shares how a year and a half of architecture school and summer jobs for a chiropractor led him to Palmer, his first 12 years practicing in his hometown of Flagstaff, why the inquisitive mind keeps him learning, why he calls the upper neck the fuse box to the body, how he thinks about finding and hitting the brain's reset button, and what seven years of coaching basketball and muscle activation work taught him.",
+    episodeNumber: 28,
+    publishedAt: "2026-11-12T12:00:00Z",
+  },
 ];
 
 /** Patient-facing episodes first. Falls back to the newest episodes. */
