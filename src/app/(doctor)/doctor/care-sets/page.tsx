@@ -27,7 +27,7 @@ export default async function CareSetsPage({ searchParams }: { searchParams: Pro
       loadCareUsage(ctx.doctor.id),
       loadFollowThrough(ctx.doctor.id, new Date(), timeZone),
     ])
-    : [[], {}, { rows: [], counts: { recommended: 0, opened: 0, following: 0, slipping: 0 }, ready: false }]
+    : [[], {}, { rows: [], counts: { all: 0, onTrack: 0, falling: 0, stopped: 0 }, ready: false }]
   const categories = categoriesInUse(plans).map((id) => ({ id, label: CATEGORY_LABELS[id] }))
   const previews: CarePreview[] = plans.map((plan) => ({
     slug: plan.slug,
@@ -48,7 +48,7 @@ export default async function CareSetsPage({ searchParams }: { searchParams: Pro
       <DoctorBand
         place="care"
         title="Home plans"
-        subtitle="Recommend a plan, then see who is following it."
+        subtitle="Send a home plan, then see who is on track."
       >
         <span className="hidden rounded-2xl bg-white/20 px-3 py-2 text-center dp-ui text-[22px] font-extrabold leading-none lg:block">
           {LIBRARY_PLAN_COUNT}

@@ -64,18 +64,22 @@ export function PeopleDesk({
   timeZone,
   plans,
   customSets,
+  remedies = [],
   followRows = [],
   nowIso,
   openCard = false,
+  plansOpen = false,
 }: {
   people: PersonCard[]
   ready: boolean
   timeZone: string
-  plans: { slug: string; name: string }[]
+  plans: { slug: string; name: string; timesPerWeek?: number }[]
   customSets: { id: string; title: string }[]
+  remedies?: { key: string; name: string; section: string }[]
   followRows?: FollowRow[]
   nowIso?: string
   openCard?: boolean
+  plansOpen?: boolean
 }) {
   const counts = useMemo(() => {
     const map = new Map<StageId, number>()
@@ -162,7 +166,7 @@ export function PeopleDesk({
             <p className="dp-ui text-[12px] font-extrabold text-[#2C6BB4]">{pipelineRow(selected) ? 'Patient request' : selected.kind.replace('_', ' ')}</p>
             <h2 className="dp-ui mt-1 text-[28px] font-extrabold tracking-[-0.02em] text-[#15202B]">{selected.name}</h2>
             <p className="mt-2 text-[15px] font-bold text-[#15202B]">{rowLabel(selected)}</p>
-            {followLabel ? <p className="mt-1 text-[14px] text-[#0A6159]">Home plan: {followLabel}. <Link href="/doctor/care-sets" className="font-extrabold underline">Open follow-through</Link></p> : null}
+            {followLabel ? <p className="mt-1 text-[14px] text-[#0A6159]">Follow-through: {followLabel}. <Link href="/doctor/care-sets" className="font-extrabold underline">Open the board</Link></p> : null}
             {pipelineRow(selected) ? (
               <div className="mt-4 space-y-2 text-[15px] text-[#15202B]">
                 <p>{selected.phone ? selected.phone : 'No phone was shared.'}</p>
@@ -211,7 +215,9 @@ export function PeopleDesk({
                 sourceId={selected.sourceId}
                 plans={plans}
                 customSets={customSets}
+                remedies={remedies}
                 highlight={selected.stage === 'started_care'}
+                startOpen={plansOpen}
               />
             ) : null}
             {note ? <p className="mt-3 text-[14px] text-[#15202B]">{note}</p> : null}

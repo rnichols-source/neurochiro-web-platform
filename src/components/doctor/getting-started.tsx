@@ -8,7 +8,7 @@ const STEPS = [
   { href: '/doctor/profile', title: 'Complete your profile', detail: 'Photo, bio, city, and hours. Patients read this before they request you.' },
   { href: '/doctor/profile#instagram', title: 'Add Instagram', detail: 'The link goes on your public profile.' },
   { href: '/doctor/people', title: 'How requests work', detail: 'A patient request lands in People. Tap the name for phone, email, and the next stage.' },
-  { href: '/doctor/care-sets', title: 'How to recommend a home plan', detail: 'Open a patient, tap Recommend a home plan, then tap the plan. Follow-through is on Home plans.' },
+  { href: '/doctor/care-sets', title: 'How to send a home plan', detail: 'Open a patient, tap Send a home plan, then tap the plan. Follow-through is on Home plans.' },
 ]
 
 export function GettingStarted({

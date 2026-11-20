@@ -5,8 +5,10 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { sendCareSetInvite } from '@/lib/community/library-actions'
 import { assignExerciseSet } from '@/lib/community/phase-actions'
-import { libraryPlans } from '@/lib/community/library-content'
-import { planBySlug } from '@/lib/community/library-model'
+import { libraryPlans, remedyGuide } from '@/lib/community/library-content'
+import { LIBRARY_COPY, planBySlug, plainGuideLabel, remedyAnchor, remedyByKey } from '@/lib/community/library-model'
+import { schemaNotReady } from '@/lib/community/phase-data'
+import { clampTimesPerWeek, recommendDelivery } from '@/lib/doctor/follow-through'
 import { parseExerciseDraft, reminderLine } from '@/lib/community/phases'
 import { isMissingTable } from '@/lib/leads/schema'
 import { outcomePatch, stageToAckAction } from '@/lib/leads/outcomes'
@@ -14,9 +16,14 @@ import { updateContactRequest } from '@/lib/leads/schema'
 import { FROM_ADDRESS } from '@/lib/leads/config'
 import { doctorMayAssignProfile } from '@/lib/doctor/assign-access'
 import { isPipelineStage, stageWritePlan, type PipelineStage } from '@/lib/doctor/pipeline'
-import { recommendDelivery } from '@/lib/doctor/follow-through'
-
 type Result = { ok: true; message?: string } | { ok: false; error: string }
+
+async function insertWithTimes(admin: any, table: string, row: Record<string, unknown>, times: number) {
+  const withTimes = await admin.from(table).insert({ ...row, times_per_week: times }).select('id').maybeSingle()
+  if (!withTimes.error) return withTimes
+  if (!schemaNotReady(withTimes.error)) return withTimes
+  return admin.from(table).insert(row).select('id').maybeSingle()
+}
 
 function fail(error: string): Result {
   return { ok: false, error }
@@ -136,9 +143,10 @@ async function mirrorLegacyStage(admin: any, doctorId: string, sourceId: string,
 }
 
 type RecommendPlan =
-  | { kind: 'library'; slug: string }
-  | { kind: 'custom'; setId: string }
-  | { kind: 'new'; title: string; note: string; stepsText: string }
+  | { kind: 'library'; slug: string; timesPerWeek?: number }
+  | { kind: 'custom'; setId: string; timesPerWeek?: number }
+  | { kind: 'new'; title: string; note: string; stepsText: string; timesPerWeek?: number }
+  | { kind: 'remedy'; key: string; timesPerWeek?: number }
 
 export async function recommendHomePlan(input: { source: string; sourceId: string; plan: RecommendPlan }): Promise<Result> {
   const doctor = await requireDoctor()
@@ -149,11 +157,24 @@ export async function recommendHomePlan(input: { source: string; sourceId: strin
   if (!delivery.ok) return fail(delivery.error)
   const admin = createAdminClient() as any
 
+  if (input.plan.kind === 'remedy') {
+    return sendRemedy(admin, doctor.doctorId, target, input.plan.key, clampTimesPerWeek(input.plan.timesPerWeek))
+  }
+
+  const times = clampTimesPerWeek(input.plan.timesPerWeek)
+
   if (input.plan.kind === 'library') {
     if (target.profileId) {
       const { assignLibraryPlan } = await import('@/lib/community/library-actions')
-      const assigned = await assignLibraryPlan({ profileId: target.profileId, slug: input.plan.slug, note: '' })
-      if (!assigned.ok) return fail(assigned.error)
+      const assigned = await assignLibraryPlan({ profileId: target.profileId, slug: input.plan.slug, note: '', timesPerWeek: times })
+      if (!assigned.ok) {
+        if (assigned.error === LIBRARY_COPY.alreadyAssigned) {
+          await admin.from('community_exercise_assignments').update({ times_per_week: times }).eq('profile_id', target.profileId).eq('library_plan_slug', input.plan.slug).eq('doctor_id', doctor.doctorId).eq('status', 'active')
+          refresh()
+          return { ok: true, message: 'That plan is already on their list. How often was saved.' }
+        }
+        return fail(assigned.error)
+      }
       refresh()
       return { ok: true, message: 'Home plan sent. It is on their Care page.' }
     }
@@ -163,6 +184,7 @@ export async function recommendHomePlan(input: { source: string; sourceId: strin
       slug: input.plan.slug,
       note: '',
       message: 'I put a home plan aside for you on NeuroChiro. Create your free account with this email and it will be waiting.',
+      timesPerWeek: times,
     })
     if (!invited.ok) return fail(invited.error)
     refresh()
@@ -178,6 +200,7 @@ export async function recommendHomePlan(input: { source: string; sourceId: strin
       title: input.plan.title,
       note: input.plan.note,
       stepsText: input.plan.stepsText,
+      timesPerWeek: times,
     })
     if (!assigned.ok) return fail(assigned.error)
     refresh()
@@ -189,12 +212,12 @@ export async function recommendHomePlan(input: { source: string; sourceId: strin
   if (target.profileId) {
     const allowed = await doctorMayAssignProfile(admin, doctor.doctorId, target.profileId)
     if (!allowed) return fail('That patient is not in your list.')
-    const assignment = await admin.from('community_exercise_assignments').insert({
+    const assignment = await insertWithTimes(admin, 'community_exercise_assignments', {
       profile_id: target.profileId,
       set_id: set.data.id,
       doctor_id: doctor.doctorId,
       status: 'active',
-    }).select('id').maybeSingle()
+    }, times)
     if (!assignment.data?.id) return fail('We could not send that plan.')
     await admin.from('notifications').insert({
       user_id: target.profileId,
@@ -271,6 +294,81 @@ async function sendCustomEmail(admin: any, doctorId: string, email: string | nul
   return { ok: true, message: 'Email sent with the steps.' }
 }
 
+async function sendRemedy(
+  admin: any,
+  doctorId: string,
+  target: { profileId: string | null; email: string | null },
+  key: string,
+  times: number,
+): Promise<Result> {
+  const card = remedyByKey(remedyGuide(), key)
+  if (!card) return fail('That remedy is not in the guide.')
+  const name = plainGuideLabel(card.name) || 'Home remedy'
+  const link = `/portal/care/remedies/${card.sectionId}#${remedyAnchor(key)}`
+  if (target.profileId) {
+    const existing = await admin
+      .from('community_remedy_recommendations')
+      .select('id')
+      .eq('doctor_id', doctorId)
+      .eq('profile_id', target.profileId)
+      .eq('remedy_key', key)
+      .eq('status', 'active')
+      .maybeSingle()
+    if (schemaNotReady(existing.error)) return fail('Home remedies need the latest database update.')
+    if (existing.data?.id) {
+      await admin.from('community_remedy_recommendations').update({ times_per_week: times }).eq('id', existing.data.id)
+      refresh()
+      return { ok: true, message: 'That remedy is already on their list. How often was saved.' }
+    }
+    const saved = await admin.from('community_remedy_recommendations').insert({
+      doctor_id: doctorId,
+      profile_id: target.profileId,
+      remedy_key: key,
+      times_per_week: times,
+      status: 'active',
+    }).select('id').maybeSingle()
+    if (schemaNotReady(saved.error)) return fail('Home remedies need the latest database update.')
+    if (!saved.data?.id) return fail('We could not send that remedy.')
+    await admin.from('notifications').insert({
+      user_id: target.profileId,
+      title: 'A home remedy from your doctor',
+      body: `${name} is in your home remedy guide. It supports what you already do at home. It is not a substitute for a visit.`,
+      type: 'system',
+      priority: 'info',
+      link,
+    })
+    refresh()
+    return { ok: true, message: 'Remedy sent. It is in their home remedy guide.' }
+  }
+  const to = (target.email || '').trim().toLowerCase()
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return fail('They did not share an email, so the remedy cannot be sent.')
+  const saved = await admin.from('community_remedy_recommendations').insert({
+    doctor_id: doctorId,
+    email: to,
+    remedy_key: key,
+    times_per_week: times,
+    status: 'active',
+  }).select('id').maybeSingle()
+  if (schemaNotReady(saved.error)) return fail('Home remedies need the latest database update.')
+  if (!saved.data?.id) return fail('We could not send that remedy.')
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'
+  const keyEnv = process.env.RESEND_API_KEY
+  if (!keyEnv) return fail('Email is not configured on this server, so nothing was sent.')
+  const { Resend } = await import('resend')
+  const sent = await new Resend(keyEnv).emails.send({
+    from: FROM_ADDRESS,
+    to,
+    subject: `${name} from your NeuroChiro doctor`,
+    text: `${name} is in the home remedy guide.\n\nOpen it: ${site}${link}\n\nneurochiro.co\n`,
+  })
+  if (sent.error) {
+    await admin.from('community_remedy_recommendations').delete().eq('id', saved.data.id)
+    return fail('The email did not send. Nothing was marked as sent.')
+  }
+  refresh()
+  return { ok: true, message: 'Remedy emailed. It will show on the board as an invite until they join.' }
+}
+
 export async function nudgeHomePlan(assignmentId: string): Promise<Result> {
   const doctor = await requireDoctor()
   if (!doctor) return fail('A doctor profile is required.')
@@ -297,4 +395,27 @@ export async function nudgeHomePlan(assignmentId: string): Promise<Result> {
   })
   refresh()
   return { ok: true, message: 'Nudge sent. It shows on their week page. No extra email.' }
+}
+
+export async function nudgeRemedy(recommendationId: string): Promise<Result> {
+  const doctor = await requireDoctor()
+  if (!doctor) return fail('A doctor profile is required.')
+  if (!/^[0-9a-f-]{36}$/i.test(recommendationId || '')) return fail('That remedy is not on your list.')
+  const admin = createAdminClient() as any
+  const row = await admin.from('community_remedy_recommendations').select('id, profile_id, remedy_key, doctor_id').eq('id', recommendationId).eq('doctor_id', doctor.doctorId).maybeSingle()
+  if (schemaNotReady(row.error)) return fail('Home remedies need the latest database update.')
+  if (!row.data?.id || !row.data.profile_id) return fail('That remedy is not on your list.')
+  const card = remedyByKey(remedyGuide(), row.data.remedy_key)
+  const name = card ? (plainGuideLabel(card.name) || 'Home remedy') : 'Home remedy'
+  const link = card ? `/portal/care/remedies/${card.sectionId}#${remedyAnchor(row.data.remedy_key)}` : '/portal/care/remedies'
+  await admin.from('notifications').insert({
+    user_id: row.data.profile_id,
+    title: 'A quiet reminder',
+    body: reminderLine(name),
+    type: 'system',
+    priority: 'info',
+    link,
+  })
+  refresh()
+  return { ok: true, message: 'Nudge sent. It shows in their remedy guide. No extra email.' }
 }
