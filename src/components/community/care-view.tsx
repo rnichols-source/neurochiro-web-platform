@@ -67,7 +67,7 @@ export function CareView({
               <span className="absolute right-4 top-4 grid h-11 w-11 place-items-center rounded-[14px] bg-white/20">
                 <LinkIcon />
               </span>
-              <p className="text-[12px] font-bold text-white/90">{plan.assignedBy}</p>
+              <p className="text-[12px] font-bold text-white">{plan.assignedBy}</p>
               <h3 className="nc-ui mr-14 mt-1.5 text-[19px] font-extrabold leading-tight tracking-[-0.02em] text-white lg:text-[24px]">{plan.title}</h3>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {plan.phases.map((phase) => (
@@ -76,7 +76,7 @@ export function CareView({
                   </span>
                 ))}
               </div>
-              <p className="mt-2.5 text-[13px] text-white/95">{plan.meta}</p>
+              <p className="mt-2.5 text-[13px] text-white">{plan.meta}</p>
               <Link prefetch href="/portal/care/exercises" className="nc-ui mt-3.5 flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-white text-[16px] font-extrabold text-[#0A6159]">
                 Open my plan
                 <ChevronIcon size={18} />
@@ -100,7 +100,7 @@ export function CareView({
                 id="remedy-q"
                 name="q"
                 placeholder="What's going on? e.g. sore throat"
-                className="h-11 w-full bg-transparent text-[15px] text-[#15202B] outline-none placeholder:text-[#7d8893]"
+                className="h-11 w-full bg-transparent text-[15px] text-[#15202B] outline-none placeholder:text-[#5b6773]"
               />
             </form>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -137,7 +137,7 @@ function DoctorRow({ doctor, onBand = false }: { doctor: CareDoctor | null; onBa
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#E5E9EE] nc-ui text-[14px] font-extrabold text-[#1E2D3B]">NC</span>
         <div className="min-w-0 flex-1">
           <p className={`nc-ui text-[15px] font-extrabold ${onBand ? 'text-white' : 'text-[#15202B]'}`}>Choose a home doctor</p>
-          <p className={`text-[13px] ${onBand ? 'text-white/85' : 'text-[#5b6773]'}`}>A listed nervous system chiropractor</p>
+          <p className={`text-[13px] ${onBand ? 'text-white' : 'text-[#5b6773]'}`}>A listed nervous system chiropractor</p>
         </div>
         <Link prefetch href="/portal/find" className={`nc-ui inline-flex min-h-11 items-center rounded-xl px-3 text-[13px] font-extrabold ${onBand ? 'bg-white text-[#0A6159]' : 'bg-[#0E857A] text-white'}`}>
           Find
@@ -154,7 +154,7 @@ function DoctorRow({ doctor, onBand = false }: { doctor: CareDoctor | null; onBa
       )}
       <div className="min-w-0 flex-1">
         <p className={`nc-ui truncate text-[15px] font-extrabold ${onBand ? 'text-white' : 'text-[#15202B]'}`}>{doctor.title}</p>
-        <p className={`truncate text-[13px] ${onBand ? 'text-white/85' : 'text-[#5b6773]'}`}>{doctor.meta}</p>
+        <p className={`truncate text-[13px] ${onBand ? 'text-white' : 'text-[#5b6773]'}`}>{doctor.meta}</p>
       </div>
       {doctor.listed ? (
         <Link prefetch href={`/portal/visit?doctor=${doctor.id}`} className={`nc-ui inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-[13px] font-extrabold ${onBand ? 'bg-white text-[#0A6159]' : 'bg-[#0E857A] text-white'}`}>

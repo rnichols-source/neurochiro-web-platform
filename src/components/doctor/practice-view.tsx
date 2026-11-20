@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { ProfileChecklist } from '@/lib/doctor/places'
+import { ONBOARDING_CONFIG } from '@/lib/onboarding-config'
 
 const TOOLS = [
   { href: '/doctor/care-plan', title: 'Care plan', detail: 'A visit-by-visit plan for your office' },
@@ -43,11 +44,11 @@ export function PracticeView({
         Edit profile
       </Link>
       <Row href="/doctor/analytics" title="Analytics" detail={views} iconBg="#2C6BB4" />
-      <Row href="/doctor/billing" title="Membership and billing" detail={plan} iconBg="#1E2D3B" />
+      <Row href="/doctor/billing" title="Update card" detail="Billing, receipts, and your plan" iconBg="#1E2D3B" />
       <section className="rounded-[20px] bg-white p-4">
         <h2 className="dp-ui text-[16px] font-extrabold text-[#15202B]">Practice tools</h2>
         <p className="mt-1 text-[13px] text-[#5b6773]">Care plan, P&L, KPI, billing guide, achievements, and this month.</p>
-        {!hasPracticeTools ? <p className="mt-2 text-[14px] text-[#5b6773]">Some office tools open fully for founding members and Pro accounts created before July 15, 2026.</p> : null}
+        {!hasPracticeTools ? <p className="mt-2 text-[14px] text-[#5b6773]">Activate Pro to open these tools.</p> : null}
         <ul className="mt-3 grid gap-2 sm:grid-cols-2">
           {TOOLS.map((tool) => (
             <li key={tool.href}>
@@ -69,6 +70,7 @@ export function PracticeView({
       </section>
       <Row href="/doctor/notifications" title="Notifications" detail="Alerts for your office" iconBg="#D66829" />
       <Row href="/doctor/settings" title="Settings" detail="Notifications, account, and text alerts" iconBg="#0E857A" />
+      <a href={ONBOARDING_CONFIG.CALENDLY_SPOTLIGHT} target="_blank" rel="noreferrer" className="dp-ui flex min-h-11 items-center rounded-[20px] bg-white px-4 text-[16px] font-extrabold text-[#15202B]">Book a Spotlight interview</a>
       <Link prefetch href="/doctor/help" className="dp-ui inline-flex min-h-11 items-center px-1 text-[14px] font-extrabold text-[#1E2D3B]">Help</Link>
       <Link prefetch href="/doctor/coming-soon" className="flex items-center justify-between rounded-[20px] border border-dashed border-[#E3C27A] bg-[#FFF8F1] px-4 py-4">
         <span>

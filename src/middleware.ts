@@ -63,7 +63,12 @@ export async function middleware(req: NextRequest) {
   )) {
     const applying = path === '/doctor/apply' || path.startsWith('/doctor/apply/');
     const careInvite = path === '/portal/care/from-doctor' || path.startsWith('/portal/care/from-doctor/');
-    const dest = applying || careInvite ? loginPathWithReturn(`${path}${req.nextUrl.search}`) : '/login';
+    const hadAuthCookie = req.cookies.getAll().some((cookie) => cookie.name.includes('-auth-token'));
+    const dest = applying || careInvite
+      ? loginPathWithReturn(`${path}${req.nextUrl.search}`)
+      : hadAuthCookie
+        ? '/login?error=session_expired'
+        : '/login';
     const redirect = NextResponse.redirect(new URL(dest, req.url));
     if (referralSlug && remembersReferral) redirect.cookies.set(MEMBER_REF_COOKIE, referralSlug, referralCookie);
     return redirect;

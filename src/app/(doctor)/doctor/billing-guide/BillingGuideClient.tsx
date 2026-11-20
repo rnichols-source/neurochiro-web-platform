@@ -512,7 +512,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
             <p className="text-white font-bold text-lg mb-1">
               Unlock the Complete Billing Toolkit
             </p>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-[#d5dde6] text-sm mb-4">
               {BILLING_SECTIONS.length} sections, {totalCodes} codes &amp; modifiers
               {totalLetters > 0 ? `, ${totalLetters} appeal letters` : ""}
               {totalTemplates > 0 ? `, ${totalTemplates} templates` : ""}.
@@ -524,7 +524,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
                 if (result.url) window.location.href = result.url;
                 else alert(result.error);
               }}
-              className="px-8 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-neuro-orange/90 transition-colors"
+              className="px-8 py-3 bg-neuro-orange text-white rounded-xl font-bold text-sm hover:bg-[#8c3a12] transition-colors"
             >
               Buy Now &mdash; $39
             </button>

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   buildNextSteps,
+  monthProofLine,
   communityMemberCopy,
   desktopClicks,
   doctorGreetingName,
@@ -82,15 +83,13 @@ test('profile checklist counts six sections and names what is left', () => {
   assert.equal(done.percent, 100)
 })
 
-test('old sidebar tools open in one desktop click and two taps on a phone', () => {
-  const oldSidebar = [
-    '/doctor/dashboard',
-    '/doctor/profile',
+test('desktop sidebar leads with today, people, home plans, profile, and help', () => {
+  const primary = ['/doctor/dashboard', '/doctor/people', '/doctor/care-sets', '/doctor/profile', '/doctor/help']
+  const more = [
     '/doctor/messages',
     '/doctor/referral-network',
     '/doctor/notifications',
     '/doctor/visit-requests',
-    '/doctor/care-sets',
     '/doctor/introductions',
     '/doctor/community-interest',
     '/doctor/students',
@@ -98,21 +97,31 @@ test('old sidebar tools open in one desktop click and two taps on a phone', () =
     '/doctor/analytics',
     '/doctor/settings',
     '/doctor/billing',
-    '/doctor/help',
     '/doctor/care-plan',
     '/doctor/kpi',
     '/doctor/pl-analyzer',
     '/doctor/billing-guide',
   ]
-  for (const href of oldSidebar) {
+  for (const href of primary) {
     assert.equal(desktopClicks(href), 1, href)
+    assert.ok(mobileClicks(href) <= 2, href)
+  }
+  for (const href of more) {
+    assert.equal(desktopClicks(href), 2, href)
     assert.ok(mobileClicks(href) <= 2, href)
   }
   assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Profile')?.href, '/doctor/profile')
   assert.equal(desktopClicks('/doctor/match'), 2)
   assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/marketplace'), false)
+  assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'ChiroMatch')?.chipLabel, 'ChiroMatch, coming soon')
+  assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Community')?.href, '/doctor/coming-soon#community')
   assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/lives'), false)
   assert.equal(mobileClicks('/doctor/messages'), 1)
+})
+
+test('this month reads requests and booked', () => {
+  assert.equal(monthProofLine(7, 3), 'This month: 7 requests, 3 booked')
+  assert.equal(monthProofLine(1, 1), 'This month: 1 request, 1 booked')
 })
 
 test('the next step is the profile until it is finished or skipped', () => {
@@ -128,8 +137,9 @@ test('the next step is the profile until it is finished or skipped', () => {
     hours: null,
   })
   const first = buildNextSteps({ checklist, skipProfile: false, waiting: 2, referrals: 1, unread: 3 })
-  assert.equal(first[0].id, 'profile')
-  assert.equal(first[0].skip, true)
+  assert.equal(first[0].id, 'people')
+  assert.equal(first[1].id, 'profile')
+  assert.equal(first[1].skip, true)
   assert.equal(first.length, 4)
   const skipped = buildNextSteps({ checklist, skipProfile: true, waiting: 2, referrals: 0, unread: 0 })
   assert.equal(skipped[0].id, 'people')

@@ -145,8 +145,8 @@ export async function getDoctorROIData(period: string = '30d') {
     const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
       admin.from('profiles').select('role').eq('id', user.id).single(),
       admin.from('doctors').select('profile_views, patient_leads, average_case_value, membership_tier').eq('user_id', user.id).single(),
-      admin.from('leads').select('*').eq('doctor_id', doctorTableId).is('confirmed_at', null),
-      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', doctorTableId).not('confirmed_at', 'is', null),
+      admin.from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
+      admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
       admin.from('analytics_events').select('*').eq('doctor_id', doctorTableId)
     ]);
 
@@ -181,14 +181,14 @@ export async function getDoctorROIData(period: string = '30d') {
     const { data: historicalLeads } = await admin
       .from('leads')
       .select('created_at, status')
-      .eq('doctor_id', doctorTableId)
+      .eq('doctor_id', user.id)
       .gte('created_at', sixMonthsAgo.toISOString());
 
     // 6. Fetch Acquisition Channels
     const { data: acquisitionData } = await admin
       .from('leads')
       .select('source')
-      .eq('doctor_id', doctorTableId);
+      .eq('doctor_id', user.id);
 
     // Grouping historical data by month
     const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
@@ -252,7 +252,7 @@ export async function confirmPatient(leadId: string) {
         confirmed_at: new Date().toISOString() 
       })
       .eq('id', leadId)
-      .eq('doctor_id', doctorTableId)
+      .eq('doctor_id', user.id)
 
     if (error) throw error;
 
@@ -359,11 +359,11 @@ export async function getPracticeHealthScore(): Promise<PracticeHealthResult | n
 
     const docId = doc.id;
     const [leadsRes, confirmedRes, seminarsRes, ceRes, referralsRes, matchRes, jobsRes, reviewsRes, notifsRes] = await Promise.all([
-      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', docId),
-      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', docId).not('confirmed_at', 'is', null),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
       createAdminClient().from('seminars').select('id', { count: 'exact', head: true }).eq('host_id', user.id).eq('is_approved', true),
       admin.from('ce_certificates').select('ce_hours').eq('user_id', user.id),
-      admin.from('leads').select('id', { count: 'exact', head: true }).eq('source', 'referral').eq('doctor_id', docId),
+      admin.from('leads').select('id', { count: 'exact', head: true }).eq('source', 'referral').eq('doctor_id', user.id),
       admin.from('match_positions').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
       createAdminClient().from('job_postings').select('id', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('seminar_reviews').select('id', { count: 'exact', head: true }),
@@ -468,11 +468,8 @@ export async function getSmartActionItems() {
       items.push({ id: 'unread', priority: 'high', title: `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}`, description: 'Review your recent notifications', href: '/doctor/notifications', icon: 'Bell' })
     }
 
-    // Stale leads (new leads older than 48 hours) — use doctor table ID
-    const { data: docForLeads } = await createAdminClient().from('doctors').select('id').eq('user_id', user.id).single()
-    const docIdForLeads = docForLeads?.id || user.id
     const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
-    const { count: staleLeads } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', docIdForLeads).eq('stage', 'new').lt('created_at', twoDaysAgo)
+    const { count: staleLeads } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('stage', 'new').lt('created_at', twoDaysAgo)
     if (staleLeads && staleLeads > 0) {
       items.push({ id: 'stale_leads', priority: 'high', title: `${staleLeads} lead${staleLeads > 1 ? 's' : ''} waiting 48+ hours`, description: 'Contact them before they go elsewhere', href: '/doctor/leads', icon: 'Users' })
     }
@@ -508,7 +505,7 @@ export async function getRevenueIntelligence() {
     const admin = createAdminClient() as any
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
-    const { count: confirmedThisMonth } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', doc.id).not('confirmed_at', 'is', null).gte('confirmed_at', thirtyDaysAgo)
+    const { count: confirmedThisMonth } = await admin.from('leads').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null).gte('confirmed_at', thirtyDaysAgo)
 
     const avgCaseValue = doc.average_case_value || 1200
     const estimatedRevenue = (confirmedThisMonth || 0) * avgCaseValue
@@ -537,10 +534,7 @@ export async function getLeadPipelineStages() {
 
   try {
     const admin = createAdminClient() as any
-    const { data: doc } = await createAdminClient().from('doctors').select('id').eq('user_id', user.id).single()
-    if (!doc) return null
-
-    const { data: leads } = await admin.from('leads').select('stage').eq('doctor_id', doc.id)
+    const { data: leads } = await admin.from('leads').select('stage').eq('doctor_id', user.id)
     if (!leads) return { new: 0, contacted: 0, scheduled: 0, converted: 0 }
 
     const stages = { new: 0, contacted: 0, scheduled: 0, converted: 0 }

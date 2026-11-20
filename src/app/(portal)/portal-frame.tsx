@@ -122,7 +122,7 @@ function PortalShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-dvh bg-[#0F1A24] overflow-hidden">
+    <div className="legacy-portal flex h-dvh bg-[#0F1A24] overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div

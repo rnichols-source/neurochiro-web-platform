@@ -4,6 +4,7 @@ import { Lock, Zap, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import UpgradeModal from "./UpgradeModal";
+import { doctorCheckoutPrice } from "@/lib/portal/checkout-price";
 
 interface UpgradeGateProps {
   children: React.ReactNode;
@@ -69,7 +70,8 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
 
   // If locked, show the content with an overlay
   const tierLabel = "Pro";
-  const tierPrice = "$99";
+  const price = doctorCheckoutPrice();
+  const tierPrice = price.monthly;
 
   return (
     <>
@@ -91,12 +93,12 @@ export default function UpgradeGate({ children, feature, requiredTier, descripti
             <p className="text-gray-500 text-sm mb-4 leading-relaxed">
               {description || `This tool is available on the ${tierLabel} plan. Upgrade to unlock all practice tools and grow your patient base.`}
             </p>
-            <p className="text-sm font-bold text-neuro-navy mb-4">{tierPrice}/month or $990/year</p>
+            <p className="text-sm font-bold text-neuro-navy mb-4">{price.lockLine}. Founding rates stay as they are.</p>
             <button
               onClick={() => setShowModal(true)}
               className="w-full py-4 bg-neuro-orange text-white rounded-xl font-black text-sm uppercase tracking-wider shadow-lg shadow-neuro-orange/20 hover:bg-neuro-orange-light transition-all flex items-center justify-center gap-2"
             >
-              <Zap className="w-4 h-4" /> Unlock Pro — {tierPrice}/mo
+              <Zap className="w-4 h-4" /> Unlock Pro, {price.monthlyWithUnit}
             </button>
             <button
               onClick={() => setShowModal(true)}

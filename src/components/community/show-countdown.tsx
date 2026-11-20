@@ -24,7 +24,7 @@ export function ShowCountdown({ initial }: { initial: { days: number; hours: num
       {cells.map((cell) => (
         <div key={cell.label} className="flex-1 rounded-xl bg-white/15 px-2 py-2 text-center">
           <b className="nc-ui block text-[22px] font-extrabold text-white">{cell.n}</b>
-          <small className="text-[11px] text-white/90">{cell.label}</small>
+          <small className="text-[11px] text-white">{cell.label}</small>
         </div>
       ))}
     </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { HeaderTools } from '@/components/doctor/header-tools'
 import { MessagesIcon, PlaceIcon, RocketIcon, SignOutIcon } from '@/components/doctor/icons'
@@ -9,8 +10,6 @@ import { createClient } from '@/lib/supabase'
 import {
   DOCTOR_PLACE_LIST,
   DOCTOR_PLACES,
-  DOCTOR_TOOL_GROUPS,
-  DOCTOR_TOOL_LINKS,
   doctorNavId,
   legacyTitle,
   usesOwnChrome,
@@ -32,6 +31,17 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
   const placeLine = [ctx.doctor?.clinic_name, ctx.doctor?.city].filter(Boolean).join(' · ')
   const messageBadge = badge(ctx.unreadMessages)
   const peopleBadge = badge(waiting)
+  const path = pathname.split('?')[0].replace(/\/$/, '') || '/'
+  const primary = path === '/doctor' || path === '/doctor/dashboard' || path.startsWith('/doctor/people') || path.startsWith('/doctor/care-sets') || path.startsWith('/doctor/profile') || path === '/doctor/help'
+  const [moreManual, setMoreManual] = useState(false)
+  const moreOpen = !primary || moreManual
+  const moreLinks = [
+    { href: '/doctor/messages', label: 'Messages' },
+    { href: '/doctor/network', label: 'Network' },
+    { href: '/doctor/practice', label: 'Practice' },
+    { href: '/doctor/billing', label: 'Billing' },
+    { href: '/doctor/settings', label: 'Settings' },
+  ]
 
   function signOut() {
     const supabase = createClient()
@@ -49,12 +59,13 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
           </span>
           <span className="min-w-0">
             <span className="dp-ui block text-[14px] font-extrabold tracking-[0.08em] text-[#15202B]">NEUROCHIRO</span>
-            <span className="dp-ui block text-[11px] font-extrabold tracking-[0.12em] text-[#8a95a1]">DOCTOR PORTAL</span>
+            <span className="dp-ui block text-[12px] font-extrabold tracking-[0.08em] text-[#5b6773]">DOCTOR PORTAL</span>
           </span>
         </Link>
         <nav className="flex min-h-0 flex-1 flex-col" aria-label="Doctor portal">
           <div className="flex shrink-0 flex-col gap-1.5">
-            {DOCTOR_PLACE_LIST.map((item) => {
+            {(['today', 'people', 'care'] as const).map((id) => {
+              const item = DOCTOR_PLACES[id]
               const on = nav === item.id
               return (
                 <Link prefetch
@@ -78,71 +89,60 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
                 </Link>
               )
             })}
-            <div className="my-2 border-t border-[#EFECE7]" />
-            <Link prefetch
-              href="/doctor/messages"
-              aria-current={nav === 'messages' ? 'page' : undefined}
-              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold"
-              style={nav === 'messages' ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#3d4a57' }}
-            >
-              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#E5E9EE] text-[#1E2D3B]">
-                <MessagesIcon size={20} />
-              </span>
-              <span className="flex-1">Messages</span>
-              {messageBadge ? (
-                <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#D66829] px-1.5 text-[12px] font-extrabold text-white" data-messages-badge={ctx.unreadMessages}>{messageBadge}</span>
-              ) : null}
-            </Link>
-            <Link prefetch
-              href="/doctor/coming-soon"
-              aria-current={nav === 'soon' ? 'page' : undefined}
-              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-bold text-[#3d4a57]"
-              style={nav === 'soon' ? { background: '#FCEBDF', color: '#B4501A' } : undefined}
-            >
-              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#FCEBDF] text-[#D66829]">
-                <RocketIcon />
-              </span>
-            Coming soon
-          </Link>
             <Link prefetch
               href="/doctor/profile"
-              aria-current={pathname === '/doctor/profile' ? 'page' : undefined}
-              className="mt-1 flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-extrabold"
-              style={pathname === '/doctor/profile' ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#1E2D3B' }}
+              aria-current={pathname.startsWith('/doctor/profile') ? 'page' : undefined}
+              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-extrabold"
+              style={pathname.startsWith('/doctor/profile') ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#1E2D3B' }}
             >
               <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#1E2D3B] text-[12px] font-extrabold text-white">
                 {ctx.initials || 'DR'}
               </span>
               Profile
             </Link>
+            <Link prefetch
+              href="/doctor/help"
+              aria-current={path === '/doctor/help' ? 'page' : undefined}
+              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 dp-ui text-[16px] font-extrabold"
+              style={path === '/doctor/help' ? { background: '#FCEBDF', color: '#8C3A12' } : { color: '#3d4a57' }}
+            >
+              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#FCEBDF] text-[16px] font-extrabold text-[#8C3A12]">?</span>
+              Help
+            </Link>
+            <button
+              type="button"
+              aria-expanded={moreOpen}
+              onClick={() => setMoreManual((open) => !open)}
+              className="flex min-h-11 items-center gap-3 rounded-[14px] px-3 text-left dp-ui text-[16px] font-extrabold text-[#3d4a57]"
+            >
+              <span className="grid h-[38px] w-[38px] place-items-center rounded-xl bg-[#E5E9EE] text-[#1E2D3B]">
+                <RocketIcon />
+              </span>
+              <span className="flex-1">More</span>
+              {messageBadge && !moreOpen ? (
+                <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#D66829] px-1.5 text-[12px] font-extrabold text-white">{messageBadge}</span>
+              ) : null}
+            </button>
           </div>
-          <div className="mt-3 min-h-0 flex-1 overflow-y-auto border-t border-[#EFECE7] pt-3">
-            <p className="px-3 pb-2 dp-ui text-[11px] font-extrabold tracking-[0.12em] text-[#8a95a1]">YOUR TOOLS</p>
-            {DOCTOR_TOOL_GROUPS.map((group) => {
-              const tone = DOCTOR_PLACES[group.place]
-              const links = DOCTOR_TOOL_LINKS.filter((link) => link.group === group.id && link.href !== '/doctor/profile')
-              if (!links.length) return null
+          <div className="mt-2 min-h-0 flex-1 overflow-y-auto">
+            {moreOpen ? moreLinks.map((link) => {
+              const on = path === link.href || (link.href !== '/doctor' && path.startsWith(`${link.href}/`))
               return (
-                <div key={group.id} className="mb-3">
-                  <p className="px-3 pb-1 dp-ui text-[11px] font-extrabold tracking-[0.08em]" style={{ color: tone.ink }}>{group.label}</p>
-                  {links.map((link) => {
-                    const on = pathname === link.href || pathname.startsWith(`${link.href}/`)
-                    return (
-                      <Link prefetch
-                        key={link.href}
-                        href={link.href}
-                        aria-current={on ? 'page' : undefined}
-                        className="flex min-h-11 items-center gap-2 rounded-xl px-3 dp-ui text-[14px] font-bold"
-                        style={on ? { background: tone.tint, color: tone.ink } : { color: '#3d4a57' }}
-                      >
-                        <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: tone.color }} />
-                        <span className="min-w-0 truncate">{link.label}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
+                <Link prefetch
+                  key={link.href}
+                  href={link.href}
+                  aria-current={on ? 'page' : undefined}
+                  className="flex min-h-11 items-center gap-2 rounded-xl px-3 dp-ui text-[14px] font-bold"
+                  style={on ? { background: '#E5E9EE', color: '#1E2D3B' } : { color: '#3d4a57' }}
+                >
+                  {link.href === '/doctor/messages' ? <MessagesIcon size={18} /> : <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#D7DEE6]" />}
+                  <span className="min-w-0 flex-1 truncate">{link.label}</span>
+                  {link.href === '/doctor/messages' && messageBadge ? (
+                    <span className="dp-ui grid h-6 min-w-6 place-items-center rounded-full bg-[#D66829] px-1.5 text-[12px] font-extrabold text-white" data-messages-badge={ctx.unreadMessages}>{messageBadge}</span>
+                  ) : null}
+                </Link>
               )
-            })}
+            }) : null}
           </div>
         </nav>
         <div className="mt-4 flex items-center gap-2.5 border-t border-[#EFECE7] px-1 pt-3">
@@ -180,7 +180,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
         </main>
       </div>
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-[#e3e0da] bg-white px-1.5 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(21,32,43,0.06)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[#e3e0da] bg-white px-2 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(21,32,43,0.06)] lg:hidden"
         aria-label="Doctor portal"
       >
         <div className="mx-auto flex max-w-[720px]">
@@ -198,7 +198,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
                 <span className="grid h-8 w-[58px] place-items-center rounded-2xl" style={on ? { background: item.tint, color: item.ink } : undefined}>
                   <PlaceIcon id={item.id as DoctorPlaceId} size={22} strokeWidth={on ? 2.1 : 1.8} />
                 </span>
-                <span className={`dp-ui whitespace-nowrap text-[11px] tracking-[-0.01em] ${on ? 'font-extrabold' : 'font-semibold'}`}>{item.label}</span>
+                <span className={`dp-ui whitespace-nowrap text-[12px] tracking-[-0.01em] min-[820px]:text-[14px] ${on ? 'font-extrabold' : 'font-semibold'}`}>{item.label}</span>
               </Link>
             )
           })}

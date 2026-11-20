@@ -5,6 +5,8 @@ import { Bell } from 'lucide-react'
 import { markVisitSeen } from '@/lib/community/actions'
 import { loadDoctorVisitRequests } from '@/lib/community/data'
 import { getPortalContext } from '@/lib/portal/context'
+import { doctorClock } from '@/lib/doctor/places'
+import { getDoctorTimezone } from '@/lib/doctor-timezone'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,13 +24,14 @@ export default async function DoctorVisitRequestsPage() {
   }
 
   const { ready, requests } = await loadDoctorVisitRequests(ctx.doctor.id)
+  const timeZone = getDoctorTimezone(ctx.doctor.state, ctx.doctor.country, 'America/New_York') || 'America/New_York'
   return (
     <div>
       <PageHeader
         title="Visit requests"
-        description="A community member only sends what they chose to share. Email and text say community member, and they include only those fields."
+        description="Only what the patient chose to share is shown here."
       />
-      {!ready ? <p className="text-sm text-portal-ink-2">The visit request table is not on this database yet.</p> : null}
+      {!ready ? <p className="text-sm text-portal-ink-2">Visit requests will show here when they come in.</p> : null}
       {ready && requests.length === 0 ? (
         <EmptyState icon={Bell} title="No visit requests" sentence="When a community member asks to see you, it shows up here and in notifications." />
       ) : null}
@@ -42,7 +45,7 @@ export default async function DoctorVisitRequestsPage() {
                   {request.forFirstName ? ` · for ${request.forFirstName}` : ''}
                 </p>
                 <p className="mt-1 text-xs text-portal-ink-2">
-                  {new Date(request.createdAt).toLocaleString()} · {request.status}
+                  {doctorClock(request.createdAt, timeZone)} · {request.status}
                   {request.preferredWindow ? ` · ${request.preferredWindow}` : ''}
                 </p>
               </div>

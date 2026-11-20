@@ -651,14 +651,14 @@ function CarePlanContent() {
       {/* Right: Live Preview */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-fit">
         <div className="bg-neuro-navy p-6">
-          <p className="text-xs text-white/50 tracking-wide font-bold">Live Preview</p>
+          <p className="text-xs tracking-wide font-bold text-[#d5dde6]">Live Preview</p>
           <h2 className="text-xl font-heading font-bold text-white mt-2">
             {state.patientName || "Patient Name"}
           </h2>
-          <p className="text-white/60 text-sm mt-1">
+          <p className="text-sm mt-1 text-[#d5dde6]">
             {state.date} &middot; {state.doctorName}
           </p>
-          <p className="text-white/40 text-xs mt-1">{state.practiceName}</p>
+          <p className="text-xs mt-1 text-[#d5dde6]">{state.practiceName}</p>
         </div>
         {state.useScoring && avgScore > 0 && (
           <div className="p-6 border-b border-gray-100">
@@ -1046,11 +1046,11 @@ function CarePlanContent() {
             {selectedSupps.length > 0 && (
               <div className="bg-neuro-navy rounded-xl p-4 text-white mt-3">
                 <div className="flex justify-between text-sm mb-1">
-                  <span className="text-white/60">Supplement Total</span>
+                  <span className="text-[#d5dde6]">Supplement Total</span>
                   <span className="font-bold">${fmt(supplementTotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-white/60">
+                  <span className="text-[#d5dde6]">
                     Over {totalMonths} months of care
                   </span>
                   <span className="font-bold text-neuro-orange">${fmt(supplementCareTotal)}</span>
@@ -1167,18 +1167,18 @@ function CarePlanContent() {
       <div ref={printRef} className="print-area bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Report Header */}
         <div className="print-header bg-neuro-navy p-8 sm:p-10" style={{ backgroundColor: "#1a2744" }}>
-          <p className="text-white/50 text-xs font-bold tracking-[0.2em]">
+          <p className="text-[#d5dde6] text-xs font-bold tracking-[0.2em]">
             {state.practiceName}
           </p>
           <h2 className="font-heading text-2xl sm:text-3xl font-bold text-white mt-2">
             {state.patientName || "Patient"}
           </h2>
           <div className="flex items-center gap-3 mt-2">
-            <span className="text-white/60 text-sm">Personalized Care Plan</span>
-            <span className="text-white/30">|</span>
-            <span className="text-white/40 text-sm">{state.date}</span>
-            <span className="text-white/30">|</span>
-            <span className="text-white/40 text-sm">{state.doctorName}</span>
+            <span className="text-[#d5dde6] text-sm">Personalized Care Plan</span>
+            <span className="text-[#d5dde6]">|</span>
+            <span className="text-[#d5dde6] text-sm">{state.date}</span>
+            <span className="text-[#d5dde6]">|</span>
+            <span className="text-[#d5dde6] text-sm">{state.doctorName}</span>
           </div>
         </div>
 

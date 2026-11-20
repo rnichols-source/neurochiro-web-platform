@@ -15,8 +15,8 @@ export default async function FeatureGate({ feature, children }: { feature: stri
     return (
       <div className="bg-white border border-portal-border rounded-xl p-6 max-w-lg">
         <h1 className="text-[26px] leading-8 font-bold text-portal-ink">{spec.label}</h1>
-        <p className="mt-2 text-[15px] leading-6 text-portal-ink-2">This is part of Pro. Activate Pro to open {spec.label.toLowerCase()}.</p>
-        <Link href="/doctor/billing" className="mt-4 min-h-11 inline-flex items-center px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">Upgrade</Link>
+        <p className="mt-2 text-[15px] leading-6 text-portal-ink-2">This is part of Pro. Activate Pro to open it.</p>
+        <Link href="/doctor/billing" className="mt-4 min-h-11 inline-flex items-center px-4 rounded-lg bg-portal-accent text-white text-sm font-bold">Activate Pro</Link>
       </div>
     );
   }

@@ -2,17 +2,18 @@ import Link from 'next/link'
 import { HeaderTools } from '@/components/doctor/header-tools'
 import { ChevronIcon, PencilIcon, PlaceIcon } from '@/components/doctor/icons'
 import { SkipProfileButton } from '@/components/doctor/skip-profile'
+import { WaitingActions } from '@/components/doctor/waiting-actions'
 import { DOCTOR_PLACES } from '@/lib/doctor/places'
 import type { TodayData } from '@/lib/doctor/portal-data'
 
 const TILES = [
   { id: 'people' as const, href: '/doctor/people', title: 'People' },
-  { id: 'care' as const, href: '/doctor/care-sets', title: 'Care sets' },
+  { id: 'care' as const, href: '/doctor/care-sets', title: 'Home plans' },
   { id: 'network' as const, href: '/doctor/network', title: 'Network' },
   { id: 'practice' as const, href: '/doctor/practice', title: 'Practice' },
 ]
 
-export function TodayView({ data }: { data: TodayData }) {
+export function TodayView({ data, intro }: { data: TodayData; intro?: React.ReactNode }) {
   const step = data.step
   const careLine = data.plansInUse == null
     ? `${data.libraryCount} plans in the library`
@@ -50,7 +51,8 @@ export function TodayView({ data }: { data: TodayData }) {
             <span className="dp-ui rounded-full bg-white/20 px-2 py-1 text-[11px] font-extrabold">Doctor</span>
           </div>
           <div className="col-span-2 lg:col-span-1 lg:row-start-1">
-            <p className="text-[16px] text-white/90">{data.dateLabel}</p>
+            <p className="text-[16px] text-white">{data.dateLabel}</p>
+            {data.monthLine ? <p className="mt-1 text-[16px] font-bold text-white">{data.monthLine}</p> : null}
             <h1 className="dp-ui mt-1 text-[34px] font-extrabold leading-none tracking-[-0.03em] lg:text-[40px]">
               {data.greetingLine}, {data.doctorName}
             </h1>
@@ -68,7 +70,6 @@ export function TodayView({ data }: { data: TodayData }) {
           </div>
         </div>
       </header>
-
       <div className="relative z-[1] -mt-10 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
         <article className="rounded-[26px] bg-white p-5 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.35)]">
           <p className="dp-ui text-[12px] font-extrabold tracking-[0.1em] text-[#D66829]" style={{ textTransform: 'uppercase' }}>
@@ -91,18 +92,34 @@ export function TodayView({ data }: { data: TodayData }) {
               <p className="mt-1.5 text-[13px] font-bold text-[#5b6773]">{step.percent}% complete</p>
             </>
           ) : null}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link prefetch href={step.href} className="dp-ui inline-flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#D66829] px-5 text-[16px] font-extrabold text-white">
-              {step.button}
-              <ChevronIcon />
+          {step.id === 'people' && data.waitingPerson ? (
+            <WaitingActions
+              phone={data.waitingPerson.phone}
+              sourceId={data.waitingPerson.id}
+              peopleHref={`/doctor/people?open=${data.waitingPerson.id}&send=1`}
+            />
+          ) : (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link prefetch href={step.href} className="dp-ui inline-flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#D66829] px-5 text-[16px] font-extrabold text-white">
+                {step.button}
+                <ChevronIcon />
+              </Link>
+              {step.skip ? <SkipProfileButton /> : null}
+            </div>
+          )}
+          {data.nextStep ? (
+            <Link prefetch href={data.nextStep.href} className="dp-ui mt-3 inline-flex min-h-11 items-center text-[15px] font-extrabold text-[#8C3A12]">
+              Also: {data.nextStep.button}
             </Link>
-            {step.skip ? <SkipProfileButton /> : null}
-          </div>
+          ) : null}
         </article>
         <aside className="rounded-[26px] bg-white p-5 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.2)] lg:border-l lg:border-[#EFECE7] lg:shadow-none">
           <p className="dp-ui text-[12px] font-extrabold tracking-[0.12em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Then</p>
           {data.thenItems.length === 0 ? (
-            <p className="mt-3 text-[14px] leading-snug text-[#5b6773]">Nothing else is waiting. New visit requests and referrals show up here.</p>
+            <>
+              <p className="mt-3 text-[14px] leading-snug text-[#5b6773]">Nothing else is waiting. New requests show up here.</p>
+              <Link prefetch href="/doctor/people" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-4 text-[14px] font-extrabold text-white">Open People</Link>
+            </>
           ) : (
             <ul className="mt-3 space-y-2">
               {data.thenItems.map((item) => (
@@ -122,6 +139,7 @@ export function TodayView({ data }: { data: TodayData }) {
           )}
         </aside>
       </div>
+      {intro ? <div className="relative z-[1] mt-4">{intro}</div> : null}
 
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {TILES.map((tile) => {
@@ -134,7 +152,7 @@ export function TodayView({ data }: { data: TodayData }) {
               </span>
               <span className="dp-ui absolute right-4 top-3 text-[32px] font-extrabold leading-none lg:text-[40px]">{numbers[tile.id]}</span>
               <span className="dp-ui text-[18px] font-extrabold">{tile.title}</span>
-              <span className="text-[13px] text-white/90">{lines[tile.id]}</span>
+              <span className="text-[13px] text-white">{lines[tile.id]}</span>
             </Link>
           )
         })}
@@ -147,7 +165,7 @@ function Stat({ value, label, light = false }: { value: string; label: string; l
   return (
     <div className={`min-w-[108px] rounded-2xl px-3 py-2 ${light ? 'bg-[#F7F6F3] text-[#15202B]' : 'bg-white/15 text-white'}`}>
       <b className="dp-ui block text-[22px] font-extrabold leading-none">{value}</b>
-      <span className={`mt-1 block text-[12px] ${light ? 'text-[#5b6773]' : 'text-white/90'}`}>{label}</span>
+      <span className={`mt-1 block text-[12px] ${light ? 'text-[#5b6773]' : 'text-white'}`}>{label}</span>
     </div>
   )
 }

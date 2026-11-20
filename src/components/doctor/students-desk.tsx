@@ -52,13 +52,13 @@ export function StudentsDesk({ students, open, pro }: { students: StudentCard[];
         </div>
         {!pro ? (
           <div className="mt-3">
-            <EmptyNote title="Students are part of Pro" sentence="Activate Pro to invite students to shadow, mentor, or join the practice." />
+            <EmptyNote title="Students are part of Pro" sentence="Activate Pro to invite students to shadow, mentor, or join the practice." actionHref="/doctor/billing" action="Activate Pro" />
             <Link prefetch href="/doctor/billing" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#7A4A94] px-4 text-[14px] font-extrabold text-white">Activate Pro</Link>
           </div>
         ) : null}
         {pro && shown.length === 0 ? (
           <div className="mt-3">
-            <EmptyNote title="No students in this list" sentence="When students join and say what they are looking for, they show up here." />
+            <EmptyNote title="No students in this list" sentence="When students join and say what they are looking for, they show up here." actionHref="/doctor/profile" action="Edit your profile" />
           </div>
         ) : null}
         <ul className="mt-3 space-y-2">

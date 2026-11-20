@@ -478,6 +478,30 @@ export function knownRemedyKey(guide: RemedyGuide, key: string): boolean {
   return guide.sections.some((section) => section.cards.some((card) => card.key === key))
 }
 
+export function plainGuideLabel(text: string): string {
+  return text.replace(/[\p{Extended_Pictographic}\uFE0F]/gu, '').replace(/\s+/g, ' ').trim()
+}
+
+export function remedyByKey(guide: RemedyGuide, key: string): { sectionId: string; name: string } | null {
+  for (const section of guide.sections) {
+    const card = section.cards.find((item) => item.key === key)
+    if (card) return { sectionId: section.id, name: card.name }
+  }
+  return null
+}
+
+export function remedyChoices(guide: RemedyGuide): { key: string; name: string; section: string }[] {
+  const choices: { key: string; name: string; section: string }[] = []
+  for (const section of guide.sections) {
+    const sectionTitle = plainGuideLabel(section.title)
+    for (const card of section.cards) {
+      const name = plainGuideLabel(card.name) || card.name
+      choices.push({ key: card.key, name, section: sectionTitle })
+    }
+  }
+  return choices
+}
+
 export function knownShoppingKey(guide: RemedyGuide, key: string): boolean {
   return guide.shopping.categories.some((category) => category.items.some((item) => item.key === key))
 }

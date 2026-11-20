@@ -69,7 +69,7 @@ export function CloseTrip({ tripId, light = false }: { tripId: string; light?: b
     <button
       type="button"
       disabled={pending}
-      className={`text-[13px] font-semibold ${light ? 'text-white/70' : 'text-[#6b7785]'}`}
+      className={`text-[13px] font-semibold ${light ? 'text-white' : 'text-[#5b6773]'}`}
       onClick={() => start(async () => {
         await closeTrip(tripId)
         router.refresh()

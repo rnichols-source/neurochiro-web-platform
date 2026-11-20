@@ -16,6 +16,7 @@ import {
 } from '@/lib/community/library-model'
 import { setExercisePassportShare, setExerciseReminder } from '@/lib/community/phase-actions'
 import { firstOpenPhase, splitPhaseName } from '@/lib/community/today'
+import { doctorCanSeeDoneLine } from '@/lib/doctor/follow-through'
 
 const care = AREAS.care
 
@@ -99,7 +100,7 @@ export function LibraryPlanBoard({ assignments }: { assignments: LibraryAssignme
                 role="tab"
                 aria-selected={on}
                 onClick={() => setPickedPhase(index)}
-                className={`nc-ui min-h-11 flex-1 rounded-[11px] px-1 py-1.5 text-center text-[13px] font-extrabold ${on ? 'bg-white text-[#0A6159]' : 'text-white/90'}`}
+                className={`nc-ui min-h-11 flex-1 rounded-[11px] px-1 py-1.5 text-center text-[13px] font-extrabold ${on ? 'bg-white text-[#0A6159]' : 'text-white'}`}
               >
                 {chip.short}
                 <small className="mt-0.5 block text-[12px] font-semibold">{item.week}</small>
@@ -120,6 +121,7 @@ export function LibraryPlanBoard({ assignments }: { assignments: LibraryAssignme
         </div>
       </div>
       <p className="mt-3 text-[13px] text-[#5b6773]">{assignedByLine(assignment.doctorName)} · {parts.rest || phase.name}</p>
+      <p className="mt-1 text-[13px] text-[#3d4a57]">{doctorCanSeeDoneLine(assignment.doctorName)}</p>
       {assignment.note ? (
         <p className="mt-3 rounded-2xl bg-white px-3 py-2 text-[13px] leading-snug text-[#15202B]">
           <span className="font-semibold">{LIBRARY_COPY.doctorNoteHeading}. </span>
@@ -219,7 +221,7 @@ function PlanHeader({ title, crumb, children }: { title: string; crumb: string; 
         <BackIcon />
         Care
       </Link>
-      <p className="mt-3 text-[12px] font-bold text-white/90">{crumb}</p>
+      <p className="mt-3 text-[12px] font-bold text-white">{crumb}</p>
       <h1 className="nc-ui mt-1 text-[23px] font-extrabold leading-[1.15] tracking-[-0.025em] text-white">{title}</h1>
       {children}
     </header>

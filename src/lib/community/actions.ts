@@ -22,7 +22,7 @@ import {
 import { isPlausibleEmail } from '@/lib/leads/validate'
 import { deliverVisitOfficeAlert } from '@/lib/community/visit-delivery'
 
-export type ActionResult = { ok: true; notified?: boolean; claimed?: boolean; emailed?: boolean; texted?: boolean; textHeld?: boolean } | { ok: false; error: string }
+export type ActionResult = { ok: true; notified?: boolean; claimed?: boolean; emailed?: boolean; texted?: boolean; textHeld?: boolean; memberEmailed?: boolean } | { ok: false; error: string }
 
 function fail(error: string): ActionResult {
   return { ok: false, error }
@@ -205,10 +205,13 @@ export async function requestVisit(input: {
       body: notice.body,
       type: 'system',
       priority: 'important',
-      link: '/doctor/visit-requests',
+      link: `/doctor/people?open=${inserted.data.id}`,
     })
     notified = !note.error
   }
+
+  const { noteNewRequest } = await import('@/lib/doctor/pipeline-actions')
+  await noteNewRequest(doctor.id, inserted.data.id)
 
   const office = await deliverVisitOfficeAlert({
     visitId: inserted.data.id,
@@ -216,8 +219,29 @@ export async function requestVisit(input: {
     share,
   })
 
+  const memberEmailed = session.email ? await emailMemberConfirmation(session.email, doctor.clinic_name || doctor.last_name || 'the office') : false
+
   revalidateCommunity()
-  return { ok: true, notified: notified || office.emailed || office.texted || office.textHeld, claimed: Boolean(doctor.user_id), emailed: office.emailed, texted: office.texted, textHeld: office.textHeld }
+  return { ok: true, notified: notified || office.emailed || office.texted || office.textHeld, claimed: Boolean(doctor.user_id), emailed: office.emailed, texted: office.texted, textHeld: office.textHeld, memberEmailed }
+}
+
+async function emailMemberConfirmation(to: string, office: string): Promise<boolean> {
+  const key = process.env.RESEND_API_KEY
+  if (!key || !to.includes('@')) return false
+  try {
+    const { Resend } = await import('resend')
+    const { FROM_ADDRESS } = await import('@/lib/leads/config')
+    const resend = new Resend(key)
+    const sent = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to,
+      subject: 'Your visit request was sent',
+      text: `Your request was sent to ${office}. Their office usually reaches out within 1 business day. You can go back to Care any time: https://neurochiro.co/portal/care`,
+    })
+    return !sent.error
+  } catch {
+    return false
+  }
 }
 
 export async function markVisitSeen(formData: FormData): Promise<void> {

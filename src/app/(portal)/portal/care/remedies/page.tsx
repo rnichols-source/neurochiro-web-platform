@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { IllnessNotes } from '@/components/community/illness-note'
 import { BackHeading, Card, Kicker } from '@/components/community/ui'
 import { requireCommunityMember } from '@/lib/community/data'
-import { loadRemedyAccount } from '@/lib/community/library-data'
+import { loadRemedyAccount, loadSentRemedies } from '@/lib/community/library-data'
+import { SentRemedies } from '@/components/community/sent-remedies'
 import { remedyGuide } from '@/lib/community/library-content'
 import {
   LIBRARY_COPY,
@@ -30,7 +31,10 @@ export default async function RemediesPage({
   const session = await requireCommunityMember()
   const query = await searchParams
   const guide = remedyGuide()
-  const account = await loadRemedyAccount(session.userId)
+  const [account, sent] = await Promise.all([
+    loadRemedyAccount(session.userId),
+    loadSentRemedies(session.userId),
+  ])
   const q = (query.q || '').trim()
   const symptoms = listed(query.symptom)
   const symptomHits = symptoms.length ? remediesForSymptoms(guide, symptoms) : []
@@ -44,6 +48,7 @@ export default async function RemediesPage({
     <div>
       <BackHeading title="Home remedy guide" href="/portal/care" label="Care" crumb="Care › Remedy guide" area="care" />
       <p className="mb-3 text-[13.5px] leading-snug text-[#3d4a57]">{LIBRARY_COPY.remediesIntro}</p>
+      <SentRemedies items={sent} />
       <p className="mb-4 text-[13px] leading-snug text-[#3d4a57]">{guide.urgent}</p>
       <div className="mb-4 flex flex-wrap gap-3 text-[13px] font-semibold text-[#B4501A]">
         {guide.emergency.map((contact) => (

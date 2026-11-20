@@ -38,7 +38,7 @@ export function CareDesk({
   const [note, setNote] = useState('')
   const [memberQuery, setMemberQuery] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteMessage, setInviteMessage] = useState('I put a care set aside for you on NeuroChiro. Create your free account with this email and it will be waiting.')
+  const [inviteMessage, setInviteMessage] = useState('I put a home plan aside for you on NeuroChiro. Create your free account with this email and it will be waiting.')
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
   const [pending, start] = useTransition()
@@ -68,7 +68,7 @@ export function CareDesk({
         setError(result.error)
         return
       }
-      setSaved('Assigned. It is on their Care page.')
+      setSaved('Sent. It is on their Care page.')
       setNote('')
       router.refresh()
     })
@@ -132,11 +132,11 @@ export function CareDesk({
             <div className="mt-4">
               <a href={`/api/doctor/care-pdf?slug=${selected.slug}`} className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#0A6159]">Print / Download PDF</a>
               {members.length === 0 ? (
-                <p className="mt-3 text-[14px] text-[#5b6773]">When a community member chooses you as their home doctor, you can assign this plan. Or email an invite below.</p>
+                <p className="mt-3 text-[14px] text-[#5b6773]">When someone is in People, you can send this home plan from their card. Or email an invite below.</p>
               ) : (
                 <>
                   <label className="mt-3 block text-[13px] font-bold text-[#0A6159]">
-                    Search your community members
+                    Search people
                     <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Name or email" className="mt-1 h-11 w-full rounded-xl border border-[#D7DEE6] px-3 text-[14px] font-normal text-[#15202B]" />
                   </label>
                   <label className="mt-2 block text-[13px] font-bold text-[#0A6159]">
@@ -150,7 +150,7 @@ export function CareDesk({
                     <input value={note} onChange={(event) => setNote(event.target.value)} className="mt-1 h-11 w-full rounded-xl border border-[#D7DEE6] px-3 text-[14px] font-normal text-[#15202B]" />
                   </label>
                   <button type="button" disabled={pending} onClick={assign} className="dp-ui mt-3 flex h-[52px] w-full items-center justify-center rounded-2xl bg-[#0E857A] text-[16px] font-extrabold text-white disabled:opacity-60">
-                    {pending ? 'Assigning…' : 'Assign this plan'}
+                    {pending ? 'Sending…' : 'Recommend this plan'}
                   </button>
                 </>
               )}
@@ -165,7 +165,7 @@ export function CareDesk({
                   start(async () => {
                     const result = await sendCareSetInvite({ email: inviteEmail, slug: selected.slug, note, message: inviteMessage })
                     if (!result.ok) setError(result.error)
-                    else setSaved('Invite sent. The care set is waiting when they sign up with that email.')
+                    else setSaved('Invite sent. The home plan is waiting when they sign up with that email.')
                   })
                 }} className="dp-ui mt-2 inline-flex h-11 items-center rounded-xl bg-[#1E2D3B] px-4 text-[14px] font-extrabold text-white">Send invite email</button>
               </div>

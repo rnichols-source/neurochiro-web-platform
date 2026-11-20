@@ -32,7 +32,7 @@ export default async function VisitPage({ searchParams }: { searchParams: Promis
             {card.title}{card.practice ? ` · ${card.practice}` : ''}{card.place ? ` · ${card.place.replace(' · your home doctor', '')}` : ''}
           </p>
           {!snapshot.ready ? (
-            <p className="text-[13.5px] text-[#B4501A]">Visit requests save after the latest database update.</p>
+            <p className="text-[15px] text-[#3d4a57]">Visit requests are not ready on this account yet. <Link href="/portal/care" className="font-semibold text-[#8C3A12]">Go back to Care</Link>.</p>
           ) : (
             <VisitForm
               doctorId={card.id}

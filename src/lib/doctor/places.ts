@@ -1,7 +1,7 @@
 export const DOCTOR_PLACES = {
-  today: { id: 'today', href: '/doctor', label: 'Today', color: '#D66829', ink: '#B4501A', dark: '#B4501A', tint: '#FCEBDF' },
+  today: { id: 'today', href: '/doctor', label: 'Today', color: '#B4501A', ink: '#8C3A12', dark: '#8C3A12', tint: '#FCEBDF' },
   people: { id: 'people', href: '/doctor/people', label: 'People', color: '#2C6BB4', ink: '#1F4F8C', dark: '#1F4F8C', tint: '#E2ECF8' },
-  care: { id: 'care', href: '/doctor/care-sets', label: 'Care sets', color: '#0E857A', ink: '#0A6159', dark: '#0A6159', tint: '#DCF1EE' },
+  care: { id: 'care', href: '/doctor/care-sets', label: 'Home plans', color: '#0E857A', ink: '#0A6159', dark: '#0A6159', tint: '#DCF1EE' },
   network: { id: 'network', href: '/doctor/network', label: 'Network', color: '#7A4A94', ink: '#5C3473', dark: '#5C3473', tint: '#EFE5F5' },
   practice: { id: 'practice', href: '/doctor/practice', label: 'Practice', color: '#1E2D3B', ink: '#1E2D3B', dark: '#15202B', tint: '#E5E9EE' },
 } as const
@@ -42,8 +42,8 @@ export const DOCTOR_TOOL_LINKS: DoctorToolLink[] = [
   { href: '/doctor/introductions', label: 'Introductions', detail: 'When someone travels with their care', place: 'people', group: 'people' },
   { href: '/doctor/referrals', label: 'Referral network', detail: 'Referrals you have sent and received', place: 'network', group: 'network' },
   { href: '/doctor/students', label: 'Students', chipLabel: 'Browse students', detail: 'Browse students looking for a practice', place: 'network', group: 'network' },
-  { href: '/doctor/match', label: 'ChiroMatch', detail: 'See which students line up with your practice', place: 'network', group: 'network' },
-  { href: '/doctor/community', label: 'Community', detail: 'Announcements and spotlights', place: 'network', group: 'network' },
+  { href: '/doctor/coming-soon#chiromatch', label: 'ChiroMatch', chipLabel: 'ChiroMatch, coming soon', detail: 'Not open yet. Tap to ask for a note when it is.', place: 'network', group: 'network' },
+  { href: '/doctor/coming-soon#community', label: 'Community', chipLabel: 'Community, coming soon', detail: 'The feed is not open yet. Tap to ask for a note when it is.', place: 'network', group: 'network' },
   { href: '/doctor/community-interest', label: 'Community interest', detail: 'People near you raising a hand', place: 'network', group: 'network' },
   { href: '/doctor/profile', label: 'Profile', detail: 'Edit what community members see', place: 'practice', group: 'account' },
   { href: '/doctor/analytics', label: 'Analytics', detail: 'Views and where they came from', place: 'practice', group: 'account' },
@@ -84,19 +84,18 @@ export const PARKED_TOOL_PREFIXES = [
   '/doctor/marketplace',
 ] as const
 
-const ONE_CLICK_DESKTOP = new Set<string>([
+const PRIMARY_DESKTOP = new Set<string>([
   '/doctor',
   '/doctor/dashboard',
-  '/doctor/messages',
-  '/doctor/coming-soon',
-  ...DOCTOR_PLACE_LIST.map((item) => item.href),
-  ...DOCTOR_TOOL_LINKS.map((item) => item.href),
+  '/doctor/people',
+  '/doctor/care-sets',
+  '/doctor/profile',
+  '/doctor/help',
 ])
 
 export function desktopClicks(href: string): number {
   const path = (href.split('?')[0] || '/').replace(/\/$/, '') || '/'
-  if (path === '/doctor/referral-network') return 1
-  return ONE_CLICK_DESKTOP.has(path) ? 1 : 2
+  return PRIMARY_DESKTOP.has(path) ? 1 : 2
 }
 
 export function mobileClicks(href: string): number {
@@ -260,6 +259,12 @@ export function profileChecklist(input: ProfileCheckInput): ProfileChecklist {
   }
 }
 
+export function monthProofLine(requests: number, booked: number): string {
+  const ask = requests === 1 ? '1 request' : `${requests} requests`
+  const held = booked === 1 ? '1 booked' : `${booked} booked`
+  return `This month: ${ask}, ${held}`
+}
+
 export type NextStep = {
   id: 'profile' | 'people' | 'referrals' | 'messages' | 'clear'
   title: string
@@ -278,27 +283,34 @@ export function buildNextSteps(input: {
   unread: number
 }): NextStep[] {
   const steps: NextStep[] = []
-  if (!input.checklist.complete && !input.skipProfile) {
-    const left = input.checklist.remaining
-    steps.push({
-      id: 'profile',
-      title: 'Finish your profile',
-      detail: left.length ? `${input.checklist.percent}% complete · ${left.join(', ')} left` : 'A few fields are still open',
-      percent: input.checklist.percent,
-      href: '/doctor/profile',
-      button: 'Edit profile',
-      skip: true,
-    })
-  }
   if (input.waiting > 0) {
     steps.push({
       id: 'people',
       title: input.waiting === 1 ? '1 person is waiting' : `${input.waiting} people are waiting`,
-      detail: 'Visit requests from community members',
+      detail: 'Call them, then tap Mark scheduled. Send a home plan from the same card.',
       percent: null,
       href: '/doctor/people',
-      button: 'Open People',
+      button: 'Open their card',
       skip: false,
+    })
+  }
+  if (!input.checklist.complete && !input.skipProfile) {
+    const left = input.checklist.remaining
+    const photoOpen = input.checklist.steps.some((step) => step.key === 'photo' && !step.done)
+    const hoursOpen = input.checklist.steps.some((step) => step.key === 'hours' && !step.done)
+    const next = photoOpen
+      ? { href: '/doctor/profile#profile-photo', button: 'Add a photo', line: 'Next: add a photo. Hours come right after.' }
+      : hoursOpen
+        ? { href: '/doctor/profile#office-hours', button: 'Add your hours', line: 'Next: add your hours.' }
+        : { href: '/doctor/profile', button: 'Edit profile', line: left.length ? `Next: ${left[0]}.` : 'A few fields are still open.' }
+    steps.push({
+      id: 'profile',
+      title: 'Finish your profile',
+      detail: left.length ? `${next.line} ${input.checklist.percent}% complete.` : next.line,
+      percent: input.checklist.percent,
+      href: next.href,
+      button: next.button,
+      skip: true,
     })
   }
   if (input.referrals > 0) {
@@ -378,7 +390,7 @@ export function communityMemberCopy(error: string): string {
     .replace(/patient/gi, 'community member')
 }
 
-export function agoLabel(iso: string, now = Date.now()): string {
+export function agoLabel(iso: string, now = Date.now(), timeZone?: string): string {
   const ms = now - new Date(iso).getTime()
   if (!Number.isFinite(ms) || ms < 0) return ''
   const min = Math.round(ms / 60000)
@@ -388,7 +400,28 @@ export function agoLabel(iso: string, now = Date.now()): string {
   if (hr < 24) return `${hr}h ago`
   const day = Math.round(hr / 24)
   if (day < 14) return `${day}d ago`
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(iso))
+  return doctorClock(iso, timeZone, false)
+}
+
+/** Clock time in the doctor's zone. Dates older than two weeks omit the hour when short is set. */
+export function doctorClock(iso: string, timeZone?: string | null, withTime = true): string {
+  const date = new Date(iso)
+  if (!Number.isFinite(date.getTime())) return ''
+  const zone = timeZone || undefined
+  try {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      ...(withTime ? { hour: 'numeric', minute: '2-digit' } : {}),
+      timeZone: zone,
+    }).format(date)
+  } catch {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      ...(withTime ? { hour: 'numeric', minute: '2-digit' } : {}),
+    }).format(date)
+  }
 }
 
 export function initialsFrom(name: string): string {

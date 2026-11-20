@@ -6,6 +6,8 @@ import { markIntroductionSeen } from '@/lib/community/phase-actions'
 import { loadDoctorIntroductions } from '@/lib/community/phase-data'
 import { passportDoctorView } from '@/lib/community/phases'
 import { getPortalContext } from '@/lib/portal/context'
+import { doctorClock } from '@/lib/doctor/places'
+import { getDoctorTimezone } from '@/lib/doctor-timezone'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +16,7 @@ export default async function IntroductionsPage() {
   if (!ctx) redirect('/login')
   if (ctx.role === 'patient') redirect('/portal')
   const loaded = ctx.doctor?.id ? await loadDoctorIntroductions(ctx.doctor.id) : { ready: true, rows: [] }
+  const timeZone = getDoctorTimezone(ctx.doctor?.state ?? null, ctx.doctor?.country ?? null, 'America/New_York') || 'America/New_York'
 
   return (
     <div className="space-y-4">
@@ -21,7 +24,7 @@ export default async function IntroductionsPage() {
         title="Introductions"
         description="A community member on the road can introduce themselves with only what they chose to share. This is not a chart."
       />
-      {!loaded.ready ? <p className="text-sm text-portal-ink-2">Introductions save with the latest database update.</p> : null}
+      {!loaded.ready ? <p className="text-sm text-portal-ink-2">Introductions will show here when someone sends one.</p> : null}
       {loaded.ready && loaded.rows.length === 0 ? (
         <EmptyState icon={Heart} title="No introductions" sentence="When a community member sends you a passport introduction, it shows up here." />
       ) : null}
@@ -41,7 +44,7 @@ export default async function IntroductionsPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-bold text-portal-ink">{view.title}</p>
-                  <p className="mt-1 text-xs text-portal-ink-2">{new Date(row.createdAt).toLocaleString()} · {row.status}</p>
+                  <p className="mt-1 text-xs text-portal-ink-2">{doctorClock(row.createdAt, timeZone)} · {row.status}</p>
                 </div>
                 {row.status === 'sent' ? (
                   <form action={markIntroductionSeen}>

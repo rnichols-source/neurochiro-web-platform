@@ -428,21 +428,22 @@ export async function closeWorkInterest(interestId: string): Promise<Result> {
   return { ok: true }
 }
 
-export async function assignExerciseSet(input: { profileId: string; title: string; note: string; stepsText: string }): Promise<Result> {
+export async function assignExerciseSet(input: { profileId: string; title: string; note: string; stepsText: string; timesPerWeek?: number }): Promise<Result> {
   const doctor = await requireDoctor()
   if (!doctor) return fail('A doctor profile is required.')
   const draft = parseExerciseDraft(input)
   if ('error' in draft) return fail(draft.error)
   const admin = createAdminClient() as any
-  const link = await admin.from('community_home_doctors').select('profile_id').eq('doctor_id', doctor.doctorId).eq('profile_id', input.profileId).maybeSingle()
-  if (!link.data?.profile_id) return fail('That community member has not chosen you as their home doctor.')
+  const { doctorMayAssignProfile } = await import('@/lib/doctor/assign-access')
+  const allowed = await doctorMayAssignProfile(admin, doctor.doctorId, input.profileId)
+  if (!allowed) return fail('That patient is not in your list.')
   const set = await admin.from('community_exercise_sets').insert({
     doctor_id: doctor.doctorId,
     title: draft.title,
     note: draft.note,
     is_sample: false,
   }).select('id').maybeSingle()
-  if (missingRelation(set.error)) return fail('Care sets save with the latest database update.')
+  if (missingRelation(set.error)) return fail('Home plans are not ready to save yet.')
   if (!set.data?.id) return fail('We could not save that set.')
   const steps = await admin.from('community_exercise_steps').insert(draft.steps.map((label, index) => ({
     set_id: set.data.id,
@@ -450,12 +451,18 @@ export async function assignExerciseSet(input: { profileId: string; title: strin
     label,
   }))).select('id')
   if (!steps.data?.length) return fail('We could not save the steps.')
-  const assignment = await admin.from('community_exercise_assignments').insert({
+  const assignmentBase = {
     profile_id: input.profileId,
     set_id: set.data.id,
     doctor_id: doctor.doctorId,
     status: 'active',
-  }).select('id').maybeSingle()
+  }
+  let assignment = input.timesPerWeek
+    ? await admin.from('community_exercise_assignments').insert({ ...assignmentBase, times_per_week: input.timesPerWeek }).select('id').maybeSingle()
+    : await admin.from('community_exercise_assignments').insert(assignmentBase).select('id').maybeSingle()
+  if (input.timesPerWeek && assignment.error) {
+    assignment = await admin.from('community_exercise_assignments').insert(assignmentBase).select('id').maybeSingle()
+  }
   if (!assignment.data?.id) return fail('We could not assign that set.')
   await admin.from('notifications').insert({
     user_id: input.profileId,

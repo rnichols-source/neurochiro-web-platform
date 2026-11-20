@@ -57,7 +57,7 @@ export default async function ShadowInboxPage() {
         ))}
       </div>
       <h2 className="text-xl font-bold text-portal-ink">Mentorship</h2>
-      {mentorship.error && missingSchema(mentorship.error) ? <p className="text-base text-portal-ink-2">Mentorship requests start after the database update is applied.</p> : null}
+      {mentorship.error && missingSchema(mentorship.error) ? <p className="text-base text-portal-ink-2">Mentorship requests will show here when a student asks.</p> : null}
       {!mentorship.error && mentorRows.length === 0 ? <p className="text-base text-portal-ink-2">No mentorship requests yet.</p> : null}
       <div className="space-y-3">
         {mentorRows.map((row) => (

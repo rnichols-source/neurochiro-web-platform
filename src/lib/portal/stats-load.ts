@@ -26,7 +26,7 @@ export async function getDoctorPortalStats(input: {
   const since = (query: any) => (startIso ? query.gte('created_at', startIso) : query);
 
   const [leadsRes, contactsRes, viewsRes, introRes, clicksRes, sentRes, receivedRes, eventsRes, earliestRes, peersRes] = await Promise.all([
-    since(admin.from('leads').select('id, stage, created_at, email, phone, source').eq('doctor_id', input.doctorId)),
+    since(admin.from('leads').select('id, stage, created_at, email, phone, source').eq('doctor_id', input.userId)),
     since(admin.from('contact_requests').select('id, contact_outcome, outcome_detail, created_at, email, phone, source').eq('doctor_id', input.doctorId)),
     admin.from('doctors').select('profile_views').eq('id', input.doctorId).maybeSingle(),
     since(

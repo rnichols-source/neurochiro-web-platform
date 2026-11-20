@@ -65,8 +65,6 @@ export function deriveMembership(input: MembershipInput): Membership {
   const founding = Boolean(input.isFoundingMember);
   const neuros = input.neurosTier === 'neuros' || input.neurosTier === 'neuros_founding';
   const stored = (input.membershipTier || input.profileTier || 'free').toLowerCase();
-  const created = input.createdAt ? new Date(input.createdAt) : null;
-  const legacy = Boolean(created && created < new Date(LEGACY_PRACTICE_TOOLS_CUTOFF));
   const stripeStatus = input.stripeStatus || null;
   const hasStripe = Boolean(input.hasStripeCustomer);
 
@@ -104,7 +102,7 @@ export function deriveMembership(input: MembershipInput): Membership {
   }
 
   const isPro = tier === 'pro' || tier === 'neuros' || founding;
-  const hasPracticeTools = founding || (legacy && isPro && (stored === 'pro' || stored === 'growth' || founding || tier !== 'free'));
+  const hasPracticeTools = isPro;
 
   return {
     tier,

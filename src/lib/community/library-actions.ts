@@ -18,6 +18,7 @@ import {
   todayKey,
 } from '@/lib/community/library-model'
 import { schemaNotReady } from '@/lib/community/phase-data'
+import { doctorMayAssignProfile } from '@/lib/doctor/assign-access'
 
 type Result = { ok: true } | { ok: false; error: string }
 
@@ -49,7 +50,7 @@ async function requireDoctor(): Promise<{ doctorId: string } | null> {
   return { doctorId: doctor.data.id }
 }
 
-export async function assignLibraryPlan(input: { profileId: string; slug: string; note: string }): Promise<Result> {
+export async function assignLibraryPlan(input: { profileId: string; slug: string; note: string; timesPerWeek?: number }): Promise<Result> {
   const doctor = await requireDoctor()
   if (!doctor) return fail('A doctor profile is required.')
   const plans = libraryPlans()
@@ -59,8 +60,8 @@ export async function assignLibraryPlan(input: { profileId: string; slug: string
   const note = parseDoctorNote(input.note || '')
   if ('error' in note) return fail(note.error)
   const admin = createAdminClient() as any
-  const link = await admin.from('community_home_doctors').select('profile_id').eq('doctor_id', doctor.doctorId).eq('profile_id', input.profileId).maybeSingle()
-  if (!link.data?.profile_id) return fail(LIBRARY_COPY.notHomeDoctor)
+  const allowed = await doctorMayAssignProfile(admin, doctor.doctorId, input.profileId)
+  if (!allowed) return fail('That patient is not in your list.')
   const existing = await admin
     .from('community_exercise_assignments')
     .select('id')
@@ -70,14 +71,21 @@ export async function assignLibraryPlan(input: { profileId: string; slug: string
     .maybeSingle()
   if (schemaNotReady(existing.error)) return fail(LIBRARY_COPY.libraryReadyNote)
   if (existing.data?.id) return fail(LIBRARY_COPY.alreadyAssigned)
-  const assignment = await admin.from('community_exercise_assignments').insert({
+  const assignmentBase = {
     profile_id: input.profileId,
     set_id: null,
     library_plan_slug: plan.slug,
     doctor_id: doctor.doctorId,
     doctor_note: note.note,
     status: 'active',
+  }
+  let assignment = await admin.from('community_exercise_assignments').insert({
+    ...assignmentBase,
+    ...(input.timesPerWeek ? { times_per_week: input.timesPerWeek } : {}),
   }).select('id').maybeSingle()
+  if (input.timesPerWeek && schemaNotReady(assignment.error)) {
+    assignment = await admin.from('community_exercise_assignments').insert(assignmentBase).select('id').maybeSingle()
+  }
   if (schemaNotReady(assignment.error)) return fail(LIBRARY_COPY.libraryReadyNote)
   if (!assignment.data?.id) return fail('We could not assign that plan.')
   await admin.from('notifications').insert({
@@ -92,7 +100,7 @@ export async function assignLibraryPlan(input: { profileId: string; slug: string
   return { ok: true }
 }
 
-export async function sendCareSetInvite(input: { email: string; slug: string; note: string; message: string }): Promise<Result & { preview?: string }> {
+export async function sendCareSetInvite(input: { email: string; slug: string; note: string; message: string; timesPerWeek?: number }): Promise<Result & { preview?: string }> {
   const doctor = await requireDoctor()
   if (!doctor) return fail('A doctor profile is required.')
   const email = input.email.trim().toLowerCase()
@@ -107,13 +115,20 @@ export async function sendCareSetInvite(input: { email: string; slug: string; no
   if (!message) return fail('Write the note you want to send, then click send.')
   const admin = createAdminClient() as any
   const token = crypto.randomUUID().replace(/-/g, '')
-  const row = await admin.from('community_doctor_care_invites').insert({
+  const inviteBase = {
     doctor_id: doctor.doctorId,
     email,
     plan_slug: plan.slug,
     note: note.note,
     token,
+  }
+  let row = await admin.from('community_doctor_care_invites').insert({
+    ...inviteBase,
+    ...(input.timesPerWeek ? { times_per_week: input.timesPerWeek } : {}),
   }).select('id').maybeSingle()
+  if (input.timesPerWeek && schemaNotReady(row.error)) {
+    row = await admin.from('community_doctor_care_invites').insert(inviteBase).select('id').maybeSingle()
+  }
   if (schemaNotReady(row.error)) return fail('Care invites need the latest database update.')
   if (!row.data?.id) return fail('Could not save that invite.')
   const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://neurochiro.co'
@@ -143,7 +158,10 @@ export async function claimCareSetInvite(token: string): Promise<Result> {
   }
   const session = await requireCommunityMember()
   const admin = createAdminClient() as any
-  const invite = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note, claimed_profile_id, email').eq('token', token).maybeSingle()
+  let invite = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note, claimed_profile_id, email, times_per_week').eq('token', token).maybeSingle()
+  if (schemaNotReady(invite.error)) {
+    invite = await admin.from('community_doctor_care_invites').select('id, doctor_id, plan_slug, note, claimed_profile_id, email').eq('token', token).maybeSingle()
+  }
   if (schemaNotReady(invite.error)) return fail('Care invites need the latest database update.')
   if (!invite.data?.id) return fail('This link is not active.')
   if (invite.data.claimed_profile_id && invite.data.claimed_profile_id !== session.userId) return fail('This link was already used.')
@@ -154,14 +172,21 @@ export async function claimCareSetInvite(token: string): Promise<Result> {
   if (!invite.data.claimed_profile_id) {
     const existing = await admin.from('community_exercise_assignments').select('id').eq('profile_id', session.userId).eq('library_plan_slug', invite.data.plan_slug).eq('status', 'active').maybeSingle()
     if (!existing.data?.id) {
-      const assignment = await admin.from('community_exercise_assignments').insert({
+      const claimedBase = {
         profile_id: session.userId,
         set_id: null,
         library_plan_slug: invite.data.plan_slug,
         doctor_id: invite.data.doctor_id,
         doctor_note: invite.data.note,
         status: 'active',
+      }
+      let assignment = await admin.from('community_exercise_assignments').insert({
+        ...claimedBase,
+        ...(invite.data.times_per_week ? { times_per_week: invite.data.times_per_week } : {}),
       }).select('id').maybeSingle()
+      if (invite.data.times_per_week && schemaNotReady(assignment.error)) {
+        assignment = await admin.from('community_exercise_assignments').insert(claimedBase).select('id').maybeSingle()
+      }
       if (!assignment.data?.id && !existing.data?.id) return fail('We could not add that care set to your account.')
     }
     const home = await admin.from('community_home_doctors').select('doctor_id').eq('profile_id', session.userId).maybeSingle()
@@ -242,6 +267,25 @@ export async function toggleLibraryExercise(assignmentId: string, exerciseKey: s
     updated_at: new Date().toISOString(),
   }).eq('id', assignmentId).eq('profile_id', session.userId)
   refresh()
+  return { ok: true }
+}
+
+export async function markRemedyCheckin(recommendationId: string): Promise<Result> {
+  const session = await requireCommunityMember()
+  if (!/^[0-9a-f-]{36}$/i.test(recommendationId || '')) return fail('That remedy is not on your list.')
+  const admin = createAdminClient() as any
+  const row = await admin.from('community_remedy_recommendations').select('id').eq('id', recommendationId).eq('profile_id', session.userId).eq('status', 'active').maybeSingle()
+  if (schemaNotReady(row.error)) return fail(LIBRARY_COPY.almostReady)
+  if (!row.data?.id) return fail('That remedy is not on your list.')
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+  const saved = await admin.from('community_remedy_checkins').insert({
+    recommendation_id: recommendationId,
+    checked_on: today,
+  })
+  if (schemaNotReady(saved.error)) return fail(LIBRARY_COPY.almostReady)
+  if (saved.error && saved.error.code !== '23505') return fail('That day was not saved.')
+  await admin.from('community_remedy_recommendations').update({ opened_at: new Date().toISOString() }).eq('id', recommendationId).is('opened_at', null)
+  refresh(['/portal/care/remedies'])
   return { ok: true }
 }
 

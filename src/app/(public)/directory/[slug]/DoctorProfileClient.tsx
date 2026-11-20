@@ -16,6 +16,7 @@ import { isProfileGated } from "@/lib/profile-gating";
 import ContactGateCTA from "@/components/directory/ContactGateCTA";
 import Image from "next/image";
 import { getEpisodeByDoctorSlug } from "../../spotlight/spotlight-data";
+import { doctorCheckoutPrice } from "@/lib/portal/checkout-price";
 import { displayAddress, nameInitials, uniqueLabels } from "@/lib/profile-display";
 import { credentialedName, doctorFormalName, isPracticeListing, listingCardCopy, listingDisplayName, listingPhotos, parseCoOwners, sameListingPerson, type CoOwner } from "@/lib/listing-display";
 import { containsHealthWords, isPlausibleEmail, requiredPhoneError } from "@/lib/leads/validate";
@@ -65,6 +66,7 @@ function CoOwnerRow({ owners }: { owners: CoOwner[] }) {
 }
 
 export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs = [], cityDoctorCount = 0, nearbyDoctors = [], citySearchVolume = 0, stories = [], badgeIds = [] }: { doctor: any; slug: string; seminars?: any[]; jobs?: any[]; cityDoctorCount?: number; nearbyDoctors?: any[]; citySearchVolume?: number; stories?: { id: string; patient_first_name?: string | null; condition_before?: string | null; outcome_after?: string | null; story_text?: string | null }[]; badgeIds?: string[] }) {
+  const checkoutPrice = doctorCheckoutPrice();
   const { toggleSave, isSaved } = useUserPreferences();
   const [copied, setCopied] = useState(false);
   const [session, setSession] = useState<any>(null);
@@ -506,7 +508,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             ) : appointmentSubmitted ? requestSuccess() : (
               <>
                 {acceptingNewPatients !== false && (
-                  <p style={{ fontSize: 13, fontWeight: 800, color: "#15803d", margin: "0 0 4px" }}>New community members welcome</p>
+                  <p style={{ fontSize: 13, fontWeight: 800, color: "#15803d", margin: "0 0 4px" }}>New patients welcome</p>
                 )}
                 <p style={{ fontSize: 13, color: "#4a5568", margin: "0 0 12px" }}>The office typically replies within 1 business day.</p>
                 {requestFields("appt-side")}
@@ -565,7 +567,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
               <p style={{ fontWeight: 900, fontSize: 14, color: "#1E2D3B" }}>This is how community members see your profile</p>
               <p style={{ fontSize: 12, color: "#718096", marginTop: 4 }}>Your phone, website, and booking link are hidden. Upgrade to Pro so community members can reach you.</p>
             </div>
-            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro — $99/mo</Link>
+            <Link href="/doctor/billing" style={{ padding: "12px 24px", background: "#D66829", color: "white", borderRadius: 12, fontWeight: 800, fontSize: 13, textDecoration: "none", whiteSpace: "nowrap" }}>Upgrade to Pro, {checkoutPrice.monthlyWithUnit}</Link>
           </div>
         </Section>
       )}
@@ -618,7 +620,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
 
       {(stories.length > 0 || d.google_reviews_url) && (
         <Section bg="white" style={{ paddingTop: 48, paddingBottom: 48 }}>
-          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 28 }}>What community members say</h2>
+          <h2 style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B", textTransform: "uppercase", letterSpacing: "0.15em", textAlign: "center", marginBottom: 28 }}>What patients say</h2>
           {stories.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 800, margin: "0 auto" }}>
               {stories.map((story) => (
@@ -797,7 +799,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
                   {d.has_weekend_hours && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Weekend hours</span>}
                   {d.accepts_walkins && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Walk-ins welcome</span>}
                   {d.offers_telehealth && <span style={{ padding: "4px 12px", background: "#eff6ff", color: "#2563eb", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Telehealth available</span>}
-                  {acceptingNewPatients && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Accepting new community members</span>}
+                  {acceptingNewPatients && <span style={{ padding: "4px 12px", background: "#ecfdf5", color: "#059669", fontSize: 12, fontWeight: 700, borderRadius: 8 }}>Accepting new patients</span>}
                 </div>
               </div>
             ) : (
@@ -985,7 +987,7 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
             <>
               <p style={{ textAlign: "center", color: "#718096", fontSize: 14, marginBottom: 8 }}>Send a request to {doctor.clinic_name || name}. They&apos;ll get back to you directly.</p>
               {acceptingNewPatients !== false && (
-                <p style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#15803d", marginBottom: 4 }}>New community members welcome</p>
+                <p style={{ textAlign: "center", fontSize: 13, fontWeight: 800, color: "#15803d", marginBottom: 4 }}>New patients welcome</p>
               )}
               <p style={{ textAlign: "center", fontSize: 13, color: "#4a5568", marginBottom: 20 }}>The office typically replies within 1 business day.</p>
               {appointmentSubmitted ? requestSuccess() : (

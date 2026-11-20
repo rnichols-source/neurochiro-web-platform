@@ -28,6 +28,7 @@ export function buildVisitOfficeAlert(input: {
   note: string | null
   preferredWindow: string | null
   practiceName: string
+  visitId?: string | null
 }): VisitOfficeAlert {
   const who = input.sharedFirstName || 'A community member'
   const practice = input.practiceName.trim() || 'your office'
@@ -46,12 +47,20 @@ export function buildVisitOfficeAlert(input: {
   const withheld = !input.sharedEmail && !input.callbackPhone
     ? '<p style="margin:0;font-size:14px;">They did not share an email or phone.</p>'
     : ''
-  const url = `${PUBLIC_ORIGIN}/doctor/visit-requests`
+  const visitId = (input.visitId || '').trim()
+  const url = /^[0-9a-f-]{36}$/i.test(visitId)
+    ? `${PUBLIC_ORIGIN}/doctor/people?open=${visitId}`
+    : `${PUBLIC_ORIGIN}/doctor/visit-requests`
+  const phone = (input.callbackPhone || '').replace(/[^\d+]/g, '')
+  const callRow = phone
+    ? `<p style="margin:16px 0;"><a href="tel:${escapeHtml(phone)}" style="display:inline-block;padding:14px 18px;background:#1E2D3B;color:white;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;margin-right:8px;">Call</a><a href="sms:${escapeHtml(phone)}" style="display:inline-block;padding:14px 18px;background:#1E2D3B;color:white;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;">Text</a></p>`
+    : ''
   const inner = `
     <h1 style="font-size:22px;margin:0 0 12px;">Visit request from a community member</h1>
     <p>${escapeHtml(opening)} They only shared what they chose.</p>
     <div style="background:#F5F3EF;padding:16px;border-radius:10px;margin:16px 0;">${details}${withheld}</div>
-    <p style="margin:24px 0;"><a href="${url}" style="display:inline-block;padding:16px 28px;background:#D66829;color:white;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;">Open visit requests</a></p>
+    ${callRow}
+    <p style="margin:24px 0;"><a href="${url}" style="display:inline-block;padding:16px 28px;background:#B4501A;color:white;text-decoration:none;border-radius:10px;font-weight:700;font-size:16px;">Open their card</a></p>
     <p style="font-size:13px;color:#6b7280;">This is not a chart. Your NeuroChiro does not send anything they left unchecked.</p>
   `
   const text = [
@@ -66,6 +75,8 @@ export function buildVisitOfficeAlert(input: {
     input.preferredWindow ? `Preferred time: ${input.preferredWindow}` : '',
     input.note ? `Note: ${input.note}` : '',
     !input.sharedEmail && !input.callbackPhone ? 'They did not share an email or phone.' : '',
+    phone ? `Call: tel:${phone}` : '',
+    phone ? `Text: sms:${phone}` : '',
     url,
   ].filter(Boolean).join('\n')
   return {
@@ -80,6 +91,7 @@ export function buildVisitOfficeAlert(input: {
       email: input.sharedEmail,
       bestTime: input.preferredWindow,
       note: input.note,
+      detailsUrl: url,
     }),
   }
 }

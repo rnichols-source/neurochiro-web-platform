@@ -14,11 +14,14 @@ import {
   agoLabel,
   buildNextSteps,
   doctorGreetingName,
+  monthProofLine,
   initialsFrom,
   profileChecklist,
   type NextStep,
   type ProfileChecklist,
 } from '@/lib/doctor/places'
+import { historyForRequest, stageFromLegacy, visibleRequestContact, type StageEvent } from '@/lib/doctor/pipeline'
+import { isMissingTable } from '@/lib/leads/schema'
 import { countStudentsNear, listStudentDirectory } from '@/lib/doctor/student-directory'
 
 export type ThenItem = {
@@ -48,6 +51,9 @@ export type TodayData = {
   stepTotal: number
   thenItems: ThenItem[]
   requestCount: number | null
+  monthLine: string | null
+  waitingPerson: { id: string; name: string; phone: string | null } | null
+  nextStep: NextStep | null
 }
 
 function countSentencesReady(value: unknown): string | null {
@@ -85,7 +91,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
       ? admin.from('doctors').select('photo_url, bio, short_intro, listing_format, co_owners, city, address, specialties, hours').eq('id', doctorId).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     doctorId
-      ? admin.from('community_visit_requests').select('id, created_at, status, shared_first_name, note, preferred_window').eq('doctor_id', doctorId).order('created_at', { ascending: false }).limit(6)
+      ? admin.from('community_visit_requests').select('id, created_at, status, shared_first_name, note, preferred_window, callback_phone').eq('doctor_id', doctorId).order('created_at', { ascending: false }).limit(6)
       : Promise.resolve({ data: [], error: null }),
     doctorId ? loadHomeDoctorMembers(doctorId).catch(() => []) : Promise.resolve([]),
     doctorId
@@ -149,7 +155,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
       kind: 'Visit request',
       title: who,
       subtitle: [newestVisit.preferred_window, agoLabel(newestVisit.created_at)].filter(Boolean).join(' · ') || 'Asked to see you',
-      href: '/doctor/people',
+      href: `/doctor/people?open=${newestVisit.id}`,
       action: 'Review',
     })
   }
@@ -179,11 +185,42 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
     studentsNear: students,
     checklist,
     step: steps[0],
+    nextStep: steps[1] || null,
     stepIndex: 1,
     stepTotal: steps.filter((step) => step.id !== 'clear').length,
     thenItems,
     requestCount: stats?.patientRequests ? stats.patientRequests.total : null,
+    monthLine: doctorId ? await loadMonthProof(admin, doctorId, now) : null,
+    waitingPerson: newestVisit && (newestVisit.status === 'requested' || !newestVisit.status)
+      ? { id: String(newestVisit.id), name: newestVisit.shared_first_name || 'Someone', phone: newestVisit.callback_phone || null }
+      : null,
   }
+}
+
+async function loadMonthProof(admin: any, doctorId: string, now: Date): Promise<string | null> {
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString()
+  const view = await admin
+    .from('doctor_pipeline_monthly')
+    .select('request_count, scheduled_count')
+    .eq('doctor_id', doctorId)
+    .gte('month_start', start)
+    .lt('month_start', end)
+  if (!view.error && Array.isArray(view.data)) {
+    const requests = view.data.reduce((sum: number, row: { request_count?: number }) => sum + (row.request_count || 0), 0)
+    const booked = view.data.reduce((sum: number, row: { scheduled_count?: number }) => sum + (row.scheduled_count || 0), 0)
+    return monthProofLine(requests, booked)
+  }
+  const events = await admin
+    .from('doctor_request_stage_events')
+    .select('stage')
+    .eq('doctor_id', doctorId)
+    .gte('happened_at', start)
+    .lt('happened_at', end)
+  if (events.error || !Array.isArray(events.data)) return null
+  const requests = events.data.filter((row: { stage?: string }) => row.stage === 'requested').length
+  const booked = events.data.filter((row: { stage?: string }) => row.stage === 'scheduled').length
+  return monthProofLine(requests, booked)
 }
 
 export type PersonCard = {
@@ -198,9 +235,36 @@ export type PersonCard = {
   leadId?: string
   leadType?: string
   canMessage?: boolean
+  phone?: string | null
+  email?: string | null
+  message?: string | null
+  stage?: string
+  history?: StageEvent[]
+  source?: 'visit' | 'lead' | 'contact_request'
+  sourceId?: string
+  createdAt?: string
 }
 
-export async function loadPeople(doctorId: string): Promise<{ ready: boolean; waiting: PersonCard[]; members: PersonCard[]; people: PersonCard[] }> {
+async function loadStageOverlay(admin: any, doctorId: string): Promise<Map<string, { stage: string; events: StageEvent[] }>> {
+  const map = new Map<string, { stage: string; events: StageEvent[] }>()
+  const rows = await admin.from('doctor_request_pipeline').select('id, source, source_id, stage').eq('doctor_id', doctorId)
+  if (rows.error || isMissingTable(rows.error)) return map
+  const events = await admin.from('doctor_request_stage_events').select('pipeline_id, stage, happened_at').eq('doctor_id', doctorId).order('happened_at', { ascending: true })
+  const byPipeline = new Map<string, StageEvent[]>()
+  if (!events.error) {
+    for (const event of events.data || []) {
+      const list = byPipeline.get(event.pipeline_id) || []
+      list.push({ stage: event.stage, at: event.happened_at })
+      byPipeline.set(event.pipeline_id, list)
+    }
+  }
+  for (const row of rows.data || []) {
+    map.set(`${row.source}:${row.source_id}`, { stage: row.stage, events: byPipeline.get(row.id) || [] })
+  }
+  return map
+}
+
+export async function loadPeople(doctorId: string, timeZone = 'America/New_York'): Promise<{ ready: boolean; waiting: PersonCard[]; members: PersonCard[]; people: PersonCard[] }> {
   const admin = createAdminClient() as any
   const { loadLeadPipeline } = await import('@/app/(doctor)/doctor/leads/pipeline')
   const { listMyReferrals } = await import('@/lib/referrals/data')
@@ -218,16 +282,36 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
   ])
   const ready = !(visits.error && schemaNotReady(visits.error))
   const threadProfiles = new Set((threads || []).map((row) => row.otherUser?.id).filter(Boolean))
-  const waiting: PersonCard[] = (visits.data || []).map((row: Record<string, string | null>) => ({
-    id: String(row.id),
-    profileId: row.profile_id,
-    name: row.shared_first_name || 'A community member',
-    detail: [row.for_first_name ? `for ${row.for_first_name}` : null, row.preferred_window, agoLabel(String(row.created_at))].filter(Boolean).join(' · '),
-    note: row.note,
-    status: String(row.status || 'requested'),
-    kind: 'visit' as const,
-    canMessage: Boolean(row.profile_id && threadProfiles.has(String(row.profile_id))),
-  }))
+  const overlay = await loadStageOverlay(admin, doctorId)
+  const waiting: PersonCard[] = (visits.data || []).map((row: Record<string, string | null>) => {
+    const contact = visibleRequestContact({
+      kind: 'visit',
+      doctorId,
+      ownerDoctorId: doctorId,
+      email: row.shared_email,
+      phone: row.callback_phone,
+    })
+    const saved = overlay.get(`visit:${row.id}`)
+    const stage = saved?.stage || stageFromLegacy(String(row.status || 'requested'))
+    return {
+      id: String(row.id),
+      profileId: row.profile_id,
+      name: row.shared_first_name || 'Someone',
+      detail: [contact.phone, contact.email, row.for_first_name ? `for ${row.for_first_name}` : null, agoLabel(String(row.created_at), Date.now(), timeZone)].filter(Boolean).join(' · '),
+      note: row.note,
+      message: row.note,
+      phone: contact.phone,
+      email: contact.email,
+      status: stage,
+      stage,
+      history: historyForRequest({ createdAt: String(row.created_at || ''), stage, events: saved?.events }),
+      source: 'visit' as const,
+      sourceId: String(row.id),
+      createdAt: String(row.created_at || ''),
+      kind: 'visit' as const,
+      canMessage: Boolean(row.profile_id && threadProfiles.has(String(row.profile_id))),
+    }
+  })
   const home: PersonCard[] = members.map((member) => ({
     id: member.id,
     profileId: member.id,
@@ -238,23 +322,49 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     kind: 'member' as const,
     canMessage: threadProfiles.has(member.id),
   }))
-  const requests: PersonCard[] = ((leads && 'leads' in leads ? leads.leads : []) as Array<Record<string, string | null>>).map((lead) => ({
-    id: `lead-${lead.id}`,
-    profileId: null,
-    name: [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Directory request',
-    detail: [lead.source || 'Directory', lead.email, agoLabel(String(lead.created_at || ''))].filter(Boolean).join(' · '),
-    note: lead.notes || lead.message || null,
-    status: String(lead.stage || 'new'),
-    kind: 'request' as const,
-    leadId: String(lead.id),
-    leadType: String(lead._type || 'lead'),
-  }))
+  const requests: PersonCard[] = ((leads && 'leads' in leads ? leads.leads : []) as Array<Record<string, string | null>>).map((lead) => {
+    const source = lead._type === 'contact_request' ? 'contact_request' as const : 'lead' as const
+    const contact = visibleRequestContact({
+      kind: source,
+      doctorId,
+      ownerDoctorId: doctorId,
+      email: lead.email,
+      phone: lead.phone,
+    })
+    const saved = overlay.get(`${source}:${lead.id}`)
+    const stage = saved?.stage || stageFromLegacy(String(lead.stage || 'new'))
+    return {
+      id: `lead-${lead.id}`,
+      profileId: null,
+      name: [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Directory request',
+      detail: [contact.phone, contact.email, lead.source || 'Directory', agoLabel(String(lead.created_at || ''), Date.now(), timeZone)].filter(Boolean).join(' · '),
+      note: lead.notes || lead.message || null,
+      message: lead.message || lead.notes || null,
+      phone: contact.phone,
+      email: contact.email,
+      status: stage,
+      stage,
+      history: historyForRequest({
+        createdAt: String(lead.created_at || ''),
+        stage,
+        contactedAt: lead.last_contacted_at,
+        bookedAt: lead.confirmed_at,
+        events: saved?.events,
+      }),
+      source,
+      sourceId: String(lead.id),
+      createdAt: String(lead.created_at || ''),
+      kind: 'request' as const,
+      leadId: String(lead.id),
+      leadType: String(lead._type || 'lead'),
+    }
+  })
   const referralCards: PersonCard[] = [
     ...((referrals?.received || []) as unknown as Array<Record<string, string>>).map((row) => ({
       id: `ref-in-${row.id}`,
       profileId: null,
       name: row.patient_first_name || 'Referral in',
-      detail: `From ${row.other_name || 'a doctor'} · ${agoLabel(row.created_at)}`,
+      detail: `From ${row.other_name || 'a doctor'} · ${agoLabel(row.created_at, Date.now(), timeZone)}`,
       note: null,
       status: row.status || 'sent',
       kind: 'referral' as const,
@@ -264,7 +374,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
       id: `ref-out-${row.id}`,
       profileId: null,
       name: row.patient_first_name || 'Referral out',
-      detail: `To ${row.other_name || 'a doctor'} · ${agoLabel(row.created_at)}`,
+      detail: `To ${row.other_name || 'a doctor'} · ${agoLabel(row.created_at, Date.now(), timeZone)}`,
       note: null,
       status: row.status || 'sent',
       kind: 'referral' as const,
@@ -276,7 +386,7 @@ export async function loadPeople(doctorId: string): Promise<{ ready: boolean; wa
     id: `care-${row.id}`,
     profileId: row.profile_id,
     name: careNames.get(String(row.profile_id)) || 'Care set',
-    detail: [planBySlug(libraryPlans(), String(row.library_plan_slug || ''))?.name || 'Care set', agoLabel(String(row.created_at || ''))].filter(Boolean).join(' · '),
+    detail: [planBySlug(libraryPlans(), String(row.library_plan_slug || ''))?.name || 'Home plan', agoLabel(String(row.created_at || ''), Date.now(), timeZone)].filter(Boolean).join(' · '),
     note: null,
     status: String(row.status || 'active'),
     kind: 'care' as const,

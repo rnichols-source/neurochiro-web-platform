@@ -37,7 +37,7 @@ export function RemedyFocus({
           <BackIcon />
           Care
         </Link>
-        <p className="mt-3 text-[12px] font-bold text-white/90">{crumb}</p>
+        <p className="mt-3 text-[12px] font-bold text-white">{crumb}</p>
         <h1 className="nc-ui mt-1 text-[23px] font-extrabold leading-[1.15] tracking-[-0.025em] text-white">{title}</h1>
         <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1" role="tablist" aria-label="Remedies">
         {cards.map((item) => {

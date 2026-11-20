@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { requestVisit } from '@/lib/community/actions'
 import type { PrivacyPrefs } from '@/lib/community/logic'
 import { FieldLabel, FormError, fieldClass } from '@/components/community/ui'
@@ -24,7 +25,7 @@ export function VisitForm({
 }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState<string | null>(null)
+  const [done, setDone] = useState<{ emailed: boolean } | null>(null)
   const [forMemberId, setForMemberId] = useState('')
   const [shareFirstName, setShareFirstName] = useState(privacy.shareNameWithHomeDoctor)
   const [shareForName, setShareForName] = useState(false)
@@ -37,9 +38,15 @@ export function VisitForm({
 
   if (done) {
     return (
-      <div className="rounded-[18px] bg-[#e8f5ee] px-4 py-4 text-[14px] leading-relaxed text-[#1f8a4c]">
-        <p className="font-heading text-[16px] font-bold text-neuro-navy">Request saved</p>
-        <p className="mt-1 text-[#3d4a57]">{done}</p>
+      <div className="rounded-[18px] bg-[#e8f5ee] px-4 py-4 text-[15px] leading-relaxed text-[#15202B]">
+        <p className="font-heading text-[18px] font-bold">Request sent</p>
+        <p className="mt-2">{doctorTitle} has your request. Their office usually reaches out within 1 business day.</p>
+        <p className="mt-2 text-[#3d4a57]">{done.emailed ? 'A confirmation is in your email.' : 'It is saved on your account. A confirmation email was not sent from this server.'}</p>
+        <p className="mt-2 text-[#3d4a57]">Nothing else is required. You can go back to Care.</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/portal/care" className="inline-flex min-h-11 items-center rounded-xl bg-[#0A6159] px-4 text-[14px] font-bold text-white">Back to Care</Link>
+          <Link href="/portal" className="inline-flex min-h-11 items-center rounded-xl bg-white px-4 text-[14px] font-bold text-[#15202B]">Home</Link>
+        </div>
       </div>
     )
   }
@@ -69,23 +76,10 @@ export function VisitForm({
             utmContent: params.get('utm_content'),
           })
           if (!result.ok) {
-            setError(result.error)
+            setError(`${result.error} Try again, or go back to Care.`)
             return
           }
-          const office = [
-            result.emailed ? 'The office was emailed what you checked.' : '',
-            result.texted ? 'A text was sent to the office.' : '',
-            result.textHeld ? 'A text is held until the office’s morning hours.' : '',
-          ].filter(Boolean)
-          if (office.length > 0) {
-            setDone(`Saved. ${office.join(' ')} Nothing else was included.`)
-          } else if (!result.claimed) {
-            setDone('Saved. This office does not have a NeuroChiro login yet, so they will not get an in-app alert. Your request is still on your account.')
-          } else if (result.notified) {
-            setDone(`${doctorTitle} has an alert in their NeuroChiro account. They only received what you checked. Email or text was not sent just now.`)
-          } else {
-            setDone('Saved on your account. The office alert could not be delivered just now. They can still see it under visit requests when they sign in.')
-          }
+          setDone({ emailed: Boolean(result.memberEmailed) })
         })
       }}
     >

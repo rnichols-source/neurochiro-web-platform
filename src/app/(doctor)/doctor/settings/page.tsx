@@ -7,6 +7,7 @@ import { listBlockedPeople, saveNotificationPrefs, unblockUser } from "@/app/act
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/portal/PageHeader";
 import LeadTextAlerts from "./LeadTextAlerts";
+import OfficeAlerts from "./OfficeAlerts";
 import { useSettingsSeed } from "./seed";
 
 export default function SettingsPage() {
@@ -141,6 +142,8 @@ export default function SettingsPage() {
           {prefsSaved ? 'Saved!' : savingPrefs ? 'Saving...' : 'Save Preferences'}
         </button>
       </div>
+
+      <OfficeAlerts />
 
       <LeadTextAlerts />
 

@@ -1,19 +1,19 @@
 /* Doctor portal tokens. Utilities are named portal-* so public pages stay on the site theme. */
 @theme {
-  --color-portal-accent: #d66829;
+  --color-portal-accent: #b4501a;
   --color-portal-accent-50: #fdf1ea;
   --color-portal-ink: #16202a;
   --color-portal-ink-2: #3d4a57;
-  --color-portal-muted: #6b7785;
+  --color-portal-muted: #5b6773;
   --color-portal-line: #cfd6dd;
   --color-portal-border: #e3e8ed;
   --color-portal-surface: #f1f4f6;
   --color-portal-canvas: #f7f8fa;
   --color-portal-sidebar: #14212e;
   --color-portal-sidebar-active: #1c2c3b;
-  --color-portal-success: #1f8a4c;
+  --color-portal-success: #0e6a36;
   --color-portal-success-bg: #e8f5ee;
-  --color-portal-warning: #a86400;
+  --color-portal-warning: #7a4800;
   --color-portal-warning-bg: #fdf3e2;
   --color-portal-danger: #c0362c;
   --color-portal-danger-bg: #fbeceb;
@@ -30,17 +30,115 @@
   line-height: 24px;
 }
 
-.portal h1,
-.portal h2,
-.portal h3,
-.portal h4,
-.portal h5,
-.portal h6 {
-  font-family: var(--font-lato), sans-serif;
-  color: #16202a;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-transform: none;
+@layer base {
+  .portal h1,
+  .portal h2,
+  .portal h3,
+  .portal h4,
+  .portal h5,
+  .portal h6 {
+    font-family: var(--font-lato), sans-serif;
+    color: inherit;
+    font-weight: 700;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+}
+
+.portal .text-gray-400,
+.portal .text-gray-500,
+.doctor-portal .text-gray-400,
+.doctor-portal .text-gray-500,
+.community .text-gray-400,
+.community .text-gray-500 {
+  color: #5b6773;
+}
+
+.portal .text-red-500,
+.doctor-portal .text-red-500,
+.community .text-red-500 {
+  color: #9f1239;
+}
+
+.portal .text-neuro-orange,
+.doctor-portal .text-neuro-orange,
+.community .text-neuro-orange,
+.portal .text-portal-accent,
+.doctor-portal .text-portal-accent,
+.community .text-portal-accent {
+  color: #b4501a;
+}
+
+.portal .bg-neuro-orange,
+.doctor-portal .bg-neuro-orange,
+.community .bg-neuro-orange,
+.portal .bg-portal-accent,
+.doctor-portal .bg-portal-accent,
+.community .bg-portal-accent,
+.portal .bg-\[\#D66829\],
+.doctor-portal .bg-\[\#D66829\],
+.community .bg-\[\#D66829\],
+.portal .bg-\[\#d66829\],
+.doctor-portal .bg-\[\#d66829\],
+.community .bg-\[\#d66829\] {
+  background-color: #b4501a;
+}
+
+.portal .text-\[\#6b7785\],
+.doctor-portal .text-\[\#6b7785\],
+.community .text-\[\#6b7785\],
+.portal .text-\[\#8a95a1\],
+.doctor-portal .text-\[\#8a95a1\],
+.community .text-\[\#8a95a1\],
+.portal .text-\[\#7d8893\],
+.doctor-portal .text-\[\#7d8893\],
+.community .text-\[\#7d8893\] {
+  color: #5b6773;
+}
+
+.portal .text-\[\#D66829\],
+.doctor-portal .text-\[\#D66829\],
+.community .text-\[\#D66829\],
+.portal .text-\[\#d66829\],
+.doctor-portal .text-\[\#d66829\],
+.community .text-\[\#d66829\] {
+  color: #b4501a;
+}
+
+.portal :is(input, textarea)::placeholder,
+.doctor-portal :is(input, textarea)::placeholder,
+.community :is(input, textarea)::placeholder {
+  color: #5b6773;
+  opacity: 1;
+}
+
+.legacy-portal [class*="text-white/"] {
+  color: #d5dde6;
+}
+
+.legacy-portal .bg-\[\#D66829\],
+.legacy-portal .bg-\[\#d66829\],
+.legacy-portal .bg-neuro-orange {
+  background-color: #b4501a;
+}
+
+.legacy-portal :is(input, textarea)::placeholder {
+  color: #d5dde6;
+  opacity: 1;
+}
+
+.portal button:disabled,
+.doctor-portal button:disabled,
+.community button:disabled,
+.legacy-portal button:disabled {
+  opacity: 1;
+}
+
+.legacy-portal :is(.hover\:bg-\[\#e8834a\]:hover, .hover\:bg-\[\#E8834A\]:hover),
+.portal :is(.hover\:bg-\[\#e8834a\]:hover, .hover\:bg-neuro-orange-light:hover),
+.doctor-portal :is(.hover\:bg-\[\#e8834a\]:hover, .hover\:bg-neuro-orange-light:hover),
+.community :is(.hover\:bg-\[\#e8834a\]:hover, .hover\:bg-neuro-orange-light:hover) {
+  background-color: #8c3a12;
 }
 
 .portal .onboarding-gate :is(h1, h2, h3, h4, h5, h6) {

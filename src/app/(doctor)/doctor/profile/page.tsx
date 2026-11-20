@@ -166,11 +166,23 @@ function compressImage(file: File, maxWidth: number, quality: number): Promise<F
 
 function ProfileFold({ title, children }: { title: string; openOnDesktop?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const openHash = () => {
+      const id = window.location.hash.replace('#', '')
+      if (!id || !ref.current?.querySelector(`#${CSS.escape(id)}`)) return
+      setOpen(true)
+      requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }))
+    }
+    openHash()
+    window.addEventListener('hashchange', openHash)
+    return () => window.removeEventListener('hashchange', openHash)
+  }, [])
   return (
-    <section className="rounded-[20px] bg-white">
+    <section ref={ref} className="rounded-[20px] bg-white">
       <button type="button" onClick={() => setOpen((value) => !value)} className="flex min-h-14 w-full items-center gap-3 px-4 text-left lg:cursor-default">
         <span className="dp-ui text-[15px] font-extrabold text-[#15202B]">{title}</span>
-        <span className="ml-auto text-[12px] font-bold text-[#6b7785] lg:hidden">{open ? "Hide" : "Show"}</span>
+        <span className="ml-auto text-[12px] font-bold text-[#5b6773] lg:hidden">{open ? "Hide" : "Show"}</span>
       </button>
       <div className={`${open ? "block" : "hidden"} space-y-4 px-4 pb-4 lg:block`}>{children}</div>
     </section>
@@ -513,14 +525,14 @@ function ProfileEditor() {
 
           <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1fr_320px]">
           <div className="space-y-3">
-          <section className="rounded-[20px] bg-white p-4">
+          <section id="profile-photo" className="rounded-[20px] bg-white p-4">
             <div className="flex items-center gap-4">
               <div className="grid h-[66px] w-[66px] shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#D66829 ${pct}%, #ECEAE5 0)` }}>
                 <span className="grid h-[52px] w-[52px] place-items-center rounded-full bg-white dp-ui text-[15px] font-extrabold text-[#15202B]">{pct}%</span>
               </div>
               <div>
                 <p className="dp-ui text-[16px] font-extrabold text-[#15202B]">Edit my profile</p>
-                <p className="text-[13px] text-[#5b6773]">{missing.length ? `${missing.length} still open` : 'Ready for community members'}</p>
+                <p className="text-[13px] text-[#5b6773]">{missing.length ? `Next: ${missing[0].hint.replace(/^Add /, 'add ')}.` : 'Ready for community members'}</p>
               </div>
               <button type="button" onClick={() => fileInputRef.current?.click()} className="dp-ui ml-auto inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-3 text-[13px] font-extrabold text-white">Upload photo</button>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
@@ -529,7 +541,7 @@ function ProfileEditor() {
             <ul className="mt-3 space-y-1">
               {checks.map((item) => (
                 <li key={item.label} className="flex items-center gap-2 text-[13px] text-[#3d4a57]">
-                  <span className={`grid h-5 w-5 place-items-center rounded-full text-[11px] font-extrabold ${item.done ? 'bg-[#E8F5EE] text-[#1f8a4c]' : 'bg-[#F5F3EF] text-[#6b7785]'}`}>{item.done ? 'OK' : ''}</span>
+                  <span className={`grid h-5 w-5 place-items-center rounded-full text-[12px] font-extrabold ${item.done ? 'bg-[#E8F5EE] text-[#0e6a36]' : 'bg-[#F5F3EF] text-[#5b6773]'}`}>{item.done ? 'OK' : ''}</span>
                   {item.label}
                 </li>
               ))}
@@ -589,6 +601,7 @@ function ProfileEditor() {
               </Section>
 
               <Section title="Office hours">
+                <div id="office-hours" />
                 <textarea name="hours" defaultValue={profile?.hours || ""} placeholder={"Monday: 9:00 AM – 6:00 PM\nTuesday: 9:00 AM – 6:00 PM\nWednesday: Closed"} rows={4} className={AREA} />
               </Section>
 
@@ -895,7 +908,7 @@ function ProfileEditor() {
                 </Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Label label="Instagram">
-                    <input name="instagram_url" defaultValue={profile?.instagram_url || ""} placeholder="https://instagram.com/yourpractice" className={INPUT} />
+                    <input id="instagram" name="instagram_url" defaultValue={profile?.instagram_url || ""} placeholder="https://instagram.com/yourpractice" className={INPUT} />
                   </Label>
                   <Label label="Facebook">
                     <input name="facebook_url" defaultValue={profile?.facebook_url || ""} placeholder="https://facebook.com/yourpractice" className={INPUT} />
@@ -927,7 +940,7 @@ function ProfileEditor() {
           </form>
           </div>
           <aside className="hidden h-fit rounded-[24px] bg-[#F4F7FA] p-4 lg:block">
-            <p className="dp-ui text-[11px] font-extrabold tracking-[0.1em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Live preview</p>
+            <p className="dp-ui text-[12px] font-extrabold tracking-[0.04em] text-[#5b6773]">Live preview</p>
             <div className="mt-3 rounded-[20px] bg-white p-4">
               <div className="flex items-center gap-3">
                 {profile?.photo_url ? <img src={profile.photo_url} alt="" className="h-14 w-14 rounded-2xl object-cover" /> : (

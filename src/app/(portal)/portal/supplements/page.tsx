@@ -209,7 +209,7 @@ export default function SupplementsPage() {
         <p className="text-xs text-white/35 mt-1">
           Simple nutrition tips and supplement info to support your healing between visits.
         </p>
-        <p className="text-xs text-amber-400/60 mt-2">
+        <p className="text-xs text-amber-400 mt-2">
           Always consult your doctor before starting any supplement, especially if you take medications or have a medical condition.
         </p>
       </header>

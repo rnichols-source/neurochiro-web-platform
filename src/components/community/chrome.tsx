@@ -67,7 +67,7 @@ export function BackHeading({
         <BackIcon />
         {label}
       </Link>
-      {crumb ? <p className="mt-3 text-[12px] font-bold text-white/90">{crumb}</p> : null}
+      {crumb ? <p className="mt-3 text-[12px] font-bold text-white">{crumb}</p> : null}
       <h1 className="nc-ui mt-1 text-[23px] font-extrabold leading-[1.15] tracking-[-0.025em] text-white">{title}</h1>
     </header>
   )

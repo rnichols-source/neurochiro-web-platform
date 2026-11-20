@@ -92,7 +92,7 @@ export function doctorNewRequest(input: LeadTemplateInput): { subject: string; h
   const url = ackUrl(input.acknowledgeToken)
   const where = sourceLabel(input.source)
   const inner = `
-    <h1 style="font-size:22px;margin:0 0 12px;">New patient request</h1>
+    <h1 style="font-size:22px;margin:0 0 12px;">New request</h1>
     <p><strong>${escapeHtml(input.patientName)}</strong> asked ${escapeHtml(input.practiceName)} to reach out, ${escapeHtml(where)}.</p>
     ${patientBlock(input)}
     ${button(url, "I've contacted this patient")}
@@ -100,7 +100,7 @@ export function doctorNewRequest(input: LeadTemplateInput): { subject: string; h
     <p style="font-size:13px;color:#6b7280;">One tap lets us know you handled it. You can also confirm from the link in this email. No login is required.</p>
   `
   const text = [
-    `New patient request for ${input.practiceName}.`,
+    `New request for ${input.practiceName}.`,
     `${input.patientName} asked your office to reach out, ${where}.`,
     patientText(input),
     `I've contacted this patient: ${url}`,
