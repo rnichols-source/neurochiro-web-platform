@@ -29,14 +29,14 @@ export async function getAIWeeklyInsight(): Promise<string | null> {
     // Gather practice data
     const { data: doc } = await createAdminClient()
       .from('doctors')
-      .select('first_name, profile_views, patient_leads, city, state, specialties, bio, photo_url, video_url, membership_tier')
+      .select('id, first_name, profile_views, patient_leads, city, state, specialties, bio, photo_url, video_url, membership_tier')
       .eq('user_id', user.id)
       .single();
 
     if (!doc) return null;
 
     const [leadsRes, seminarsRes, jobsRes, ceRes] = await Promise.all([
-      admin.from('leads').select('id, stage, created_at', { count: 'exact' }).eq('doctor_id', user.id),
+      admin.from('leads').select('id, stage, created_at', { count: 'exact' }).eq('doctor_id', doc.id),
       createAdminClient().from('seminars').select('id', { count: 'exact', head: true }).eq('host_id', user.id).eq('is_approved', true),
       createAdminClient().from('job_postings').select('id', { count: 'exact', head: true }).eq('doctor_id', user.id),
       admin.from('ce_certificates').select('ce_hours').eq('user_id', user.id),
