@@ -32,22 +32,32 @@ export async function deliverVisitOfficeAlert(input: {
   const result: OfficeAlertResult = { emailed: false, texted: false, textHeld: false }
   try {
     const admin = createAdminClient() as any
-    const doctor = await admin
+    let doctor = await admin
       .from('doctors')
-      .select('id, email, user_id, lead_notification_emails, clinic_name, last_name, state, country')
+      .select('id, email, user_id, lead_notification_emails, clinic_name, last_name, state, country, lead_alert_channel')
       .eq('id', input.doctorId)
       .maybeSingle()
+    if (doctor.error && /lead_alert_channel/.test(doctor.error.message || '')) {
+      doctor = await admin
+        .from('doctors')
+        .select('id, email, user_id, lead_notification_emails, clinic_name, last_name, state, country')
+        .eq('id', input.doctorId)
+        .maybeSingle()
+    }
     if (doctor.error || !doctor.data?.id) return result
 
     const practice = (doctor.data.clinic_name || '').trim() || (doctor.data.last_name ? `Dr. ${doctor.data.last_name}` : 'your office')
-    const built = buildVisitOfficeAlert({ ...input.share, practiceName: practice })
+    const channel = doctor.data.lead_alert_channel === 'email' || doctor.data.lead_alert_channel === 'text'
+      ? doctor.data.lead_alert_channel
+      : 'both'
+    const built = buildVisitOfficeAlert({ ...input.share, practiceName: practice, visitId: input.visitId })
     const recipients = await getDoctorRecipients({
       id: doctor.data.id,
       email: doctor.data.email,
       user_id: doctor.data.user_id,
       lead_notification_emails: doctor.data.lead_notification_emails,
     })
-    if (recipients.length > 0) {
+    if (channel !== 'text' && recipients.length > 0) {
       const sent = await sendTracked({
         requestId: null,
         kind: 'community_visit',
@@ -65,7 +75,7 @@ export async function deliverVisitOfficeAlert(input: {
       .select('lead_alert_phones, sms_alerts_enabled, sms_alerts_consent_at')
       .eq('id', input.doctorId)
       .maybeSingle()
-    if (smsRow.error || !smsRow.data) return result
+    if (channel === 'email' || smsRow.error || !smsRow.data) return result
     const phones = Array.isArray(smsRow.data.lead_alert_phones)
       ? smsRow.data.lead_alert_phones.filter((value: unknown) => typeof value === 'string')
       : []

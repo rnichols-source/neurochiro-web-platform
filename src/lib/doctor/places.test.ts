@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   buildNextSteps,
+  monthProofLine,
   communityMemberCopy,
   desktopClicks,
   doctorGreetingName,
@@ -116,6 +117,11 @@ test('desktop sidebar leads with today, people, home plans, profile, and help', 
   assert.equal(DOCTOR_TOOL_LINKS.find((link) => link.label === 'Community')?.href, '/doctor/coming-soon#community')
   assert.equal(DOCTOR_TOOL_LINKS.some((link) => link.href === '/doctor/lives'), false)
   assert.equal(mobileClicks('/doctor/messages'), 1)
+})
+
+test('this month reads requests and booked', () => {
+  assert.equal(monthProofLine(7, 3), 'This month: 7 requests, 3 booked')
+  assert.equal(monthProofLine(1, 1), 'This month: 1 request, 1 booked')
 })
 
 test('the next step is the profile until it is finished or skipped', () => {

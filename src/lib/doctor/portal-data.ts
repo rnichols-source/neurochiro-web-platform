@@ -14,6 +14,7 @@ import {
   agoLabel,
   buildNextSteps,
   doctorGreetingName,
+  monthProofLine,
   initialsFrom,
   profileChecklist,
   type NextStep,
@@ -50,6 +51,7 @@ export type TodayData = {
   stepTotal: number
   thenItems: ThenItem[]
   requestCount: number | null
+  monthLine: string | null
 }
 
 function countSentencesReady(value: unknown): string | null {
@@ -151,7 +153,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
       kind: 'Visit request',
       title: who,
       subtitle: [newestVisit.preferred_window, agoLabel(newestVisit.created_at)].filter(Boolean).join(' · ') || 'Asked to see you',
-      href: '/doctor/people',
+      href: `/doctor/people?open=${newestVisit.id}`,
       action: 'Review',
     })
   }
@@ -185,7 +187,34 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
     stepTotal: steps.filter((step) => step.id !== 'clear').length,
     thenItems,
     requestCount: stats?.patientRequests ? stats.patientRequests.total : null,
+    monthLine: doctorId ? await loadMonthProof(admin, doctorId, now) : null,
   }
+}
+
+async function loadMonthProof(admin: any, doctorId: string, now: Date): Promise<string | null> {
+  const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString()
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString()
+  const view = await admin
+    .from('doctor_pipeline_monthly')
+    .select('request_count, scheduled_count')
+    .eq('doctor_id', doctorId)
+    .gte('month_start', start)
+    .lt('month_start', end)
+  if (!view.error && Array.isArray(view.data)) {
+    const requests = view.data.reduce((sum: number, row: { request_count?: number }) => sum + (row.request_count || 0), 0)
+    const booked = view.data.reduce((sum: number, row: { scheduled_count?: number }) => sum + (row.scheduled_count || 0), 0)
+    return monthProofLine(requests, booked)
+  }
+  const events = await admin
+    .from('doctor_request_stage_events')
+    .select('stage')
+    .eq('doctor_id', doctorId)
+    .gte('happened_at', start)
+    .lt('happened_at', end)
+  if (events.error || !Array.isArray(events.data)) return null
+  const requests = events.data.filter((row: { stage?: string }) => row.stage === 'requested').length
+  const booked = events.data.filter((row: { stage?: string }) => row.stage === 'scheduled').length
+  return monthProofLine(requests, booked)
 }
 
 export type PersonCard = {

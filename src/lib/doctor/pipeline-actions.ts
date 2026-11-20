@@ -48,6 +48,12 @@ function refresh() {
 
 const PIPELINE_MISSING = 'That step needs the patient pipeline update from this change. It has not been applied on the database yet.'
 
+export async function noteNewRequest(doctorId: string, sourceId: string): Promise<void> {
+  if (!/^[0-9a-f-]{36}$/i.test(doctorId) || !/^[0-9a-f-]{36}$/i.test(sourceId)) return
+  const admin = createAdminClient() as any
+  await savePipelineStage(admin, doctorId, 'visit', sourceId, 'requested')
+}
+
 export async function setRequestStage(source: string, sourceId: string, stage: string): Promise<Result> {
   const doctor = await requirePracticeAccess()
   if (!doctor) return fail('A doctor profile is required.')

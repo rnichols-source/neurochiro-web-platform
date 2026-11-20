@@ -53,7 +53,7 @@ function LoginContent() {
 
   useEffect(() => {
     if (errorParam === "session_expired") {
-      setErrorMsg("Your session has expired. Please log in again.");
+      setErrorMsg("Your session ended. Sign in again and you will land back in the portal.");
     } else if (errorParam === "auth_failed") {
       setErrorMsg("Invalid email or password.");
     } else if (errorParam === "email_not_confirmed") {

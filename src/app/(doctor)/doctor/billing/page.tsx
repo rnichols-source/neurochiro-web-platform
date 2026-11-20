@@ -28,7 +28,9 @@ async function BillingLoaded({ membership }: { membership: Membership }) {
   const renews = billing && 'subscription' in billing ? billing.subscription?.nextBilling : null;
   const description =
     view === 'included' || view === 'included_with_stripe'
-      ? 'Your plan: Founding member. Pro is included.'
+      ? membership.isFounder
+        ? 'Your plan: Founding member. Pro is included.'
+        : 'Your plan: Pro is on this account. There is no card on file yet.'
       : view === 'stripe'
         ? `Your plan: Pro ${membership.priceLabel || PRO_PRICE_LABEL}. ${membership.status === 'canceled' ? 'Ends' : 'Renews'} ${renews || 'on your Stripe date'}.`
         : view === 'error'
@@ -49,10 +51,13 @@ async function BillingLoaded({ membership }: { membership: Membership }) {
       ) : null}
       {view === 'included' ? (
         <section className="bg-white border border-portal-border rounded-xl p-6">
-          <h2 className="text-lg font-bold text-portal-ink">Founding member: Pro is included. There&apos;s nothing to pay and no card on file.</h2>
+          <h2 className="text-lg font-bold text-portal-ink">{membership.isFounder ? 'Founding member: Pro is included. There is nothing to pay and no card on file.' : 'Pro is on this account. There is no card on file yet.'}</h2>
           <p className="mt-2 text-sm text-portal-ink-2">
-            Questions about your plan? <a className="font-bold text-portal-accent" href="mailto:support@neurochirodirectory.com">Email support@neurochirodirectory.com</a>.
+            {membership.isFounder
+              ? 'Card updates and receipts appear here after a Stripe customer is on the account.'
+              : 'Update card and receipts appear here after Stripe has a customer for this login. Activate Pro below if you still need to pay.'}
           </p>
+          {membership.isFounder ? null : <div className="mt-4"><ActivateProButtons /></div>}
         </section>
       ) : null}
       {showStripe && billing && !('error' in billing) && !billing.noCustomer ? (

@@ -39,6 +39,13 @@ function inStage(row: PersonCard, stage: StageId) {
   return (row.stage || row.status) === stage
 }
 
+function stageTab(row: PersonCard): StageId {
+  if (!pipelineRow(row)) return 'other'
+  const stage = row.stage || row.status
+  if (isClosedStage(stage)) return 'closed'
+  return STAGES.some((item) => item.id === stage) ? stage as StageId : 'requested'
+}
+
 function dial(phone: string) {
   const cleaned = phone.replace(/[^\d+]/g, '')
   return cleaned || phone
@@ -70,6 +77,7 @@ export function PeopleDesk({
   openCard = false,
   plansOpen = false,
   canSendPlans = true,
+  openId = '',
 }: {
   people: PersonCard[]
   ready: boolean
@@ -82,17 +90,19 @@ export function PeopleDesk({
   openCard?: boolean
   plansOpen?: boolean
   canSendPlans?: boolean
+  openId?: string
 }) {
   const counts = useMemo(() => {
     const map = new Map<StageId, number>()
     for (const stage of STAGES) map.set(stage.id, people.filter((row) => inStage(row, stage.id)).length)
     return map
   }, [people])
-  const firstStage = STAGES.find((stage) => (counts.get(stage.id) || 0) > 0)?.id || 'requested'
+  const opened = people.find((row) => row.id === openId || row.sourceId === openId) || null
+  const firstStage = opened ? stageTab(opened) : (STAGES.find((stage) => (counts.get(stage.id) || 0) > 0)?.id || 'requested')
   const [filter, setFilter] = useState<StageId>(firstStage)
   const rows = people.filter((row) => inStage(row, filter))
-  const [selectedId, setSelectedId] = useState(rows[0]?.id || '')
-  const [mobileCard, setMobileCard] = useState(openCard)
+  const [selectedId, setSelectedId] = useState(opened?.id || rows[0]?.id || '')
+  const [mobileCard, setMobileCard] = useState(Boolean(opened) || openCard)
   const selected = people.find((row) => row.id === selectedId) || rows[0] || null
   const [pending, start] = useTransition()
   const [note, setNote] = useState('')
@@ -110,7 +120,7 @@ export function PeopleDesk({
     setNote('')
     start(async () => {
       const result = await setRequestStage(selected.source || '', selected.sourceId || '', stage)
-      setNote(result.ok ? (result.message || 'Saved.') : result.error)
+      setNote(result.ok ? (result.message || 'Saved.') : `${result.error} Try again.`)
       if (result.ok) {
         if (isClosedStage(stage)) setFilter('closed')
         else if (STAGES.some((item) => item.id === stage)) setFilter(stage as StageId)

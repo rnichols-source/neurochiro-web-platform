@@ -166,8 +166,20 @@ function compressImage(file: File, maxWidth: number, quality: number): Promise<F
 
 function ProfileFold({ title, children }: { title: string; openOnDesktop?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const openHash = () => {
+      const id = window.location.hash.replace('#', '')
+      if (!id || !ref.current?.querySelector(`#${CSS.escape(id)}`)) return
+      setOpen(true)
+      requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ block: 'start' }))
+    }
+    openHash()
+    window.addEventListener('hashchange', openHash)
+    return () => window.removeEventListener('hashchange', openHash)
+  }, [])
   return (
-    <section className="rounded-[20px] bg-white">
+    <section ref={ref} className="rounded-[20px] bg-white">
       <button type="button" onClick={() => setOpen((value) => !value)} className="flex min-h-14 w-full items-center gap-3 px-4 text-left lg:cursor-default">
         <span className="dp-ui text-[15px] font-extrabold text-[#15202B]">{title}</span>
         <span className="ml-auto text-[12px] font-bold text-[#5b6773] lg:hidden">{open ? "Hide" : "Show"}</span>
@@ -513,14 +525,14 @@ function ProfileEditor() {
 
           <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1fr_320px]">
           <div className="space-y-3">
-          <section className="rounded-[20px] bg-white p-4">
+          <section id="profile-photo" className="rounded-[20px] bg-white p-4">
             <div className="flex items-center gap-4">
               <div className="grid h-[66px] w-[66px] shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#D66829 ${pct}%, #ECEAE5 0)` }}>
                 <span className="grid h-[52px] w-[52px] place-items-center rounded-full bg-white dp-ui text-[15px] font-extrabold text-[#15202B]">{pct}%</span>
               </div>
               <div>
                 <p className="dp-ui text-[16px] font-extrabold text-[#15202B]">Edit my profile</p>
-                <p className="text-[13px] text-[#5b6773]">{missing.length ? `${missing.length} still open` : 'Ready for community members'}</p>
+                <p className="text-[13px] text-[#5b6773]">{missing.length ? `Next: ${missing[0].hint.replace(/^Add /, 'add ')}.` : 'Ready for community members'}</p>
               </div>
               <button type="button" onClick={() => fileInputRef.current?.click()} className="dp-ui ml-auto inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-3 text-[13px] font-extrabold text-white">Upload photo</button>
               <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
@@ -589,6 +601,7 @@ function ProfileEditor() {
               </Section>
 
               <Section title="Office hours">
+                <div id="office-hours" />
                 <textarea name="hours" defaultValue={profile?.hours || ""} placeholder={"Monday: 9:00 AM – 6:00 PM\nTuesday: 9:00 AM – 6:00 PM\nWednesday: Closed"} rows={4} className={AREA} />
               </Section>
 

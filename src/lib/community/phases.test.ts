@@ -214,8 +214,12 @@ test('visit office alerts say community member and omit unchecked contact detail
     note: null,
     preferredWindow: null,
     practiceName: 'Oak Nerve',
+    visitId: '55555555-5555-4555-8555-555555555501',
   })
   assert.match(open.sms, /Maya, 5125550100/)
+  assert.match(open.sms, /\/doctor\/people\?open=55555555-5555-4555-8555-555555555501/)
+  assert.match(open.html, /tel:5125550100/)
+  assert.match(open.html, /sms:5125550100/)
   assert.doesNotMatch(open.sms, /patient/i)
 })
 

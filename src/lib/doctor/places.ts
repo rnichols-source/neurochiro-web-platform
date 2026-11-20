@@ -259,6 +259,12 @@ export function profileChecklist(input: ProfileCheckInput): ProfileChecklist {
   }
 }
 
+export function monthProofLine(requests: number, booked: number): string {
+  const ask = requests === 1 ? '1 request' : `${requests} requests`
+  const held = booked === 1 ? '1 booked' : `${booked} booked`
+  return `This month: ${ask}, ${held}`
+}
+
 export type NextStep = {
   id: 'profile' | 'people' | 'referrals' | 'messages' | 'clear'
   title: string
@@ -279,13 +285,20 @@ export function buildNextSteps(input: {
   const steps: NextStep[] = []
   if (!input.checklist.complete && !input.skipProfile) {
     const left = input.checklist.remaining
+    const photoOpen = input.checklist.steps.some((step) => step.key === 'photo' && !step.done)
+    const hoursOpen = input.checklist.steps.some((step) => step.key === 'hours' && !step.done)
+    const next = photoOpen
+      ? { href: '/doctor/profile#profile-photo', button: 'Add a photo', line: 'Next: add a photo. Hours come right after.' }
+      : hoursOpen
+        ? { href: '/doctor/profile#office-hours', button: 'Add your hours', line: 'Next: add your hours.' }
+        : { href: '/doctor/profile', button: 'Edit profile', line: left.length ? `Next: ${left[0]}.` : 'A few fields are still open.' }
     steps.push({
       id: 'profile',
       title: 'Finish your profile',
-      detail: left.length ? `${input.checklist.percent}% complete · ${left.join(', ')} left` : 'A few fields are still open',
+      detail: left.length ? `${next.line} ${input.checklist.percent}% complete.` : next.line,
       percent: input.checklist.percent,
-      href: '/doctor/profile',
-      button: 'Edit profile',
+      href: next.href,
+      button: next.button,
       skip: true,
     })
   }

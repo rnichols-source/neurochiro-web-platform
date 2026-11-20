@@ -51,6 +51,7 @@ export function TodayView({ data, intro }: { data: TodayData; intro?: React.Reac
           </div>
           <div className="col-span-2 lg:col-span-1 lg:row-start-1">
             <p className="text-[16px] text-white">{data.dateLabel}</p>
+            {data.monthLine ? <p className="mt-1 text-[16px] font-bold text-white">{data.monthLine}</p> : null}
             <h1 className="dp-ui mt-1 text-[34px] font-extrabold leading-none tracking-[-0.03em] lg:text-[40px]">
               {data.greetingLine}, {data.doctorName}
             </h1>

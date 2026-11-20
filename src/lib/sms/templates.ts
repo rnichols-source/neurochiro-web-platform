@@ -57,6 +57,7 @@ export function communityVisitOfficeText(input: {
   email: string | null
   bestTime: string | null
   note: string | null
+  detailsUrl?: string | null
 }): string {
   const name = ascii(input.name) || 'A community member'
   const contact = ascii(input.phone) || ascii(input.email)
@@ -66,7 +67,10 @@ export function communityVisitOfficeText(input: {
   if (when) parts.push(`Best time: ${when}.`)
   const note = noteLine(input.note)
   if (note) parts.push(`Note: ${note}.`)
-  parts.push('Please reach out within 24 hrs. Details: https://neurochiro.co/doctor/visit-requests Reply STOP to opt out.')
+  const details = input.detailsUrl && input.detailsUrl.startsWith('https://neurochiro.co/')
+    ? input.detailsUrl
+    : 'https://neurochiro.co/doctor/visit-requests'
+  parts.push(`Please reach out within 24 hrs. Open their card: ${details} Reply STOP to opt out.`)
   return parts.join(' ')
 }
 

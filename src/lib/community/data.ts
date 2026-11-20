@@ -195,7 +195,12 @@ export async function loadCommunitySnapshot(session: CommunitySession): Promise<
 export async function loadListedDoctor(doctorId: string): Promise<(DoctorCardSource & { id: string; user_id?: string | null }) | null> {
   if (!doctorId) return null
   const admin = createAdminClient() as any
-  const { data, error } = await admin.from('doctors').select(DOCTOR_COLUMNS).eq('id', doctorId).maybeSingle()
+  let { data, error } = await admin.from('doctors').select(DOCTOR_COLUMNS).eq('id', doctorId).maybeSingle()
+  if (error && /paid_at/.test(error.message || '')) {
+    const again = await admin.from('doctors').select(DOCTOR_COLUMNS.replace(', paid_at', '')).eq('id', doctorId).maybeSingle()
+    data = again.data
+    error = again.error
+  }
   if (error || !data) return null
   if (!doctorMayBeHomeDoctor(data)) return null
   return data
