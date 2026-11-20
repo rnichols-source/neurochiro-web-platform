@@ -137,8 +137,9 @@ test('the next step is the profile until it is finished or skipped', () => {
     hours: null,
   })
   const first = buildNextSteps({ checklist, skipProfile: false, waiting: 2, referrals: 1, unread: 3 })
-  assert.equal(first[0].id, 'profile')
-  assert.equal(first[0].skip, true)
+  assert.equal(first[0].id, 'people')
+  assert.equal(first[1].id, 'profile')
+  assert.equal(first[1].skip, true)
   assert.equal(first.length, 4)
   const skipped = buildNextSteps({ checklist, skipProfile: true, waiting: 2, referrals: 0, unread: 0 })
   assert.equal(skipped[0].id, 'people')

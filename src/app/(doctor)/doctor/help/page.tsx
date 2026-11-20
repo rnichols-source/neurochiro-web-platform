@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import PageHeader from '@/components/portal/PageHeader';
 import { usePortal } from '@/components/portal/PortalProvider';
@@ -12,12 +13,16 @@ import { REPLY_TO } from '@/lib/leads/config';
 const TOPICS = ['Profile', 'Visit requests', 'Billing', 'Seminars', 'Bug', 'Other'];
 
 const FAQ = [
-  { q: 'How do community members find me?', a: 'Your profile is on neurochiro.co. Community members search by city, then request a visit from your page.' },
-  { q: 'When do I see a visit request?', a: 'Requests show under People, and the full list is on Visit requests. Call them back while they are still deciding.' },
-  { q: 'How do I change my plan?', a: "If you pay by card, open Billing and tap Manage billing to update your card, see invoices or cancel. Founding members have Pro included, so there's nothing to manage. Email support@neurochirodirectory.com with any plan question." },
-  { q: 'How do seminars work?', a: 'Seminars are not open in the portal yet. Use this form if you want to host one, and we will write back.' },
-  { q: 'Who do I email?', a: 'Email support@neurochirodirectory.com. We read every message.' },
-  { q: 'Can I preview what community members see?', a: 'Open Profile and use View public profile. It opens your directory page in a new tab.' },
+  { q: 'How do I get requests?', a: 'Finish your profile on neurochiro.co. People search by city and request you from that page. New requests show on Today and in People.', href: '/doctor/profile', link: 'Edit your profile' },
+  { q: 'What do the stages mean?', a: 'Requested means they just asked. Contacted means you reached them. Scheduled means a visit is on the books. Started care means they began. Not a fit, No answer, and Went elsewhere close the request.', href: '/doctor/people', link: 'Open People' },
+  { q: 'How do I send a home plan?', a: 'Open the person in People, tap Send a home plan, then tap the plan. It shows on Home plans after that.', href: '/doctor/people', link: 'Open People' },
+  { q: 'What do the colors mean?', a: 'On Home plans, green is on track, yellow is falling behind, and red is stopped. The words are on the row too.', href: '/doctor/care-sets', link: 'Open Home plans' },
+  { q: 'How do I add my front desk?', a: 'Settings has a front desk email. They get the same request email you do. Sending a home plan stays on your login.', href: '/doctor/settings', link: 'Open Settings' },
+  { q: 'How do I change alerts?', a: 'Settings lets you pick email, text, or both, and the mobiles that get the text.', href: '/doctor/settings', link: 'Open Settings' },
+  { q: 'How do I update my card?', a: 'Open Billing, then Update card and receipts. That opens Stripe, where the card and receipts live.', href: '/doctor/billing', link: 'Open Billing' },
+  { q: 'How do I edit my profile?', a: 'Profile is the photo, hours, and the page people see on neurochiro.co.', href: '/doctor/profile', link: 'Edit your profile' },
+  { q: 'Why is something locked?', a: 'Some office tools open with Pro. The lock says Activate Pro and goes to Billing.', href: '/doctor/billing', link: 'Open Billing' },
+  { q: 'How do I contact NeuroChiro?', a: 'Use the form on this page, or email support@neurochirodirectory.com. We reply within 24 hours.', href: '#help-form', link: 'Write to us' },
 ];
 
 function HelpForm() {
@@ -69,7 +74,7 @@ function HelpForm() {
       {status === 'sent' ? (
         <p className="bg-white border border-portal-border rounded-xl p-4 text-sm">Message received. We will reply within 24 hours.</p>
       ) : (
-        <form onSubmit={onSubmit} className="bg-white border border-portal-border rounded-xl p-4 space-y-3">
+        <form id="help-form" onSubmit={onSubmit} className="bg-white border border-portal-border rounded-xl p-4 space-y-3">
           <label className="block text-sm font-bold">Name
             <input name="name" defaultValue={ctx.fullName || ''} className="mt-1 w-full min-h-11 px-3 rounded-lg border border-portal-border text-base" />
           </label>
@@ -97,6 +102,7 @@ function HelpForm() {
           <article key={item.q} className="bg-white border border-portal-border rounded-xl p-4">
             <h3 className="font-bold">{item.q}</h3>
             <p className="mt-1 text-sm text-portal-ink-2">{item.a}</p>
+            <Link href={item.href} className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-[#8C3A12]">{item.link}</Link>
           </article>
         ))}
       </section>

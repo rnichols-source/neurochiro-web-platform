@@ -72,7 +72,7 @@ export function approvedWelcomeEmail(input: ApprovedWelcome): Mail {
       <p>Your profile is live.</p>
       <p><a href="${escapeHtml(profile)}">${escapeHtml(profile)}</a></p>
       <p>${started}${receiptHtml}</p>
-      <p>New patient requests arrive by text and by email as soon as someone asks for your office. Reply to that text or email. Each request includes a one-click link: they came in, or they did not come in. The same list is in your portal: <a href="${escapeHtml(REQUESTS_URL)}">patient requests</a>.</p>
+      <p>New requests arrive by text and by email as soon as someone asks for your office. Reply to that text or email. Each request includes a one-click link: they came in, or they did not come in. The same list is in your portal: <a href="${escapeHtml(REQUESTS_URL)}">requests</a>.</p>
       <p>The next step is your onboarding call. <a href="${escapeHtml(ONBOARDING_CALL_URL)}">Pick a time with Dr. Ray</a>.</p>
       <p>When a colleague joins from your link, you get a free month. <a href="${escapeHtml(REFERRAL_URL)}">Your referral program</a>.</p>
       <p>Dr. Ray</p>

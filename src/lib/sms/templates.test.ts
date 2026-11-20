@@ -44,7 +44,7 @@ test('patient and doctor texts use the exact wording', () => {
   )
   assert.equal(
     doctor,
-    'NeuroChiro: New patient request. Jamie Lee, +18645550100. Best time: Mornings. Note: Please call after 9. Please reach out within 24 hrs. Details: https://neurochiro.co/doctor/leads Reply STOP to opt out.',
+    'NeuroChiro: New request. Jamie Lee, +18645550100. Best time: Mornings. Note: Please call after 9. Please reach out within 24 hrs. Details: https://neurochiro.co/doctor/leads Reply STOP to opt out.',
   )
 })
 
@@ -81,7 +81,7 @@ test('empty practice, empty details, health words, and long fields are cleaned u
   assert.equal(bare.includes('Note:'), false)
   assert.equal(
     bare,
-    'NeuroChiro: New patient request. Jamie Lee, +18645550100. Please reach out within 24 hrs. Details: https://neurochiro.co/doctor/leads Reply STOP to opt out.',
+    'NeuroChiro: New request. Jamie Lee, +18645550100. Please reach out within 24 hrs. Details: https://neurochiro.co/doctor/leads Reply STOP to opt out.',
   )
 
   const emailOnly = doctorNewLead({

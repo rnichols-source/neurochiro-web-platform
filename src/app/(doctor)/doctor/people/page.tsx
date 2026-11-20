@@ -12,9 +12,10 @@ import { practiceAccessForUser, staffMaySendHomePlan } from '@/lib/doctor/practi
 
 export const dynamic = 'force-dynamic'
 
-export default async function PeoplePage({ searchParams }: { searchParams: Promise<{ open?: string }> }) {
+export default async function PeoplePage({ searchParams }: { searchParams: Promise<{ open?: string; send?: string }> }) {
   const params = await searchParams
   const openId = /^[0-9a-f-]{36}$/i.test(params.open || '') ? String(params.open) : ''
+  const plansOpen = params.send === '1'
   const ctx = await getPortalContext()
   if (!ctx) redirect('/login')
   const practice = ctx.doctor?.id
@@ -44,7 +45,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   return (
     <div>
       <DoctorBand place="people" title="People" subtitle={practice.staff ? 'Open a name, call or text them, then move the stage.' : 'Open a name, call them, then move the stage. Send a home plan in one tap.'} />
-      <PeopleDesk people={data.people} ready={data.ready} timeZone={timeZone} plans={plans} customSets={choices.customSets} remedies={remedies} followRows={follow.rows} nowIso={nowIso} canSendPlans={staffMaySendHomePlan(practice.staff)} openId={openId} />
+      <PeopleDesk people={data.people} ready={data.ready} timeZone={timeZone} plans={plans} customSets={choices.customSets} remedies={remedies} followRows={follow.rows} nowIso={nowIso} canSendPlans={staffMaySendHomePlan(practice.staff)} openId={openId} plansOpen={plansOpen} />
     </div>
   )
 }

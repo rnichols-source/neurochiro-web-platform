@@ -52,6 +52,8 @@ export type TodayData = {
   thenItems: ThenItem[]
   requestCount: number | null
   monthLine: string | null
+  waitingPerson: { id: string; name: string; phone: string | null } | null
+  nextStep: NextStep | null
 }
 
 function countSentencesReady(value: unknown): string | null {
@@ -89,7 +91,7 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
       ? admin.from('doctors').select('photo_url, bio, short_intro, listing_format, co_owners, city, address, specialties, hours').eq('id', doctorId).maybeSingle()
       : Promise.resolve({ data: null, error: null }),
     doctorId
-      ? admin.from('community_visit_requests').select('id, created_at, status, shared_first_name, note, preferred_window').eq('doctor_id', doctorId).order('created_at', { ascending: false }).limit(6)
+      ? admin.from('community_visit_requests').select('id, created_at, status, shared_first_name, note, preferred_window, callback_phone').eq('doctor_id', doctorId).order('created_at', { ascending: false }).limit(6)
       : Promise.resolve({ data: [], error: null }),
     doctorId ? loadHomeDoctorMembers(doctorId).catch(() => []) : Promise.resolve([]),
     doctorId
@@ -183,11 +185,15 @@ export async function loadToday(ctx: PortalContext, skipProfile = false): Promis
     studentsNear: students,
     checklist,
     step: steps[0],
+    nextStep: steps[1] || null,
     stepIndex: 1,
     stepTotal: steps.filter((step) => step.id !== 'clear').length,
     thenItems,
     requestCount: stats?.patientRequests ? stats.patientRequests.total : null,
     monthLine: doctorId ? await loadMonthProof(admin, doctorId, now) : null,
+    waitingPerson: newestVisit && (newestVisit.status === 'requested' || !newestVisit.status)
+      ? { id: String(newestVisit.id), name: newestVisit.shared_first_name || 'Someone', phone: newestVisit.callback_phone || null }
+      : null,
   }
 }
 
@@ -290,7 +296,7 @@ export async function loadPeople(doctorId: string, timeZone = 'America/New_York'
     return {
       id: String(row.id),
       profileId: row.profile_id,
-      name: row.shared_first_name || 'A patient',
+      name: row.shared_first_name || 'Someone',
       detail: [contact.phone, contact.email, row.for_first_name ? `for ${row.for_first_name}` : null, agoLabel(String(row.created_at), Date.now(), timeZone)].filter(Boolean).join(' · '),
       note: row.note,
       message: row.note,

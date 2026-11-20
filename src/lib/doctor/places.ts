@@ -283,6 +283,17 @@ export function buildNextSteps(input: {
   unread: number
 }): NextStep[] {
   const steps: NextStep[] = []
+  if (input.waiting > 0) {
+    steps.push({
+      id: 'people',
+      title: input.waiting === 1 ? '1 person is waiting' : `${input.waiting} people are waiting`,
+      detail: 'Call them, then tap Mark scheduled. Send a home plan from the same card.',
+      percent: null,
+      href: '/doctor/people',
+      button: 'Open their card',
+      skip: false,
+    })
+  }
   if (!input.checklist.complete && !input.skipProfile) {
     const left = input.checklist.remaining
     const photoOpen = input.checklist.steps.some((step) => step.key === 'photo' && !step.done)
@@ -300,17 +311,6 @@ export function buildNextSteps(input: {
       href: next.href,
       button: next.button,
       skip: true,
-    })
-  }
-  if (input.waiting > 0) {
-    steps.push({
-      id: 'people',
-      title: input.waiting === 1 ? '1 person is waiting' : `${input.waiting} people are waiting`,
-      detail: 'Visit requests from community members',
-      percent: null,
-      href: '/doctor/people',
-      button: 'Open People',
-      skip: false,
     })
   }
   if (input.referrals > 0) {

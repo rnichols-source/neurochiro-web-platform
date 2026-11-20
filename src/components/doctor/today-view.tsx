@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { HeaderTools } from '@/components/doctor/header-tools'
 import { ChevronIcon, PencilIcon, PlaceIcon } from '@/components/doctor/icons'
 import { SkipProfileButton } from '@/components/doctor/skip-profile'
+import { WaitingActions } from '@/components/doctor/waiting-actions'
 import { DOCTOR_PLACES } from '@/lib/doctor/places'
 import type { TodayData } from '@/lib/doctor/portal-data'
 
@@ -69,9 +70,7 @@ export function TodayView({ data, intro }: { data: TodayData; intro?: React.Reac
           </div>
         </div>
       </header>
-      {intro ? <div className="relative z-[1] -mt-8 mb-4">{intro}</div> : null}
-
-      <div className={`relative z-[1] grid gap-4 lg:grid-cols-[1.25fr_1fr] ${intro ? '' : '-mt-10'}`}>
+      <div className="relative z-[1] -mt-10 grid gap-4 lg:grid-cols-[1.25fr_1fr]">
         <article className="rounded-[26px] bg-white p-5 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.35)]">
           <p className="dp-ui text-[12px] font-extrabold tracking-[0.1em] text-[#D66829]" style={{ textTransform: 'uppercase' }}>
             {step.id === 'clear' ? 'Today' : `Your next step · ${data.stepIndex} of ${Math.max(data.stepTotal, 1)}`}
@@ -93,18 +92,34 @@ export function TodayView({ data, intro }: { data: TodayData; intro?: React.Reac
               <p className="mt-1.5 text-[13px] font-bold text-[#5b6773]">{step.percent}% complete</p>
             </>
           ) : null}
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link prefetch href={step.href} className="dp-ui inline-flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#D66829] px-5 text-[16px] font-extrabold text-white">
-              {step.button}
-              <ChevronIcon />
+          {step.id === 'people' && data.waitingPerson ? (
+            <WaitingActions
+              phone={data.waitingPerson.phone}
+              sourceId={data.waitingPerson.id}
+              peopleHref={`/doctor/people?open=${data.waitingPerson.id}&send=1`}
+            />
+          ) : (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Link prefetch href={step.href} className="dp-ui inline-flex h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#D66829] px-5 text-[16px] font-extrabold text-white">
+                {step.button}
+                <ChevronIcon />
+              </Link>
+              {step.skip ? <SkipProfileButton /> : null}
+            </div>
+          )}
+          {data.nextStep ? (
+            <Link prefetch href={data.nextStep.href} className="dp-ui mt-3 inline-flex min-h-11 items-center text-[15px] font-extrabold text-[#8C3A12]">
+              Also: {data.nextStep.button}
             </Link>
-            {step.skip ? <SkipProfileButton /> : null}
-          </div>
+          ) : null}
         </article>
         <aside className="rounded-[26px] bg-white p-5 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.2)] lg:border-l lg:border-[#EFECE7] lg:shadow-none">
           <p className="dp-ui text-[12px] font-extrabold tracking-[0.12em] text-[#6b7785]" style={{ textTransform: 'uppercase' }}>Then</p>
           {data.thenItems.length === 0 ? (
-            <p className="mt-3 text-[14px] leading-snug text-[#5b6773]">Nothing else is waiting. New visit requests and referrals show up here.</p>
+            <>
+              <p className="mt-3 text-[14px] leading-snug text-[#5b6773]">Nothing else is waiting. New requests show up here.</p>
+              <Link prefetch href="/doctor/people" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-4 text-[14px] font-extrabold text-white">Open People</Link>
+            </>
           ) : (
             <ul className="mt-3 space-y-2">
               {data.thenItems.map((item) => (
@@ -124,6 +139,7 @@ export function TodayView({ data, intro }: { data: TodayData; intro?: React.Reac
           )}
         </aside>
       </div>
+      {intro ? <div className="relative z-[1] mt-4">{intro}</div> : null}
 
       <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {TILES.map((tile) => {

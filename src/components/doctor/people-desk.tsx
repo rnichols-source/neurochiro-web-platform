@@ -55,7 +55,7 @@ function rowLabel(row: PersonCard) {
   if (pipelineRow(row)) return stageLabel(row.stage || row.status)
   const labels: Record<string, string> = {
     active: 'Home plan sent',
-    home: 'Your patient',
+    home: 'In your people',
     sent: 'Sent',
     pending: 'Sent',
     viewed: 'Seen',
@@ -150,8 +150,10 @@ export function PeopleDesk({
             <EmptyNote
               title={people.filter(pipelineRow).length === 0 ? 'No requests yet' : 'No one in this step'}
               sentence={people.filter(pipelineRow).length === 0
-                ? 'When someone asks to see you from your public profile, they show up here. Open the name, call them, then move the stage.'
+                ? 'When someone asks to see you from your public page, they show up here. Open the name, call them, then move the stage.'
                 : 'New requests show up under Requested. Referrals and messages are under Other.'}
+              actionHref={people.filter(pipelineRow).length === 0 ? '/doctor/profile' : '/doctor'}
+              action={people.filter(pipelineRow).length === 0 ? 'Finish your profile' : 'Back to Today'}
             />
           </div>
         ) : (
@@ -179,7 +181,7 @@ export function PeopleDesk({
         ) : null}
         {selected ? (
           <article className="rounded-[26px] bg-white p-6 shadow-[0_14px_30px_-18px_rgba(21,32,43,0.3)]">
-            <p className="dp-ui text-[12px] font-extrabold text-[#2C6BB4]">{pipelineRow(selected) ? 'Patient request' : selected.kind.replace('_', ' ')}</p>
+            <p className="dp-ui text-[12px] font-extrabold text-[#2C6BB4]">{pipelineRow(selected) ? 'Request' : selected.kind.replace('_', ' ')}</p>
             <h2 className="dp-ui mt-1 text-[28px] font-extrabold tracking-[-0.02em] text-[#15202B]">{selected.name}</h2>
             <p className="mt-2 text-[15px] font-bold text-[#15202B]">{rowLabel(selected)}</p>
             {followLabel ? <p className="mt-1 text-[14px] text-[#0A6159]">Follow-through: {followLabel}. <Link href="/doctor/care-sets" className="font-extrabold underline">Open the board</Link></p> : null}
@@ -219,6 +221,11 @@ export function PeopleDesk({
                   {pending ? 'Saving…' : `Move to ${stageLabel(upcoming)}`}
                 </button>
               ) : null}
+              {pipelineRow(selected) && selected.source && (selected.stage === 'requested' || selected.stage === 'contacted' || selected.status === 'requested') ? (
+                <button type="button" disabled={pending} onClick={() => move('scheduled')} className="dp-ui inline-flex h-[52px] items-center rounded-2xl bg-[#2C6BB4] px-5 text-[15px] font-extrabold text-white">
+                  {pending ? 'Saving…' : 'Mark scheduled'}
+                </button>
+              ) : null}
               {pipelineRow(selected) && selected.source && !isClosedStage(selected.stage) ? CLOSE_REASONS.map((reason) => (
                 <button key={reason.id} type="button" disabled={pending} onClick={() => move(reason.id)} className="dp-ui inline-flex h-11 items-center rounded-xl border border-[#D7DEE6] bg-white px-3 text-[14px] font-extrabold text-[#3d4a57]">
                   {reason.label}
@@ -239,7 +246,7 @@ export function PeopleDesk({
             {note ? <p className="mt-3 text-[14px] text-[#15202B]">{note}</p> : null}
           </article>
         ) : (
-          <EmptyNote title="Pick a patient" sentence="Phone, email, the request, and the stage history open here." />
+          <EmptyNote title="Pick a person" sentence="Phone, email, the request, and the stage history open here." actionHref="/doctor/help" action="How requests work" />
         )}
       </div>
     </div>

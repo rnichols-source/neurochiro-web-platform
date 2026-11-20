@@ -44,7 +44,7 @@ export function PracticeView({
         Edit profile
       </Link>
       <Row href="/doctor/analytics" title="Analytics" detail={views} iconBg="#2C6BB4" />
-      <Row href="/doctor/billing" title="Membership and billing" detail={plan} iconBg="#1E2D3B" />
+      <Row href="/doctor/billing" title="Update card" detail="Billing, receipts, and your plan" iconBg="#1E2D3B" />
       <section className="rounded-[20px] bg-white p-4">
         <h2 className="dp-ui text-[16px] font-extrabold text-[#15202B]">Practice tools</h2>
         <p className="mt-1 text-[13px] text-[#5b6773]">Care plan, P&L, KPI, billing guide, achievements, and this month.</p>

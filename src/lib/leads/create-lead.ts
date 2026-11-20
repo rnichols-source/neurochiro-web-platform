@@ -323,7 +323,7 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   if (doctor.user_id) {
     const notice = await db.from('notifications').insert({
       user_id: doctor.user_id,
-      title: 'New patient request',
+      title: 'New request',
       body: `${name} wants your office to reach out.${phoneOk ? ` Phone: ${phone}` : ''}${emailOk ? ` Email: ${email}` : ''}`,
       type: 'system',
       priority: 'important',

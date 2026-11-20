@@ -135,7 +135,7 @@ export function ReferDesk({
           <button type="button" onClick={() => setTab('sent')} className={`dp-ui min-h-11 flex-1 rounded-xl text-[14px] font-extrabold ${tab === 'sent' ? 'bg-[#7A4A94] text-white' : 'text-[#5b6773]'}`}>Sent {sent.length}</button>
           <button type="button" onClick={() => setTab('received')} className={`dp-ui min-h-11 flex-1 rounded-xl text-[14px] font-extrabold ${tab === 'received' ? 'bg-[#7A4A94] text-white' : 'text-[#5b6773]'}`}>Received {received.length}</button>
         </div>
-        {rows.length === 0 ? <EmptyNote title={tab === 'sent' ? 'No intros sent' : 'No intros received'} sentence="When you send or receive a referral, it stays in this list." /> : null}
+        {rows.length === 0 ? <EmptyNote title={tab === 'sent' ? 'No intros sent' : 'No intros received'} sentence="When you send or receive a referral, it stays in this list." actionHref="/doctor/network" action="Refer someone" /> : null}
         <ul className="space-y-2">
           {rows.map((row) => (
             <li key={row.id} className="rounded-[18px] bg-white px-3 py-3">

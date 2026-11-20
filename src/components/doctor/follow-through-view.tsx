@@ -81,7 +81,14 @@ export function FollowThroughView({
         })}
       </div>
       {shown.length === 0 ? (
-        <p className="mt-4 text-[14px] text-[#5b6773]">No one here yet. <Link href="/doctor/people" className="font-extrabold text-[#0A6159] underline">Open People and send a home plan.</Link></p>
+        <div className="mt-4">
+          <p className="text-[14px] text-[#5b6773]">{filter === 'all' ? 'No home plans yet. Send one from a person in People, then they show up here in green, yellow, or red.' : 'No one in this color right now.'}</p>
+          {filter === 'all' ? (
+            <Link href="/doctor/people" className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#0E857A] px-4 text-[14px] font-extrabold text-white">Open People</Link>
+          ) : (
+            <button type="button" onClick={() => setFilter('all')} className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#0E857A] px-4 text-[14px] font-extrabold text-white">Show everyone</button>
+          )}
+        </div>
       ) : (
         <ul className="mt-2 divide-y divide-[#ECEAE5]">
           {shown.map((row) => {

@@ -180,7 +180,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
         </main>
       </div>
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-[#e3e0da] bg-white px-1.5 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(21,32,43,0.06)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-[#e3e0da] bg-white px-2 pb-[max(12px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_24px_rgba(21,32,43,0.06)] lg:hidden"
         aria-label="Doctor portal"
       >
         <div className="mx-auto flex max-w-[720px]">
@@ -198,7 +198,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
                 <span className="grid h-8 w-[58px] place-items-center rounded-2xl" style={on ? { background: item.tint, color: item.ink } : undefined}>
                   <PlaceIcon id={item.id as DoctorPlaceId} size={22} strokeWidth={on ? 2.1 : 1.8} />
                 </span>
-                <span className={`dp-ui whitespace-nowrap text-[11px] tracking-[-0.01em] ${on ? 'font-extrabold' : 'font-semibold'}`}>{item.label}</span>
+                <span className={`dp-ui whitespace-nowrap text-[12px] tracking-[-0.01em] min-[820px]:text-[14px] ${on ? 'font-extrabold' : 'font-semibold'}`}>{item.label}</span>
               </Link>
             )
           })}

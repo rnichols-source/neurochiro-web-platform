@@ -37,7 +37,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
         initialOtherUserId={to}
         initialConversationId={c}
         initialInbox={inbox}
-        emptyMessage="This inbox is for community members, doctors, and students. Start a conversation, or reply when someone writes to you."
+        emptyMessage="No messages yet. This inbox is for people, doctors, and students. Tap New message to write to someone."
       />
     </div>
   );

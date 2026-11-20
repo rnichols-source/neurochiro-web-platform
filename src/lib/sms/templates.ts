@@ -84,7 +84,7 @@ export function doctorNewLead(input: {
   const name = ascii(input.patientName)
   const contact = ascii(input.patientPhone) || ascii(input.patientEmail)
   const who = contact ? `${name}, ${contact}` : name
-  const parts = [`NeuroChiro: New patient request. ${who}.`]
+  const parts = [`NeuroChiro: New request. ${who}.`]
   const when = ascii(input.bestTime)
   if (when) parts.push(`Best time: ${when}.`)
   const note = noteLine(input.note)

@@ -132,11 +132,11 @@ export function CareDesk({
             <div className="mt-4">
               <a href={`/api/doctor/care-pdf?slug=${selected.slug}`} className="dp-ui inline-flex min-h-11 items-center text-[14px] font-extrabold text-[#0A6159]">Print / Download PDF</a>
               {members.length === 0 ? (
-                <p className="mt-3 text-[14px] text-[#5b6773]">When a patient is in your People list, you can recommend this plan here. Or email an invite below.</p>
+                <p className="mt-3 text-[14px] text-[#5b6773]">When someone is in People, you can send this home plan from their card. Or email an invite below.</p>
               ) : (
                 <>
                   <label className="mt-3 block text-[13px] font-bold text-[#0A6159]">
-                    Search patients
+                    Search people
                     <input value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Name or email" className="mt-1 h-11 w-full rounded-xl border border-[#D7DEE6] px-3 text-[14px] font-normal text-[#15202B]" />
                   </label>
                   <label className="mt-2 block text-[13px] font-bold text-[#0A6159]">

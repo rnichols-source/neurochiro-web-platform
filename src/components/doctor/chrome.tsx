@@ -72,11 +72,14 @@ export function SubTabs({
   )
 }
 
-export function EmptyNote({ title, sentence }: { title: string; sentence: string }) {
+export function EmptyNote({ title, sentence, actionHref, action }: { title: string; sentence: string; actionHref?: string; action?: string }) {
   return (
     <div className="rounded-[20px] border border-dashed border-[#D7DEE6] bg-white px-4 py-6">
       <p className="dp-ui text-[16px] font-extrabold text-[#15202B]">{title}</p>
       <p className="mt-1 text-[14px] leading-snug text-[#5b6773]">{sentence}</p>
+      {actionHref && action ? (
+        <Link href={actionHref} className="dp-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-4 text-[14px] font-extrabold text-white">{action}</Link>
+      ) : null}
     </div>
   )
 }
