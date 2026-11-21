@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { DEFAULT_LEAD_FOLLOWUP } from './config.ts'
-import { nextLeadAction, type LeadNotificationSnapshot, type LeadRequestSnapshot } from './escalation.ts'
+import { alreadySentAdminAlert, nextLeadAction, type LeadNotificationSnapshot, type LeadRequestSnapshot } from './escalation.ts'
 
 const created = new Date('2026-10-30T12:00:00Z')
 
@@ -121,3 +121,22 @@ test('a sent reminder is not sent again when the counter was not saved', () => {
   const notes: LeadNotificationSnapshot[] = [{ id: 'n1', kind: 'doctor_reminder_1', status: 'sent', attempt: 1 }]
   assert.deepEqual(act(24, { reminder_count: 0 }, notes), { type: 'doctor_reminder_2' })
 })
+
+test('an acknowledged lead with no contact outcome is finished, so the hourly cron stops', () => {
+  assert.deepEqual(act(30, { status: 'acknowledged' }), { type: 'none', reason: 'acknowledged' })
+})
+
+test('alreadySentAdminAlert is false until an admin_alert succeeds', () => {
+  assert.equal(alreadySentAdminAlert([]), false)
+  assert.equal(alreadySentAdminAlert([{ id: 'n1', kind: 'admin_alert', status: 'failed', attempt: 1 }]), false)
+  assert.equal(alreadySentAdminAlert([{ id: 'n1', kind: 'admin_copy', status: 'sent', attempt: 1 }]), false)
+})
+
+test('alreadySentAdminAlert is true after a successful admin_alert, so the cron must not send another', () => {
+  assert.equal(alreadySentAdminAlert([{ id: 'n1', kind: 'admin_alert', status: 'sent', attempt: 1 }]), true)
+  assert.equal(alreadySentAdminAlert([
+    { id: 'n1', kind: 'admin_alert', status: 'failed', attempt: 1 },
+    { id: 'n2', kind: 'admin_alert', status: 'delivered', attempt: 1 },
+  ]), true)
+})
+
