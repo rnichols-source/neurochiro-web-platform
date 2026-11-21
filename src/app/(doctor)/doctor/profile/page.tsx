@@ -837,9 +837,12 @@ function ProfileEditor() {
               </Section>
               <Section title="Amenities">
                 <input type="hidden" name="amenities" value={amenitiesSelected.join(",")} />
+                {/* Each label is `relative` so the visually hidden (sr-only, position:absolute) checkbox stays inside it.
+                    Without it the checkbox was positioned against <body>, thousands of pixels below the scrolling <main>,
+                    and focusing it on click scrolled the whole portal off screen (looked like being logged out). */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {AMENITY_OPTIONS.map((amenity) => (
-                    <label key={amenity} className={`flex items-center gap-2 min-h-11 px-3 rounded-lg cursor-pointer border text-base ${amenitiesSelected.includes(amenity) ? "bg-portal-accent-50 border-portal-accent text-portal-ink" : "bg-portal-surface border-portal-border text-portal-ink-2"}`}>
+                    <label key={amenity} className={`relative flex items-center gap-2 min-h-11 px-3 rounded-lg cursor-pointer border text-base focus-within:ring-2 focus-within:ring-portal-accent ${amenitiesSelected.includes(amenity) ? "bg-portal-accent-50 border-portal-accent text-portal-ink" : "bg-portal-surface border-portal-border text-portal-ink-2"}`}>
                       <input type="checkbox" checked={amenitiesSelected.includes(amenity)} onChange={(e) => { if (e.target.checked) setAmenitiesSelected((prev) => [...prev, amenity]); else setAmenitiesSelected((prev) => prev.filter((item) => item !== amenity)); markDirty(); }} className="sr-only" />
                       {amenity}
                     </label>
