@@ -45,6 +45,12 @@ function succeeded(notifications: LeadNotificationSnapshot[], kind: string): boo
   return notifications.some((row) => row.kind === kind && DONE_STATUSES.has(row.status))
 }
 
+/** True when an admin_alert for this lead already landed (sent, delivered, opened, or clicked). */
+export function alreadySentAdminAlert(notifications: LeadNotificationSnapshot[]): boolean {
+  return succeeded(notifications, 'admin_alert')
+}
+
+
 function exhausted(notifications: LeadNotificationSnapshot[], kind: string): boolean {
   return !succeeded(notifications, kind)
     && notifications.some((row) => row.kind === kind && row.status === 'failed' && row.attempt >= 5)

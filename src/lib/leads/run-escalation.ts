@@ -16,7 +16,7 @@ import {
   type LeadMail,
 } from './deliver'
 import { postDiscord } from './discord'
-import { nextLeadAction, type LeadNotificationSnapshot, type NextLeadAction } from './escalation'
+import { alreadySentAdminAlert, nextLeadAction, type LeadNotificationSnapshot, type NextLeadAction } from './escalation'
 import { getDoctorRecipients } from './recipients'
 import { isMissingColumn, isMissingTable, updateContactRequest } from './schema'
 import { parseLegacyNote } from './validate'
@@ -222,13 +222,20 @@ async function handleRequest(db: any, request: any, config: LeadFollowupConfig, 
   const recipients = await getDoctorRecipients(doctor)
   const doctorSend = kind === 'doctor_initial' || kind === 'doctor_reminder_1' || kind === 'doctor_reminder_2'
   if (doctorSend && recipients.length === 0) {
-    await updateContactRequest(db, request.id, { needs_admin_attention: true, attention_reason: 'doctor has no email' })
+    const alreadyAlerted = alreadySentAdminAlert(snapshots(rows))
     if (!dryRun) {
-      const mail = await mailFor(db, request, doctor, recipients, rows, now)
-      await sendAdminAlert(mail, 'doctor has no email')
+      await updateContactRequest(db, request.id, {
+        needs_admin_attention: true,
+        attention_reason: 'doctor has no email',
+        escalated_to_admin_at: request.escalated_to_admin_at || now.toISOString(),
+      })
+      if (!alreadyAlerted) {
+        const mail = await mailFor(db, request, doctor, recipients, rows, now)
+        await sendAdminAlert(mail, 'doctor has no email')
+      }
     }
-    await logRun(db, { contact_request_id: request.id, step: STEP[kind], action: 'error', reason: `doctor has no email${tz.usedFallback ? ' tz_fallback' : ''}`, doctor_timezone: timezone, doctor_local_hour: getLocalHour(timezone, now), dry_run: dryRun })
-    return { ...base, action: 'error', reason: 'doctor has no email' }
+    await logRun(db, { contact_request_id: request.id, step: STEP[kind], action: 'none', reason: `doctor has no email${alreadyAlerted ? ' already_sent' : ''}${tz.usedFallback ? ' tz_fallback' : ''}`, doctor_timezone: timezone, doctor_local_hour: getLocalHour(timezone, now), dry_run: dryRun })
+    return { ...base, action: 'none', reason: alreadyAlerted ? 'doctor has no email already_sent' : 'doctor has no email' }
   }
 
   if (rows.some((row) => row.kind === kind && DONE.has(row.status)) && action.type !== 'retry') {
