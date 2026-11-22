@@ -6,6 +6,7 @@ import { getDoctorTimezone } from '@/lib/doctor-timezone'
 import { normalizeCalendar } from '@/lib/kpi/calendar'
 import { clinicToday, historyStart, isValidYmd } from '@/lib/kpi/dates'
 import { applyAutoLeadCounts, countNeuroChiroLeadsByDay, type LeadEvent } from '@/lib/kpi/leads'
+import { isHiddenSpamLead } from '@/lib/leads/spam'
 import { compareMonthCollections } from '@/lib/kpi/pl-compare'
 import { currencyForCountry } from '@/lib/kpi/currency'
 import { IMPORT_FLAG, LIBRARY, type LibraryKpi } from '@/lib/kpi/library'
@@ -377,7 +378,7 @@ async function loadLeadEvents(doctorId: string | null, valuesFrom: string): Prom
     const admin = createAdminClient() as unknown as Loose
     const owner = await admin.from('doctors').select('user_id').eq('id', doctorId).maybeSingle()
     const leadOwnerId = typeof record(owner.data).user_id === 'string' ? String(record(owner.data).user_id) : ''
-    const contacts = await admin.from('contact_requests').select('id, email, phone, created_at').eq('doctor_id', doctorId).gte('created_at', valuesFrom).limit(5000)
+    const contacts = await admin.from('contact_requests').select('id, email, phone, created_at, status, admin_note').eq('doctor_id', doctorId).gte('created_at', valuesFrom).limit(5000)
     let leads = leadOwnerId
       ? await admin.from('leads').select('id, email, phone, created_at').eq('doctor_id', leadOwnerId).gte('created_at', valuesFrom).limit(5000)
       : { data: [], error: null }
@@ -386,16 +387,17 @@ async function loadLeadEvents(doctorId: string | null, valuesFrom: string): Prom
     }
     if (contacts.error && leads.error) return { events: [], ready: false }
     const events: LeadEvent[] = []
-    const take = (rows: unknown, prefix: string) => {
+    const take = (rows: unknown, prefix: string, spamCheck = false) => {
       if (!Array.isArray(rows)) return
       for (const row of rows) {
         const item = record(row)
+        if (spamCheck && isHiddenSpamLead({ status: textOf(item, 'status'), admin_note: textOf(item, 'admin_note') })) continue
         const at = textOf(item, 'created_at')
         if (!at) continue
         events.push({ id: `${prefix}:${String(item.id || at)}`, at, email: textOf(item, 'email'), phone: textOf(item, 'phone') })
       }
     }
-    if (!contacts.error) take(contacts.data, 'request')
+    if (!contacts.error) take(contacts.data, 'request', true)
     if (!leads.error) take(leads.data, 'lead')
     return { events, ready: true }
   } catch {

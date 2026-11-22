@@ -101,8 +101,8 @@ export function nextLeadAction(
   now: Date,
   ctx: { inQuietHours: boolean },
 ): NextLeadAction {
-  if (request.status === 'withdrawn' || request.withdrawn_at) {
-    return { type: 'none', reason: 'withdrawn' }
+  if (request.status === 'spam' || request.status === 'withdrawn' || request.withdrawn_at) {
+    return { type: 'none', reason: request.status === 'spam' ? 'spam' : 'withdrawn' }
   }
 
   const doctorClosed = request.contact_outcome === 'patient_contacted_confirmed'
@@ -179,7 +179,7 @@ export type AttentionInput = {
 
 /** Same rule the admin "Needs attention" tab and the sidebar badge use. */
 export function requestNeedsAttention(input: AttentionInput): boolean {
-  if (input.status === 'withdrawn') return false
+  if (input.status === 'withdrawn' || input.status === 'spam') return false
   if (input.needsAdminAttention) return true
   if (input.checkinResponse === 'not_yet') return true
   if (input.hasFailedOrBouncedSend) return true

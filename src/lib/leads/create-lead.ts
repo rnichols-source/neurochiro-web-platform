@@ -16,6 +16,7 @@ import {
 import { getDoctorRecipients } from './recipients'
 import { isMissingColumn, isMissingTable, updateContactRequest } from './schema'
 import { isPracticeListing, listingDisplayName } from '@/lib/listing-display'
+import { classifySpam } from './spam'
 import { containsHealthWords, isPlausibleEmail, isPlausiblePhone, normalizeEmail } from './validate'
 
 export type CreateLeadInput = {
@@ -33,6 +34,8 @@ export type CreateLeadInput = {
   utmSource?: string | null
   utmCampaign?: string | null
   utmContent?: string | null
+  honeypot?: string | null
+  startedAt?: number | string | null
 }
 
 export type CreateLeadResult = {
@@ -48,6 +51,8 @@ export type CreateLeadResult = {
   message?: string
   error?: string
   healthWarning: boolean
+  /** Internal. API routes must not send this to the browser. */
+  quarantined?: boolean
 }
 
 const SAVED_FOR_ADMIN = "We've received your request and our team will make sure the office gets it"
@@ -177,6 +182,35 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
   const displayName = listingDisplayName(doctor)
   const practiceName = isPracticeListing(doctor) ? displayName : (doctor.clinic_name || docName)
   const officePhone = doctor.phone || null
+
+  const spam = classifySpam({
+    name,
+    email,
+    message,
+    preferredTime,
+    honeypot: input.honeypot,
+    startedAt: input.startedAt,
+  })
+  if (spam.quarantine) {
+    return quarantineLead({
+      db,
+      input,
+      name,
+      phone,
+      phoneOk,
+      email,
+      preferredTime,
+      message,
+      source,
+      healthWarning,
+      doctor,
+      docName,
+      displayName,
+      practiceName,
+      officePhone,
+      spam,
+    })
+  }
 
   const withdrawalToken = crypto.randomBytes(32).toString('hex')
   const acknowledgeToken = crypto.randomBytes(32).toString('hex')
@@ -403,3 +437,86 @@ export async function createLead(input: CreateLeadInput): Promise<CreateLeadResu
     healthWarning,
   }
 }
+
+async function quarantineLead(args: {
+  db: any
+  input: CreateLeadInput
+  name: string
+  phone: string
+  phoneOk: boolean
+  email: string
+  preferredTime: string
+  message: string
+  source: string
+  healthWarning: boolean
+  doctor: any
+  docName: string
+  displayName: string
+  practiceName: string
+  officePhone: string | null
+  spam: { adminNote: string; signals: string[] }
+}): Promise<CreateLeadResult> {
+  const {
+    db, input, name, phone, phoneOk, email, preferredTime, message, source,
+    healthWarning, doctor, docName, displayName, practiceName, officePhone, spam,
+  } = args
+  const withdrawalToken = crypto.randomBytes(32).toString('hex')
+  const acknowledgeToken = crypto.randomBytes(32).toString('hex')
+  const checkinToken = crypto.randomBytes(32).toString('hex')
+  const withdrawUrl = `${siteUrl()}/api/contact-request/withdraw?token=${withdrawalToken}`
+  const note = noteFor({ preferredTime, email, message })
+  const baseRow = {
+    doctor_id: input.doctorId,
+    name,
+    phone: phoneOk ? phone : '',
+    note,
+    consent_text: input.consentText,
+    consented_at: new Date().toISOString(),
+    ip: input.ip || null,
+    status: 'spam',
+    admin_note: spam.adminNote,
+    withdrawal_token: withdrawalToken,
+    acknowledge_token: acknowledgeToken,
+    acknowledge_token_expires: new Date(Date.now() + ACK_TOKEN_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+    source,
+  }
+  const extendedRow = {
+    ...baseRow,
+    email: email || null,
+    preferred_time: preferredTime || null,
+    message: message || null,
+    patient_checkin_token: checkinToken,
+  }
+
+  let inserted = await db.from('contact_requests').insert(extendedRow).select('id').single()
+  if (inserted.error && isMissingColumn(inserted.error)) {
+    inserted = await db.from('contact_requests').insert(baseRow).select('id').single()
+  }
+  if (inserted.error) {
+    console.error('[LEADS] spam quarantine insert failed, retrying without status=spam:', inserted.error.message)
+    const fallback = { ...baseRow, status: 'withdrawn', withdrawn_at: new Date().toISOString() }
+    inserted = await db.from('contact_requests').insert(fallback).select('id').single()
+  }
+  const requestId = inserted.data?.id ? String(inserted.data.id) : null
+  if (inserted.error || !requestId) {
+    console.error('[LEADS] spam quarantine could not be saved:', inserted.error?.message || 'no id')
+  }
+
+  await postDiscord(
+    `🚫 **Quarantined spam request**\n**Patient:** ${name}\n**Phone:** ${phoneOk ? phone : 'not provided'}\n**Email:** ${email || 'not provided'}\n**Doctor:** ${docName} (${doctor.city || ''}, ${doctor.state || ''})\n**Source:** ${source}\n**Signals:** ${spam.signals.join(', ')}${message ? `\n**Note:** ${message}` : ''}${requestId ? `\n\n→ ${siteUrl()}/admin/contact-requests?focus=${requestId}` : ''}`,
+  )
+
+  return {
+    ok: true,
+    savedForAdmin: true,
+    requestId,
+    doctorName: docName,
+    practiceName,
+    displayName,
+    withdrawUrl: requestId ? withdrawUrl : '',
+    officePhone,
+    healthWarning,
+    quarantined: true,
+  }
+}
+

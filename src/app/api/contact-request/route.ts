@@ -27,9 +27,6 @@ export async function POST(req: NextRequest) {
   }
 
   const { doctorId, name, phone, email, note, consent, consentText, source, joinList, _hp } = body
-  if (_hp) {
-    return NextResponse.json({ ok: true, doctorName: '', practiceName: '', withdrawUrl: '' })
-  }
   if (!consent) return NextResponse.json({ error: 'You must agree to be contacted.' }, { status: 400 })
   if (!consentText) return NextResponse.json({ error: 'Missing consent text.' }, { status: 400 })
   const phoneError = requiredPhoneError(phone)
@@ -51,6 +48,8 @@ export async function POST(req: NextRequest) {
     utmSource: cleanUtm(body.utm_source),
     utmCampaign: cleanUtm(body.utm_campaign),
     utmContent: cleanUtm(body.utm_content),
+    honeypot: typeof _hp === 'string' ? _hp : '',
+    startedAt: body.startedAt,
   })
 
   if (!result.ok) {
@@ -58,7 +57,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: result.error || 'Something went wrong. Please try again.' }, { status })
   }
 
-  if (joinList && result.ok && email && typeof email === 'string' && email.trim()) {
+  if (joinList && result.ok && !result.quarantined && email && typeof email === 'string' && email.trim()) {
     try {
       const supabase = createAdminClient() as any
       const normalizedEmail = email.trim().toLowerCase()

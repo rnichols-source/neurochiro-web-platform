@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
         sentKeys,
       })
     if (!plan || !row.email) continue
-    const { count } = await admin.from('contact_requests').select('id', { count: 'exact', head: true }).eq('doctor_id', row.id)
+    const { count } = await admin.from('contact_requests').select('id', { count: 'exact', head: true }).eq('doctor_id', row.id).neq('status', 'spam')
     const copy = nudgeCopy(plan, { name: row.last_name || row.first_name || '', requestCount: count || 0, activateUrl: 'https://neurochiro.co/login?next=%2Fdoctor%2Fdashboard' })
     const mailed = await sendApplicationEmail({ to: row.email, subject: copy.subject, html: `<p>${copy.body}</p>` })
     if (!mailed) continue

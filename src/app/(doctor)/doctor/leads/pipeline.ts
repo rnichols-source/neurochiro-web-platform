@@ -2,12 +2,13 @@ import 'server-only';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { isMissingColumn } from '@/lib/leads/schema';
 import { parseLegacyNote } from '@/lib/leads/validate';
+import { isHiddenSpamLead } from '@/lib/leads/spam';
 import { dedupePatientRequests, pipelineTab } from '@/lib/portal/stats';
 
 async function loadContactRequests(admin: any, docId: string) {
   const extended = await admin
     .from('contact_requests')
-    .select('id, name, phone, email, preferred_time, message, note, source, created_at, acknowledged_at, contact_outcome, outcome_detail, status')
+    .select('id, name, phone, email, preferred_time, message, note, source, created_at, acknowledged_at, contact_outcome, outcome_detail, status, admin_note')
     .eq('doctor_id', docId)
     .order('created_at', { ascending: false });
   if (!extended.error) return extended;
@@ -38,7 +39,7 @@ export async function loadLeadPipeline(doctorId: string) {
   ]);
 
   const rawLeads = leadsRes.data || [];
-  const contactLeads = (contactReqRes.data || []).map((cr: any) => {
+  const contactLeads = (contactReqRes.data || []).filter((cr: any) => !isHiddenSpamLead(cr)).map((cr: any) => {
     const nameParts = (cr.name || '').trim().split(' ');
     const legacy = parseLegacyNote(cr.note);
     let stage = 'new';

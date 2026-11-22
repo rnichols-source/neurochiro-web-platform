@@ -38,6 +38,8 @@ export async function POST(request: NextRequest) {
       utmSource: cleanUtm(body.utm_source),
       utmCampaign: cleanUtm(body.utm_campaign),
       utmContent: cleanUtm(body.utm_content),
+      honeypot: typeof body._hp === 'string' ? body._hp : '',
+      startedAt: body.startedAt,
     })
 
     if (!result.ok) {

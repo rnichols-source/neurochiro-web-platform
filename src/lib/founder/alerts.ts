@@ -11,7 +11,7 @@ async function loadShellAlertsFresh(): Promise<ShellAlert[]> {
   const admin = createAdminClient() as any
   const cutoff = new Date(Date.now() - 48 * 3_600_000).toISOString()
   const [waiting, review, drafts, gaps, founding, builds] = await Promise.all([
-    admin.from('contact_requests').select('doctor_id').is('acknowledged_at', null).neq('status', 'withdrawn').lt('created_at', cutoff).limit(200),
+    admin.from('contact_requests').select('doctor_id').is('acknowledged_at', null).neq('status', 'withdrawn').neq('status', 'spam').lt('created_at', cutoff).limit(200),
     admin.from('doctor_applications').select('id', { count: 'exact', head: true }).eq('status', 'under_review'),
     admin.from('doctor_applications').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
     admin.from('demand_mentions').select('id', { count: 'exact', head: true }).gte('nearest_distance_mi', 50),
