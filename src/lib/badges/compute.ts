@@ -1,5 +1,6 @@
 import { countPatientRequests, type LeadLike } from '../portal/stats.ts';
 import { isUpcoming, parseSeminarDates } from '../seminars/dates.ts';
+import { isHiddenSpamLead } from '@/lib/leads/spam';
 
 export const PUBLISHED_JOB_STATUSES = new Set(['active', 'open', 'published']);
 
@@ -139,7 +140,7 @@ export async function loadEarnedBadgeIds(doctor: {
       userId
         ? admin.from('leads').select('id, stage, created_at, email, phone').eq('doctor_id', userId)
         : Promise.resolve({ data: [], error: null }),
-      admin.from('contact_requests').select('id, contact_outcome, outcome_detail, created_at, email, phone').eq('doctor_id', doctor.id),
+      admin.from('contact_requests').select('id, contact_outcome, outcome_detail, created_at, email, phone, status, admin_note').eq('doctor_id', doctor.id),
       userId
         ? admin.from('seminars').select('id, dates, is_past, is_approved').eq('host_id', userId).eq('is_approved', true)
         : Promise.resolve({ data: [], error: null }),
@@ -167,7 +168,7 @@ export async function loadEarnedBadgeIds(doctor: {
 
     const contacts: LeadLike[] = contactsRes.error
       ? []
-      : (contactsRes.data || []).map((row: any) => ({
+      : (contactsRes.data || []).filter((row: any) => !isHiddenSpamLead(row)).map((row: any) => ({
           id: row.id,
           stage: contactStage(row),
           created_at: row.created_at,

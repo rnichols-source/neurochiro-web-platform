@@ -1,6 +1,7 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase-admin';
 import type { AttentionItem, SetupFields } from './home-types';
+import { isHiddenSpamLead } from '@/lib/leads/spam';
 
 export type { AttentionItem, SetupFields };
 
@@ -64,7 +65,7 @@ export async function getAttention(doctorId: string, unreadMessages: number): Pr
   const [contacts, leads] = await Promise.all([
     admin
       .from('contact_requests')
-      .select('id, name, phone, note, contact_outcome, created_at')
+      .select('id, name, phone, note, contact_outcome, created_at, status, admin_note')
       .eq('doctor_id', doctorId)
       .order('created_at', { ascending: false })
       .limit(6),
@@ -81,6 +82,7 @@ export async function getAttention(doctorId: string, unreadMessages: number): Pr
   const items: AttentionItem[] = [];
   if (!contacts.error && Array.isArray(contacts.data)) {
     for (const row of contacts.data) {
+      if (isHiddenSpamLead(row)) continue;
       if (row.contact_outcome === 'patient_contacted_confirmed') continue;
       items.push({
         id: row.id,

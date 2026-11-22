@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PublicBadges from "./public-badges";
 import {
   MapPin, ShieldCheck, CheckCircle2, Mail, ExternalLink, MessageSquare,
@@ -77,7 +77,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   const [submittingStory, setSubmittingStory] = useState(false);
   const [appointmentSubmitted, setAppointmentSubmitted] = useState(false);
   const [submittingAppointment, setSubmittingAppointment] = useState(false);
-  const [appointmentForm, setAppointmentForm] = useState({ name: '', phone: '', email: '', bestTime: '', message: '', smsConsent: false });
+  const [appointmentForm, setAppointmentForm] = useState({ name: '', phone: '', email: '', bestTime: '', message: '', smsConsent: false, _hp: '' });
+  const appointmentStartedAt = useRef(Date.now());
   const [appointmentErrors, setAppointmentErrors] = useState<{ name?: string; phone?: string; email?: string }>({});
   const [showReportForm, setShowReportForm] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
@@ -237,6 +238,8 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
           doctorId: doctor.id,
           smsConsent: appointmentForm.smsConsent === true,
           smsPhone: appointmentForm.smsConsent ? appointmentForm.phone.trim() : null,
+          _hp: appointmentForm._hp,
+          startedAt: appointmentStartedAt.current,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -252,7 +255,11 @@ export default function DoctorProfileClient({ doctor, slug, seminars = [], jobs 
   };
 
   const requestFields = (idPrefix: string) => (
-    <form onSubmit={(e) => { e.preventDefault(); void sendAppointmentRequest(); }} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+    <form onSubmit={(e) => { e.preventDefault(); void sendAppointmentRequest(); }} style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}>
+      <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
+        <label htmlFor={`${idPrefix}-hp`}>Website</label>
+        <input id={`${idPrefix}-hp`} type="text" name="_hp" tabIndex={-1} autoComplete="off" value={appointmentForm._hp} onChange={(e) => setAppointmentForm((f) => ({ ...f, _hp: e.target.value }))} />
+      </div>
       <label htmlFor={`${idPrefix}-name`} style={{ fontSize: 13, fontWeight: 800, color: "#1E2D3B" }}>
         Your name <span style={{ color: "#dc2626" }} aria-hidden="true">*</span>
       </label>

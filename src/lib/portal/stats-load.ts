@@ -9,6 +9,7 @@ import {
   type LeadLike,
   type PortalStats,
 } from '@/lib/portal/stats';
+import { isHiddenSpamLead } from '@/lib/leads/spam';
 
 export async function getDoctorPortalStats(input: {
   doctorId: string;
@@ -27,7 +28,7 @@ export async function getDoctorPortalStats(input: {
 
   const [leadsRes, contactsRes, viewsRes, introRes, clicksRes, sentRes, receivedRes, eventsRes, earliestRes, peersRes] = await Promise.all([
     since(admin.from('leads').select('id, stage, created_at, email, phone, source').eq('doctor_id', input.userId)),
-    since(admin.from('contact_requests').select('id, contact_outcome, outcome_detail, created_at, email, phone, source').eq('doctor_id', input.doctorId)),
+    since(admin.from('contact_requests').select('id, contact_outcome, outcome_detail, created_at, email, phone, source, status, admin_note').eq('doctor_id', input.doctorId)),
     admin.from('doctors').select('profile_views').eq('id', input.doctorId).maybeSingle(),
     since(
       admin
@@ -60,7 +61,7 @@ export async function getDoctorPortalStats(input: {
 
   const contacts: LeadLike[] = contactsRes.error
     ? []
-    : (contactsRes.data || []).map((row: any) => {
+    : (contactsRes.data || []).filter((row: any) => !isHiddenSpamLead(row)).map((row: any) => {
         let stage = 'new';
         if (row.contact_outcome === 'patient_contacted_confirmed' || row.outcome_detail === 'booked') {
           stage = row.outcome_detail === 'booked' ? 'scheduled' : 'contacted';

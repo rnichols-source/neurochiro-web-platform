@@ -121,3 +121,12 @@ test('a sent reminder is not sent again when the counter was not saved', () => {
   const notes: LeadNotificationSnapshot[] = [{ id: 'n1', kind: 'doctor_reminder_1', status: 'sent', attempt: 1 }]
   assert.deepEqual(act(24, { reminder_count: 0 }, notes), { type: 'doctor_reminder_2' })
 })
+
+test('a spam request is treated as done and is not reminded', () => {
+  assert.deepEqual(act(48, { status: 'spam' }), { type: 'none', reason: 'spam' })
+})
+
+test('a withdrawn request is treated as done', () => {
+  assert.deepEqual(act(48, { status: 'withdrawn', withdrawn_at: created.toISOString() }), { type: 'none', reason: 'withdrawn' })
+})
+

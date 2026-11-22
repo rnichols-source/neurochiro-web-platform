@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Phone, User, MessageSquare, CheckCircle2, AlertCircle, Loader2, ShieldCheck, Mail } from "lucide-react";
 import Link from "next/link";
@@ -39,6 +39,8 @@ function ContactRequestContent() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [serverError, setServerError] = useState("");
   const [result, setResult] = useState<{ doctorName: string; practiceName: string; withdrawUrl: string; message?: string } | null>(null);
+  const [honeypot, setHoneypot] = useState("");
+  const formStartedAt = useRef(Date.now());
 
   // Load doctor info
   useEffect(() => {
@@ -113,6 +115,8 @@ function ContactRequestContent() {
           smsPhone: smsConsent ? phone.trim() : null,
           source: urlSource,
           joinList: joinList && email.trim() ? true : false,
+          _hp: honeypot,
+          startedAt: formStartedAt.current,
         }),
       });
 
@@ -262,7 +266,11 @@ function ContactRequestContent() {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5" style={{ position: "relative" }}>
+            <div aria-hidden="true" style={{ position: "absolute", left: "-10000px", top: "auto", width: 1, height: 1, overflow: "hidden" }}>
+              <label htmlFor="contact-hp">Website</label>
+              <input id="contact-hp" type="text" name="_hp" tabIndex={-1} autoComplete="off" value={honeypot} onChange={(e) => setHoneypot(e.target.value)} />
+            </div>
             {/* Name */}
             <div>
               <label className="block text-sm font-bold text-neuro-navy mb-1.5">
