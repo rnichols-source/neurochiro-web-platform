@@ -10,6 +10,7 @@ import VerifiedBadge from "@/components/doctor/VerifiedBadge";
 import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
 import { ALL_COUNTRIES, getCountryByIso2 } from "@/config/countries";
 import { profileChecklist } from "@/lib/doctor/places";
+import { PROFILE_IMAGE_ACCEPT, uploadPreparedProfileImage } from "@/lib/profile-image";
 
 const INPUT = "w-full min-h-11 px-3 rounded-lg border border-portal-border bg-white text-base";
 const AREA = "w-full px-3 py-2 rounded-lg border border-portal-border bg-white text-base";
@@ -113,57 +114,6 @@ function asLines(value: unknown): string {
   return "";
 }
 
-async function convertToJpeg(file: File): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const img = new window.Image();
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) { reject(new Error("Canvas not supported")); return; }
-      ctx.drawImage(img, 0, 0);
-      canvas.toBlob((blob) => {
-        if (!blob) { reject(new Error("Conversion failed")); return; }
-        resolve(new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }));
-      }, "image/jpeg", 0.9);
-    };
-    img.onerror = () => reject(new Error("Could not load image"));
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-function isHeic(file: File): boolean {
-  const name = file.name.toLowerCase();
-  return name.endsWith(".heic") || name.endsWith(".heif") || file.type === "image/heic" || file.type === "image/heif";
-}
-
-function compressImage(file: File, maxWidth: number, quality: number): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const img = document.createElement("img");
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      let width = img.width;
-      let height = img.height;
-      if (width > maxWidth) {
-        height = (height * maxWidth) / width;
-        width = maxWidth;
-      }
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) { reject(new Error("No canvas context")); return; }
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob((blob) => {
-        if (!blob) { reject(new Error("Compression failed")); return; }
-        resolve(new File([blob], file.name, { type: "image/jpeg" }));
-      }, "image/jpeg", quality);
-    };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
-}
-
 function ProfileFold({ title, children }: { title: string; openOnDesktop?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLElement>(null);
@@ -201,6 +151,26 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
   );
 }
 
+function PhotoError({ message }: { message?: string | null }) {
+  if (!message) return null;
+  return <p role="alert" className="text-sm font-bold text-red-600">{message}</p>;
+}
+
+function choosePhoto(onFile: (file: File) => void) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = PROFILE_IMAGE_ACCEPT;
+  input.style.position = "fixed";
+  input.style.left = "-10000px";
+  input.onchange = () => {
+    const file = input.files?.[0];
+    input.remove();
+    if (file) onFile(file);
+  };
+  document.body.appendChild(input);
+  input.click();
+}
+
 function Label({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
@@ -233,6 +203,10 @@ function ProfileEditor() {
   const [amenitiesSelected, setAmenitiesSelected] = useState<string[]>([]);
   const [uploadingGallery, setUploadingGallery] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState<string | null>(null);
+  const [uploadErrors, setUploadErrors] = useState<Record<string, string>>({});
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [error, setError] = useState(false);
   const [loadError, setLoadError] = useState(false);
   const [countryCode, setCountryCode] = useState("US");
@@ -312,6 +286,10 @@ function ProfileEditor() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => () => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+  }, []);
+
   useEffect(() => {
     const anchor = headerRef.current?.querySelector('a[href^="/directory/"]');
     if (!anchor) return;
@@ -320,8 +298,33 @@ function ProfileEditor() {
   }, [profile?.slug]);
 
   const toast = (message: string, type: "success" | "error" = "success") => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setShowToast({ show: true, message, type });
-    setTimeout(() => setShowToast({ show: false, message: "", type: "success" }), 3000);
+    toastTimer.current = setTimeout(() => setShowToast({ show: false, message: "", type: "success" }), type === "error" ? 6000 : 3000);
+  };
+
+  const clearUploadError = (slot: string) => {
+    setUploadErrors((current) => {
+      if (!current[slot]) return current;
+      const next = { ...current };
+      delete next[slot];
+      return next;
+    });
+  };
+
+  const reportUploadError = (slot: string, error: unknown) => {
+    const message = error instanceof Error ? error.message : "Photo upload failed. The picture was not saved. Please try again.";
+    setUploadErrors((current) => ({ ...current, [slot]: message }));
+    toast(message, "error");
+  };
+
+  const uploadProfilePhoto = async (
+    slot: string,
+    file: File,
+    upload: (formData: FormData) => Promise<{ success?: boolean; publicUrl?: string; error?: string }>,
+  ) => {
+    clearUploadError(slot);
+    return uploadPreparedProfileImage(file, upload);
   };
 
   const markDirty = () => {
@@ -361,84 +364,79 @@ function ProfileEditor() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-
-    let processedFile = file;
-    if (isHeic(file)) {
-      try {
-        processedFile = await convertToJpeg(file);
-      } catch {
-        processedFile = file;
-      }
-    }
-
-    if (processedFile.size > 5 * 1024 * 1024) {
-      toast("Image too large. Please use a photo under 5MB.", "error");
-      return;
-    }
-
-    let uploadFile = processedFile;
-    if (processedFile.size > 1 * 1024 * 1024) {
-      try {
-        uploadFile = await compressImage(processedFile, 800, 0.8);
-      } catch {
-        // If compression fails, use original
-      }
-    }
-
-    setSaving(true);
-    const formData = new FormData();
-    formData.append("file", uploadFile);
-    const result = await uploadAvatar(formData);
-    setSaving(false);
-    if (result.success) {
-      setProfile((p) => (p ? { ...p, photo_url: result.publicUrl } : p));
+    setUploadingAvatar(true);
+    try {
+      const publicUrl = await uploadProfilePhoto("avatar", file, uploadAvatar);
+      setProfile((p) => (p ? { ...p, photo_url: publicUrl } : p));
       toast("Photo updated.");
-    } else toast(result.error || "Upload failed.", "error");
+    } catch (error) {
+      reportUploadError("avatar", error);
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setUploadingBanner(true);
-    let processedFile = file;
-    if (isHeic(file)) {
-      try { processedFile = await convertToJpeg(file); } catch { processedFile = file; }
+    try {
+      const publicUrl = await uploadProfilePhoto("banner", file, uploadBannerImage);
+      setProfile((p) => (p ? { ...p, banner_url: publicUrl } : p));
+      toast("Banner updated.");
+    } catch (error) {
+      reportUploadError("banner", error);
+    } finally {
+      setUploadingBanner(false);
     }
-    let uploadFile = processedFile;
-    if (processedFile.size > 1 * 1024 * 1024) {
-      try { uploadFile = await compressImage(processedFile, 1400, 0.85); } catch { /* use original */ }
-    }
-    const fd = new FormData();
-    fd.append("file", uploadFile);
-    const result = await uploadBannerImage(fd);
-    setUploadingBanner(false);
-    if (result.success) { setProfile((p) => (p ? { ...p, banner_url: result.publicUrl } : p)); toast("Banner updated."); }
-    else toast(result.error || "Upload failed.", "error");
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    e.target.value = "";
     if (!files || files.length === 0) return;
+    const selected = Array.from(files).slice(0, Math.max(0, 10 - galleryUrls.length));
+    if (selected.length === 0) {
+      reportUploadError("gallery", new Error("The gallery already has 10 photos. Remove one before adding another."));
+      return;
+    }
     setUploadingGallery(true);
-    for (let i = 0; i < Math.min(files.length, 10 - galleryUrls.length); i++) {
-      let processedFile: File = files[i];
-      if (isHeic(processedFile)) {
-        try { processedFile = await convertToJpeg(processedFile); } catch { /* server handles it */ }
+    clearUploadError("gallery");
+    let added = 0;
+    let failure = "";
+    for (const file of selected) {
+      try {
+        const publicUrl = await uploadPreparedProfileImage(file, uploadGalleryImage);
+        setGalleryUrls((prev) => [...prev, publicUrl]);
+        added += 1;
+      } catch (error) {
+        failure = error instanceof Error ? error.message : "Photo upload failed. The picture was not saved. Please try again.";
       }
-      let uploadFile = processedFile;
-      if (processedFile.size > 1 * 1024 * 1024) {
-        try { uploadFile = await compressImage(processedFile, 1000, 0.8); } catch { /* use original */ }
-      }
-      const fd = new FormData();
-      fd.append("file", uploadFile);
-      const result = await uploadGalleryImage(fd);
-      if (result.success && result.publicUrl) setGalleryUrls((prev) => [...prev, result.publicUrl!]);
     }
     setUploadingGallery(false);
-    setHasUnsavedChanges(true);
-    toast("Photos added. Save to keep them.");
+    if (added > 0) setHasUnsavedChanges(true);
+    if (!failure) {
+      toast("Photos added. Save to keep them.");
+      return;
+    }
+    setUploadErrors((current) => ({ ...current, gallery: failure }));
+    toast(added > 0 ? `Added ${added} ${added === 1 ? "photo" : "photos"}. ${failure}` : failure, "error");
+  };
+
+  const uploadPersonPhoto = (slot: string, file: File, apply: (publicUrl: string) => void) => {
+    setPhotoBusy(slot);
+    uploadProfilePhoto(slot, file, uploadTeamPhoto)
+      .then((publicUrl) => {
+        apply(publicUrl);
+        markDirty();
+        toast("Photo added. Save to keep it.");
+      })
+      .catch((error: unknown) => reportUploadError(slot, error))
+      .finally(() => setPhotoBusy((current) => (current === slot ? null : current)));
   };
 
   const openLiveProfile = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -534,10 +532,11 @@ function ProfileEditor() {
                 <p className="dp-ui text-[16px] font-extrabold text-[#15202B]">Edit my profile</p>
                 <p className="text-[13px] text-[#5b6773]">{missing.length ? `Next: ${missing[0].hint.replace(/^Add /, 'add ')}.` : 'Ready for community members'}</p>
               </div>
-              <button type="button" onClick={() => fileInputRef.current?.click()} className="dp-ui ml-auto inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-3 text-[13px] font-extrabold text-white">Upload photo</button>
-              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleImageUpload} />
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar} className="dp-ui ml-auto inline-flex min-h-11 items-center rounded-xl bg-[#1E2D3B] px-3 text-[13px] font-extrabold text-white disabled:opacity-50">{uploadingAvatar ? "Uploading..." : "Upload photo"}</button>
+              <input ref={fileInputRef} type="file" accept={PROFILE_IMAGE_ACCEPT} className="hidden" onChange={handleImageUpload} />
             </div>
             {profile?.photo_url ? <img src={profile.photo_url} alt="" className="mt-3 h-16 w-16 rounded-2xl object-cover" /> : null}
+            <PhotoError message={uploadErrors.avatar} />
             <ul className="mt-3 space-y-1">
               {checks.map((item) => (
                 <li key={item.label} className="flex items-center gap-2 text-[13px] text-[#3d4a57]">
@@ -657,7 +656,8 @@ function ProfileEditor() {
                 <button type="button" onClick={() => bannerInputRef.current?.click()} disabled={uploadingBanner} className="min-h-11 px-4 rounded-lg bg-portal-ink text-white text-sm font-bold disabled:opacity-50">
                   {uploadingBanner ? "Uploading..." : profile?.banner_url ? "Change banner" : "Upload banner"}
                 </button>
-                <input ref={bannerInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" className="hidden" onChange={handleBannerUpload} />
+                <PhotoError message={uploadErrors.banner} />
+                <input ref={bannerInputRef} type="file" accept={PROFILE_IMAGE_ACCEPT} className="hidden" onChange={handleBannerUpload} />
               </Section>
 
               <Section title="Photo gallery" hint="Up to 10 photos. JPG, PNG, or WebP.">
@@ -683,7 +683,8 @@ function ProfileEditor() {
                     {uploadingGallery ? "Uploading..." : "Add photos"}
                   </button>
                 )}
-                <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif" multiple className="hidden" onChange={handleGalleryUpload} />
+                <PhotoError message={uploadErrors.gallery} />
+                <input ref={galleryInputRef} type="file" accept={PROFILE_IMAGE_ACCEPT} multiple className="hidden" onChange={handleGalleryUpload} />
               </Section>
             </div>
 
@@ -781,11 +782,15 @@ function ProfileEditor() {
                         <input placeholder="Credentials (for example, DC, CACCP)" value={owner.credentials} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], credentials: e.target.value }; setCoOwners(next); markDirty(); }} className={INPUT} />
                         <textarea placeholder="Bio" value={owner.bio} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], bio: e.target.value }; setCoOwners(next); markDirty(); }} rows={4} className={AREA} />
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.onchange = async () => { const f = input.files?.[0]; if (!f) return; const fd = new FormData(); fd.append("file", f); const r = await uploadTeamPhoto(fd); if (r.success && r.publicUrl) { const next = [...coOwners]; next[i] = { ...next[i], photo_url: r.publicUrl }; setCoOwners(next); markDirty(); } }; input.click(); }} className="min-h-11 text-sm font-bold text-portal-accent">Upload photo</button>
+                          {owner.photo_url ? <img src={owner.photo_url} alt="" className="h-14 w-14 rounded-xl object-cover border border-portal-border" /> : null}
+                          <button type="button" disabled={photoBusy === `owner-${i}`} onClick={() => choosePhoto((file) => uploadPersonPhoto(`owner-${i}`, file, (publicUrl) => {
+                            setCoOwners((prev) => prev.map((item, index) => index === i ? { ...item, photo_url: publicUrl } : item));
+                          }))} className="min-h-11 text-sm font-bold text-portal-accent disabled:opacity-50">{photoBusy === `owner-${i}` ? "Uploading..." : "Upload photo"}</button>
                           <button type="button" onClick={() => { setCoOwners((prev) => prev.filter((_, j) => j !== i)); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-red-600">
                             <Trash2 className="w-4 h-4" /> Remove
                           </button>
                         </div>
+                        <PhotoError message={uploadErrors[`owner-${i}`]} />
                       </div>
                     ))}
                     <button type="button" onClick={() => { setCoOwners((prev) => [...prev, { name: "", credentials: "", photo_url: "", bio: "" }]); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-portal-accent">
@@ -808,11 +813,14 @@ function ProfileEditor() {
                         <input placeholder="Name" value={member.name} onChange={(e) => { const u = [...teamMembers]; u[i] = { ...u[i], name: e.target.value }; setTeamMembers(u); markDirty(); }} className={INPUT} />
                         <input placeholder="Role (for example, Chiropractic Assistant)" value={member.role} onChange={(e) => { const u = [...teamMembers]; u[i] = { ...u[i], role: e.target.value }; setTeamMembers(u); markDirty(); }} className={INPUT} />
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.onchange = async () => { const f = input.files?.[0]; if (!f) return; const fd = new FormData(); fd.append("file", f); const r = await uploadTeamPhoto(fd); if (r.success && r.publicUrl) { const u = [...teamMembers]; u[i] = { ...u[i], photo_url: r.publicUrl }; setTeamMembers(u); markDirty(); } }; input.click(); }} className="min-h-11 text-sm font-bold text-portal-accent">Upload Photo</button>
+                          <button type="button" disabled={photoBusy === `team-${i}`} onClick={() => choosePhoto((file) => uploadPersonPhoto(`team-${i}`, file, (publicUrl) => {
+                            setTeamMembers((prev) => prev.map((item, index) => index === i ? { ...item, photo_url: publicUrl } : item));
+                          }))} className="min-h-11 text-sm font-bold text-portal-accent disabled:opacity-50">{photoBusy === `team-${i}` ? "Uploading..." : "Upload photo"}</button>
                           <button type="button" onClick={() => { setTeamMembers((prev) => prev.filter((_, j) => j !== i)); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-red-600">
                             <Trash2 className="w-4 h-4" /> Remove
                           </button>
                         </div>
+                        <PhotoError message={uploadErrors[`team-${i}`]} />
                       </div>
                     </div>
                   ))}

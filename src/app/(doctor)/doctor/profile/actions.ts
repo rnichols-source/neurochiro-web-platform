@@ -586,50 +586,60 @@ export async function uploadAvatar(formData: FormData) {
 }
 
 async function uploadImage(subfolder: string, formData: FormData) {
-    const supabase = createServerSupabase()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: "Authentication required." }
+    // Gallery, banner, team, and co-owner photos share this action.
+    // Next.js rejects the request before this runs when the body is over 1 MB,
+    // so the browser compresses the image first. Unexpected failures still
+    // return an error the editor can show instead of dropping the photo.
+    try {
+        const supabase = createServerSupabase()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return { error: "Authentication required." }
 
-    const file = formData.get('file')
-    if (!file || !(file instanceof File)) return { error: "No valid image file." }
+        const file = formData.get('file')
+        if (!file || !(file instanceof File)) return { error: "No valid image file." }
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    const heicTypes = ['image/heic', 'image/heif']
-    const isHeicFile = heicTypes.includes(file.type) || /\.(heic|heif)$/i.test(file.name)
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+        const heicTypes = ['image/heic', 'image/heif']
+        const isHeicFile = heicTypes.includes(file.type) || /\.(heic|heif)$/i.test(file.name)
 
-    if (!allowedTypes.includes(file.type) && !isHeicFile) return { error: "Supported formats: JPEG, PNG, WebP, or HEIC." }
-    if (file.size > 5 * 1024 * 1024) return { error: "Image must be under 5MB." }
+        if (!allowedTypes.includes(file.type) && !isHeicFile) return { error: "Supported formats: JPEG, PNG, WebP, or HEIC." }
+        if (file.size > 5 * 1024 * 1024) return { error: "Image must be under 5MB." }
 
-    let uploadBody: File | Buffer = file
-    let finalExt = file.name.split('.').pop()?.toLowerCase() || 'png'
-    let contentType = file.type
+        let uploadBody: File | Buffer = file
+        let finalExt = file.name.split('.').pop()?.toLowerCase() || 'png'
+        let contentType = file.type
 
-    if (isHeicFile) {
-        try {
-            const sharp = (await import('sharp')).default
-            const buffer = Buffer.from(await file.arrayBuffer())
-            uploadBody = await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
-            finalExt = 'jpg'
-            contentType = 'image/jpeg'
-        } catch (convErr) {
-            console.error('[HEIC_CONVERT] Failed:', convErr)
-            return { error: "Could not convert HEIC image. Please convert to JPEG and try again." }
+        if (isHeicFile) {
+            try {
+                const sharp = (await import('sharp')).default
+                const buffer = Buffer.from(await file.arrayBuffer())
+                uploadBody = await sharp(buffer).jpeg({ quality: 90 }).toBuffer()
+                finalExt = 'jpg'
+                contentType = 'image/jpeg'
+            } catch (convErr) {
+                console.error('[HEIC_CONVERT] Failed:', convErr)
+                return { error: "Could not convert HEIC image. Please convert to JPEG and try again." }
+            }
         }
+
+        const { createAdminClient } = await import('@/lib/supabase-admin')
+        const adminSupabase = createAdminClient()
+
+        const filePath = `${user.id}/${subfolder}/${Date.now()}.${finalExt}`
+
+        const { error: uploadError } = await adminSupabase.storage
+            .from('clinic-photos')
+            .upload(filePath, uploadBody, { cacheControl: '3600', upsert: true, contentType })
+
+        if (uploadError) return { error: `Upload failed: ${uploadError.message}` }
+
+        const { data } = adminSupabase.storage.from('clinic-photos').getPublicUrl(filePath)
+        return { success: true, publicUrl: data?.publicUrl || '' }
+    } catch (err: unknown) {
+        console.error('[IMAGE_UPLOAD]', err)
+        const message = err instanceof Error && err.message ? err.message : 'An unexpected error occurred.'
+        return { error: `Upload failed: ${message}` }
     }
-
-    const { createAdminClient } = await import('@/lib/supabase-admin')
-    const adminSupabase = createAdminClient()
-
-    const filePath = `${user.id}/${subfolder}/${Date.now()}.${finalExt}`
-
-    const { error: uploadError } = await adminSupabase.storage
-        .from('clinic-photos')
-        .upload(filePath, uploadBody, { cacheControl: '3600', upsert: true, contentType })
-
-    if (uploadError) return { error: `Upload failed: ${uploadError.message}` }
-
-    const { data } = adminSupabase.storage.from('clinic-photos').getPublicUrl(filePath)
-    return { success: true, publicUrl: data?.publicUrl || '' }
 }
 
 export async function uploadGalleryImage(formData: FormData) {
