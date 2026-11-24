@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { isMissingColumn } from '@/lib/leads/schema'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 export async function skipProfileStep() {
   const jar = await cookies()
@@ -27,8 +28,8 @@ export async function dismissGettingStarted() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
   const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (!doctor.data?.id) return
-  const saved = await admin.from('doctors').update({ getting_started_dismissed_at: new Date().toISOString() }).eq('id', doctor.data.id)
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return
+  const saved = await admin.from('doctors').update({ getting_started_dismissed_at: new Date().toISOString() }).eq('id', doctorId).eq('user_id', user.id)
   if (isMissingColumn(saved.error)) return
 }

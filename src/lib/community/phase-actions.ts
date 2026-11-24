@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 import { loadCommunitySnapshot, loadListedDoctor, requireCommunityMember } from '@/lib/community/data'
 import { displayFirstName, homeDoctorCard } from '@/lib/community/logic'
 import { loadSharedExerciseTitles, missingRelation } from '@/lib/community/phase-data'
@@ -60,10 +61,9 @@ async function requireDoctor(): Promise<{ doctorId: string; userId: string } | n
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (!doctor.data?.id) return null
-  return { doctorId: doctor.data.id, userId: user.id }
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return null
+  return { doctorId, userId: user.id }
 }
 
 export async function saveCheckIn(feeling: string): Promise<Result> {

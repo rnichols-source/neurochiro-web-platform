@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { HeaderTools } from '@/components/doctor/header-tools'
+import { LocationSwitcher } from '@/components/doctor/LocationSwitcher'
 import { MessagesIcon, PlaceIcon, RocketIcon, SignOutIcon } from '@/components/doctor/icons'
 import { usePortal } from '@/components/portal/PortalProvider'
 import { createClient } from '@/lib/supabase'
@@ -151,7 +152,7 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
           </Link>
           <div className="min-w-0 flex-1">
             <p className="dp-ui truncate text-[13px] font-extrabold leading-tight text-[#15202B]">{ctx.fullName || 'Doctor'}</p>
-            <p className="truncate text-[12px] text-[#5b6773]">{placeLine || 'Your practice'}</p>
+            {ctx.listings.length > 1 ? <LocationSwitcher /> : <p className="truncate text-[12px] text-[#5b6773]">{placeLine || 'Your practice'}</p>}
           </div>
           <button type="button" onClick={signOut} className="inline-flex min-h-11 min-w-11 items-center justify-center text-[#5b6773]" aria-label="Sign out">
             <SignOutIcon />
@@ -163,6 +164,11 @@ export default function DoctorShell({ children, waiting }: { children: React.Rea
           <div className="flex shrink-0 items-center justify-between gap-3 border-b border-[#E7E2D8] bg-[#FCEBDF] px-4 py-3">
             <p className="text-[14px] text-[#15202B]">Activate Pro to open visit requests and results.</p>
             <Link prefetch href="/doctor/billing" className="dp-ui inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-4 text-[14px] font-extrabold text-white">Activate Pro</Link>
+          </div>
+        ) : null}
+        {ctx.listings.length > 1 ? (
+          <div className="shrink-0 border-b border-[#E7E2D8] bg-white px-4 py-2 lg:hidden">
+            <LocationSwitcher />
           </div>
         ) : null}
         <main

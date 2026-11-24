@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 export async function getOrCreateReferralCode() {
   const supabase = createServerSupabase()
@@ -9,11 +10,12 @@ export async function getOrCreateReferralCode() {
   if (!user) throw new Error("Unauthorized")
 
   // Check if doctor already has a referral code
-  const { data: doctor } = await supabase
-    .from('doctors')
-    .select('id, first_name, last_name, referral_code')
-    .eq('user_id', user.id)
-    .single()
+  const { data: doctor } = await readSelectedDoctor<{
+    id: string
+    first_name?: string | null
+    last_name?: string | null
+    referral_code?: string | null
+  }>(user.id, 'id, first_name, last_name, referral_code')
 
   if (!doctor) throw new Error("Doctor profile not found")
 
@@ -38,11 +40,7 @@ export async function getReferralStats() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const { data: doctor } = await supabase
-    .from('doctors')
-    .select('id, referral_code')
-    .eq('user_id', user.id)
-    .single()
+  const { data: doctor } = await readSelectedDoctor<{ id: string; referral_code?: string | null }>(user.id, 'id, referral_code')
 
   if (!doctor?.referral_code) return { code: null, invites: 0, signups: 0, monthsFree: 0 }
 

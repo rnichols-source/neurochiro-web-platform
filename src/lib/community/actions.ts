@@ -252,11 +252,12 @@ export async function markVisitSeen(formData: FormData): Promise<void> {
   const requestId = String(formData.get('id') || '')
   if (!requestId) return
   const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (!doctor.data?.id) return
+  const { selectedDoctorIdFor } = await import('@/lib/portal/selected-doctor')
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return
   await admin.from('community_visit_requests').update({
     status: 'seen',
     seen_at: new Date().toISOString(),
-  }).eq('id', requestId).eq('doctor_id', doctor.data.id).eq('status', 'requested')
+  }).eq('id', requestId).eq('doctor_id', doctorId).eq('status', 'requested')
   revalidatePath('/doctor/visit-requests')
 }

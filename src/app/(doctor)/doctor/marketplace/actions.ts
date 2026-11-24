@@ -8,6 +8,7 @@ import { asLooseDb, asRows, type PostgrestError } from '@/lib/synapse/loose-db'
 import { revealPerkForUser } from '@/lib/synapse/reveal'
 import { paybackProgress, savedThisYearCents } from '@/lib/synapse/savings'
 import { listDoctorRequests, type DoctorRequest } from '@/app/(public)/marketplace/request/actions'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 export type WalletPerk = {
   id: string
@@ -46,7 +47,7 @@ async function doctorContext(): Promise<{ userId: string; country: SynapseCountr
   if (!user) return { error: 'Sign in to open Synapse.' }
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
   if (profile?.role !== 'doctor') return { error: 'Synapse perks in this portal are for doctor members.' }
-  const { data: doctor } = await createAdminClient().from('doctors').select('country').eq('user_id', user.id).maybeSingle()
+  const { data: doctor } = await readSelectedDoctor<{ country?: string | null }>(user.id, 'country')
   return { userId: user.id, country: marketplaceCountry(doctor?.country) }
 }
 

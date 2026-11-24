@@ -4,6 +4,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { BADGE_DEFINITIONS } from '@/lib/badges'
 import { loadEarnedBadgeIds } from '@/lib/badges/compute'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 export async function checkAndAwardBadges() {
   const supabase = createServerSupabase();
@@ -11,11 +12,18 @@ export async function checkAndAwardBadges() {
   if (!user) return { newlyEarned: [], allBadges: [] };
 
   const admin = createAdminClient() as any;
-  const { data: doc } = await admin
-    .from('doctors')
-    .select('id, user_id, profile_views, city, state, photo_url, bio, clinic_name, specialties, website_url')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const { data: doc } = await readSelectedDoctor<{
+    id: string
+    user_id?: string | null
+    profile_views?: number | null
+    city?: string | null
+    state?: string | null
+    photo_url?: string | null
+    bio?: string | null
+    clinic_name?: string | null
+    specialties?: string[] | null
+    website_url?: string | null
+  }>(user.id, 'id, user_id, profile_views, city, state, photo_url, bio, clinic_name, specialties, website_url');
   if (!doc) return { newlyEarned: [], allBadges: [] };
 
   const earned = await loadEarnedBadgeIds({ ...doc, user_id: doc.user_id || user.id });

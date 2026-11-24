@@ -2,6 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { deriveMembership, type Membership, type MembershipStatus } from '@/lib/portal/membership';
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor';
 
 const STATUSES = new Set([
   'active',
@@ -23,15 +24,15 @@ export const getMembership = cache(async (userId: string): Promise<Membership> =
     .eq('id', userId)
     .maybeSingle();
 
-  let doctorResult = await (admin.from('doctors') as any)
-    .select('membership_tier, is_founding_member, neuros_tier, created_at, subscription_status')
-    .eq('user_id', userId)
-    .maybeSingle();
+  let doctorResult = await readSelectedDoctor<{
+    membership_tier?: string | null
+    is_founding_member?: boolean | null
+    neuros_tier?: string | null
+    created_at?: string | null
+    subscription_status?: string | null
+  }>(userId, 'membership_tier, is_founding_member, neuros_tier, created_at, subscription_status');
   if (doctorResult.error) {
-    doctorResult = await (admin.from('doctors') as any)
-      .select('membership_tier, is_founding_member, neuros_tier, created_at')
-      .eq('user_id', userId)
-      .maybeSingle();
+    doctorResult = await readSelectedDoctor(userId, 'membership_tier, is_founding_member, neuros_tier, created_at');
   }
   const doctor = doctorResult.data as {
     membership_tier?: string | null;

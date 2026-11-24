@@ -60,8 +60,9 @@ export async function GET(req: Request) {
       if (recentlyEmailed.has(doc.id)) continue;
 
       // Skip hidden/unsubscribed doctors
-      const { data: doctorRecord } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).single();
-      if (doctorRecord?.verification_status === 'hidden') continue;
+      const { data: doctorRows } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).limit(20);
+      const statuses = Array.isArray(doctorRows) ? doctorRows : [];
+      if (statuses.length > 0 && statuses.every((row) => row?.verification_status === 'hidden')) continue;
 
       const rawName1 = doc.full_name?.split(' ')[0] || 'Doctor';
       const name = rawName1.replace(/^Dr\.?$/i, '') || 'Doctor';
@@ -104,8 +105,9 @@ export async function GET(req: Request) {
       if (recentlyEmailed.has(doc.id) || emailedThisRun.has(doc.id)) continue;
 
       // Skip hidden/unsubscribed doctors
-      const { data: doctorRecord2 } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).single();
-      if (doctorRecord2?.verification_status === 'hidden') continue;
+      const { data: doctorRows } = await supabase.from('doctors').select('verification_status').eq('user_id', doc.id).limit(20);
+      const statuses = Array.isArray(doctorRows) ? doctorRows : [];
+      if (statuses.length > 0 && statuses.every((row) => row?.verification_status === 'hidden')) continue;
 
       const rawName = doc.full_name?.split(' ')[0] || 'Doctor';
       const name = rawName.replace(/^Dr\.?$/i, '') || 'Doctor';

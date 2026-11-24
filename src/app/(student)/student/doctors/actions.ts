@@ -10,6 +10,7 @@ import { escapeHtml } from '@/lib/students/html';
 import { getStudentPortal } from '@/lib/students/context';
 import { hasMemberAccess } from '@/lib/students/membership-pure';
 import { missingSchema } from '@/lib/students/schema';
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor';
 import { canRequestShadow } from '@/lib/students/shadow';
 
 export async function requestShadow(input: {
@@ -118,8 +119,8 @@ export async function decideMentorship(input: { requestId: string; status: 'acce
     return { error: 'Only the doctor can answer this.' };
   }
   const admin = createAdminClient();
-  const doctor = await (admin as any).from('doctors').select('id').eq('user_id', portal.userId).maybeSingle();
-  const doctorRow = doctor.data as { id: string } | null;
+  const doctor = await readSelectedDoctor<{ id: string }>(portal.userId, 'id');
+  const doctorRow = doctor.data;
   if (!doctorRow) return { error: 'No clinic profile found.' };
   const existing = await (admin as any).from('mentorship_requests').select('id, student_id, status').eq('id', input.requestId).eq('doctor_id', doctorRow.id).maybeSingle();
   if (existing.error && missingSchema(existing.error)) return { error: 'Mentorship requests are not ready yet.' };
@@ -150,8 +151,8 @@ export async function decideShadow(input: { requestId: string; status: 'accepted
     return { error: 'Only the doctor can answer this.' };
   }
   const admin = createAdminClient();
-  const doctor = await (admin as any).from('doctors').select('id, user_id, clinic_name').eq('user_id', portal.userId).maybeSingle();
-  const doctorRow = doctor.data as { id: string; clinic_name?: string | null } | null;
+  const doctor = await readSelectedDoctor<{ id: string; clinic_name?: string | null }>(portal.userId, 'id, clinic_name');
+  const doctorRow = doctor.data;
   if (!doctorRow) return { error: 'No clinic profile found.' };
   const existing = await (admin as any).from('shadow_requests').select('id, student_id, doctor_id, status').eq('id', input.requestId).eq('doctor_id', doctorRow.id).maybeSingle();
   if (existing.error && missingSchema(existing.error)) return { error: 'Shadow days are not ready yet.' };

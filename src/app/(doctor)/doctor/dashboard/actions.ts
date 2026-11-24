@@ -3,6 +3,7 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isFounderRole } from '@/lib/founder'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 export async function getDoctorDashboardStats() {
   try {
@@ -14,13 +15,13 @@ export async function getDoctorDashboardStats() {
     if (!user) return null
 
     // First get doctor table ID for leads/jobs queries
-    const { data: doctorIdRow } = await admin.from('doctors').select('id').eq('user_id', user.id).single();
+    const { data: doctorIdRow } = await readSelectedDoctor<{ id: string }>(user.id, 'id');
     const docId = doctorIdRow?.id || user.id;
 
     // Use admin client to bypass any RLS issues
     const [profileRes, doctorRes, seminarsRes, jobsRes, leadsRes, referralsRes, contactReqRes] = await Promise.all([
       admin.from('profiles').select('role, tier, full_name').eq('id', user.id).single(),
-      (admin as any).from('doctors').select('clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status, created_at').eq('user_id', user.id).single(),
+      readSelectedDoctor(user.id, 'clinic_name, slug, city, state, profile_views, bio, photo_url, specialties, website_url, instagram_url, facebook_url, review_count, membership_tier, verification_status, created_at'),
       admin.from('seminars').select('*', { count: 'exact', head: true }).eq('host_id', user.id),
       admin.from('job_postings').select('*', { count: 'exact', head: true }).eq('doctor_id', docId),
       admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).eq('source', 'appointment_request'),
@@ -138,13 +139,13 @@ export async function getDoctorROIData(period: string = '30d') {
 
   try {
     // First get the doctor's table ID
-    const { data: doctorRow } = await admin.from('doctors').select('id').eq('user_id', user.id).single();
+    const { data: doctorRow } = await readSelectedDoctor<{ id: string }>(user.id, 'id');
     const doctorTableId = doctorRow?.id || user.id;
 
     // 1. Parallelize fetches using admin client and correct doctor ID
     const [profileRes, doctorRes, leadsRes, confirmedRes, analyticsRes] = await Promise.all([
       admin.from('profiles').select('role').eq('id', user.id).single(),
-      admin.from('doctors').select('profile_views, patient_leads, average_case_value, membership_tier').eq('user_id', user.id).single(),
+      readSelectedDoctor(user.id, 'profile_views, patient_leads, average_case_value, membership_tier'),
       admin.from('leads').select('*').eq('doctor_id', user.id).is('confirmed_at', null),
       admin.from('leads').select('*', { count: 'exact', head: true }).eq('doctor_id', user.id).not('confirmed_at', 'is', null),
       admin.from('analytics_events').select('*').eq('doctor_id', doctorTableId)
@@ -241,7 +242,7 @@ export async function confirmPatient(leadId: string) {
   const admin = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: "Unauthorized" }
-  const { data: doctorRow } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
+  const { data: doctorRow } = await readSelectedDoctor<{ id: string }>(user.id, 'id')
   const doctorTableId = (doctorRow as any)?.id || user.id
 
   try {
@@ -278,7 +279,7 @@ export async function getDoctorActivityFeed() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return []
 
-    const { data: doctorRow } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
+    const { data: doctorRow } = await readSelectedDoctor<{ id: string }>(user.id, 'id')
     const doctorId = (doctorRow as any)?.id || user.id
 
     const activities: { type: string; title: string; detail: string; time: string; link: string }[] = []
@@ -354,7 +355,7 @@ export async function getPracticeHealthScore(): Promise<PracticeHealthResult | n
     const admin = createAdminClient() as any
 
     // Get doctor record first (need doc.id for leads queries)
-    const { data: doc } = await createAdminClient().from('doctors').select('id, photo_url, bio, clinic_name, specialties, city, state, website_url, instagram_url, facebook_url, video_url, profile_views, patient_leads').eq('user_id', user.id).single();
+    const { data: doc } = await readSelectedDoctor(user.id, 'id, photo_url, bio, clinic_name, specialties, city, state, website_url, instagram_url, facebook_url, video_url, profile_views, patient_leads');
     if (!doc) return null;
 
     const docId = doc.id;
@@ -415,7 +416,7 @@ export async function getCompetitiveIntelligence() {
   if (!user) return null
 
   try {
-    const { data: doc } = await createAdminClient().from('doctors').select('city, state, profile_views').eq('user_id', user.id).single()
+    const { data: doc } = await readSelectedDoctor(user.id, 'city, state, profile_views')
     if (!doc || !doc.city) return null
 
     const { data: cityDoctors } = await createAdminClient()
@@ -475,7 +476,7 @@ export async function getSmartActionItems() {
     }
 
     // Missing video
-    const { data: doc } = await createAdminClient().from('doctors').select('video_url, photo_url, bio, specialties').eq('user_id', user.id).single()
+    const { data: doc } = await readSelectedDoctor(user.id, 'video_url, photo_url, bio, specialties')
     if (doc && !doc.video_url) {
       items.push({ id: 'video', priority: 'medium', title: 'Add a profile video', description: 'Doctors with video get 3x more community member leads', href: '/doctor/profile', icon: 'Video' })
     }
@@ -499,7 +500,7 @@ export async function getRevenueIntelligence() {
   if (!user) return null
 
   try {
-    const { data: doc } = await createAdminClient().from('doctors').select('id, average_case_value, membership_tier').eq('user_id', user.id).single()
+    const { data: doc } = await readSelectedDoctor(user.id, 'id, average_case_value, membership_tier')
     if (!doc) return null
 
     const admin = createAdminClient() as any

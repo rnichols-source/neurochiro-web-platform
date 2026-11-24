@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-admin';
 import { rateLimit, getIP } from '@/lib/rate-limit';
 import { loadEarnedBadgeIds } from '@/lib/badges/compute';
+import { readDefaultDoctor } from '@/lib/portal/selected-doctor';
 
 export const revalidate = 3600;
 
@@ -15,12 +15,7 @@ export async function GET(request: NextRequest) {
   if (!userId) return NextResponse.json({ badges: [] });
 
   try {
-    const sb = createAdminClient() as any;
-    const { data: doctor } = await sb
-      .from('doctors')
-      .select('id, user_id, photo_url, bio, clinic_name, specialties, website_url, profile_views, city, state')
-      .eq('user_id', userId)
-      .maybeSingle();
+    const { data: doctor } = await readDefaultDoctor(userId, 'id, user_id, photo_url, bio, clinic_name, specialties, website_url, profile_views, city, state');
     if (!doctor) return NextResponse.json({ badges: [] });
     const badges = await loadEarnedBadgeIds(doctor);
     return NextResponse.json(

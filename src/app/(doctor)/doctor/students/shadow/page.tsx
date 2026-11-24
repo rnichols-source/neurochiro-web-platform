@@ -5,14 +5,14 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { missingSchema } from '@/lib/students/schema';
 import { decideMentorship, decideShadow } from '@/app/(student)/student/doctors/actions';
 import { redirect } from 'next/navigation';
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor';
 
 export default async function ShadowInboxPage() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
   const admin = createAdminClient();
-  const doctor = await (admin as any).from('doctors').select('id').eq('user_id', user.id).maybeSingle();
-  const doctorId = (doctor.data as { id?: string } | null)?.id;
+  const doctorId = await selectedDoctorIdFor(user.id);
   const requests = doctorId
     ? await (admin as any).from('shadow_requests').select('id, student_id, proposed_dates, message, status, created_at').eq('doctor_id', doctorId).order('created_at', { ascending: false })
     : { data: [], error: null };

@@ -3,6 +3,8 @@ import 'server-only';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { missingSchema } from '@/lib/students/schema';
 import { filterBoard, isPublicJob, type BoardJob } from './posting-pure';
+import { resolveSelectedListing, sortListings } from '@/lib/portal/listings';
+import { readDefaultDoctor } from '@/lib/portal/selected-doctor';
 
 const HIDDEN = new Set([
   'poster_email',
@@ -43,9 +45,24 @@ export async function loadPublicBoard(filters: { state?: string; type?: string; 
   const doctorIds = [...new Set(visible.map((row: { doctor_id?: string | null }) => row.doctor_id).filter(Boolean))] as string[];
   const clinicMap = new Map<string, { clinic_name?: string; city?: string; state?: string; slug?: string }>();
   if (doctorIds.length) {
-    const { data: doctors } = await admin.from('doctors').select('user_id, clinic_name, city, state, slug').in('user_id', doctorIds);
+    const { data: doctors } = await admin.from('doctors').select('id, user_id, clinic_name, city, state, slug, first_name, last_name').in('user_id', doctorIds);
+    const grouped = new Map<string, Array<{ id: string; city?: string | null; clinic_name?: string | null; first_name?: string | null; last_name?: string | null; state?: string | null; slug?: string | null }>>();
     for (const doctor of doctors || []) {
-      if (doctor.user_id) clinicMap.set(doctor.user_id, doctor);
+      if (!doctor.user_id || !doctor.id) continue;
+      const list = grouped.get(doctor.user_id) || [];
+      list.push(doctor);
+      grouped.set(doctor.user_id, list);
+    }
+    for (const [userId, rows] of grouped) {
+      const picked = resolveSelectedListing(sortListings(rows), null);
+      if (picked) {
+        clinicMap.set(userId, {
+          clinic_name: picked.clinic_name || undefined,
+          city: picked.city || undefined,
+          state: picked.state || undefined,
+          slug: picked.slug || undefined,
+        });
+      }
     }
   }
   const shaped = visible.map((row: Record<string, unknown> & { doctor_id?: string }) => {
@@ -68,7 +85,7 @@ export async function loadPublicJob(id: string) {
   if (!isPublicJob(data, Date.now())) return null;
   let doctor: { clinic_name?: string; city?: string; state?: string; slug?: string } | null = null;
   if (data.doctor_id) {
-    const { data: row } = await admin.from('doctors').select('clinic_name, city, state, slug').eq('user_id', data.doctor_id).maybeSingle();
+    const { data: row } = await readDefaultDoctor<{ clinic_name?: string; city?: string; state?: string; slug?: string }>(String(data.doctor_id), 'clinic_name, city, state, slug');
     doctor = row;
   }
   return {

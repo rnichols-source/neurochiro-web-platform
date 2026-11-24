@@ -3,6 +3,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 
 import { useState, useMemo, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
+import { usePortal } from "@/components/portal/PortalProvider";
 import { Search, Copy, Check, Edit3, X, FileText, Users, Building2, Puzzle, Shield, Zap, Lock, ChevronDown } from "lucide-react";
 import { createDoctorProductCheckout, hasPurchased } from "../purchase-actions";
 
@@ -58,6 +59,8 @@ export default function ContractsPage() {
 }
 
 function ContractsContent() {
+  const portal = usePortal();
+  const founding = portal.membership.isFounder || portal.doctor?.is_founding_member === true;
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -70,9 +73,7 @@ function ContractsContent() {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
-      // Founding members get everything
-      const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
-      if (doc?.is_founding_member) { setPurchasedIds(["contract-bundle"]); return; }
+      if (founding) { setPurchasedIds(["contract-bundle"]); return; }
       try {
         const { data } = await (supabase as any)
           .from('course_purchases')
@@ -81,7 +82,7 @@ function ContractsContent() {
         setPurchasedIds((data || []).map((r: any) => r.course_id));
       } catch {}
     });
-  }, []);
+  }, [founding]);
 
   const hasBundled = purchasedIds.includes('contract-bundle');
 

@@ -1,6 +1,5 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { ensureSignupDoctor } from '@/lib/applications/signup-doctor'
@@ -8,6 +7,7 @@ import { loadApplicationGate } from '@/lib/applications/gate'
 import { referrerLabelForSlug } from '@/lib/member-referrals/db'
 import { MEMBER_REF_COOKIE, persistedRef, withReferralQuery } from '@/lib/member-referrals/logic'
 import GetStartedClient from './GetStartedClient'
+import { portalListingsForUser } from '@/lib/portal/selected-doctor'
 
 export default async function GetStartedPage({
   searchParams,
@@ -28,9 +28,8 @@ export default async function GetStartedPage({
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
       const role = String((profile as { role?: string | null } | null)?.role || '')
       if (role === 'doctor' || role.startsWith('doctor')) {
-        const admin = createAdminClient()
-        const { data: doctor } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-        const doctorId = doctor?.id || (await ensureSignupDoctor({
+        const owned = await portalListingsForUser(user.id)
+        const doctorId = owned.selected?.id || (await ensureSignupDoctor({
           userId: user.id,
           email: user.email || '',
           name: typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : '',

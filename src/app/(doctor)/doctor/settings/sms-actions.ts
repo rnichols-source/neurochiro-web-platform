@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn, isMissingTable } from '@/lib/leads/schema'
 import { DOCTOR_SMS_CONSENT_V1 } from '@/lib/sms/consent'
 import { toE164 } from '@/lib/sms/phone'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 const LABELS = ['Your mobile', 'Office manager or second phone', 'Another mobile'] as const
 
@@ -35,10 +36,9 @@ async function ownedDoctorId(): Promise<{ id: string } | { error: string }> {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Sign in again.' }
-  const admin = doctorDb()
-  const { data, error } = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (error || !data?.id) return { error: 'Doctor profile not found.' }
-  return { id: String(data.id) }
+  const id = await selectedDoctorIdFor(user.id)
+  if (!id) return { error: 'Doctor profile not found.' }
+  return { id }
 }
 
 function missing(error: { message?: string; code?: string; details?: string } | null): boolean {

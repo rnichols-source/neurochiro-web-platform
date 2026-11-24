@@ -4,6 +4,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { usePortal } from "@/components/portal/PortalProvider";
 import { createDoctorProductCheckout } from "../purchase-actions";
 import {
   Target,
@@ -81,6 +82,8 @@ export default function ScreeningsPage() {
 }
 
 function ScreeningsContent() {
+  const portal = usePortal();
+  const founding = portal.membership.isFounder || portal.doctor?.is_founding_member === true;
   const [isPurchased, setIsPurchased] = useState(false);
   const [checking, setChecking] = useState(true);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
@@ -92,9 +95,7 @@ function ScreeningsContent() {
         const supabase = createClient();
         const { data: { user } } = await (supabase as any).auth.getUser();
         if (!user) { setChecking(false); return; }
-        // Founding members get everything
-        const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
-        if (doc?.is_founding_member) { setIsPurchased(true); setChecking(false); return; }
+        if (founding) { setIsPurchased(true); setChecking(false); return; }
         const { data } = await (supabase as any)
           .from("course_purchases")
           .select("id")
@@ -106,7 +107,7 @@ function ScreeningsContent() {
         setChecking(false);
       }
     })();
-  }, []);
+  }, [founding]);
 
   const toggleSection = (key: string) => {
     setExpandedSections((prev) =>

@@ -8,6 +8,7 @@ import { LIMIT_MESSAGE, stageLabel, toApplicationStage } from '@/lib/jobs/postin
 import { ensureContextConversation } from '@/lib/messaging/db';
 import { signStudentResume } from '@/lib/security/signed-resume';
 import { missingSchema } from '@/lib/students/schema';
+import { readDefaultDoctor, readSelectedDoctor } from '@/lib/portal/selected-doctor';
 
 /** Verify the current user owns the job that an application belongs to */
 async function verifyApplicationOwnership(supabase: any, userId: string, applicationId: string) {
@@ -127,11 +128,13 @@ export async function createJobPosting(formData: any) {
   // Notify matched students about the new job
   try {
     // Get the doctor's location for matching
-    const { data: doctor } = await supabase
-      .from('doctors')
-      .select('clinic_name, city, state, region_code, specialties')
-      .eq('user_id', user.id)
-      .single();
+    const { data: doctor } = await readSelectedDoctor<{
+      clinic_name?: string | null
+      city?: string | null
+      state?: string | null
+      region_code?: string | null
+      specialties?: string[] | null
+    }>(user.id, 'clinic_name, city, state, region_code, specialties');
 
     const jobCity = doctor?.city || '';
     const jobState = doctor?.state || '';
@@ -504,11 +507,11 @@ export async function generateDreamPitch(candidateId: string, jobId: string) {
   if (!candidate || !job) return "Failed to generate pitch. Missing data.";
 
   // Fetch the doctor's clinic name
-  const { data: doctor } = await supabase
-    .from('doctors')
-    .select('clinic_name')
-    .eq('user_id', job.doctor_id)
-    .single();
+  const { data: { user } } = await supabase.auth.getUser();
+  const ownerId = String(job.doctor_id || '');
+  const { data: doctor } = user?.id && ownerId === user.id
+    ? await readSelectedDoctor<{ clinic_name?: string | null }>(user.id, 'clinic_name')
+    : await readDefaultDoctor<{ clinic_name?: string | null }>(ownerId, 'clinic_name');
 
   const firstName = candidate.full_name?.split(' ')[0] || 'Doctor';
   const school = candidate.school || 'your chiropractic college';

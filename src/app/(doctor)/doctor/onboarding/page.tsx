@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Camera, FileText, Tag, Share2, ArrowRight, Loader2, CheckCircle2, Sparkles, Copy, Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase";
+import { usePortal } from "@/components/portal/PortalProvider";
 import { completeOnboarding, updateOnboardingProfile } from "./actions";
 import { generateAIProfileBio } from "../profile/actions";
 
@@ -16,6 +17,7 @@ const SPECIALTIES = [
 
 export default function DoctorOnboardingPage() {
   const router = useRouter();
+  const doctor = usePortal().doctor;
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [slug, setSlug] = useState("");
@@ -34,14 +36,9 @@ export default function DoctorOnboardingPage() {
   const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
 
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return;
-      const { data: doc } = await supabase.from("doctors").select("slug, clinic_name").eq("user_id", user.id).single();
-      if (doc?.slug) setSlug(doc.slug);
-      if (doc?.clinic_name) setClinicName(doc.clinic_name);
-    });
-  }, []);
+    if (doctor?.slug) setSlug(doctor.slug);
+    if (doctor?.clinic_name) setClinicName(doctor.clinic_name);
+  }, [doctor?.slug, doctor?.clinic_name]);
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

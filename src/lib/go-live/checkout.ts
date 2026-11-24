@@ -32,6 +32,7 @@ import {
   type CheckoutIdentity,
   type ExistingListing,
 } from './plan.ts'
+import { chooseOwnedListing } from '@/lib/portal/listings'
 
 function db() {
   return createAdminClient() as any
@@ -557,8 +558,9 @@ async function ingestLoggedIn(identity: CheckoutIdentity, paid: boolean): Promis
   const userId = identity.userId || ''
   const { data: profile } = await db().from('profiles').select('id, role').eq('id', userId).maybeSingle()
   const role = text(profile?.role) || text(identity.metadataRole) || null
-  const { data: doctor } = await db().from('doctors').select('id').eq('user_id', userId).maybeSingle()
-  const doctorId = text(doctor?.id) || null
+  const ownedRows = await db().from('doctors').select('id, email, user_id, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id, city, clinic_name, first_name, last_name').eq('user_id', userId).limit(50)
+  const owned = chooseOwnedListing(Array.isArray(ownedRows.data) ? ownedRows.data : [])
+  const doctorId = owned?.row.id || null
   const loaded = doctorId
     ? await db().from('doctors').select('id, email, first_name, last_name, city, user_id, stripe_customer_id, verification_status, is_approved, go_live_flow_at').eq('id', doctorId).maybeSingle()
     : { data: null }
@@ -609,10 +611,11 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
     : await db().from('profiles').select('id, role').ilike('email', identity.email).maybeSingle()
   if (existingProfile.data?.id) {
     const userId = String(existingProfile.data.id)
-    const doctor = await db().from('doctors').select('id').eq('user_id', userId).maybeSingle()
+    const doctorRows = await db().from('doctors').select('id, email, user_id, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id, city, clinic_name, first_name, last_name').eq('user_id', userId).limit(50)
+    const owned = chooseOwnedListing(Array.isArray(doctorRows.data) ? doctorRows.data : [])
     const promo = promotionPlan({
       hasAccount: true,
-      hasDoctor: Boolean(doctor.data?.id),
+      hasDoctor: Boolean(owned),
       role: text(existingProfile.data.role) || null,
     })
     if (promo.action === 'exclude') return null
@@ -628,9 +631,9 @@ async function createPendingDoctor(identity: CheckoutIdentity): Promise<string |
           console.error('[go-live] role update failed', error instanceof Error ? error.name : 'error')
         }
       }
-      if (doctor.data?.id) {
-        await markPaymentReceived(String(doctor.data.id), identity, userId)
-        return String(doctor.data.id)
+      if (owned?.row.id) {
+        await markPaymentReceived(String(owned.row.id), identity, userId)
+        return String(owned.row.id)
       }
       return insertDoctorForUser(userId, identity)
     }
@@ -718,10 +721,11 @@ async function insertDoctorForUser(userId: string, identity: CheckoutIdentity): 
 }
 
 async function attachExistingUser(userId: string, identity: CheckoutIdentity, country: string): Promise<string | null> {
-  const { data } = await db().from('doctors').select('id').eq('user_id', userId).maybeSingle()
-  if (!data?.id) return null
-  await markPaymentReceived(String(data.id), identity, userId, country)
-  return String(data.id)
+  const ownedRows = await db().from('doctors').select('id, email, user_id, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id, city, clinic_name, first_name, last_name').eq('user_id', userId).limit(50)
+  const owned = chooseOwnedListing(Array.isArray(ownedRows.data) ? ownedRows.data : [])
+  if (!owned?.row.id) return null
+  await markPaymentReceived(String(owned.row.id), identity, userId, country)
+  return String(owned.row.id)
 }
 
 async function linkStripeOnly(doctorId: string, identity: CheckoutIdentity): Promise<void> {

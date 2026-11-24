@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 export async function completeOnboarding() {
   const supabase = createServerSupabase();
@@ -15,9 +16,11 @@ export async function completeOnboarding() {
 
   // Profile onboarding complete — verification happens after onboarding call with Dr. Ray
   const admin = createAdminClient();
+  const doctorId = await selectedDoctorIdFor(user.id);
+  if (!doctorId) return { error: 'Doctor profile not found' };
   await admin.from('doctors').update({
     verification_status: 'pending',
-  } as any).eq('user_id', user.id);
+  } as any).eq('id', doctorId).eq('user_id', user.id);
 
   return { success: true };
 }
@@ -31,9 +34,11 @@ export async function updateOnboardingProfile(data: {
   if (!user) return { error: 'Not authenticated' };
 
   const admin = createAdminClient();
+  const doctorId = await selectedDoctorIdFor(user.id);
+  if (!doctorId) return { error: 'Doctor profile not found' };
   const updateData: any = { specialties: data.specialties };
   if (data.bio) updateData.bio = data.bio;
 
-  await admin.from('doctors').update(updateData).eq('user_id', user.id);
+  await admin.from('doctors').update(updateData).eq('id', doctorId).eq('user_id', user.id);
   return { success: true };
 }

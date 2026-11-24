@@ -3,6 +3,7 @@
 import { createServerSupabase } from '@/lib/supabase-server'
 import { revalidatePath } from 'next/cache'
 import { parseCoOwners } from '@/lib/listing-display'
+import { readSelectedDoctor, selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 
 export async function getDoctorProfile() {
@@ -17,11 +18,7 @@ export async function getDoctorProfile() {
         .select('full_name, email, role, tier, notification_preferences')
         .eq('id', user.id)
         .maybeSingle(),
-      supabase
-        .from('doctors')
-        .select('first_name, last_name, clinic_name, city, state, country, zip_code, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, listing_format, co_owners')
-        .eq('user_id', user.id)
-        .maybeSingle()
+      readSelectedDoctor(user.id, 'first_name, last_name, clinic_name, city, state, country, zip_code, website_url, bio, specialties, video_url, seo_keywords, photo_url, phone, latitude, slug, verification_status, instagram_url, facebook_url, tiktok_url, membership_tier, address, highlights, conditions_treated, education, languages, hours, accepted_payment, faq, gallery_images, banner_url, booking_url, first_visit_info, parking_info, amenities, offers_telehealth, accepts_walkins, accepting_new_patients, accepts_student_messages, years_in_practice, insurance_networks, team_members, certifications, first_visit_price, payment_model, files_insurance, payment_plans, free_consultation, has_evening_hours, has_weekend_hours, short_intro, philosophy, chiropractic_school, degree, graduation_year, post_doctoral_training, google_reviews_url, listing_format, co_owners')
     ])
 
     if (profileRes.error) {
@@ -218,13 +215,11 @@ export async function updateDoctorProfile(formData: FormData) {
     // Use admin client for all updates to bypass RLS
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const adminSupabase = createAdminClient()
+    const listingId = await selectedDoctorIdFor(user.id)
+    if (!listingId) return { error: 'Doctor profile not found' }
 
     // Load the current row before any write so validation can compare it.
-    const { data: currentDocRow } = await adminSupabase
-      .from('doctors')
-      .select('address, city, state, country, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated, listing_format')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    const { data: currentDocRow } = await readSelectedDoctor(user.id, 'address, city, state, country, latitude, longitude, clinic_name, phone, first_name, last_name, slug, specialties, conditions_treated, listing_format')
     // Generated doctors types omit columns this form already saves.
     const currentDoc = currentDocRow as any
 
@@ -351,6 +346,7 @@ export async function updateDoctorProfile(formData: FormData) {
         post_doctoral_training: postDoctoralTraining,
         google_reviews_url: googleReviewsUrl,
       } as any)
+      .eq('id', listingId)
       .eq('user_id', user.id)
 
     if (doctorError) {
@@ -369,7 +365,7 @@ export async function updateDoctorProfile(formData: FormData) {
           { onConflict: 'old_slug' }
         );
       }
-      await adminSupabase.from('doctors').update({ slug: newSlug } as any).eq('user_id', user.id);
+      await adminSupabase.from('doctors').update({ slug: newSlug } as any).eq('id', listingId).eq('user_id', user.id);
     }
 
     // Refresh search index for high-performance GIN/RPC search
@@ -429,11 +425,13 @@ export async function generateAIProfileBio(clinicName: string, currentBio: strin
     if (!user) return { error: "Unauthorized" }
 
     // Fetch doctor profile data for context
-    const { data: doctor } = await supabase
-      .from('doctors')
-      .select('first_name, last_name, city, state, specialties')
-      .eq('user_id', user.id)
-      .single()
+    const { data: doctor } = await readSelectedDoctor<{
+      first_name?: string | null
+      last_name?: string | null
+      city?: string | null
+      state?: string | null
+      specialties?: string[] | null
+    }>(user.id, 'first_name, last_name, city, state, specialties')
 
     const doctorName = doctor ? `Dr. ${doctor.first_name} ${doctor.last_name}` : 'The doctor'
     const location = [doctor?.city, doctor?.state].filter(Boolean).join(', ')
@@ -565,11 +563,14 @@ export async function uploadAvatar(formData: FormData) {
             .getPublicUrl(filePath)
 
         const publicUrl = data?.publicUrl || ""
+        const listingId = await selectedDoctorIdFor(user.id)
+        if (!listingId) return { error: "Doctor profile not found" }
 
         // Update doctor photo_url
         const { error: updateError } = await adminSupabase
             .from('doctors')
             .update({ photo_url: publicUrl })
+            .eq('id', listingId)
             .eq('user_id', user.id)
 
         if (updateError) {
@@ -646,7 +647,9 @@ export async function uploadBannerImage(formData: FormData) {
 
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const adminSupabase = createAdminClient()
-    await adminSupabase.from('doctors').update({ banner_url: result.publicUrl } as any).eq('user_id', user.id)
+    const listingId = await selectedDoctorIdFor(user.id)
+    if (!listingId) return { error: 'Doctor profile not found' }
+    await adminSupabase.from('doctors').update({ banner_url: result.publicUrl } as any).eq('id', listingId).eq('user_id', user.id)
 
     revalidatePath('/doctor/profile')
     return result

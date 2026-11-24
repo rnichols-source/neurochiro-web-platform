@@ -4,13 +4,20 @@ import { revalidatePath } from 'next/cache';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { missingSchema } from '@/lib/students/schema';
+import { readSelectedDoctor, selectedDoctorIdFor } from '@/lib/portal/selected-doctor';
 
 export async function getStudentOptIn() {
   const supabase = createServerSupabase();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
-  const admin = createAdminClient();
-  const row = await (admin as any).from('doctors').select('open_to_students, is_mentoring, offers_shadowing, accepts_interns, is_hiring, student_note').eq('user_id', user.id).maybeSingle();
+  const row = await readSelectedDoctor<{
+    open_to_students?: boolean | null;
+    is_mentoring?: boolean | null;
+    offers_shadowing?: boolean | null;
+    accepts_interns?: boolean | null;
+    is_hiring?: boolean | null;
+    student_note?: string | null;
+  }>(user.id, 'open_to_students, is_mentoring, offers_shadowing, accepts_interns, is_hiring, student_note');
   if (row.error && missingSchema(row.error)) return { missing: true as const };
   const data = row.data as {
     open_to_students?: boolean | null;
@@ -28,6 +35,8 @@ export async function saveStudentOptIn(formData: FormData): Promise<{ error?: st
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: 'Sign in first.' };
   const note = String(formData.get('student_note') || '').slice(0, 280);
+  const doctorId = await selectedDoctorIdFor(user.id);
+  if (!doctorId) return { error: 'Sign in first.' };
   const admin = createAdminClient();
   const updated = await (admin as any).from('doctors').update({
     open_to_students: formData.get('open_to_students') === 'yes',
@@ -36,7 +45,7 @@ export async function saveStudentOptIn(formData: FormData): Promise<{ error?: st
     accepts_interns: formData.get('accepts_interns') === 'yes',
     is_hiring: formData.get('is_hiring') === 'yes',
     student_note: note,
-  }).eq('user_id', user.id);
+  }).eq('id', doctorId).eq('user_id', user.id);
   if (updated.error && missingSchema(updated.error)) return { error: 'Student settings are not on yet.' };
   if (updated.error) return { error: 'Could not save that.' };
   revalidatePath('/doctor/profile');

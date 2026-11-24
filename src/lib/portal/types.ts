@@ -1,6 +1,13 @@
 import type { Membership } from '@/lib/portal/membership';
 import type { PortalNavItem } from '@/lib/portal/features';
 
+export type PortalListing = {
+  id: string;
+  label: string;
+  city: string | null;
+  clinicName: string | null;
+};
+
 export type PortalDoctor = {
   id: string;
   slug: string | null;
@@ -26,6 +33,7 @@ export type PortalContextValue = {
   initials: string;
   role: string | null;
   doctor: PortalDoctor | null;
+  listings: PortalListing[];
   membership: Membership;
   unreadNotifications: number;
   unreadMessages: number;

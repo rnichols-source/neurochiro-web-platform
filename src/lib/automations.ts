@@ -594,8 +594,9 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
         if (supabaseAdmin && emailEnabled && payload.email && payload.userId) {
            // Check if they already paid/completed
            const { data: profile } = await supabaseAdmin.from('profiles').select('tier').eq('id', payload.userId).single();
-           const { data: doctor } = await supabaseAdmin.from('doctors').select('is_approved, verification_status, paid_at').eq('user_id', payload.userId).maybeSingle();
-           const alreadyLive = doctor?.is_approved === true || doctor?.verification_status === 'verified' || Boolean(doctor?.paid_at);
+           const { data: doctorRows } = await supabaseAdmin.from('doctors').select('is_approved, verification_status, paid_at').eq('user_id', payload.userId).limit(50);
+           const doctors = Array.isArray(doctorRows) ? doctorRows : [];
+           const alreadyLive = doctors.some((doctor) => doctor?.is_approved === true || doctor?.verification_status === 'verified' || Boolean(doctor?.paid_at));
            if (!alreadyLive && (!profile || profile.tier !== 'pro' && profile.tier !== 'student_paid')) {
               await sendPremiumEmail({
                 to: payload.email,
@@ -821,11 +822,13 @@ export const executeAutomation = async (queueId: string, eventType: string, payl
                  .eq('verification_status', 'verified');
 
                // Get slug for the link
-               const { data: doctorData } = await supabaseAdmin
+               const { data: slugRows } = await supabaseAdmin
                  .from('doctors')
-                 .select('slug')
+                 .select('id, slug, city, clinic_name, first_name, last_name')
                  .eq('user_id', userId)
-                 .single();
+                 .limit(50);
+               const { resolveSelectedListing, sortListings } = await import('@/lib/portal/listings');
+               const doctorData = resolveSelectedListing(sortListings(Array.isArray(slugRows) ? slugRows : []), null);
 
                const profileLink = doctorData?.slug ? `https://neurochiro.co/directory/${doctorData.slug}` : 'https://neurochiro.co/directory';
 

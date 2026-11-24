@@ -14,6 +14,7 @@ import { SavedItemsSeed } from '@/components/portal/saved-seed';
 import { SmsPromptBanner } from '@/components/doctor/SmsPromptBanner';
 import type { ApplicationGate } from '@/lib/applications/gate';
 import StaffScorecardFrame from './StaffScorecardFrame';
+import { LocationSwitcher } from '@/components/doctor/LocationSwitcher';
 import '@/styles/doctor-portal.css';
 import { practiceAccessForUser } from '@/lib/doctor/practice-access';
 
@@ -68,6 +69,11 @@ export default async function DoctorLayout({ children }: { children: React.React
       <AuthProvider>
         <div className="min-h-dvh overflow-x-hidden bg-neuro-cream" style={{ fontFamily: 'var(--font-montserrat), Montserrat, sans-serif' }}>
           <PortalProvider value={ctx}>
+            {ctx.listings.length > 1 ? (
+              <div className="border-b border-[#E7E2D8] bg-white px-4 py-3">
+                <LocationSwitcher />
+              </div>
+            ) : null}
             {children}
           </PortalProvider>
         </div>

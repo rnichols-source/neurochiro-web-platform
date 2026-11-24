@@ -4,6 +4,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 import { useState, useMemo, useEffect } from "react";
 import { Search, Copy, Check, Edit3, X, FileText, Mail, Share2, Layers, Sparkles, Lock, Zap } from "lucide-react";
 import { createDoctorSubscriptionCheckout, hasPurchased } from "../purchase-actions";
+import { usePortal } from "@/components/portal/PortalProvider";
 
 // Will import from content-data.ts once it's created
 // For now, define the type
@@ -57,24 +58,22 @@ function ContentLibraryContent() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const portal = usePortal();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const included = portal.membership.isFounder
+    || portal.doctor?.is_founding_member === true
+    || portal.membership.tier === 'pro'
+    || portal.membership.tier === 'neuros'
+    || portal.doctor?.membership_tier === 'growth'
+    || portal.doctor?.membership_tier === 'pro';
 
   useEffect(() => {
-    // Check membership tier + founding member status — they get full access
-    (async () => {
-      const { createClient } = await import("@/lib/supabase");
-      const sb = createClient();
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) return;
-      const { data: doctor } = await sb.from("doctors").select("membership_tier, is_founding_member").eq("user_id", user.id).single() as any;
-      if (doctor?.is_founding_member || doctor?.membership_tier === 'growth' || doctor?.membership_tier === 'pro') {
-        setIsSubscribed(true);
-        return;
-      }
-      // Fallback: check for separate content library purchase
-      hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
-    })();
-  }, []);
+    if (included) {
+      setIsSubscribed(true);
+      return;
+    }
+    hasPurchased('content-library').then(setIsSubscribed).catch(() => {});
+  }, [included]);
 
   const thirtyDaysAgo = useMemo(() => {
     const d = new Date();

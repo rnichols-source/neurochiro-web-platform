@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { FROM_ADDRESS, REPLY_TO } from '@/lib/leads/config'
 import { isMissingTable } from '@/lib/leads/schema'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 export type HelpResult = { ok: true } | { ok: false; error: string }
 
@@ -27,9 +28,9 @@ export async function sendHelpMessage(input: {
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: 'That email address does not look right.' }
 
   const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
+  const doctorId = await selectedDoctorIdFor(user.id)
   const stored = await admin.from('doctor_help_messages').insert({
-    doctor_id: doctor.data?.id || null,
+    doctor_id: doctorId,
     user_id: user.id,
     name: name || null,
     email: email || user.email || null,

@@ -1,6 +1,7 @@
 import 'server-only';
 import { Resend } from 'resend';
-import { createAdminClient } from '@/lib/supabase-admin';
+import { createAdminClient } from '@/lib/supabase-admin'
+import { readDefaultDoctor, readSelectedDoctor } from '@/lib/portal/selected-doctor';
 import { isPracticeListing, listingCardCopy, listingDisplayName } from '@/lib/listing-display';
 import { createServerSupabase } from '@/lib/supabase-server';
 import {
@@ -95,11 +96,19 @@ async function currentDoctor(): Promise<Me | null> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   const admin = createAdminClient() as any;
-  const { data } = await admin
-    .from('doctors')
-    .select('id, first_name, last_name, clinic_name, phone, address, booking_url, slug, city, state, country')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const { data } = await readSelectedDoctor<{
+    id: string
+    first_name?: string | null
+    last_name?: string | null
+    clinic_name?: string | null
+    phone?: string | null
+    address?: string | null
+    booking_url?: string | null
+    slug?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+  }>(user.id, 'id, first_name, last_name, clinic_name, phone, address, booking_url, slug, city, state, country');
   if (!data) return null;
   return {
     userId: user.id,
@@ -305,8 +314,8 @@ export async function loadDoctorCard(doctorId: string): Promise<ReferableDoctor 
 export async function doctorIdForUser(userId: string): Promise<string | null> {
   const me = await currentDoctor();
   if (!me || !userId) return null;
-  const admin = createAdminClient() as any;
-  const { data } = await admin.from('doctors').select('id').eq('user_id', userId).maybeSingle();
+  if (userId === me.userId) return me.doctorId;
+  const { data } = await readDefaultDoctor<{ id: string }>(userId, 'id');
   return data?.id || null;
 }
 

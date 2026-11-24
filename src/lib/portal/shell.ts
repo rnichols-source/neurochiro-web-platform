@@ -1,7 +1,9 @@
 import 'server-only';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { listingLabel } from '@/lib/portal/listings';
+import { portalListingsForUser, readSelectedDoctor } from '@/lib/portal/selected-doctor';
 import type { LoadedShell } from '@/lib/portal/context-assemble';
-import type { PortalDoctor } from '@/lib/portal/types';
+import type { PortalDoctor, PortalListing } from '@/lib/portal/types';
 
 const DOCTOR_COLUMNS =
   'id, slug, clinic_name, membership_tier, is_founding_member, neuros_tier, created_at, is_approved, onboarding_call_status, profile_views, city, state, country, specialties, subscription_status';
@@ -52,27 +54,41 @@ function toDoctor(row: DoctorRow | null): PortalDoctor | null {
   };
 }
 
-/** Profiles and doctors, once. Used by the portal context and by the shell server action. */
+function toListing(row: { id: string; city?: string | null; clinic_name?: string | null; first_name?: string | null; last_name?: string | null }): PortalListing {
+  return {
+    id: row.id,
+    label: listingLabel(row),
+    city: row.city ?? null,
+    clinicName: row.clinic_name ?? null,
+  };
+}
+
+/** Profiles and the selected listing. Used by the portal context and by the shell server action. */
 export async function loadShell(user: { id: string }): Promise<LoadedShell> {
   const admin = createAdminClient();
-  const [profileRes, doctorFirst] = await Promise.all([
+  const [profileRes, portal] = await Promise.all([
     admin.from('profiles').select('full_name, tier, stripe_customer_id, role').eq('id', user.id).maybeSingle(),
-    (admin.from('doctors') as any).select(DOCTOR_COLUMNS).eq('user_id', user.id).maybeSingle() as Promise<{ data: DoctorRow | null; error: { message?: string } | null }>,
+    portalListingsForUser(user.id),
   ]);
-  let doctorRow = doctorFirst.data;
-  let subscriptionStatus = doctorRow?.subscription_status ?? null;
-  if (doctorFirst.error) {
-    const fallback = await (admin.from('doctors') as any).select(DOCTOR_COLUMNS_FALLBACK).eq('user_id', user.id).maybeSingle() as {
-      data: DoctorRow | null;
-    };
-    doctorRow = fallback.data;
-    subscriptionStatus = null;
+  let doctorRow: DoctorRow | null = null;
+  let subscriptionStatus: string | null = null;
+  if (portal.selected?.id) {
+    const full = await readSelectedDoctor<DoctorRow>(user.id, DOCTOR_COLUMNS);
+    if (full.error) {
+      const fallback = await readSelectedDoctor<DoctorRow>(user.id, DOCTOR_COLUMNS_FALLBACK);
+      doctorRow = fallback.data;
+      subscriptionStatus = null;
+    } else {
+      doctorRow = full.data;
+      subscriptionStatus = doctorRow?.subscription_status ?? null;
+    }
   }
   const fullName = profileRes.data?.full_name ?? null;
   return {
     fullName,
     initials: initialsFrom(fullName),
     doctor: toDoctor(doctorRow),
+    listings: portal.listings.map(toListing),
     profileTier: profileRes.data?.tier ?? null,
     role: (profileRes.data as { role?: string | null } | null)?.role ?? null,
     stripeCustomerId: profileRes.data?.stripe_customer_id ?? null,
