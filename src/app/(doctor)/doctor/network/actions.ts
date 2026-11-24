@@ -6,6 +6,7 @@ import { createServerSupabase } from '@/lib/supabase-server'
 import { communityMemberCopy } from '@/lib/doctor/places'
 import { searchForCurrentDoctor, submitReferral } from '@/lib/referrals/data'
 import { placeLabel } from '@/lib/referrals/pure'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 export type DoctorHit = {
   id: string
@@ -69,7 +70,9 @@ export async function setOpenToStudents(open: boolean): Promise<{ ok: boolean }>
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false }
   const admin = createAdminClient() as any
-  const updated = await admin.from('doctors').update({ accepts_student_messages: open }).eq('user_id', user.id)
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return { ok: false }
+  const updated = await admin.from('doctors').update({ accepts_student_messages: open }).eq('id', doctorId).eq('user_id', user.id)
   if (updated.error) return { ok: false }
   revalidatePath('/doctor/network/students')
   return { ok: true }

@@ -1,6 +1,7 @@
 'use server'
 
 import { createServerSupabase } from '@/lib/supabase-server'
+import { readDefaultDoctor } from '@/lib/portal/selected-doctor'
 import { isUpcoming, parseSeminarDates } from '@/lib/seminars/dates'
 import type { SeminarFilters } from '@/lib/seminars/types'
 
@@ -107,11 +108,7 @@ export async function getSeminarById(id: string) {
 
     // Look up host doctor's directory slug for cross-linking
     if (data?.host_id) {
-      const { data: doctor } = await supabase
-        .from('doctors')
-        .select('slug, first_name, last_name, photo_url, clinic_name')
-        .eq('user_id', data.host_id)
-        .maybeSingle()
+      const { data: doctor } = await readDefaultDoctor(String(data.host_id), 'slug, first_name, last_name, photo_url, clinic_name')
       if (doctor) {
         data.host_doctor = doctor;
       }

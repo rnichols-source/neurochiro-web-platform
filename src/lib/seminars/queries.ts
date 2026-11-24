@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase-admin";
+import { readDefaultDoctor } from "@/lib/portal/selected-doctor";
 import { parseSeminarDates, timezoneForCity, isUpcoming } from "./dates";
 import { countryCode, currencyForCountry } from "./format";
 import { dedupeSlugs, isUuid, seminarSlug } from "./slug";
@@ -176,11 +177,6 @@ export async function getRelated(seminar: SeminarRecord, now = Date.now()): Prom
 
 export async function getHostSummary(hostId: string | null) {
   if (!hostId) return null;
-  const admin = createAdminClient();
-  const { data } = await admin
-    .from("doctors")
-    .select("slug, first_name, last_name, photo_url, clinic_name, bio, city, state")
-    .eq("user_id", hostId)
-    .maybeSingle();
+  const { data } = await readDefaultDoctor(hostId, "slug, first_name, last_name, photo_url, clinic_name, bio, city, state");
   return data;
 }

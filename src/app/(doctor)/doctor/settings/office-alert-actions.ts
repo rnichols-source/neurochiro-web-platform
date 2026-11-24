@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { isMissingColumn } from '@/lib/leads/schema'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 export type AlertChannel = 'email' | 'text' | 'both'
 
@@ -19,10 +20,9 @@ async function doctorId(): Promise<{ id: string } | { error: string }> {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Your session ended. Sign in again, then save these choices.' }
-  const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (!doctor.data?.id) return { error: 'A doctor profile is required before these choices can be saved.' }
-  return { id: String(doctor.data.id) }
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return { error: 'A doctor profile is required before these choices can be saved.' }
+  return { id: doctorId }
 }
 
 function emailsOf(value: unknown): string[] {

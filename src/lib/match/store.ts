@@ -7,6 +7,7 @@ import { wrapEmail } from '@/lib/email-template';
 import { ensureContextConversation, postSystemMessage } from '@/lib/messaging/db';
 import { deriveMembership, type MembershipStatus } from '@/lib/portal/membership';
 import { getMembership } from '@/lib/portal/membership-load';
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor';
 import { isDoctorMember } from '@/lib/jobs/posting-pure';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
@@ -602,7 +603,9 @@ export async function reportOutcome(matchId: string, outcome: string, note: stri
 export async function setOpenToStudents(on: boolean): Promise<{ error?: string }> {
   const me = await actor();
   if (!me || me.role !== 'doctor') return { error: 'Sign in first.' };
-  const updated = await db().from('doctors').update({ open_to_students: on }).eq('user_id', me.id);
+  const doctorId = await selectedDoctorIdFor(me.id);
+  if (!doctorId) return { error: 'Sign in first.' };
+  const updated = await db().from('doctors').update({ open_to_students: on }).eq('id', doctorId).eq('user_id', me.id);
   if (updated.error && missingSchema(updated.error)) return { error: 'Student settings are not on yet.' };
   if (updated.error) return { error: 'Could not save that.' };
   return {};

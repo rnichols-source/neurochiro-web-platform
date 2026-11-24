@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 import { revalidatePath } from 'next/cache'
 import { stripe } from '@/lib/stripe'
 import { STUDENT_CONFIG } from '@/config/students'
@@ -125,11 +126,7 @@ export async function createSeminarAction(formData: FormData) {
 
   // 3. Check membership status — only paying members get auto-approved
   //    Read from doctors table via admin client (profiles.tier is untrusted while RLS is off)
-  const adminClient = createAdminClient();
-  const { data: doctor } = await (adminClient as any).from('doctors')
-    .select('verification_status, membership_tier')
-    .eq('user_id', user.id)
-    .single()
+  const { data: doctor } = await readSelectedDoctor<{ verification_status?: string | null; membership_tier?: string | null }>(user.id, 'verification_status, membership_tier')
 
   const isVerified = (doctor as any)?.verification_status === 'verified';
   void tier
@@ -404,10 +401,7 @@ export async function getRecommendedSeminars() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data: doctor } = await (supabase as any).from('doctors')
-    .select('specialties, city, state')
-    .eq('user_id', user.id)
-    .single();
+  const { data: doctor } = await readSelectedDoctor<{ specialties?: string[] | null; city?: string | null; state?: string | null }>(user.id, 'specialties, city, state');
 
   return loadRecommendedSeminars(user.id, {
     city: doctor?.city,

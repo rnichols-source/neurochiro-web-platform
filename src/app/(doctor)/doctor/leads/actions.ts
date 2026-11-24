@@ -6,10 +6,10 @@ import { logPortalEvent } from '@/lib/leads/send'
 import { outcomePatch, stageToAckAction } from '@/lib/leads/outcomes'
 import { updateContactRequest } from '@/lib/leads/schema'
 import { loadLeadPipeline } from './pipeline'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 
 async function getDoctorId(userId: string): Promise<string | null> {
-  const { data } = await createAdminClient().from('doctors').select('id').eq('user_id', userId).single();
-  return data?.id || null;
+  return selectedDoctorIdFor(userId)
 }
 
 export async function getLeadPipeline() {

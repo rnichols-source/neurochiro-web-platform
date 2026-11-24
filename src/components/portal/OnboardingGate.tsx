@@ -7,15 +7,19 @@ import { Calendar, CheckCircle2, Phone, Image as ImageIcon, Video, Star, Zap, Ba
 import { DOCTOR_PRO_FEATURES_MINIMAL } from '@/lib/membership-value';
 import { createClient } from '@/lib/supabase';
 import { firstName } from '@/lib/portal/greeting';
+import { usePortal } from '@/components/portal/PortalProvider';
+import { LocationSwitcher } from '@/components/doctor/LocationSwitcher';
 import type { ApplicationGate } from '@/lib/applications/gate-kind';
 import { DR_RAY_REVIEW_STEPS, DR_RAY_SIGN_OFF } from '@/lib/applications/next-steps';
 
 const CALENDLY_URL = 'https://calendly.com/drray-neurochirodirectory/neurochiro-onboarding-call';
 
 function ReviewScreen({ title, body, steps, signOff, action }: { title: string; body?: string; steps?: readonly string[]; signOff?: string; action?: { href: string; label: string } }) {
+  const listings = usePortal().listings
   return (
     <div className="onboarding-gate min-h-dvh overflow-x-hidden bg-[#0F1A24] flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full text-center">
+        {listings.length > 1 ? <div className="mb-6 text-left"><LocationSwitcher variant="dark" /></div> : null}
         <h1 className="text-2xl font-bold text-white mb-3">{title}</h1>
         {body ? <p className="text-base text-white/70 leading-relaxed mb-6">{body}</p> : null}
         {steps ? (
@@ -57,6 +61,7 @@ export default function OnboardingGate({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const listings = usePortal().listings;
   const onApply = pathname === '/doctor/apply' || pathname.startsWith('/doctor/apply/');
 
   useEffect(() => {
@@ -102,6 +107,7 @@ export default function OnboardingGate({
   return (
     <div className="onboarding-gate min-h-dvh bg-[#0F1A24] flex items-center justify-center px-6 py-12">
       <div className="max-w-lg w-full">
+        {listings.length > 1 ? <div className="mb-6"><LocationSwitcher variant="dark" /></div> : null}
         <div className="text-center mb-8">
           <div className="w-20 h-20 rounded-full bg-neuro-orange/20 flex items-center justify-center mx-auto mb-6">
             <Calendar className="w-10 h-10 text-neuro-orange" />

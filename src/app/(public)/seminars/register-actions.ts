@@ -11,6 +11,7 @@ import { formatDateRange } from "@/lib/seminars/format";
 import { memberTicketPrice } from "@/lib/seminars/utm";
 import { STUDENT_CONFIG } from "@/config/students";
 import { getStudentMembership } from "@/lib/students/membership";
+import { getMembership } from "@/lib/portal/membership-load";
 import { hasMemberAccess } from "@/lib/students/membership-pure";
 import { getSeminarBySlug } from "@/lib/seminars/queries";
 import { supabaseSeminarStore } from "@/lib/seminars/fulfill-db";
@@ -91,8 +92,8 @@ export async function createSeminarCheckout(input: {
   let isMember = false;
   let discountPct: number = SEMINAR_CONFIG.defaultMemberDiscountPct;
   if (user) {
-    const doctor = await admin.from("doctors").select("membership_tier").eq("user_id", user.id).maybeSingle();
-    isMember = doctor.data?.membership_tier === "pro";
+    const membership = await getMembership(user.id);
+    isMember = membership.tier === "pro" || membership.tier === "neuros";
     if (!isMember) {
       const studentMembership = await getStudentMembership(user.id);
       const profile = await admin.from("profiles").select("role").eq("id", user.id).maybeSingle();

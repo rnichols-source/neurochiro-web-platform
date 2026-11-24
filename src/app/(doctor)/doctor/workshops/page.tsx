@@ -4,6 +4,7 @@ import UpgradeGate from "@/components/doctor/UpgradeGate";
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase";
+import { usePortal } from "@/components/portal/PortalProvider";
 import { createDoctorProductCheckout } from "../purchase-actions";
 import {
   Presentation,
@@ -154,6 +155,8 @@ export default function WorkshopsPage() {
 
 function WorkshopsContent() {
   /* ---------- state ---------- */
+  const portal = usePortal();
+  const founding = portal.doctor?.is_founding_member === true || portal.membership.isFounder;
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [selectedKitId, setSelectedKitId] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -167,9 +170,7 @@ function WorkshopsContent() {
     const supabase = createClient();
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
-      // Founding members get everything
-      const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
-      if (doc?.is_founding_member) {
+      if (founding) {
         setPurchasedIds(["workshop-bundle", "workshop-stress-sleep", "workshop-pediatric", "workshop-lunch-learn", "workshop-corporate", "workshop-community"]);
         return;
       }
@@ -181,7 +182,7 @@ function WorkshopsContent() {
         setPurchasedIds((data || []).map((r: any) => r.course_id));
       } catch {}
     });
-  }, []);
+  }, [founding]);
 
   const hasBundled = purchasedIds.includes("workshop-bundle");
 

@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 import { getDoctorTimezone } from '@/lib/doctor-timezone'
 import { normalizeCalendar } from '@/lib/kpi/calendar'
 import { clinicToday, historyStart, isValidYmd } from '@/lib/kpi/dates'
@@ -157,9 +158,8 @@ async function officeDoctor(officeUserId: string, own: Record<string, unknown> |
     }
   }
   try {
-    const admin = createAdminClient() as unknown as Loose
-    const result = await admin.from('doctors').select('id, state, country, clinic_name').eq('user_id', officeUserId).limit(1)
-    const row = record(Array.isArray(result.data) ? result.data[0] : null)
+    const result = await readSelectedDoctor<Record<string, unknown>>(officeUserId, 'id, state, country, clinic_name')
+    const row = record(result.data)
     return {
       state: textOf(row, 'state'),
       country: textOf(row, 'country'),
@@ -178,7 +178,7 @@ async function requireDoctor(): Promise<Session | { error: string }> {
   const db = loose(supabase)
   const [profileResult, doctorResult] = await Promise.all([
     db.from('profiles').select('role, full_name, email').eq('id', user.id).maybeSingle(),
-    db.from('doctors').select('id, state, country, clinic_name').eq('user_id', user.id).limit(1),
+    readSelectedDoctor<Record<string, unknown>>(user.id, 'id, state, country, clinic_name'),
   ])
   if (profileResult.error) return { error: GENERIC }
   const profile = record(profileResult.data)
@@ -188,7 +188,7 @@ async function requireDoctor(): Promise<Session | { error: string }> {
   await claimInvites(db, user.id, email)
   const memberships = await db.from('kpi_office_members').select('office_user_id, role, can_view_pl, status').eq('member_user_id', user.id).eq('status', 'active')
   const memberRows = memberships.error || !Array.isArray(memberships.data) ? [] : memberships.data.map((row) => record(row))
-  const ownDoctor = record(Array.isArray(doctorResult.data) ? doctorResult.data[0] : null)
+  const ownDoctor = record(doctorResult.data)
   if (ALLOWED_ROLES.has(profileRole)) {
     const place = await officeDoctor(user.id, textOf(ownDoctor, 'id') ? ownDoctor : null)
     return {

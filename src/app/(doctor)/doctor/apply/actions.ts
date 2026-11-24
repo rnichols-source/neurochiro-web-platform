@@ -14,6 +14,7 @@ import { ensureDraftApplication, loadApplicationByDoctor, saveAnswers, saveDraft
 import { rememberApplicantReferral } from '@/lib/member-referrals/db'
 import { MEMBER_REF_COOKIE, persistedRef } from '@/lib/member-referrals/logic'
 import { cookies } from 'next/headers'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 export type PlanChoice = {
   cycle: BillingCycle
@@ -27,11 +28,14 @@ async function requireDoctor() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Sign in to continue your application.' as const }
   const admin = createAdminClient()
-  const { data: doctor } = await admin
-    .from('doctors')
-    .select('id, first_name, last_name, email, country, city')
-    .eq('user_id', user.id)
-    .maybeSingle()
+  const { data: doctor } = await readSelectedDoctor<{
+    id: string
+    first_name: string | null
+    last_name: string | null
+    email: string | null
+    country: string | null
+    city: string | null
+  }>(user.id, 'id, first_name, last_name, email, country, city')
   if (!doctor) {
     const repaired = await ensureSignupDoctor({
       userId: user.id,

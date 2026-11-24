@@ -1,7 +1,7 @@
 import { PORTAL_FEATURES } from '../../config/portal-features.ts';
 import { effectiveState, navFor } from './features.ts';
 import { deriveMembership, type MembershipStatus } from './membership.ts';
-import type { PortalContextValue, PortalDoctor } from './types.ts';
+import type { PortalContextValue, PortalDoctor, PortalListing } from './types.ts';
 
 const STATUSES = new Set(['active', 'trialing', 'past_due', 'canceled', 'none']);
 
@@ -11,6 +11,7 @@ export type LoadedShell = {
   fullName: string | null;
   initials: string;
   doctor: PortalDoctor | null;
+  listings: PortalListing[];
   profileTier: string | null;
   role: string | null;
   stripeCustomerId: string | null;
@@ -91,6 +92,7 @@ export async function assemblePortalContext(deps: PortalContextDeps): Promise<Po
     initials: shell.initials,
     role: shell.role,
     doctor: shell.doctor,
+    listings: shell.listings || [],
     membership,
     unreadNotifications: unread.notificationsExcludingMessages,
     unreadMessages: unread.messages,

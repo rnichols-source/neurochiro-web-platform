@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import PageHeader from "@/components/portal/PageHeader";
 import { billingGuideCopy } from "@/lib/doctor/places";
+import { usePortal } from "@/components/portal/PortalProvider";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -128,6 +129,8 @@ function boldify(text: string): string {
 /* ------------------------------------------------------------------ */
 
 export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: boolean }) {
+  const portal = usePortal();
+  const included = hasAccess || portal.membership.isFounder || portal.doctor?.is_founding_member === true || portal.membership.tier === "pro" || portal.membership.tier === "neuros";
   const [purchased, setPurchased] = useState(hasAccess);
   const [loadingPurchase, setLoadingPurchase] = useState(!hasAccess);
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,9 +150,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
           setLoadingPurchase(false);
           return;
         }
-        // Founding members get everything
-        const { data: doc } = await supabase.from("doctors").select("is_founding_member").eq("user_id", user.id).single() as any;
-        if (doc?.is_founding_member && !cancelled) { setPurchased(true); return; }
+        if (included && !cancelled) { setPurchased(true); return; }
         const { data } = await (supabase as any)
           .from("course_purchases")
           .select("course_id")
@@ -166,7 +167,7 @@ export default function BillingGuideClient({ hasAccess = false }: { hasAccess?: 
     }
     check();
     return () => { cancelled = true; };
-  }, [hasAccess]);
+  }, [hasAccess, included]);
 
   /* --- Computed counts ------------------------------------------- */
   const totalCodes = useMemo(

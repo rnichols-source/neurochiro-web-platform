@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 import { sendCareSetInvite } from '@/lib/community/library-actions'
 import { assignExerciseSet } from '@/lib/community/phase-actions'
 import { libraryPlans, remedyGuide } from '@/lib/community/library-content'
@@ -34,10 +35,9 @@ async function requireDoctor(): Promise<{ userId: string; doctorId: string } | n
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (!doctor.data?.id) return null
-  return { userId: user.id, doctorId: doctor.data.id }
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return null
+  return { userId: user.id, doctorId }
 }
 
 function refresh() {

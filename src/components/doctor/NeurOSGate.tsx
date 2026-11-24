@@ -1,8 +1,8 @@
 "use client";
 
 import { Lock, Cpu, ArrowRight, Check } from "lucide-react";
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase";
+import { useState } from "react";
+import { usePortal } from "@/components/portal/PortalProvider";
 
 interface NeurOSGateProps {
   children: React.ReactNode;
@@ -10,30 +10,11 @@ interface NeurOSGateProps {
 }
 
 export default function NeurOSGate({ children, feature }: NeurOSGateProps) {
-  const [hasNeurOS, setHasNeurOS] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const ctx = usePortal();
   const [checkingOut, setCheckingOut] = useState(false);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setLoading(false); return; }
-
-      const { data: doctor } = await supabase
-        .from("doctors")
-        .select("neuros_tier")
-        .eq("user_id", user.id)
-        .single() as any;
-
-      setHasNeurOS(
-        doctor?.neuros_tier === "neuros" ||
-        doctor?.neuros_tier === "neuros_founding"
-      );
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <>{children}</>;
+  const hasNeurOS = ctx.membership.tier === "neuros"
+    || ctx.doctor?.neuros_tier === "neuros"
+    || ctx.doctor?.neuros_tier === "neuros_founding";
   if (hasNeurOS) return <>{children}</>;
 
   const handleCheckout = async (cycle: "monthly" | "annual") => {

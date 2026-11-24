@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { createServerSupabase } from '@/lib/supabase-server'
+import { selectedDoctorIdFor } from '@/lib/portal/selected-doctor'
 import { requireCommunityMember } from '@/lib/community/data'
 import { libraryPlans, remedyGuide } from '@/lib/community/library-content'
 import {
@@ -44,10 +45,9 @@ async function requireDoctor(): Promise<{ doctorId: string } | null> {
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
-  const admin = createAdminClient() as any
-  const doctor = await admin.from('doctors').select('id').eq('user_id', user.id).maybeSingle()
-  if (!doctor.data?.id) return null
-  return { doctorId: doctor.data.id }
+  const doctorId = await selectedDoctorIdFor(user.id)
+  if (!doctorId) return null
+  return { doctorId }
 }
 
 export async function assignLibraryPlan(input: { profileId: string; slug: string; note: string; timesPerWeek?: number }): Promise<Result> {

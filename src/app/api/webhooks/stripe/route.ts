@@ -351,7 +351,9 @@ export async function POST(req: Request) {
 
             // Discord notification
             if (process.env.DISCORD_WEBHOOK_URL) {
-              const { data: doctorInfo } = await supabase.from('doctors').select('first_name, last_name, clinic_name').eq('user_id', userId).single();
+              const { data: doctorRows } = await supabase.from('doctors').select('id, first_name, last_name, clinic_name, city').eq('user_id', userId).limit(20);
+              const { resolveSelectedListing, sortListings } = await import('@/lib/portal/listings');
+              const doctorInfo = resolveSelectedListing(sortListings(Array.isArray(doctorRows) ? doctorRows : []), null);
               fetch(process.env.DISCORD_WEBHOOK_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

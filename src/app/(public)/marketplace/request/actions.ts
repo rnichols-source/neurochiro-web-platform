@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase-admin'
 import { categoryKeyFromAlias, categoryLabel } from '@/lib/synapse/categories'
 import { FIRST_LOOK_HOURS, isSynapseCountry, marketplaceCountry } from '@/lib/synapse/config'
 import { asLooseDb, asRows, type PostgrestError } from '@/lib/synapse/loose-db'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 function missingColumn(error: PostgrestError | null): boolean {
   if (!error) return false
@@ -34,7 +35,7 @@ export async function submitRFP(data: {
   const adminTyped = createAdminClient()
   let country = data.country && isSynapseCountry(data.country) ? data.country : null
   if (!country) {
-    const { data: doctor } = await adminTyped.from('doctors').select('country').eq('user_id', user.id).maybeSingle()
+    const { data: doctor } = await readSelectedDoctor<{ country?: string | null }>(user.id, 'country')
     country = marketplaceCountry(doctor?.country)
   }
 

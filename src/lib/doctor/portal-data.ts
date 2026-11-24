@@ -452,8 +452,9 @@ export async function loadStudentDesk(city: string | null): Promise<{ students: 
   const supabase = createServerSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { students: [], open: false, near: null }
+  const { readSelectedDoctor } = await import('@/lib/portal/selected-doctor')
   const [mine, selfProfile, students, near] = await Promise.all([
-    admin.from('doctors').select('accepts_student_messages').eq('user_id', user.id).maybeSingle(),
+    readSelectedDoctor<{ accepts_student_messages?: boolean | null }>(user.id, 'accepts_student_messages'),
     admin.from('profiles').select('is_test').eq('id', user.id).maybeSingle(),
     listStudentDirectory(false),
     countStudentsNear(city),

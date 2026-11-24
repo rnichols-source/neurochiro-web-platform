@@ -9,6 +9,12 @@ const shell: LoadedShell = {
   role: 'doctor',
   stripeCustomerId: null,
   subscriptionStatus: null,
+  listings: [{
+    id: 'doc-1',
+    label: 'NeuroChiro · Jacksonville',
+    city: 'Jacksonville',
+    clinicName: 'NeuroChiro',
+  }],
   doctor: {
     id: 'doc-1',
     slug: 'dr-raymond-nichols',
@@ -67,6 +73,8 @@ test('portal context calls getUser once, then the shell, then one parallel round
   assert.deepEqual(order.slice(2).sort(), ['cycles', 'purchase', 'referrals', 'unread', 'waiting']);
   assert.equal(ctx?.waitingVisits, 4);
   assert.equal(ctx?.userId, 'user-1');
+  assert.equal(ctx?.listings.length, 1);
+  assert.equal(ctx?.listings[0]?.id, 'doc-1');
   assert.equal(ctx?.membership.source, 'founding');
   assert.equal(ctx?.membership.tier, 'pro');
   assert.equal(ctx?.unreadMessages, 2);

@@ -3,6 +3,7 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { rememberApplicantReferral } from '@/lib/member-referrals/db'
 import { isListingOrPaidMembership, type ListingDoctor } from './existing-listing.ts'
+import { chooseOwnedListing } from '../portal/listings.ts'
 import { isApplicationFlowEnabled } from './flag.ts'
 import { toApplicationE164 } from './phone.ts'
 import { currencyForCountry } from './prices.ts'
@@ -22,6 +23,26 @@ function listingOf(row: DoctorRow, email: string): ListingDoctor {
     membershipTier: typeof row.membership_tier === 'string' ? row.membership_tier : null,
     stripeSubscriptionId: typeof row.stripe_subscription_id === 'string' ? row.stripe_subscription_id : null,
   }
+}
+
+function asOwned(rows: DoctorRow[] | null) {
+  return (rows || []).flatMap((row) => {
+    if (typeof row.id !== 'string' || !row.id) return []
+    return [{
+      id: row.id,
+      city: typeof row.city === 'string' ? row.city : null,
+      clinic_name: typeof row.clinic_name === 'string' ? row.clinic_name : null,
+      first_name: typeof row.first_name === 'string' ? row.first_name : null,
+      last_name: typeof row.last_name === 'string' ? row.last_name : null,
+      email: typeof row.email === 'string' ? row.email : null,
+      user_id: typeof row.user_id === 'string' ? row.user_id : null,
+      is_approved: row.is_approved === true,
+      verification_status: typeof row.verification_status === 'string' ? row.verification_status : null,
+      paid_at: typeof row.paid_at === 'string' ? row.paid_at : null,
+      membership_tier: typeof row.membership_tier === 'string' ? row.membership_tier : null,
+      stripe_subscription_id: typeof row.stripe_subscription_id === 'string' ? row.stripe_subscription_id : null,
+    }]
+  })
 }
 
 function exactEmail(email: string): string {
@@ -48,18 +69,22 @@ export async function ensureSignupDoctor(input: {
   const admin = createAdminClient() as unknown as {
     from: (table: string) => {
       select: (columns: string) => {
-        eq: (column: string, value: string) => { maybeSingle: () => Promise<{ data: { id?: string } | null; error?: { code?: string } | null }> }
+        eq: (column: string, value: string) => {
+          maybeSingle: () => Promise<{ data: { id?: string } | null; error?: { code?: string } | null }>
+          limit: (count: number) => Promise<{ data: DoctorRow[] | null; error?: { code?: string } | null }>
+        }
         ilike: (column: string, value: string) => Promise<{ data: DoctorRow[] | null; error?: { code?: string } | null }>
       }
       insert: (values: Record<string, unknown>) => { select: (columns: string) => { maybeSingle: () => Promise<{ data: { id?: string } | null; error?: { code?: string } | null }> } }
       update: (values: Record<string, unknown>) => { eq: (column: string, value: string) => { is: (column: string, value: null) => { select: (columns: string) => { maybeSingle: () => Promise<{ data: { id?: string } | null; error?: { code?: string } | null }> } } } }
     }
   }
-  const owned = await admin.from('doctors').select('id').eq('user_id', userId).maybeSingle()
+  const owned = await admin.from('doctors').select('id, city, clinic_name, first_name, last_name, email, user_id, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id').eq('user_id', userId).limit(50)
   if (owned.error) console.error('[signup] doctor lookup failed', owned.error.code || 'error')
-  if (owned.data?.id) {
-    await attachDraft(String(owned.data.id), userId, email, input, false)
-    return { id: String(owned.data.id) }
+  const existing = chooseOwnedListing(asOwned(owned.data))
+  if (existing?.row.id) {
+    if (!existing.paid) await attachDraft(String(existing.row.id), userId, email, input, false)
+    return { id: String(existing.row.id) }
   }
 
   if (email) {
@@ -110,10 +135,11 @@ export async function ensureSignupDoctor(input: {
       return { id: String(inserted.data.id) }
     }
     console.error('[signup] doctor insert failed', inserted.error?.code || 'error')
-    const again = await admin.from('doctors').select('id').eq('user_id', userId).maybeSingle()
-    if (again.data?.id) {
-      await attachDraft(String(again.data.id), userId, email, input, false)
-      return { id: String(again.data.id) }
+    const again = await admin.from('doctors').select('id, city, clinic_name, first_name, last_name, email, user_id, is_approved, verification_status, paid_at, membership_tier, stripe_subscription_id').eq('user_id', userId).limit(50)
+    const recovered = chooseOwnedListing(asOwned(again.data))
+    if (recovered?.row.id) {
+      if (!recovered.paid) await attachDraft(String(recovered.row.id), userId, email, input, false)
+      return { id: String(recovered.row.id) }
     }
   }
   return null

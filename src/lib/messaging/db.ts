@@ -2,6 +2,7 @@ import 'server-only';
 import { messagingV2 } from '@/config/portal-features';
 import { Automations } from '@/lib/automations';
 import { getMembership } from '@/lib/portal/membership-load';
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor';
 import { patientLabel, statusLabel } from '@/lib/referrals/pure';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { createServerSupabase } from '@/lib/supabase-server';
@@ -55,7 +56,7 @@ async function loadParty(userId: string): Promise<AccessParty | null> {
   let acceptsStudentMessages = false;
   let membershipActive = false;
   if (profile.role === 'doctor') {
-    const { data: doctor } = await admin().from('doctors').select('verification_status, accepts_student_messages').eq('user_id', userId).maybeSingle();
+    const { data: doctor } = await readSelectedDoctor<{ verification_status?: string | null; accepts_student_messages?: boolean | null }>(userId, 'verification_status, accepts_student_messages');
     verified = doctor?.verification_status === 'verified';
     acceptsStudentMessages = Boolean(doctor?.accepts_student_messages);
     const membership = await getMembership(userId);

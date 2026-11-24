@@ -7,6 +7,7 @@ import { cookies } from 'next/headers'
 import { isFounderEmail } from '@/lib/founder'
 import { assertSelfServeRole } from '@/lib/auth/roles'
 import { canAutoCorrectToDoctor } from '@/lib/security/role-transition'
+import { portalListingsForUser } from '@/lib/portal/selected-doctor'
 import { isApplicationFlowEnabled } from '@/lib/applications/flag'
 import { ACCOUNT_CONTINUE_PATH } from '@/lib/applications/resume-path'
 import { ensureDraftApplication } from '@/lib/applications/store'
@@ -81,12 +82,8 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
   if (storedRole === 'patient' || storedRole === '') {
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const admin = createAdminClient()
-    const { data: doctorRecord } = await admin
-      .from('doctors')
-      .select('id')
-      .eq('user_id', data.user.id)
-      .maybeSingle()
-    if (canAutoCorrectToDoctor(storedRole, !!doctorRecord)) {
+    const owned = await portalListingsForUser(data.user.id)
+    if (canAutoCorrectToDoctor(storedRole, owned.listings.length > 0)) {
       role = 'doctor'
       await admin.from('profiles').update({ role: 'doctor' }).eq('id', data.user.id)
     }
@@ -109,9 +106,9 @@ export async function login(formData: FormData, redirectUrl?: string | null) {
     const { createAdminClient } = await import('@/lib/supabase-admin')
     const { loadApplicationGate } = await import('@/lib/applications/gate')
     const admin = createAdminClient()
-    const { data: doctor } = await admin.from('doctors').select('id').eq('user_id', data.user.id).maybeSingle()
-    if (doctor?.id) {
-      const gate = await loadApplicationGate(doctor.id)
+    const owned = await portalListingsForUser(data.user.id)
+    if (owned.selected?.id) {
+      const gate = await loadApplicationGate(owned.selected.id)
       if (gate === 'finish') return redirect('/doctor/apply')
     }
   }
@@ -234,8 +231,8 @@ export async function createAccountAction(formData: FormData, role: string, _tie
       const slug = (cleanedName || 'doctor').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '-' + Date.now().toString(36);
 
       // Only create if no doctors row exists yet
-      const { data: existingDoc } = await adminDb.from('doctors').select('id').eq('user_id', data.user.id).maybeSingle();
-      if (!existingDoc) {
+      const ownedListings = await portalListingsForUser(data.user.id);
+      if (!ownedListings.listings.length) {
         const { data: doctorRow } = await adminDb.from('doctors').insert({
           user_id: data.user.id,
           first_name: firstName,

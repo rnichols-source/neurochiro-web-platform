@@ -2,6 +2,7 @@
 
 import { createServerSupabase } from '@/lib/supabase-server'
 import { createAdminClient } from '@/lib/supabase-admin'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 // ─── AI WEEKLY INSIGHT ───────────────────────────────────────────────────────
 
@@ -27,11 +28,18 @@ export async function getAIWeeklyInsight(): Promise<string | null> {
     }
 
     // Gather practice data
-    const { data: doc } = await createAdminClient()
-      .from('doctors')
-      .select('first_name, profile_views, patient_leads, city, state, specialties, bio, photo_url, video_url, membership_tier')
-      .eq('user_id', user.id)
-      .single();
+    const { data: doc } = await readSelectedDoctor<{
+      first_name?: string | null
+      profile_views?: number | null
+      patient_leads?: number | null
+      city?: string | null
+      state?: string | null
+      specialties?: string[] | null
+      bio?: string | null
+      photo_url?: string | null
+      video_url?: string | null
+      membership_tier?: string | null
+    }>(user.id, 'first_name, profile_views, patient_leads, city, state, specialties, bio, photo_url, video_url, membership_tier');
 
     if (!doc) return null;
 
@@ -139,11 +147,20 @@ export async function getAIProfileOptimization(): Promise<string[] | null> {
   if (!user) return null;
 
   try {
-    const { data: doc } = await createAdminClient()
-      .from('doctors')
-      .select('first_name, clinic_name, bio, photo_url, video_url, specialties, website_url, instagram_url, facebook_url, city, state, profile_views')
-      .eq('user_id', user.id)
-      .single();
+    const { data: doc } = await readSelectedDoctor<{
+      first_name?: string | null
+      clinic_name?: string | null
+      bio?: string | null
+      photo_url?: string | null
+      video_url?: string | null
+      specialties?: string[] | null
+      website_url?: string | null
+      instagram_url?: string | null
+      facebook_url?: string | null
+      city?: string | null
+      state?: string | null
+      profile_views?: number | null
+    }>(user.id, 'first_name, clinic_name, bio, photo_url, video_url, specialties, website_url, instagram_url, facebook_url, city, state, profile_views');
 
     if (!doc) return null;
 
@@ -151,7 +168,7 @@ export async function getAIProfileOptimization(): Promise<string[] | null> {
     const { data: topDoctors } = await createAdminClient()
       .from('doctors')
       .select('bio, photo_url, video_url, specialties, website_url, profile_views')
-      .eq('state', doc.state)
+      .eq('state', doc.state || '')
       .eq('verification_status', 'verified')
       .order('profile_views', { ascending: false })
       .limit(10);

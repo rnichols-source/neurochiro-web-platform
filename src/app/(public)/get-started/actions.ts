@@ -83,10 +83,12 @@ export async function createFreeAccount(data: {
       const doctors = ((byEmail.data || []) as Record<string, unknown>[]).map((row) => listingFromRow(row, email))
       const profileId = profileResult.data?.id ? String(profileResult.data.id) : ''
       if (profileId) {
-        const linked = await doctorSelect().eq('user_id', profileId).maybeSingle()
-        const linkedRow = linked.data as Record<string, unknown> | null
-        if (linkedRow?.id && !doctors.some((doctor) => doctor.id === String(linkedRow.id))) {
-          doctors.push(listingFromRow({ ...linkedRow, email }, email))
+        const linked = await doctorSelect().eq('user_id', profileId).limit(50)
+        const linkedRows = Array.isArray(linked.data) ? linked.data as Record<string, unknown>[] : []
+        for (const linkedRow of linkedRows) {
+          if (linkedRow?.id && !doctors.some((doctor) => doctor.id === String(linkedRow.id))) {
+            doctors.push(listingFromRow({ ...linkedRow, email }, email))
+          }
         }
       }
       const decision = signupDuplicateDecision(email, doctors)

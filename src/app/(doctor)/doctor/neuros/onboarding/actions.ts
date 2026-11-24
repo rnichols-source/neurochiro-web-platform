@@ -1,6 +1,7 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase-server";
+import { readSelectedDoctor } from "@/lib/portal/selected-doctor";
 
 // Cast to any for NeurOS tables not yet in generated types
 function getSupabase() {
@@ -61,11 +62,7 @@ export async function loadDoctorInfo() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data } = await supabase
-    .from("doctors")
-    .select("first_name, last_name, clinic_name, phone, address, city, state")
-    .eq("user_id", user.id)
-    .single();
+  const { data } = await readSelectedDoctor(user.id, "first_name, last_name, clinic_name, phone, address, city, state");
 
   return data;
 }

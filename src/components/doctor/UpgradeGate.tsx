@@ -1,10 +1,10 @@
 "use client";
 
 import { Lock, Zap, ArrowRight } from "lucide-react";
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase";
+import { useState } from "react";
 import UpgradeModal from "./UpgradeModal";
 import { doctorCheckoutPrice } from "@/lib/portal/checkout-price";
+import { usePortal } from "@/components/portal/PortalProvider";
 
 interface UpgradeGateProps {
   children: React.ReactNode;
@@ -25,38 +25,16 @@ const TIER_LEVELS: Record<string, number> = {
 };
 
 export default function UpgradeGate({ children, feature, requiredTier, description }: UpgradeGateProps) {
-  const [tier, setTier] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const ctx = usePortal();
   const [showModal, setShowModal] = useState(false);
-
-  const [isFounder, setIsFounder] = useState(false);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { setLoading(false); return; }
-      setUserId(user.id);
-
-      const { data: doctor } = await supabase
-        .from("doctors")
-        .select("membership_tier, is_founding_member, neuros_tier")
-        .eq("user_id", user.id)
-        .single() as any;
-
-      // If user has NeurOS, set tier to neuros (highest level)
-      if (doctor?.neuros_tier === 'neuros' || doctor?.neuros_tier === 'neuros_founding') {
-        setTier("neuros");
-      } else {
-        setTier(doctor?.membership_tier || "free");
-      }
-      setIsFounder(doctor?.is_founding_member || false);
-
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading) return <>{children}</>;
+  const doctor = ctx.doctor;
+  const isFounder = doctor?.is_founding_member === true || ctx.membership.isFounder;
+  const listingTier = doctor?.neuros_tier === "neuros" || doctor?.neuros_tier === "neuros_founding"
+    ? "neuros"
+    : (doctor?.membership_tier || "free");
+  const accountTier = ctx.membership.tier;
+  const tier = (TIER_LEVELS[accountTier] || 0) >= (TIER_LEVELS[listingTier] || 0) ? accountTier : listingTier;
+  const userId = ctx.userId;
 
   // Founding members get access to EVERYTHING
   if (isFounder) return <>{children}</>;

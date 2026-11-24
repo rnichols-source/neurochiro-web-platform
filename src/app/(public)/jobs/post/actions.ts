@@ -3,8 +3,8 @@
 import { createNonMemberCheckout } from '@/lib/jobs/posting';
 import { canPostFree, insertMemberPost } from '@/lib/jobs/posting';
 import { createServerSupabase } from '@/lib/supabase-server';
-import { createAdminClient } from '@/lib/supabase-admin';
 import { LIMIT_MESSAGE } from '@/lib/jobs/posting-pure';
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor';
 
 export async function submitOutsidePost(formData: FormData) {
   const tags = String(formData.get('techniques') || '')
@@ -17,8 +17,7 @@ export async function submitOutsidePost(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   let doctorUserId: string | null = null;
   if (user) {
-    const admin = createAdminClient();
-    const { data: doctor } = await admin.from('doctors').select('user_id, clinic_name, city, state').eq('user_id', user.id).maybeSingle();
+    const { data: doctor } = await readSelectedDoctor<{ user_id?: string | null; clinic_name?: string | null; city?: string | null; state?: string | null }>(user.id, 'user_id, clinic_name, city, state');
     if (doctor) {
       doctorUserId = user.id;
       const decision = await canPostFree(user.id);

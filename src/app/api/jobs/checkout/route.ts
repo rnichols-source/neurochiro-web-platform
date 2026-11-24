@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabase } from '@/lib/supabase-server'
-import { createAdminClient } from '@/lib/supabase-admin'
 import { canPostFree, insertMemberPost } from '@/lib/jobs/posting'
 import { LIMIT_MESSAGE } from '@/lib/jobs/posting-pure'
+import { readSelectedDoctor } from '@/lib/portal/selected-doctor'
 
 /**
  * POST /api/jobs/checkout
@@ -21,11 +21,7 @@ export async function POST(request: NextRequest) {
     if (!title?.trim()) return NextResponse.json({ error: 'Title is required.' }, { status: 400 })
     if (!description?.trim()) return NextResponse.json({ error: 'Description is required.' }, { status: 400 })
 
-    const admin = createAdminClient()
-    const { data: doctor } = await admin.from('doctors')
-      .select('id, clinic_name, city, state')
-      .eq('user_id', user.id)
-      .maybeSingle()
+    const { data: doctor } = await readSelectedDoctor<{ id: string; clinic_name?: string | null; city?: string | null; state?: string | null }>(user.id, 'id, clinic_name, city, state')
 
     if (!doctor) return NextResponse.json({ error: 'Only doctors can post jobs.' }, { status: 403 })
 
