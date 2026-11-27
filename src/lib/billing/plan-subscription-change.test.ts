@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   isUndefinedPaymentIssueColumn,
   planSubscriptionChange,
+  profileKeyToDrop,
   resolveStripeStatus,
   type SubscriptionPlanInput,
 } from './plan-subscription-change.ts';
@@ -49,11 +50,11 @@ for (const role of ['doctor', 'student'] as const) {
         assert.equal(result.doctors?.membership_tier, role === 'doctor' ? 'pro' : undefined);
         if (role === 'student') assert.equal(result.doctors, null);
       } else {
-        assert.equal(result.profiles.tier, 'free');
+        assert.equal(result.profiles.tier, 'standard');
         if (role === 'doctor') assert.equal(result.doctors?.membership_tier, 'free');
         else assert.equal(result.doctors, null);
       }
-      assert.equal(result.profiles.subscription_status, entry.status);
+      assert.equal('subscription_status' in result.profiles, false);
       if (entry.flag === NOW) {
         assert.equal(result.profiles.payment_issue_since, EARLIER);
       } else {
@@ -90,14 +91,14 @@ test('trialing to active stays paid and clears the flag', () => {
 
 test('past_due to unpaid is free and clears the flag', () => {
   const result = plan({ role: 'doctor', stripeStatus: 'unpaid', paymentIssueSince: EARLIER });
-  assert.equal(result.profiles.tier, 'free');
+  assert.equal(result.profiles.tier, 'standard');
   assert.equal(result.doctors?.membership_tier, 'free');
   assert.equal(result.profiles.payment_issue_since, null);
 });
 
 test('past_due to canceled is free and clears the flag', () => {
   const result = plan({ role: 'student', stripeStatus: 'canceled', paymentIssueSince: EARLIER, studentPastDueSince: EARLIER });
-  assert.equal(result.profiles.tier, 'free');
+  assert.equal(result.profiles.tier, 'standard');
   assert.equal(result.profiles.payment_issue_since, null);
   assert.equal(result.profiles.student_past_due_since, null);
   assert.equal(result.doctors, null);
@@ -116,7 +117,7 @@ test('active to canceled with another live membership stays paid', () => {
 
 test('incomplete to incomplete_expired is free', () => {
   const result = plan({ role: 'doctor', stripeStatus: 'incomplete_expired' });
-  assert.equal(result.profiles.tier, 'free');
+  assert.equal(result.profiles.tier, 'standard');
   assert.equal(result.doctors?.membership_tier, 'free');
   assert.equal(result.profiles.payment_issue_since, null);
 });
@@ -132,7 +133,7 @@ test('paused leaves the tier unchanged and sets the flag', () => {
   assert.equal('tier' in doctor.profiles, false);
   assert.equal(doctor.doctors, null);
   assert.equal(doctor.profiles.payment_issue_since, NOW);
-  assert.equal(doctor.profiles.subscription_status, 'paused');
+  assert.equal('subscription_status' in doctor.profiles, false);
 
   const student = plan({ role: 'student', stripeStatus: 'paused' });
   assert.equal('tier' in student.profiles, false);
@@ -159,8 +160,8 @@ test('a stale active event uses the retrieved canceled status', () => {
   const status = resolveStripeStatus('active', 'canceled');
   assert.equal(status, 'canceled');
   const result = plan({ role: 'doctor', stripeStatus: status });
-  assert.equal(result.profiles.tier, 'free');
-  assert.equal(result.profiles.subscription_status, 'canceled');
+  assert.equal(result.profiles.tier, 'standard');
+  assert.equal('subscription_status' in result.profiles, false);
   assert.equal(result.doctors?.membership_tier, 'free');
 });
 
@@ -192,4 +193,32 @@ test('undefined payment_issue_since column is recognized without using the error
   assert.equal(isUndefinedPaymentIssueColumn({ code: 'PGRST204', message: "Could not find the 'payment_issue_since' column of 'profiles' in the schema cache" }), true);
   assert.equal(isUndefinedPaymentIssueColumn({ code: '42703', message: 'column "other" does not exist' }), false);
   assert.equal(isUndefinedPaymentIssueColumn(null), false);
+});
+
+test('profile plans only use columns and tier values that exist on profiles', () => {
+  for (const status of ['active', 'trialing', 'past_due', 'incomplete', 'paused', 'canceled', 'unpaid', 'incomplete_expired']) {
+    for (const role of ['doctor', 'student']) {
+      const result = plan({ role, stripeStatus: status });
+      for (const key of Object.keys(result.profiles)) {
+        assert.ok(['tier', 'payment_issue_since', 'student_past_due_since'].includes(key), `${role} ${status} wrote ${key}`);
+      }
+      if (result.profiles.tier !== undefined) {
+        assert.ok(['pro', 'student_paid', 'standard'].includes(result.profiles.tier), `${role} ${status} tier ${result.profiles.tier}`);
+      }
+    }
+  }
+});
+
+test('profileKeyToDrop drops only the rejected column or tier value', () => {
+  const payload = { tier: 'pro', payment_issue_since: null, subscription_status: 'active' };
+  assert.equal(
+    profileKeyToDrop({ code: 'PGRST204', message: "Could not find the 'subscription_status' column of 'profiles' in the schema cache" }, payload),
+    'subscription_status',
+  );
+  assert.equal(profileKeyToDrop({ code: '42703', message: 'column "subscription_status" of relation "profiles" does not exist' }, payload), 'subscription_status');
+  assert.equal(profileKeyToDrop({ code: 'PGRST204', message: "Could not find the 'other' column of 'profiles' in the schema cache" }, payload), null);
+  assert.equal(profileKeyToDrop({ code: '22P02', message: 'invalid input value for enum user_tier: "student_paid"' }, { tier: 'student_paid', student_past_due_since: null }), 'tier');
+  assert.equal(profileKeyToDrop({ code: '22P02', message: 'bad value' }, { payment_issue_since: 'x' }), null);
+  assert.equal(profileKeyToDrop({ code: '23505', message: 'duplicate' }, payload), null);
+  assert.equal(profileKeyToDrop(null, payload), null);
 });

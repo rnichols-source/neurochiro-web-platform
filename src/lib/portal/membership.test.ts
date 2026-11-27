@@ -167,3 +167,27 @@ test('derive paused keeps stored pro', () => {
   assert.equal(membership.tier, 'pro');
   assert.equal(membership.status, 'paused');
 });
+
+test('a Stripe customer with no stored status keeps the stored tier', () => {
+  const paying = deriveMembership({ membershipTier: 'pro', profileTier: 'standard', hasStripeCustomer: true, stripeStatus: null });
+  assert.equal(paying.tier, 'pro');
+  assert.equal(paying.source, 'stripe');
+  assert.equal(paying.status, 'active');
+  assert.equal(paying.hasStripeCustomer, true);
+
+  const ended = deriveMembership({ membershipTier: 'free', profileTier: 'standard', hasStripeCustomer: true, stripeStatus: null });
+  assert.equal(ended.tier, 'free');
+  assert.equal(ended.source, 'none');
+  assert.equal(ended.hasPracticeTools, false);
+
+  const comped = deriveMembership({ membershipTier: 'comped', hasStripeCustomer: true, stripeStatus: null });
+  assert.equal(comped.tier, 'pro');
+  assert.equal(comped.source, 'comped');
+
+  const compedNoCustomer = deriveMembership({ membershipTier: 'pro', hasStripeCustomer: false, stripeStatus: null });
+  assert.equal(compedNoCustomer.source, 'comped');
+
+  const founder = deriveMembership({ membershipTier: 'pro', isFoundingMember: true, hasStripeCustomer: true, stripeStatus: null });
+  assert.equal(founder.source, 'founding');
+  assert.equal(founder.tier, 'pro');
+});

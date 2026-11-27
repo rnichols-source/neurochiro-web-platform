@@ -23,6 +23,7 @@ import { subscriptionIdFromInvoice } from "@/lib/go-live/plan";
 import {
   isUndefinedPaymentIssueColumn,
   planSubscriptionChange,
+  profileKeyToDrop,
   resolveStripeStatus,
   type ProfileBillingUpdate,
 } from "@/lib/billing/plan-subscription-change";
@@ -83,24 +84,26 @@ async function loadBillingProfile(admin: AdminClient, customerId: string): Promi
 }
 
 async function writeProfileBilling(admin: AdminClient, profileId: string, patch: ProfileBillingUpdate): Promise<void> {
-  const payload: Database["public"]["Tables"]["profiles"]["Update"] = {};
+  const payload: Record<string, unknown> = {};
   if (patch.tier !== undefined) payload.tier = patch.tier;
-  if (patch.subscription_status !== undefined) payload.subscription_status = patch.subscription_status;
   if (patch.payment_issue_since !== undefined) payload.payment_issue_since = patch.payment_issue_since;
   if (patch.student_past_due_since !== undefined) payload.student_past_due_since = patch.student_past_due_since;
-  if (Object.keys(payload).length === 0) return;
 
-  const first = await admin.from("profiles").update(payload).eq("id", profileId);
-  if (first.error && isUndefinedPaymentIssueColumn(first.error)) {
-    console.error("payment_issue_since");
-    const retryPayload: Database["public"]["Tables"]["profiles"]["Update"] = { ...payload };
-    delete retryPayload.payment_issue_since;
-    if (Object.keys(retryPayload).length === 0) return;
-    const retry = await admin.from("profiles").update(retryPayload).eq("id", profileId);
-    if (retry.error) console.error("[WEBHOOK] profile update failed", retry.error.code);
-    return;
+  // A rejected column or tier value must not take the other billing fields down with it.
+  for (let attempt = 0; attempt < 4 && Object.keys(payload).length > 0; attempt += 1) {
+    const result = await admin
+      .from("profiles")
+      .update(payload as Database["public"]["Tables"]["profiles"]["Update"])
+      .eq("id", profileId);
+    if (!result.error) return;
+    const drop = profileKeyToDrop(result.error, payload);
+    if (!drop) {
+      console.error("[WEBHOOK] profile update failed", result.error.code, Object.keys(payload).join(","));
+      return;
+    }
+    console.warn("[WEBHOOK] profile update skipped a field", result.error.code, drop);
+    delete payload[drop];
   }
-  if (first.error) console.error("[WEBHOOK] profile update failed", first.error.code);
 }
 
 async function retrievedSubscriptionStatus(subscriptionId: string, fallback: string): Promise<string> {

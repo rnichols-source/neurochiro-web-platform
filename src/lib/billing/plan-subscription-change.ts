@@ -12,12 +12,20 @@ export type SubscriptionPlanInput = {
   intent?: SubscriptionIntent;
 };
 
+/**
+ * Columns that exist on `profiles` in production. There is no `profiles.subscription_status`
+ * column, and `profiles.tier` is an enum (standard, pro, admin), so "free" is written as "standard".
+ */
 export type ProfileBillingUpdate = {
-  tier?: string;
-  subscription_status?: string;
+  tier?: ProfileTier;
   payment_issue_since?: string | null;
   student_past_due_since?: string | null;
 };
+
+export type ProfileTier = 'pro' | 'student_paid' | 'standard';
+
+/** The unpaid value of the `profiles.tier` enum. `doctors.membership_tier` is text and uses "free". */
+export const PROFILE_FREE_TIER = 'standard' as const;
 
 export type DoctorBillingUpdate = {
   membership_tier: 'pro' | 'free';
@@ -77,7 +85,6 @@ export function planSubscriptionChange(input: SubscriptionPlanInput): Subscripti
   const access = accessForStripeStatus(input.stripeStatus, input.role);
   const paid = access.paid === false && input.hasOtherLiveMembership ? true : access.paid;
   const profiles: ProfileBillingUpdate = {
-    subscription_status: input.stripeStatus,
     payment_issue_since: stamp(input.paymentIssueSince, input.now, access.paymentIssue),
   };
   if (student) {
@@ -88,11 +95,10 @@ export function planSubscriptionChange(input: SubscriptionPlanInput): Subscripti
     return { profiles, doctors: null };
   }
 
-  const tier = paid ? paidTier(input.role) : 'free';
-  profiles.tier = tier;
+  profiles.tier = paid ? paidTier(input.role) : PROFILE_FREE_TIER;
   return {
     profiles,
-    doctors: doctor ? { membership_tier: tier === 'student_paid' ? 'pro' : tier } : null,
+    doctors: doctor ? { membership_tier: paid ? 'pro' : 'free' } : null,
   };
 }
 
@@ -104,4 +110,22 @@ export function isUndefinedPaymentIssueColumn(error: DbError): boolean {
   if (error.code === '42703' && (namesThisColumn || message.length === 0)) return true;
   if (error.code === 'PGRST204' && namesThisColumn) return true;
   return false;
+}
+
+/**
+ * When a profiles update is rejected, name the one key to drop before retrying, or null to stop.
+ * - PGRST204 / 42703: a column the database does not have. Drop the column it names.
+ * - 22P02 with a tier in the payload: the tier value is not in the enum (for example "student_paid").
+ *   Drop the tier so the payment flags still save.
+ */
+export function profileKeyToDrop(error: DbError, payload: Record<string, unknown>): string | null {
+  if (!error) return null;
+  const message = error.message || '';
+  if (error.code === 'PGRST204' || error.code === '42703') {
+    const named = message.match(/'([a-z0-9_]+)' column/i)?.[1] || message.match(/column "([a-z0-9_]+)"/i)?.[1] || message.match(/'([a-z0-9_]+)'/i)?.[1];
+    if (named && named in payload) return named;
+    return null;
+  }
+  if (error.code === '22P02' && 'tier' in payload) return 'tier';
+  return null;
 }
