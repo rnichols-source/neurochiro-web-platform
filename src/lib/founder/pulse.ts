@@ -443,7 +443,7 @@ export function morningNeeds(input: {
       title: `Founding rate ends Dec 1, ${plural(days, 'day')}`,
       detail: `${plural(founding, 'live founding doctor')}. The email is not sent until you confirm the count. Hidden and unverified doctors are left out.`,
       action: 'Draft email',
-      href: '/admin/broadcast?audience=founding',
+      href: '/admin/broadcast?audience=founding&draft=founding',
       tone: 'money',
       priority: days <= 7 ? 55 : 80,
       seeHref: '/admin/people?filter=founding',
@@ -462,7 +462,7 @@ export function morningNeeds(input: {
       href: '/admin/applications?queue=progress',
       tone: 'people',
       priority: 70,
-      seeHref: '/admin/broadcast?audience=stalled',
+      seeHref: '/admin/broadcast?audience=stalled&draft=stalled',
       seeLabel: 'Draft a reminder',
     })
   }
