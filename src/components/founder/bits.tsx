@@ -19,7 +19,7 @@ export function ToolLinks({ links }: { links: { label: string; href: string }[] 
   return (
     <div className="flex flex-wrap gap-2">
       {links.map((link) => (
-        <Link prefetch key={link.href} href={link.href} className="fd-ui inline-flex min-h-11 items-center rounded-full bg-white px-3 text-[13px] font-bold text-[#3d4a57] shadow-sm">
+        <Link prefetch={false} key={link.href} href={link.href} className="fd-ui inline-flex min-h-11 items-center rounded-full bg-white px-3 text-[13px] font-bold text-[#3d4a57] shadow-sm">
           {link.label}
         </Link>
       ))}
@@ -27,7 +27,21 @@ export function ToolLinks({ links }: { links: { label: string; href: string }[] 
   )
 }
 
-export function FunnelList({ steps }: { steps: { label: string; detail: string; value: string; width: number; tone: string; tracking: boolean }[] }) {
+export function ReachCounts({ counts }: { counts: { label: string; detail: string; value: string }[] }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-3">
+      {counts.map((count) => (
+        <div key={count.label} className="rounded-2xl bg-[#F7F9FC] p-3">
+          <b className="fd-ui block text-[26px] leading-none">{count.value}</b>
+          <span className="fd-ui mt-1 block text-[13px] font-extrabold">{count.label}</span>
+          <span className="mt-1 block text-[12px] text-[#5b6773]">{count.detail}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+export function FunnelList({ steps }: { steps: { label: string; detail: string; value: string; width: number; tone: string; tracking: boolean; tag?: string; href?: string }[] }) {
   const color: Record<string, string> = { growth: '#2C6BB4', people: '#0E857A', pulse: '#D66829' }
   return (
     <div className="space-y-2">
@@ -37,17 +51,24 @@ export function FunnelList({ steps }: { steps: { label: string; detail: string; 
             <p className="fd-ui text-[13px] font-extrabold">{step.label}</p>
             <p className="text-[12px] text-[#6b7785]">{step.detail}</p>
           </div>
-          <div className="h-8 overflow-hidden rounded-[10px] bg-[#F3F1EC]">
-            <div
-              className="flex h-full min-w-12 items-center justify-end rounded-[10px] pr-2 text-white"
-              style={step.tracking
-                ? { width: `${step.width}%`, background: 'repeating-linear-gradient(45deg,#FFF1E6,#FFF1E6 8px,#FBE3D2 8px,#FBE3D2 16px)', color: '#B4501A', border: '1.5px dashed #E9A77A' }
-                : { width: `${step.width}%`, background: color[step.tone] || '#D66829' }}
-            >
-              <span className="fd-ui text-[14px] font-extrabold">{step.value}</span>
+          {step.width > 0 ? (
+            <div className="h-8 overflow-hidden rounded-[10px] bg-[#F3F1EC]">
+              <div
+                className="flex h-full min-w-12 items-center justify-end rounded-[10px] pr-2 text-white"
+                style={step.tracking
+                  ? { width: `${step.width}%`, background: 'repeating-linear-gradient(45deg,#FFF1E6,#FFF1E6 8px,#FBE3D2 8px,#FBE3D2 16px)', color: '#B4501A', border: '1.5px dashed #E9A77A' }
+                  : { width: `${step.width}%`, background: color[step.tone] || '#D66829' }}
+              >
+                <span className="fd-ui text-[14px] font-extrabold">{step.value}</span>
+              </div>
             </div>
-          </div>
-          {step.tracking ? <Tag kind="tracking">Starts tracking now</Tag> : <Tag kind="live">Live data</Tag>}
+          ) : (
+            <div className="flex min-h-8 items-center gap-2">
+              <span className="fd-ui text-[14px] font-extrabold text-[#B4501A]">{step.value}</span>
+              {step.href ? <Link href={step.href} className="fd-ui inline-flex min-h-10 items-center rounded-xl bg-[#D66829] px-3 text-[13px] font-extrabold text-white">Turn on in Settings</Link> : null}
+            </div>
+          )}
+          {step.tag ? <Tag kind={step.tag === 'Off' ? 'tracking' : 'live'}>{step.tag}</Tag> : step.tracking ? <Tag kind="tracking">Not tracking</Tag> : <Tag kind="live">Live data</Tag>}
         </div>
       ))}
     </div>

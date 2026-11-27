@@ -16,8 +16,8 @@ export function StatsCardView({
   visitPrice,
 }: {
   dateLabel: string
-  followers: number
-  peopleUsed: number
+  followers: number | null
+  peopleUsed: number | null
   approximate: boolean
   countries: number | null
   asks: number | null
@@ -47,11 +47,11 @@ export function StatsCardView({
     ctx.font = '700 28px Montserrat, sans-serif'
     ctx.fillText(dateLabel, 80, 220)
     ctx.font = '800 120px Montserrat, sans-serif'
-    ctx.fillText(followers.toLocaleString('en-US'), 80, 420)
+    ctx.fillText(followers == null ? 'Add' : followers.toLocaleString('en-US'), 80, 420)
     ctx.font = '600 36px Lato, sans-serif'
-    ctx.fillText('followers · your figure', 80, 480)
+    ctx.fillText(followers == null ? 'followers · add in Settings' : 'followers · your figure', 80, 480)
     const cells = [
-      [`${approximate ? '~' : ''}${peopleUsed.toLocaleString('en-US')}`, 'people used NeuroChiro'],
+      [peopleUsed == null ? 'Add' : `${approximate ? '~' : ''}${peopleUsed.toLocaleString('en-US')}`, 'people used NeuroChiro'],
       [countries == null ? '—' : String(countries), 'countries asking'],
       [asks == null ? '—' : asks.toLocaleString('en-US'), 'people asked for a doctor'],
       [doctorsLive == null ? '—' : String(doctorsLive), `doctors live${doctorCountries ? ` · ${doctorCountries} countries` : ''}`],
@@ -91,11 +91,11 @@ export function StatsCardView({
           <p className="text-[13px]">{dateLabel}</p>
         </div>
         <p className="fd-ui mt-6 text-[12px] font-extrabold uppercase tracking-[0.14em] text-white/80">The numbers</p>
-        <p className="fd-ui text-[64px] font-extrabold leading-none">{followers.toLocaleString('en-US')}</p>
-        <p className="text-[16px]">followers</p>
-        <span className="fd-ui mt-1 inline-flex rounded-full bg-[#EFE5F5] px-2 py-0.5 text-[10px] font-extrabold uppercase text-[#5C3473]">Your figure</span>
+        <p className="fd-ui text-[64px] font-extrabold leading-none">{followers == null ? 'Add' : followers.toLocaleString('en-US')}</p>
+        <p className="text-[16px]">{followers == null ? 'Add your follower figure in Settings' : 'followers'}</p>
+        <span className="fd-ui mt-1 inline-flex rounded-full bg-[#EFE5F5] px-2 py-0.5 text-[10px] font-extrabold uppercase text-[#5C3473]">{followers == null ? 'Not entered' : 'Your figure'}</span>
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Cell value={`${approximate ? '~' : ''}${peopleUsed.toLocaleString('en-US')}`} label="people used NeuroChiro" yours />
+          <Cell value={peopleUsed == null ? 'Add' : `${approximate ? '~' : ''}${peopleUsed.toLocaleString('en-US')}`} label={peopleUsed == null ? 'Add people used in Settings' : 'people used NeuroChiro'} yours />
           <Cell value={countries == null ? '—' : String(countries)} label="countries asking for a doctor" />
           <Cell value={asks == null ? '—' : asks.toLocaleString('en-US')} label="people asked for a doctor" />
           <Cell value={doctorsLive == null ? '—' : String(doctorsLive)} label={`doctors live${doctorCountries ? ` · ${doctorCountries} countries` : ''}`} />

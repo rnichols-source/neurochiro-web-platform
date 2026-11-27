@@ -29,12 +29,12 @@ export async function GET(req: NextRequest) {
     ...(people.data || []).filter((row: { is_test?: boolean }) => row.is_test !== true).map((row: { id: string; full_name?: string; role?: string; email?: string }) => ({
       title: row.full_name || 'Unnamed',
       subtitle: `${row.role === 'patient' ? 'Community member' : row.role || 'Person'}${row.email ? ` · ${row.email}` : ''}`,
-      href: row.role === 'doctor' ? '/admin/members' : '/admin/people',
+      href: row.role === 'doctor' ? '/admin/people' : row.role === 'student' ? '/admin/people?tab=students' : '/admin/people?tab=members',
     })),
     ...(subscribers.data || []).map((row: { email?: string; status?: string }) => ({
       title: row.email || 'Subscriber',
       subtitle: `Subscriber · ${row.status || 'unknown'}`,
-      href: '/admin/list',
+      href: '/admin/leads?tab=waitlist',
     })),
     ...(applications.data || []).map((row: { city?: string; state?: string; status?: string }) => ({
       title: [row.city, row.state].filter(Boolean).join(', ') || 'Application',

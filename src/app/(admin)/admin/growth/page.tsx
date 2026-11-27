@@ -4,6 +4,7 @@ import { DemandMapLazy } from '@/components/founder/demand-map-lazy'
 import { AdminRouteSkeleton } from '@/components/loading/route-skeletons'
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, Tag, ToolLinks } from '@/components/founder/bits'
+import { CouldNotLoad } from '@/components/founder/load-error'
 import { resolveGrowthPoint } from '@/lib/founder/geo-search'
 import { demandNear, doctorsNear, liveDoctors } from '@/lib/founder/model'
 import { GROWTH_TOOLS } from '@/lib/founder/places'
@@ -38,7 +39,12 @@ export default async function GrowthPage({ searchParams }: { searchParams: Promi
 }
 
 async function GrowthBody({ q, world }: { q: string; world: boolean }) {
-  const roster = await loadFounderRoster()
+  let roster
+  try {
+    roster = await loadFounderRoster()
+  } catch {
+    return <CouldNotLoad what="Growth" />
+  }
   const doctors = liveDoctors(roster).map((doctor) => ({
     lat: doctor.lat || 0,
     lng: doctor.lng || 0,
@@ -141,13 +147,13 @@ async function GrowthBody({ q, world }: { q: string; world: boolean }) {
               <div key={row.label} className="flex justify-between border-b border-[#F1EEE8] py-1 text-[13px]"><span>{row.label}</span><b className="fd-ui">{row.n.toLocaleString('en-US')}</b></div>
             ))}
           </Card>
-          <Link href="#targets" className="fd-ui flex min-h-12 items-center justify-center rounded-2xl bg-[#2C6BB4] font-extrabold text-white">Recruit doctors in the {formatNumber(roster.gapAsks)} gap asks</Link>
+          <Link href="#targets" className="fd-ui flex min-h-12 items-center justify-center rounded-2xl bg-[#2C6BB4] px-3 text-center font-extrabold text-white">{formatNumber(roster.gapAsks)} confirmed far · {formatNumber(roster.unmeasured)} not measured yet</Link>
         </div>
       </div>
       <section id="targets" className="px-4 pb-6 xl:px-8">
         <Card>
           <h2 className="fd-ui text-[17px] font-extrabold">Expansion targets</h2>
-          <p className="mt-1 text-[14px] text-[#5b6773]">{formatNumber(roster.gapAsks)} asks already measured at 50 miles or more. {formatNumber(roster.unmeasured)} asks do not have a distance yet, so they are not in this list.</p>
+          <p className="mt-1 text-[14px] text-[#5b6773]">{formatNumber(roster.gapAsks)} confirmed far. {formatNumber(roster.unmeasured)} not measured yet, so the real gap is larger. A backfill file is in the repo and has not been run.</p>
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {roster.gaps.map((gap) => (
               <Link key={`${gap.city}-${gap.state}`} href={`/admin/growth?q=${encodeURIComponent(`${gap.city}, ${gap.state}`)}`} className="flex min-h-12 items-center justify-between rounded-xl bg-[#F7F9FC] px-3">

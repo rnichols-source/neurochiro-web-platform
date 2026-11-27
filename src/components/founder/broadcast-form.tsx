@@ -23,13 +23,25 @@ const CHANNELS: { id: Channel; label: string }[] = [
   { id: 'text', label: 'Text (Quo)' },
 ]
 
-export function BroadcastForm({ presets, initialAudience = 'founding' }: { presets: { id: string; count: number; label: string }[]; initialAudience?: string }) {
+const AUDIENCE_WHO: Record<string, string> = {
+  doctors: 'doctors',
+  members: 'patient accounts',
+  students: 'students',
+  subscribers: 'email subscribers',
+  everyone: 'people',
+  founding: 'live, verified founding doctors',
+  ignoring: 'doctors with a request waiting 48 hours or more',
+  stalled: 'doctors who started an application and did not pay',
+  unconfirmed: 'subscribers who never confirmed',
+}
+
+export function BroadcastForm({ presets, initialAudience = '' }: { presets: { id: string; count: number; label: string }[]; initialAudience?: string }) {
   const [audience, setAudience] = useState(initialAudience)
   const [channels, setChannels] = useState<Channel[]>(['email'])
   const [state, setState] = useState('')
   const [country, setCountry] = useState('')
-  const [subject, setSubject] = useState('Your founding rate ends Dec 1')
-  const [body, setBody] = useState('Here is what changes and what stays the same for you.')
+  const [subject, setSubject] = useState('')
+  const [body, setBody] = useState('')
   const [href, setHref] = useState('https://neurochiro.co/doctor')
   const [startsAt, setStartsAt] = useState('')
   const [endsAt, setEndsAt] = useState('')
@@ -44,6 +56,11 @@ export function BroadcastForm({ presets, initialAudience = 'founding' }: { prese
   }
 
   async function previewNow() {
+    if (!audience) {
+      setMessage('Pick who this is for.')
+      setPreview(null)
+      return
+    }
     setBusy(true)
     setMessage('')
     const result = await previewBroadcastAction({ audience, state, country, channels })
@@ -57,9 +74,19 @@ export function BroadcastForm({ presets, initialAudience = 'founding' }: { prese
   }
 
   async function send(schedule: boolean) {
-    if (!preview) return
+    if (!preview || !audience) return
+    const who = AUDIENCE_WHO[audience] || 'people'
     const whenText = schedule && when ? `Schedule this for ${when}` : 'Send this now'
-    if (!window.confirm(`${whenText} to ${preview.count} people?\n\nChannels: ${channels.join(', ')}\n\nNothing goes out until you confirm.`)) return
+    const channelText = channels.join(', ')
+    const lines = [
+      `${whenText} to ${preview.count} ${who}?`,
+      '',
+      `Channels: ${channelText}`,
+      `Subject: ${subject.trim() || '(no subject yet)'}`,
+      '',
+      'Nothing goes out until you confirm this count.',
+    ]
+    if (!window.confirm(lines.join('\n'))) return
     setBusy(true)
     const result = await sendBroadcastAction({
       audience,
@@ -102,9 +129,11 @@ export function BroadcastForm({ presets, initialAudience = 'founding' }: { prese
             </button>
           ))}
         </div>
+        {!audience ? <p className="mt-3 text-[13px] text-[#5C3473]">No audience is selected. Pick who this is for, then count them.</p> : null}
+        {audience === 'founding' ? <p className="mt-3 text-[13px] text-[#5C3473]">Live, verified founding doctors only. Hidden and unverified doctors are left out. Nothing is sent until you confirm the exact count.</p> : null}
         <Step n={3} title="Say it" />
-        <input value={subject} onChange={(event) => setSubject(event.target.value)} className="mt-2 min-h-11 w-full rounded-xl border-2 border-[#E3D6EB] px-3 fd-ui font-extrabold outline-none" />
-        <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={4} className="mt-2 w-full rounded-xl border-2 border-[#E3D6EB] px-3 py-2 text-[15px] outline-none" />
+        <input value={subject} onChange={(event) => setSubject(event.target.value)} placeholder="Subject" className="mt-2 min-h-11 w-full rounded-xl border-2 border-[#E3D6EB] px-3 fd-ui font-extrabold outline-none" />
+        <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={4} placeholder="Message" className="mt-2 w-full rounded-xl border-2 border-[#E3D6EB] px-3 py-2 text-[15px] outline-none" />
         {channels.includes('banner') ? (
           <div className="mt-3 grid gap-2 md:grid-cols-3">
             <input value={href} onChange={(event) => setHref(event.target.value)} placeholder="Link" className="min-h-11 rounded-xl border border-[#E3D6EB] px-3 text-[14px]" />
@@ -114,7 +143,7 @@ export function BroadcastForm({ presets, initialAudience = 'founding' }: { prese
         ) : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button type="button" disabled={busy} onClick={previewNow} className="fd-ui min-h-12 rounded-2xl bg-[#F5F3EF] px-4 font-extrabold text-[#5C3473]">Count recipients</button>
-          {preview ? <p className="fd-ui text-[32px] font-extrabold text-[#7A4A94]">{preview.count} <span className="text-[13px] font-bold text-[#4a5865]">people</span></p> : null}
+          {preview ? <p className="fd-ui text-[32px] font-extrabold text-[#7A4A94]">{preview.count} <span className="text-[13px] font-bold text-[#4a5865]">{AUDIENCE_WHO[audience] || 'people'}</span></p> : null}
         </div>
         {preview ? (
           <div className="mt-3 flex flex-wrap gap-2">

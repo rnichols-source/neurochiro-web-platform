@@ -89,6 +89,7 @@ export async function fetchAllRows(
   buildQuery?: (q: any) => any,
   orderBy: string = 'created_at',
   ascending: boolean = true,
+  options?: { throwOnError?: boolean },
 ): Promise<any[]> {
   const PAGE = 1000
   let all: any[] = []
@@ -101,6 +102,9 @@ export async function fetchAllRows(
     const { data, error } = await q
     if (error) {
       console.error(`[fetchAllRows] Error on ${table} page ${pages}:`, error.message)
+      if (options?.throwOnError) {
+        throw new Error(`Could not read ${table}`)
+      }
       break
     }
     if (!data || data.length === 0) break

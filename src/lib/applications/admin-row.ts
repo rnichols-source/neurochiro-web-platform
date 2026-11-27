@@ -26,6 +26,7 @@ export type AdminApplicationRow = {
   stoppedAt: string
   createdAt: string
   lastActivity: string
+  lastContacted: string | null
   missing: string[]
   complete: boolean
   paymentReceived: boolean

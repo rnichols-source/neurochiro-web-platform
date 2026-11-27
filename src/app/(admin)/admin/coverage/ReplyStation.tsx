@@ -285,7 +285,7 @@ export default function ReplyStation({
             : 'City or postal code'
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="text-neuro-navy">
       <div className="border-b border-white/10 px-4 py-4">
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-3">

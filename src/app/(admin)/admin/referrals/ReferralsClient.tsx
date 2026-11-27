@@ -78,7 +78,7 @@ export default function ReferralsClient({ data }: {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 lg:p-8">
+    <div className="p-4 text-neuro-navy lg:p-6">
       <div className="max-w-6xl mx-auto space-y-8">
         <h1 className="text-xl font-bold">Introductions</h1>
 

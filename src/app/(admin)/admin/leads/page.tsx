@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { checkAdminAuth } from '@/lib/admin-auth'
-import { PageHeader } from '@/components/admin/ui/PageHeader'
 import { Tabs } from '@/components/admin/ui/Tabs'
 import ContactRequestsPage from '../contact-requests/page'
 import AdminListPage from '../list/page'
@@ -39,10 +38,7 @@ export default async function LeadsPage({
 
   return (
     <div className="space-y-4 px-4 py-6">
-      <PageHeader
-        title="Leads"
-        description="Requests, the community-member waitlist, introductions, matching, and the older captured-leads list."
-      />
+      <p className="max-w-2xl text-sm text-neuro-gray">Requests, the waitlist, introductions, matching, and captured leads. Spam is not part of the all-time request count on Pulse.</p>
       <Tabs
         active={active}
         items={TABS.map((tab) => ({ id: tab.id, label: tab.label, href: `/admin/leads?tab=${tab.id}` }))}

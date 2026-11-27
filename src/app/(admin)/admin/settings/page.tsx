@@ -13,6 +13,7 @@ export default async function SettingsPage() {
     <div>
       <PlaceHeader place="pulse" title="Settings" subtitle="Your figures, and the switches that message real people." />
       <div className="mx-auto max-w-xl px-4 py-4">
+        {settings.error ? <p className="mb-4 rounded-2xl border border-dashed border-[#E9A77A] bg-white p-4 text-[14px]">Could not load saved figures. The fields below are blank. They are not zeros.</p> : null}
         <SettingsForm figures={settings.figures} automations={settings.automations} />
         <div className="mt-6 rounded-2xl bg-white p-4 text-[13px] text-[#5b6773]">
           <p>Broadcast log: {tables.broadcasts ? 'ready' : 'waiting on the founder migration'}</p>

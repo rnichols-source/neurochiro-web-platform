@@ -19,12 +19,11 @@ export const PLACES: Place[] = [
 ]
 
 export const MORE = [
-  { label: 'Content & IG Live', href: '/admin/content' },
-  { label: 'Synapse', href: '/admin/marketplace' },
-  { label: 'Seminars & jobs', href: '/admin/work' },
+  { label: 'Content', href: '/admin/content' },
+  { label: 'Marketplace', href: '/admin/marketplace' },
+  { label: 'Seminars and jobs', href: '/admin/work' },
   { label: 'Audit log', href: '/admin/audit' },
-  { label: 'Profile research', href: '/admin/profile-builds' },
-  { label: 'Doctor go-live', href: '/admin/go-live' },
+  { label: 'New doctor setup', href: '/admin/go-live' },
   { label: 'System health', href: '/admin/health' },
   { label: 'Settings', href: '/admin/settings' },
 ] as const
@@ -48,24 +47,18 @@ export function placeById(id: PlaceId): Place {
 }
 
 export const GROWTH_TOOLS = [
-  { label: 'Coverage map', href: '/admin/coverage' },
   { label: 'Reply station', href: '/admin/coverage/reply' },
   { label: 'Mentions', href: '/admin/coverage/mentions' },
   { label: 'Templates', href: '/admin/coverage/templates' },
+  { label: 'Fix map pins', href: '/admin/coverage?tab=pins' },
   { label: 'Doctor referrals', href: '/admin/doctor-referrals' },
-  { label: 'Member referrals', href: '/admin/referrals' },
-  { label: 'Match', href: '/admin/match' },
+  { label: 'Introductions', href: '/admin/leads?tab=introductions' },
+  { label: 'Matching', href: '/admin/leads?tab=matching' },
 ]
 
 export const PEOPLE_TOOLS = [
-  { label: 'Member editor', href: '/admin/members' },
   { label: 'Applications', href: '/admin/applications' },
-  { label: 'Leads', href: '/admin/leads' },
-  { label: 'Visit requests', href: '/admin/contact-requests' },
-  { label: 'Directory list', href: '/admin/list' },
-  { label: 'Invisible doctors', href: '/admin/invisible-doctors' },
-  { label: 'Profile research', href: '/admin/profile-builds' },
-  { label: 'Doctor go-live', href: '/admin/go-live' },
+  { label: 'Leads', href: '/admin/leads?tab=requests' },
 ]
 
 export const MONEY_TOOLS = [
@@ -73,20 +66,16 @@ export const MONEY_TOOLS = [
 ]
 
 export const BROADCAST_TOOLS = [
-  { label: 'Earlier in-app broadcast', href: '/admin/broadcast/messages' },
   { label: 'Email list', href: '/admin/list/broadcast' },
   { label: 'Outreach', href: '/admin/outreach' },
-  { label: 'Announcements', href: '/admin/announcements' },
   { label: 'Notifications', href: '/admin/notifications' },
   { label: 'Inbox', href: '/admin/inbox' },
 ]
 
 export const CONTENT_TOOLS = [
   { label: 'Content', href: '/admin/content' },
-  { label: 'Clips', href: '/admin/clips' },
-  { label: 'Spotlight', href: '/admin/spotlight' },
-  { label: 'Content tracker', href: '/admin/content-tracker' },
-  { label: 'Agents', href: '/admin/agents' },
-  { label: 'Message reports', href: '/admin/message-reports' },
-  { label: 'Older logs', href: '/admin/logs' },
+  { label: 'Clips', href: '/admin/content?tab=clips' },
+  { label: 'Spotlight', href: '/admin/content?tab=spotlight' },
+  { label: 'Announcements', href: '/admin/content?tab=announcements' },
+  { label: 'Content tracker', href: '/admin/content?tab=tracker' },
 ]

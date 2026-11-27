@@ -38,10 +38,10 @@ export default function TemplatesPage() {
     setSaving(null)
   }
 
-  if (loading) return <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">Loading...</div>
+  if (loading) return <div className="flex items-center justify-center p-8 text-neuro-navy">Loading...</div>
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
+    <div className="p-4 text-neuro-navy">
       <div className="max-w-2xl mx-auto">
         <Link href="/admin/coverage" className="text-white/40 text-sm hover:text-white/70 flex items-center gap-1 mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Coverage Map

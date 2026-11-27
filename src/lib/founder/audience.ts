@@ -67,7 +67,9 @@ export function resolveAudience(roster: FounderRoster, key: AudienceKey, filters
   const waitingDoctors = new Set(waitingRequests(roster, now).map((row) => row.doctorId).filter(Boolean))
   let rows: Recipient[] = []
   if (key === 'doctors' || key === 'everyone') rows.push(...doctors.map(doctorRecipient))
-  if (key === 'founding') rows.push(...doctors.filter((doctor) => doctor.founding).map(doctorRecipient))
+  if (key === 'founding') {
+    rows.push(...doctors.filter((doctor) => doctor.founding && doctor.verified).map(doctorRecipient))
+  }
   if (key === 'ignoring') rows.push(...doctors.filter((doctor) => waitingDoctors.has(doctor.id)).map(doctorRecipient))
   if (key === 'members' || key === 'everyone') rows.push(...roster.people.filter((person) => person.role === 'patient').map((person) => personRecipient(person, 'member')))
   if (key === 'students' || key === 'everyone') rows.push(...roster.people.filter((person) => person.role === 'student').map((person) => personRecipient(person, 'student')))

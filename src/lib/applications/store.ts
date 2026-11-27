@@ -513,6 +513,11 @@ async function notesKeepingContact(applicationId: string, nextNotes: string | nu
   )
 }
 
+function latestStamp(hour: string, day: string): string | null {
+  if (hour && day) return hour > day ? hour : day
+  return hour || day || null
+}
+
 export type { AdminApplicationRow } from './admin-row.ts'
 
 export async function listAdminApplications(): Promise<{ rows: AdminApplicationRow[]; error: string | null }> {
@@ -601,6 +606,7 @@ export async function listAdminApplications(): Promise<{ rows: AdminApplicationR
           },
         }),
         createdAt: text(row.created_at),
+        lastContacted: latestStamp(text(row.reminder_1h_sent_at), text(row.reminder_24h_sent_at)),
         paymentReceived: mapped.paymentReceived === true,
       }
     }),

@@ -49,7 +49,7 @@ export function InstagramBatch({ title, rows, paste }: { title: string; rows: Ig
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-[#15202B]">{title}</h2>
         <button type="button" className="min-h-11 rounded-full bg-[#15202B] px-4 text-sm font-bold text-white" onClick={() => void copy(paste, 'all')}>
-          {copied === 'all' ? 'Copied' : 'Copy all for Muse'}
+          {copied === 'all' ? 'Copied' : 'Copy all'}
         </button>
       </div>
       <ul className="mt-4 divide-y divide-black/10">

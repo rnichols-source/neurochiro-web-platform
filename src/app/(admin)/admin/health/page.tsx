@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import { PlaceHeader } from '@/components/founder/header'
 import { AdminRouteSkeleton } from '@/components/loading/route-skeletons'
 import { Card, Tag } from '@/components/founder/bits'
+import { CouldNotLoad } from '@/components/founder/load-error'
 import { founderTablesReady } from '@/lib/founder/audit'
 import { loadDoctorBilling } from '@/lib/founder/money'
 import { loadFounderRoster } from '@/lib/founder/roster'
@@ -24,8 +25,13 @@ export default async function HealthPage() {
 }
 
 async function HealthBody() {
-  const [roster, billing, tables, settings] = await Promise.all([
-    loadFounderRoster(),
+  let roster
+  try {
+    roster = await loadFounderRoster()
+  } catch {
+    return <CouldNotLoad what="system health" />
+  }
+  const [billing, tables, settings] = await Promise.all([
     loadDoctorBilling(),
     founderTablesReady(),
     loadFounderSettings(),
@@ -38,18 +44,18 @@ async function HealthBody() {
     ['Quo texting', sms.enabled && sms.apiKey ? 'Configured' : 'Switched off or missing a key', Boolean(sms.enabled && sms.apiKey)],
     ['Broadcast log', tables.broadcasts ? 'Table is present' : 'Migration not applied', tables.broadcasts],
     ['Office-visit columns', tables.officeVisit ? 'Present' : 'Migration not applied', tables.officeVisit],
-    ['Did you get in?', settings.automations.didYouGetIn ? 'On' : 'Off', true],
-    ['Auto-nudge', settings.automations.autoNudge ? 'On' : 'Off', true],
-    ['Monday digest', settings.automations.mondayDigest ? 'On' : 'Off', true],
+    ['Did you get in?', settings.automations.didYouGetIn ? 'On' : 'Off', settings.automations.didYouGetIn, true],
+    ['Auto-nudge', settings.automations.autoNudge ? 'On' : 'Off', settings.automations.autoNudge, true],
+    ['Monday digest', settings.automations.mondayDigest ? 'On' : 'Off', settings.automations.mondayDigest, true],
   ] as const
 
   return (
       <div className="grid gap-3 px-4 py-4 md:grid-cols-2 lg:px-8">
-        {rows.map(([label, detail, ok]) => (
+        {rows.map(([label, detail, ok, isSwitch]) => (
           <Card key={label}>
             <div className="flex items-center justify-between">
               <h2 className="fd-ui font-extrabold">{label}</h2>
-              <Tag kind={ok ? 'live' : 'tracking'}>{ok ? 'OK' : 'Needs a look'}</Tag>
+              <Tag kind={ok ? 'live' : 'tracking'}>{isSwitch ? (ok ? 'On' : 'Off') : ok ? 'OK' : 'Needs a look'}</Tag>
             </div>
             <p className="mt-2 text-[14px] text-[#5b6773]">{detail}</p>
           </Card>

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { after } from 'next/server'
 import { PlaceHeader } from '@/components/founder/header'
 import { recordDoctorPreview } from '@/app/(admin)/admin/founder-actions'
 import { doctorRows } from '@/lib/founder/model'
@@ -15,7 +16,11 @@ export default async function DoctorPreviewPage({ params }: { params: Promise<{ 
   const roster = await loadFounderRoster()
   const doctor = doctorRows(roster).find((row) => row.id === id)
   if (!doctor) notFound()
-  await recordDoctorPreview(doctor.id, doctor.name)
+  const previewId = doctor.id
+  const previewName = doctor.name
+  after(() => {
+    void recordDoctorPreview(previewId, previewName)
+  })
   const publicUrl = doctor.slug ? `${siteUrl()}/directory/${doctor.slug}` : null
 
   return (

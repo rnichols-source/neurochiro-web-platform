@@ -64,7 +64,8 @@ export default function ContactRequestsPage() {
     document.getElementById(`lead-${focus}`)?.scrollIntoView({ behavior: "smooth", block: "center" })
   }, [focus, loading, requests])
 
-  async function run(id: string, action: () => Promise<{ error?: string; success?: boolean }>) {
+  async function run(id: string, action: () => Promise<{ error?: string; success?: boolean }>, confirm?: string) {
+    if (confirm && !window.confirm(confirm)) return
     setBusy(id)
     setError("")
     const result = await action()
@@ -94,10 +95,10 @@ export default function ContactRequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white p-4 sm:p-6">
+    <div className="p-1 text-neuro-navy sm:p-2">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-xl font-black uppercase tracking-tight">Contact Requests</h1>
-        <p className="text-sm text-gray-500 mt-1 mb-4">{attention.length} need attention · {requests.length} total</p>
+        <h2 className="text-lg font-black text-neuro-navy">Requests</h2>
+        <p className="text-sm text-neuro-gray mt-1 mb-4">{attention.length} need attention. {requests.length} in this list. Spam is left out of the bell.</p>
         <label className="mb-4 block text-xs font-bold text-gray-400">
           Search
           <input
@@ -176,8 +177,8 @@ export default function ContactRequestsPage() {
               </ol>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                <button disabled={busy === row.id} onClick={() => run(row.id, () => resendLeadToDoctor(row.id))} className="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold min-h-[44px]">Resend to doctor</button>
-                <button disabled={busy === row.id} onClick={() => run(row.id, () => sendLeadReminderNow(row.id))} className="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold min-h-[44px]">Send reminder now</button>
+                <button disabled={busy === row.id} onClick={() => run(row.id, () => resendLeadToDoctor(row.id), `Email ${row.doctor_name || 'the doctor'} this request from ${row.name || 'the patient'} again?`)} className="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold min-h-[44px]">Resend to doctor</button>
+                <button disabled={busy === row.id} onClick={() => run(row.id, () => sendLeadReminderNow(row.id), `Send a reminder now to ${row.doctor_name || 'the doctor'} about ${row.name || 'this patient'}'s visit request?`)} className="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold min-h-[44px]">Send reminder now</button>
                 <button disabled={busy === row.id} onClick={() => run(row.id, () => markLeadContacted(row.id, notes[row.id]))} className="px-3 py-2 rounded-lg bg-green-700 text-xs font-bold min-h-[44px]">Mark contacted</button>
                 <button disabled={busy === row.id} onClick={() => run(row.id, () => markLeadUnreachable(row.id, notes[row.id]))} className="px-3 py-2 rounded-lg bg-red-700 text-xs font-bold min-h-[44px]">Mark doctor unreachable</button>
                 <button disabled={busy === row.id} onClick={() => run(row.id, () => clearLeadAttention(row.id, notes[row.id]))} className="px-3 py-2 rounded-lg bg-white/10 text-xs font-bold min-h-[44px]">Clear attention flag</button>

@@ -32,7 +32,19 @@ export function ApplicationsClient({
 
   const visible = rows.filter((row) => filter === 'all' || applicationQueue(row.status) === filter)
 
+  function confirmAction(row: AdminApplicationRow, kind: 'approve' | 'decline'): boolean {
+    if (kind === 'decline') {
+      return window.confirm(`Decline ${row.name}? This emails them, takes the card off file, and refunds a payment if one was already taken.`)
+    }
+    if (row.paymentReceived) {
+      return window.confirm(`Publish ${row.name}'s profile? The card will not be charged again. They will get an email.`)
+    }
+    return window.confirm(`Charge ${row.name} (${row.priceLabel}) and publish the profile? They will get an email.`)
+  }
+
   async function run(id: string, kind: 'approve' | 'decline') {
+    const row = rows.find((item) => item.id === id)
+    if (!row || !confirmAction(row, kind)) return
     setBusy(`${kind}:${id}`)
     setMessage('')
     setWarning('')
@@ -82,7 +94,8 @@ export function ApplicationsClient({
             <div><dt className="font-bold">Last activity</dt><dd>{activityLabel(row.lastActivity)}</dd></div>
             <div><dt className="font-bold">Mobile</dt><dd>{row.mobile || 'Not given'}</dd></div>
             <div><dt className="font-bold">Text consent</dt><dd>{row.smsConsent}</dd></div>
-            <div><dt className="font-bold">Payment</dt><dd>{row.paymentReceived ? 'Received — Approve will not charge again' : 'Not received'}</dd></div>
+            <div><dt className="font-bold">Payment</dt><dd>{row.paymentReceived ? 'Received. Approve will not charge again' : 'Not received'}</dd></div>
+            {row.status === 'draft' ? <div className="sm:col-span-2"><dt className="font-bold">Last reminder</dt><dd>{row.lastContacted ? activityLabel(row.lastContacted) : 'No reminder sent yet'}</dd></div> : null}
             <div><dt className="font-bold">Years in practice</dt><dd>{row.years ?? '—'}</dd></div>
             <div><dt className="font-bold">Scans</dt><dd>{row.scans}</dd></div>
             <div className="sm:col-span-2"><dt className="font-bold">Approach</dt><dd>{row.approach || '—'}</dd></div>

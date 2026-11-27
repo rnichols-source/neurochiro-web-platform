@@ -3,40 +3,57 @@ import 'server-only'
 import { unstable_cache } from 'next/cache'
 import { cache } from 'react'
 import { createAdminClient } from '@/lib/supabase-admin'
-import { daysUntil, FOUNDING_END } from './format'
+import { loadDoctorBilling } from './money'
 
 export type ShellAlert = { id: string; title: string; href: string }
 
-async function loadShellAlertsFresh(): Promise<ShellAlert[]> {
-  const admin = createAdminClient() as any
-  const cutoff = new Date(Date.now() - 48 * 3_600_000).toISOString()
-  const [waiting, review, drafts, gaps, founding, builds] = await Promise.all([
-    admin.from('contact_requests').select('doctor_id').is('acknowledged_at', null).neq('status', 'withdrawn').neq('status', 'spam').lt('created_at', cutoff).limit(200),
-    admin.from('doctor_applications').select('id', { count: 'exact', head: true }).eq('status', 'under_review'),
-    admin.from('doctor_applications').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
-    admin.from('demand_mentions').select('id', { count: 'exact', head: true }).gte('nearest_distance_mi', 50),
-    admin.from('doctors').select('id', { count: 'exact', head: true }).eq('is_founding_member', true).eq('is_test', false),
-    admin.from('profile_build_jobs').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
-  ])
-  const alerts: ShellAlert[] = []
-  const waitingRows = (waiting.data || []) as { doctor_id: string | null }[]
-  if (waitingRows.length) {
-    alerts.push({ id: 'waiting', title: `${waitingRows.length} visit requests waiting 48h+`, href: '/admin' })
-  }
-  const reviewCount = review.count || 0
-  const draftCount = drafts.count || 0
-  if (reviewCount || draftCount) {
-    alerts.push({ id: 'applications', title: `${reviewCount} to review · ${draftCount} drafts`, href: '/admin/applications' })
-  }
-  if (gaps.count) alerts.push({ id: 'gaps', title: `${gaps.count} asks are 50+ miles out`, href: '/admin/growth#targets' })
-  const days = daysUntil(new Date(), FOUNDING_END)
-  if (days > 0) alerts.push({ id: 'founding', title: `Founding rate ends in ${days} days · ${founding.count || 0} members`, href: '/admin/money#heads-up' })
-  if (!builds.error && builds.count) {
-    alerts.push({ id: 'profile-builds', title: `${builds.count} profile research ${builds.count === 1 ? 'failure' : 'failures'}`, href: '/admin/profile-builds' })
-  }
-  return alerts
+type WaitChain = PromiseLike<{ data: { doctor_id: string | null }[] | null; error: { message?: string } | null }> & {
+  is: (column: string, value: null) => WaitChain
+  neq: (column: string, value: string) => WaitChain
+  lt: (column: string, value: string) => WaitChain
+  limit: (count: number) => WaitChain
 }
 
-const loadShellAlertsCached = unstable_cache(loadShellAlertsFresh, ['founder-shell-alerts-v2'], { revalidate: 60 })
+async function loadWaitingRequests(): Promise<{ doctor_id: string | null }[]> {
+  const admin = createAdminClient() as unknown as {
+    from: (table: string) => { select: (columns: string) => WaitChain }
+  }
+  const cutoff = new Date(Date.now() - 48 * 3_600_000).toISOString()
+  const waiting = await admin.from('contact_requests').select('doctor_id').is('acknowledged_at', null).neq('status', 'withdrawn').neq('status', 'spam').lt('created_at', cutoff).limit(200)
+  if (waiting.error) throw new Error('alerts')
+  return (waiting.data || []) as { doctor_id: string | null }[]
+}
 
-export const loadShellAlerts = cache(loadShellAlertsCached)
+const loadWaitingCached = unstable_cache(loadWaitingRequests, ['founder-shell-waiting-v3'], { revalidate: 60 })
+
+export const loadShellAlerts = cache(async (): Promise<ShellAlert[]> => {
+  try {
+    const [waitingRows, billing] = await Promise.all([loadWaitingCached(), loadDoctorBilling()])
+    const alerts: ShellAlert[] = []
+    if (waitingRows.length) {
+      const doctors = new Set(waitingRows.map((row) => row.doctor_id).filter(Boolean))
+      alerts.push({
+        id: 'waiting',
+        title: `${waitingRows.length} visit requests waiting 48h+ at ${doctors.size} doctor${doctors.size === 1 ? '' : 's'}`,
+        href: '/admin/people?filter=ignoring',
+      })
+    }
+    if (billing.stripeOk && billing.pastDue) {
+      alerts.push({
+        id: 'pastdue',
+        title: `${billing.pastDue} failed payment${billing.pastDue === 1 ? '' : 's'}`,
+        href: '/admin/money',
+      })
+    }
+    if (billing.stripeOk && billing.disputesOpen) {
+      alerts.push({
+        id: 'disputes',
+        title: `${billing.disputesOpen} open dispute${billing.disputesOpen === 1 ? '' : 's'} on Stripe`,
+        href: '/admin/money',
+      })
+    }
+    return alerts
+  } catch {
+    return [{ id: 'alerts-failed', title: 'Could not load alerts. Open Pulse to retry.', href: '/admin' }]
+  }
+})
