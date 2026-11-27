@@ -64,7 +64,7 @@ async function MoneyBody() {
               <div>
                 <h2 className="fd-ui text-[20px] font-extrabold">{formatNumber(founding.length)} live founding doctors</h2>
                 <p className="mt-1 text-[14px] text-[#4a5865]">Hidden and unverified founding doctors are not in this email. Count them on the next screen before anything is sent.</p>
-                <Link href="/admin/broadcast?audience=founding" className="fd-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#B7791F] px-3 text-[13px] font-extrabold text-white">Draft the heads-up</Link>
+                <Link href="/admin/broadcast?audience=founding&draft=founding" className="fd-ui mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#B7791F] px-3 text-[13px] font-extrabold text-white">Draft the heads-up</Link>
                 <Link href="/admin/people?filter=founding" className="ml-2 inline-flex min-h-11 items-center text-[13px] font-bold text-[#8A5A0F]">See the list</Link>
               </div>
             </div>

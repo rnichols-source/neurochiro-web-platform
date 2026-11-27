@@ -238,7 +238,7 @@ export function buildNeeds(roster: FounderRoster, now = new Date()): NeedItem[] 
       title: `${drafts.length} doctor${drafts.length === 1 ? '' : 's'} started but didn't pay`,
       detail: 'A scheduled note may already have gone out. Check the last reminder before you send another.',
       action: 'Send a reminder',
-      href: '/admin/broadcast?audience=stalled',
+      href: '/admin/broadcast?audience=stalled&draft=stalled',
       tone: 'people',
     })
   }

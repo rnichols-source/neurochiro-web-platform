@@ -3,6 +3,7 @@ import { ToolLinks } from '@/components/founder/bits'
 import { CouldNotLoad } from '@/components/founder/load-error'
 import { BroadcastForm } from '@/components/founder/broadcast-form'
 import { isAudience, resolveAudience, type AudienceKey } from '@/lib/founder/audience'
+import { broadcastDraft } from '@/lib/founder/drafts'
 import { BROADCAST_TOOLS } from '@/lib/founder/places'
 import { waitingRequests } from '@/lib/founder/model'
 import { loadFounderRoster } from '@/lib/founder/roster'
@@ -13,7 +14,9 @@ export const dynamic = 'force-dynamic'
 export default async function BroadcastPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   await requireAdminPage()
   const params = await searchParams
-  const audience = typeof params.audience === 'string' && isAudience(params.audience) ? params.audience : ''
+  const draft = typeof params.draft === 'string' ? broadcastDraft(params.draft) : null
+  const requested = typeof params.audience === 'string' && isAudience(params.audience) ? params.audience : ''
+  const audience = draft?.audience || requested
   let roster
   try {
     roster = await loadFounderRoster()
@@ -46,7 +49,7 @@ export default async function BroadcastPage({ searchParams }: { searchParams: Pr
         ]}
       />
       <div className="px-4 py-4 lg:px-8">
-        <BroadcastForm presets={presets} initialAudience={audience} />
+        <BroadcastForm presets={presets} initialAudience={audience} initialSubject={draft?.subject || ''} initialBody={draft?.body || ''} />
         <div className="mt-4"><ToolLinks links={BROADCAST_TOOLS} /></div>
       </div>
     </div>
