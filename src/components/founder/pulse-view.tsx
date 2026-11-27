@@ -31,7 +31,7 @@ export function NeedsCard({ needs, instagramClear }: { needs: MorningNeed[]; ins
             {need.nudge ? (
               <>
                 <Link href={need.href} className="fd-ui inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-[#E7C4B4] px-3 text-[13px] font-extrabold text-[#B4501A]">See who</Link>
-                <NudgeButton count={need.nudge} />
+                <NudgeButton count={need.nudge} skipped={need.nudgeSkipped || 0} />
               </>
             ) : (
               <Link href={need.href} className="fd-ui inline-flex min-h-11 w-full items-center justify-center rounded-xl px-3 text-center text-[13px] font-extrabold text-white" style={{ background: TONE[need.tone] }}>{need.action}</Link>

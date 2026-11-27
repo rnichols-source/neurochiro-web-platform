@@ -1,5 +1,6 @@
 import { daysUntil, FOUNDING_END, median } from './format'
 import { buildReach, openRequests, waitingRequests, type ReachCount } from './model'
+import { doctorsToNudge, type NudgeStamp } from './nudge'
 import type { FounderRoster } from './roster'
 
 const DAY = 86_400_000
@@ -27,6 +28,7 @@ export type MorningNeed = {
   seeHref?: string
   seeLabel?: string
   nudge?: number
+  nudgeSkipped?: number
 }
 
 export type PulseKpi = {
@@ -327,6 +329,7 @@ export function morningNeeds(input: {
   now?: Date
   instagram: number | null
   profileFailed: number | null
+  recentNudges?: NudgeStamp[] | null
 }): MorningNeed[] {
   const now = input.now ?? new Date()
   const roster = input.roster
@@ -335,18 +338,47 @@ export function morningNeeds(input: {
   if (waiting.length) {
     const doctors = new Set(waiting.map((row) => row.doctorId).filter(Boolean))
     const unassigned = waiting.filter((row) => !row.doctorId).length
-    const detail = unassigned
+    const ids = [...doctors] as string[]
+    const known = input.recentNudges === undefined ? [] : input.recentNudges
+    let nudge: number | undefined
+    let nudgeSkipped = 0
+    let action = doctors.size ? `Nudge all ${doctors.size}` : 'See requests'
+    let extra = ''
+    if (doctors.size && known == null) {
+      action = 'See who'
+      extra = ' Could not check who was nudged in the last 20 hours. Nudge all stays off until that check works. This is not zero skipped.'
+    } else if (doctors.size && known) {
+      const plan = doctorsToNudge(ids, known, now)
+      nudgeSkipped = plan.skipped.length
+      if (plan.send.length) {
+        nudge = plan.send.length
+        action = `Nudge all ${plan.send.length}`
+        if (plan.skipped.length) {
+          const skip = plan.skipped.length === 1
+            ? '1 was nudged in the last 20 hours and will be skipped.'
+            : `${plan.skipped.length} were nudged in the last 20 hours and will be skipped.`
+          extra = ` ${plan.send.length} will get a reminder. ${skip}`
+        }
+      } else {
+        action = 'See who'
+        extra = plan.skipped.length === 1
+          ? ' This doctor was nudged in the last 20 hours, so Nudge all will not send.'
+          : ` All ${plan.skipped.length} were nudged in the last 20 hours, so Nudge all will not send.`
+      }
+    }
+    const detail = (unassigned
       ? `${plural(doctors.size, 'doctor')} can be reminded. ${plural(unassigned, 'request')} ${unassigned === 1 ? 'has' : 'have'} no doctor, so ${unassigned === 1 ? 'it is' : 'they are'} not in the nudge.`
-      : `At ${plural(doctors.size, 'doctor')}. See who is quiet, or send a reminder.`
+      : `At ${plural(doctors.size, 'doctor')}. See who is quiet, or send a reminder.`) + extra
     needs.push({
       id: 'waiting',
       title: `${plural(waiting.length, 'visit request')} waiting 48h+`,
       detail,
-      action: doctors.size ? `Nudge all ${doctors.size}` : 'See requests',
+      action,
       href: doctors.size ? '/admin/people?filter=ignoring' : '/admin/leads?tab=requests',
       tone: 'alert',
       priority: 10,
-      nudge: doctors.size || undefined,
+      nudge,
+      nudgeSkipped,
     })
   }
   const review = roster.applications.filter((row) => row.status === 'under_review')

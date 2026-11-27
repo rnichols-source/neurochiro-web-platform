@@ -26,6 +26,7 @@ import {
 } from '@/lib/founder/pulse'
 import { loadPulseWindows } from '@/lib/founder/pulse-windows'
 import { loadFounderRoster } from '@/lib/founder/roster'
+import { loadRecentNudges } from '@/lib/founder/send'
 import { loadFounderSettings } from '@/lib/founder/settings'
 import { createAdminClient } from '@/lib/supabase-admin'
 import { loadProfileBuildBoard } from '@/lib/profile-build/board'
@@ -78,6 +79,7 @@ async function PulseMain({ nowIso }: { nowIso: string }) {
   const buildsPromise = loadProfileBuildBoard().catch(() => null)
   const dmsPromise = waitingInstagramDms()
   const windowsPromise = loadPulseWindows().catch(() => null)
+  const nudgesPromise = loadRecentNudges().catch(() => null)
   let roster
   let settings
   try {
@@ -85,9 +87,9 @@ async function PulseMain({ nowIso }: { nowIso: string }) {
   } catch {
     return <CouldNotLoad what="Pulse" />
   }
-  const [builds, dms, windows] = await Promise.all([buildsPromise, dmsPromise, windowsPromise])
+  const [builds, dms, windows, recentNudges] = await Promise.all([buildsPromise, dmsPromise, windowsPromise, nudgesPromise])
   const officeOn = settings.error ? null : settings.automations.didYouGetIn
-  const needs = morningNeeds({ roster, now, instagram: dms, profileFailed: profileCount(builds) })
+  const needs = morningNeeds({ roster, now, instagram: dms, profileFailed: profileCount(builds), recentNudges })
   const kpis = [askingKpi(roster, windows), visitKpi(roster, now, windows), doctorsKpi(roster, now)]
   const live = roster.doctors.filter((doctor) => doctor.verified)
   const unpaid = live.filter((doctor) => !doctor.paid).length

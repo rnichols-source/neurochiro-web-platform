@@ -267,6 +267,7 @@ test('needs you today is ordered and each tap has a filtered place', async () =>
   assert.deepEqual(needs.map((item) => item.id), ['waiting', 'applications', 'instagram', 'profiles', 'founding', 'drafts', 'gaps'])
   const waiting = needs[0]
   assert.equal(waiting.nudge, 1)
+  assert.equal(waiting.nudgeSkipped, 0)
   assert.equal(waiting.href, '/admin/people?filter=ignoring')
   assert.match(waiting.detail, /no doctor/)
   assert.equal(needs.find((item) => item.id === 'applications')?.href, '/admin/applications')
@@ -283,6 +284,36 @@ test('needs you today is ordered and each tap has a filtered place', async () =>
   assert.equal(needs.find((item) => item.id === 'gaps')?.href, '/admin/growth#targets')
   assert.equal(needs.every((item) => item.href.startsWith('/admin')), true)
   assert.equal(DASH.test(JSON.stringify(needs)), false)
+})
+
+test('a doctor nudged in the last 20 hours is left out of Nudge all', async () => {
+  const { morningNeeds } = await import('./pulse.ts')
+  const data = roster({
+    requests: [
+      request({ id: 'old', doctorId: 'quiet', createdAt: '2026-11-20T00:00:00.000Z' }),
+      request({ id: 'also', doctorId: 'other', createdAt: '2026-11-20T00:00:00.000Z' }),
+    ],
+    doctors: [doctor({ id: 'quiet' }), doctor({ id: 'other' })],
+    gapAsks: 0,
+    unmeasured: 0,
+    gaps: [],
+  })
+  const needs = morningNeeds({
+    roster: data,
+    now: NOW,
+    instagram: 0,
+    profileFailed: 0,
+    recentNudges: [{ doctorId: 'quiet', at: '2026-11-27T10:00:00.000Z' }],
+  })
+  const waiting = needs.find((item) => item.id === 'waiting')
+  assert.equal(waiting?.nudge, 1)
+  assert.equal(waiting?.nudgeSkipped, 1)
+  assert.match(waiting?.detail || '', /1 will get a reminder/)
+  assert.match(waiting?.detail || '', /1 was nudged in the last 20 hours/)
+  const blocked = morningNeeds({ roster: data, now: NOW, instagram: 0, profileFailed: 0, recentNudges: null })
+  const held = blocked.find((item) => item.id === 'waiting')
+  assert.equal(held?.nudge, undefined)
+  assert.match(held?.detail || '', /Nudge all stays off/)
 })
 
 test('a clear instagram queue and a healthy research list stay off the needs list', async () => {
