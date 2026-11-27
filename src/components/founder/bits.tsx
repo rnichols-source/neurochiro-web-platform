@@ -44,33 +44,33 @@ export function ReachCounts({ counts }: { counts: { label: string; detail: strin
 export function FunnelList({ steps }: { steps: { label: string; detail: string; value: string; width: number; tone: string; tracking: boolean; tag?: string; href?: string }[] }) {
   const color: Record<string, string> = { growth: '#2C6BB4', people: '#0E857A', pulse: '#D66829' }
   return (
-    <div className="space-y-2">
-      {steps.map((step) => (
-        <div key={step.label} className="grid items-center gap-2 md:grid-cols-[190px_1fr_auto]">
-          <div>
-            <p className="fd-ui text-[13px] font-extrabold">{step.label}</p>
-            <p className="text-[12px] text-[#6b7785]">{step.detail}</p>
-          </div>
-          {step.width > 0 ? (
-            <div className="h-8 overflow-hidden rounded-[10px] bg-[#F3F1EC]">
-              <div
-                className="flex h-full min-w-12 items-center justify-end rounded-[10px] pr-2 text-white"
-                style={step.tracking
-                  ? { width: `${step.width}%`, background: 'repeating-linear-gradient(45deg,#FFF1E6,#FFF1E6 8px,#FBE3D2 8px,#FBE3D2 16px)', color: '#B4501A', border: '1.5px dashed #E9A77A' }
-                  : { width: `${step.width}%`, background: color[step.tone] || '#D66829' }}
-              >
-                <span className="fd-ui text-[14px] font-extrabold">{step.value}</span>
+    <div className="space-y-3">
+      {steps.map((step) => {
+        const quiet = step.tracking || step.tag === 'Off' || step.tag === 'Unavailable'
+        const tag = step.tag || (step.tracking ? 'Not tracking' : 'Live data')
+        const width = Math.max(0, Math.min(100, step.width))
+        return (
+          <div key={step.label} className="min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              <p className="fd-ui text-[14px] font-extrabold">{step.label}</p>
+              <div className="flex items-center gap-2">
+                <span className="fd-ui text-[18px] font-extrabold tabular-nums">{step.value}</span>
+                <Tag kind={quiet ? 'tracking' : 'live'}>{tag}</Tag>
               </div>
             </div>
-          ) : (
-            <div className="flex min-h-8 items-center gap-2">
-              <span className="fd-ui text-[14px] font-extrabold text-[#B4501A]">{step.value}</span>
-              {step.href ? <Link href={step.href} className="fd-ui inline-flex min-h-10 items-center rounded-xl bg-[#D66829] px-3 text-[13px] font-extrabold text-white">Turn on in Settings</Link> : null}
+            <p className="text-[12px] leading-snug text-[#6b7785]">{step.detail}</p>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-[#F3F1EC]" aria-hidden="true">
+              <div
+                className="h-full rounded-full"
+                style={step.tracking
+                  ? { width: `${width}%`, background: '#E9A77A' }
+                  : { width: `${width}%`, background: color[step.tone] || '#D66829' }}
+              />
             </div>
-          )}
-          {step.tag ? <Tag kind={step.tag === 'Off' ? 'tracking' : 'live'}>{step.tag}</Tag> : step.tracking ? <Tag kind="tracking">Not tracking</Tag> : <Tag kind="live">Live data</Tag>}
-        </div>
-      ))}
+            {step.href ? <Link href={step.href} className="fd-ui mt-2 inline-flex min-h-11 items-center rounded-xl bg-[#D66829] px-3 text-[13px] font-extrabold text-white">Turn on in Settings</Link> : null}
+          </div>
+        )
+      })}
     </div>
   )
 }

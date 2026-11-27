@@ -181,12 +181,12 @@ export async function nudgeWaitingDoctors(actorId: string, expected: number, lim
   for (const [doctorId, rows] of byDoctor) {
     const doctor = roster.doctors.find((item) => item.id === doctorId)
     if (!doctor) continue
-    const message = `You have ${rows.length} community member request${rows.length === 1 ? '' : 's'} waiting more than 48 hours. Reply in NeuroChiro: ${siteUrl()}/doctor`
-    if (doctor.email && await sendEmail(doctor.email, 'A community member is waiting', message)) emailed += 1
+    const message = `You have ${rows.length} patient visit request${rows.length === 1 ? '' : 's'} waiting more than 48 hours. Reply in NeuroChiro: ${siteUrl()}/doctor`
+    if (doctor.email && await sendEmail(doctor.email, 'A patient is waiting', message)) emailed += 1
     if (doctor.userId) {
       const note = await admin.from('notifications').insert({
         user_id: doctor.userId,
-        title: 'A community member is waiting',
+        title: 'A patient is waiting',
         body: message,
         type: 'lead',
         priority: 'important',

@@ -1,6 +1,6 @@
 import { haversineDistance } from '@/lib/geo'
 import { doctorHealth, type HealthTone } from './health-score'
-import { barPercent, daysUntil, formatHours, FOUNDING_END, lastWeeks, median, parseVisitPrice, weekStart } from './format'
+import { daysUntil, formatHours, FOUNDING_END, lastWeeks, median, parseVisitPrice, weekStart } from './format'
 import type { DoctorRecord, FounderRoster, PersonRecord, RequestRecord } from './roster'
 
 const HOUR = 3_600_000
@@ -87,20 +87,37 @@ export function listingViewTotal(roster: FounderRoster): number {
   return roster.doctors.reduce((sum, doctor) => sum + (doctor.views || 0), 0)
 }
 
-export function buildRequestFunnel(roster: FounderRoster, now = new Date(), officeOn = false): FunnelStep[] {
+function linearPercent(value: number, max: number): number {
+  if (value <= 0 || max <= 0) return 0
+  return Math.max(4, Math.min(100, Math.round((value / max) * 100)))
+}
+
+function portalLine(count: number | null): string {
+  if (count == null) return 'Patient portal visits could not be counted, so they are not in this number.'
+  if (count === 0) return '0 from the patient portal.'
+  if (count === 1) return '1 patient portal visit is tracked separately and is not in this number.'
+  return `${count.toLocaleString('en-US')} patient portal visits are tracked separately and are not in this number.`
+}
+
+/** Directory requests only. `officeOn` null means the switch could not be read. */
+export function buildRequestFunnel(roster: FounderRoster, now = new Date(), officeOn: boolean | null = false): FunnelStep[] {
   const open = openRequests(roster, now)
+  const directory = open.length
   const replied = open.filter((row) => row.acknowledgedAt).length
-  const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed').length
-  const requested = open.length + (roster.communityVisits || 0)
-  const base = Math.max(requested, 1)
-  const share = (count: number) => requested ? `${Math.round((count / requested) * 100)}% of requests` : 'No requests yet'
+  const confirmedRows = open.filter((row) => row.outcome === 'patient_contacted_confirmed')
+  const confirmed = confirmedRows.length
+  const confirmedWithoutReply = confirmedRows.filter((row) => !row.acknowledgedAt).length
+  const share = (count: number) => directory ? `${Math.round((count / directory) * 100)}% of directory requests` : 'No directory requests yet'
   const doctorCount = new Set(open.map((row) => row.doctorId).filter(Boolean)).size
+  const confirmedDetail = confirmedWithoutReply
+    ? `${share(confirmed)}. ${confirmedWithoutReply.toLocaleString('en-US')} marked confirmed with no reply time saved, so this step can be larger than Doctor replied.`
+    : share(confirmed)
   const steps: FunnelStep[] = [
     {
       label: 'Requested a visit',
-      detail: `all time · ${doctorCount} doctors${roster.communityVisits ? ` · ${roster.communityVisits} from the patient portal` : ''}`,
-      value: String(requested),
-      width: requested ? 100 : 8,
+      detail: `Directory requests, all time, spam left out. ${doctorCount.toLocaleString('en-US')} doctors. ${portalLine(roster.communityVisits)}`,
+      value: String(directory),
+      width: directory ? 100 : 0,
       tone: 'pulse',
       tracking: false,
     },
@@ -108,24 +125,35 @@ export function buildRequestFunnel(roster: FounderRoster, now = new Date(), offi
       label: 'Doctor replied',
       detail: share(replied),
       value: String(replied),
-      width: barPercent(replied, base),
+      width: linearPercent(replied, directory),
       tone: 'pulse',
       tracking: false,
     },
     {
       label: 'Contact confirmed',
-      detail: share(confirmed),
+      detail: confirmedDetail,
       value: String(confirmed),
-      width: barPercent(confirmed, base),
+      width: linearPercent(confirmed, directory),
       tone: 'pulse',
       tracking: false,
     },
   ]
-  steps.push(officeVisitStep(roster, requested, officeOn))
+  steps.push(officeVisitStep(roster, directory, officeOn))
   return steps
 }
 
-function officeVisitStep(roster: FounderRoster, requested: number, officeOn: boolean): FunnelStep {
+function officeVisitStep(roster: FounderRoster, requested: number, officeOn: boolean | null): FunnelStep {
+  if (officeOn == null) {
+    return {
+      label: 'Went into the office',
+      detail: 'Settings could not be loaded, so this is not off and it is not zero.',
+      value: 'Unavailable',
+      width: 0,
+      tone: 'pulse',
+      tracking: true,
+      tag: 'Unavailable',
+    }
+  }
   if (!officeOn) {
     return {
       label: 'Went into the office',
@@ -154,18 +182,17 @@ function officeVisitStep(roster: FounderRoster, requested: number, officeOn: boo
       label: 'Went into the office',
       detail: 'On. No one has been asked yet.',
       value: '0',
-      width: 8,
+      width: 0,
       tone: 'pulse',
       tracking: false,
       tag: 'On',
     }
   }
-  const base = Math.max(requested, 1)
   return {
     label: 'Went into the office',
-    detail: `${roster.office.yes} yes · ${roster.office.no} no · ${roster.office.sent} asked`,
+    detail: `${roster.office.yes} yes, ${roster.office.no} no, ${roster.office.sent} asked`,
     value: String(roster.office.yes),
-    width: barPercent(roster.office.yes, base),
+    width: linearPercent(roster.office.yes, Math.max(requested, 1)),
     tone: 'pulse',
     tracking: false,
     tag: 'On',

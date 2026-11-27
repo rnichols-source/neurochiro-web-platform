@@ -46,7 +46,7 @@ async function FunnelBody() {
   const plans = settings.error ? null : settings.figures.carePlansStarted
   const average = settings.error ? null : settings.figures.averageCarePlan
   const roi = roiCard(roster, new Date(), plans, average)
-  const steps = buildRequestFunnel(roster, new Date(), !settings.error && settings.automations.didYouGetIn)
+  const steps = buildRequestFunnel(roster, new Date(), settings.error ? null : settings.automations.didYouGetIn)
   const figuresReady = plans != null && average != null
 
   return (
@@ -110,7 +110,7 @@ async function FunnelBody() {
           </Card>
           <Card>
             <h2 className="fd-ui text-[15px] font-extrabold">Content attribution</h2>
-            {roster.sources.length === 0 ? <p className="mt-2 text-[13px]">Starts tracking now. No source is stored on the asks yet.</p> : (
+            {roster.sources.length === 0 ? <p className="mt-2 text-[13px]">No source is stored on the asks yet.</p> : (
               <ul className="mt-2 space-y-1 text-[13px]">
                 {roster.sources.map((row) => <li key={row.label} className="flex justify-between"><span>{row.label}</span><b>{row.n.toLocaleString('en-US')}</b></li>)}
               </ul>
