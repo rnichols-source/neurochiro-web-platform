@@ -1,14 +1,18 @@
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { stripe } from '@/lib/stripe'
 import type Stripe from 'stripe'
+import { pickMembershipSubscription, type RawSubscription } from './membership-subscription.ts'
 
 type StripeBilling = {
   subscription: {
     id: string
     status: string
     price: number
+    currency: string
     interval: string
+    intervalCount: number
     nextBilling: string
+    cancelAtPeriodEnd: boolean
     paymentMethod: string | null
   } | null
   invoices: {
@@ -34,7 +38,7 @@ async function fetchStripeBilling(customerId: string): Promise<StripeBilling> {
   const [subscriptions, invoices] = await Promise.all([
     stripe.subscriptions.list({
       customer: customerId,
-      limit: 1,
+      limit: 20,
       status: 'all',
       expand: ['data.default_payment_method'],
     }),
@@ -43,28 +47,28 @@ async function fetchStripeBilling(customerId: string): Promise<StripeBilling> {
       limit: 10,
     }),
   ])
-  const activeSubscription = subscriptions.data[0] as {
-    id: string
-    status: string
-    current_period_end?: number
-    items?: { data?: { price?: { unit_amount?: number | null } ; plan?: { interval?: string } }[] }
+  const raw = subscriptions.data as unknown as (RawSubscription & {
     default_payment_method?: { card?: { last4?: string } } | string | null
-  }
-  const method = activeSubscription?.default_payment_method
+  })[]
+  const picked = pickMembershipSubscription(raw)
+  const method = picked ? raw.find((sub) => sub.id === picked.id)?.default_payment_method : null
   const last4 = method && typeof method === 'object' ? method.card?.last4 || null : null
   return {
-    subscription: activeSubscription ? {
-      id: activeSubscription.id,
-      status: activeSubscription.status,
-      price: activeSubscription.items?.data?.[0]?.price?.unit_amount ? activeSubscription.items.data[0].price.unit_amount / 100 : 0,
-      interval: activeSubscription.items?.data?.[0]?.plan?.interval || 'month',
-      nextBilling: activeSubscription.current_period_end
-        ? new Date(activeSubscription.current_period_end * 1000).toLocaleDateString('en-US', {
+    subscription: picked ? {
+      id: picked.id,
+      status: picked.status,
+      price: picked.price,
+      currency: picked.currency,
+      interval: picked.interval,
+      intervalCount: picked.intervalCount,
+      nextBilling: picked.periodEnd
+        ? new Date(picked.periodEnd * 1000).toLocaleDateString('en-US', {
             month: 'short',
             day: '2-digit',
             year: 'numeric',
           })
         : '---',
+      cancelAtPeriodEnd: picked.cancelAtPeriodEnd,
       paymentMethod: last4,
     } : null,
     invoices: invoices.data.map((inv) => ({
@@ -83,7 +87,7 @@ async function fetchStripeBilling(customerId: string): Promise<StripeBilling> {
 }
 
 export function loadStripeBilling(customerId: string) {
-  return unstable_cache(fetchStripeBilling, ['doctor-stripe-billing-v1', customerId], {
+  return unstable_cache(fetchStripeBilling, ['doctor-stripe-billing-v2', customerId], {
     revalidate: 60,
     tags: [doctorStripeTag(customerId)],
   })(customerId)

@@ -83,7 +83,14 @@ export function deriveMembership(input: MembershipInput): Membership {
     source = 'founding';
     status = 'active';
     priceLabel = null;
-  } else if (hasStripe) {
+  } else if (hasStripe && !stripeStatus && PAID.has(stored)) {
+    // No stored Stripe status exists. The webhook keeps membership_tier in step with Stripe,
+    // so the stored tier decides access; the billing page reads the live status from Stripe.
+    tier = stored === 'neuros' ? 'neuros' : 'pro';
+    source = 'stripe';
+    status = 'active';
+    priceLabel = PRO_PRICE_LABEL;
+  } else if (hasStripe && stripeStatus) {
     source = 'stripe';
     status = stripeStatus || 'active';
     if (status === 'canceled' || status === 'unpaid' || status === 'incomplete_expired') {

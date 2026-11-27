@@ -5,7 +5,7 @@ import { getBillingData, invalidateCurrentDoctorStripe } from './actions';
 import { ActivateProButtons, ManageBillingButton } from './BillingButtons';
 import { getPortalContext } from '@/lib/portal/context';
 import { PRO_PRICE_LABEL, type Membership } from '@/lib/portal/membership';
-import { billingView } from '@/lib/portal/billing-view';
+import { billingPlan } from '@/lib/portal/billing-view';
 import { redirect } from 'next/navigation';
 import { portalTimer } from '@/lib/portal/timing';
 
@@ -24,15 +24,17 @@ async function BillingLoaded({ membership }: { membership: Membership }) {
   const done = portalTimer('billing');
   const billing = await getBillingData();
   done();
-  const view = billingView(membership, billing);
-  const renews = billing && 'subscription' in billing ? billing.subscription?.nextBilling : null;
+  const plan = billingPlan(membership, billing);
+  const view = plan.view;
   const description =
     view === 'included' || view === 'included_with_stripe'
       ? membership.isFounder
         ? 'Your plan: Founding member. Pro is included.'
-        : 'Your plan: Pro is on this account. There is no card on file yet.'
+        : view === 'included'
+          ? 'Your plan: Pro is on this account. There is no card on file yet.'
+          : 'Your plan: Pro is on this account at no charge.'
       : view === 'stripe'
-        ? `Your plan: Pro ${membership.priceLabel || PRO_PRICE_LABEL}. ${membership.status === 'canceled' ? 'Ends' : 'Renews'} ${renews || 'on your Stripe date'}.`
+        ? `Your plan: ${plan.planName}${plan.priceLabel ? `, ${plan.priceLabel}` : ''}.${plan.dateLabel ? ` ${plan.dateLabel}.` : ''}`
         : view === 'error'
           ? "We couldn't load your billing details right now."
           : 'Your plan: Free. Activate Pro when you want community members to reach you.';
@@ -63,15 +65,19 @@ async function BillingLoaded({ membership }: { membership: Membership }) {
       {showStripe && billing && !('error' in billing) && !billing.noCustomer ? (
         <section className="bg-white border border-portal-border rounded-xl p-6 space-y-3">
           {view === 'included_with_stripe' ? (
-            <p className="text-sm text-portal-ink-2">Founding member: Pro is included. Card charges below are for extras such as seminar hosting.</p>
+            <p className="text-sm text-portal-ink-2">
+              {membership.isFounder
+                ? 'Founding member: Pro is included. Card charges below are for extras such as seminar hosting.'
+                : 'Pro is on this account at no charge. Card charges below are for extras such as seminar hosting.'}
+            </p>
           ) : null}
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-bold text-portal-ink">Pro</h2>
-            <StatusPill label={billing.subscription?.status || membership.status} tone={billing.subscription?.status === 'active' ? 'booked' : 'follow'} />
+            <h2 className="text-lg font-bold text-portal-ink">{plan.planName}</h2>
+            {plan.statusLabel ? <StatusPill label={plan.statusLabel} tone={plan.statusTone} /> : null}
           </div>
-          {membership.priceLabel ? <p className="text-2xl font-bold text-portal-ink">{membership.priceLabel}</p> : <p className="text-2xl font-bold text-portal-ink">Pro included</p>}
-          {billing.subscription?.paymentMethod ? <p className="text-sm text-portal-ink-2">Card ending {billing.subscription.paymentMethod}</p> : null}
-          {renews ? <p className="text-sm text-portal-ink-2">{membership.status === 'canceled' ? 'Ends' : 'Renews'} {renews}</p> : null}
+          <p className="text-2xl font-bold text-portal-ink">{plan.priceLabel || 'Pro included'}</p>
+          {billing.subscription?.paymentMethod && view === 'stripe' ? <p className="text-sm text-portal-ink-2">Card ending {billing.subscription.paymentMethod}</p> : null}
+          {plan.dateLabel ? <p className="text-sm text-portal-ink-2">{plan.dateLabel}</p> : null}
           <ManageBillingButton />
         </section>
       ) : null}
