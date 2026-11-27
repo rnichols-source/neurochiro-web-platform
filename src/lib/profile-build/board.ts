@@ -18,6 +18,7 @@ export type ProfileBuildBoard = {
   ready: boolean
   failed: ProfileBuildRow[]
   retrying: ProfileBuildRow[]
+  loadError: boolean
 }
 
 type JobRecord = {
@@ -37,7 +38,7 @@ type DoctorRecord = {
 }
 
 export async function loadProfileBuildBoard(): Promise<ProfileBuildBoard> {
-  const empty = { ready: true, failed: [], retrying: [] }
+  const failedLoad = { ready: false, failed: [], retrying: [], loadError: true }
   try {
     const admin = profileDb()
     const jobs = await admin
@@ -47,8 +48,8 @@ export async function loadProfileBuildBoard(): Promise<ProfileBuildBoard> {
       .order('updated_at', { ascending: false })
       .limit(40)
     if (jobs.error) {
-      if (isMissingTable(jobs.error)) return { ready: false, failed: [], retrying: [] }
-      return empty
+      if (isMissingTable(jobs.error)) return { ready: false, failed: [], retrying: [], loadError: false }
+      return failedLoad
     }
     const rows = ((jobs.data || []) as JobRecord[]).filter((row) => row.status !== 'succeeded')
     const doctorIds = [...new Set(rows.map((row) => row.doctor_id).filter(Boolean))]
@@ -62,9 +63,10 @@ export async function loadProfileBuildBoard(): Promise<ProfileBuildBoard> {
       ready: true,
       failed: mapped.filter((row) => row.status === 'failed'),
       retrying: mapped.filter((row) => row.status !== 'failed'),
+      loadError: false,
     }
   } catch {
-    return empty
+    return failedLoad
   }
 }
 

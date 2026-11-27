@@ -19,12 +19,14 @@ export function ApplicationsClient({
   rows,
   loadError,
   initialNotice = '',
+  initialQueue = 'decision',
 }: {
   rows: AdminApplicationRow[]
   loadError: string | null
   initialNotice?: string
+  initialQueue?: 'decision' | 'progress' | 'all'
 }) {
-  const [filter, setFilter] = useState<'decision' | 'progress' | 'all'>('decision')
+  const [filter, setFilter] = useState<'decision' | 'progress' | 'all'>(initialQueue)
   const [notes, setNotes] = useState<Record<string, string>>({})
   const [message, setMessage] = useState('')
   const [warning, setWarning] = useState(initialNotice)

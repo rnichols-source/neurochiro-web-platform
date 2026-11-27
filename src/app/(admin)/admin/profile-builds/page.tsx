@@ -18,13 +18,19 @@ export default async function ProfileBuildsPage() {
         subtitle="Approved doctors get a researched profile from their public site. Blank fields are filled. Phone and anything already saved stay as they are."
       />
       <div className="space-y-4 px-4 py-4 lg:px-8">
-        {!board.ready ? (
+        {board.loadError ? (
+          <Card>
+            <h2 className="fd-ui text-[17px] font-extrabold">Could not load this list</h2>
+            <p className="mt-2 text-[14px] text-[#5b6773]">This is not zero. The read failed, so nothing below is a count of failures.</p>
+          </Card>
+        ) : null}
+        {!board.ready && !board.loadError ? (
           <Card>
             <h2 className="fd-ui text-[17px] font-extrabold">Research is not on yet</h2>
             <p className="mt-2 text-[14px] text-[#5b6773]">The profile_build_jobs table is not in the database. The migration is in the repo and has not been applied.</p>
           </Card>
         ) : null}
-        {board.ready && board.failed.length === 0 && board.retrying.length === 0 ? (
+        {board.ready && !board.loadError && board.failed.length === 0 && board.retrying.length === 0 ? (
           <Card>
             <h2 className="fd-ui text-[17px] font-extrabold">No failures</h2>
             <p className="mt-2 text-[14px] text-[#5b6773]">Nothing is waiting after a failed research pass.</p>

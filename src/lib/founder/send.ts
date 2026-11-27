@@ -12,6 +12,7 @@ import { resolveSearchPoint } from '@/lib/admin/nearby'
 import { canReceive, reachable, resolveAudience, type AudienceFilters, type AudienceKey, type Channel, type Recipient } from './audience'
 import { writeAudit } from './audit'
 import { demandNear, doctorsNear, openRequests, waitingRequests } from './model'
+import { doctorsToNudge, nudgeCopy, nudgeLeadsUrl, type NudgeStamp } from './nudge'
 import { loadFounderRoster } from './roster'
 import { loadFounderSettings, saveDigestStamp } from './settings'
 
@@ -27,16 +28,45 @@ function mailer(): Resend | null {
   return new Resend(key)
 }
 
-async function sendEmail(to: string, subject: string, text: string): Promise<boolean> {
+async function sendEmail(to: string, subject: string, text: string, html?: string): Promise<boolean> {
   const resend = mailer()
   if (!resend) return false
   const sent = await resend.emails.send({
     from: FROM,
     to,
     subject,
-    html: wrapEmail(`<p>${text.replace(/\n/g, '<br>')}</p>`),
+    html: html || wrapEmail(`<p>${text.replace(/\n/g, '<br>')}</p>`),
   })
   return !sent.error
+}
+
+export async function loadRecentNudges(now = new Date()): Promise<NudgeStamp[] | null> {
+  try {
+    const admin = createAdminClient() as unknown as {
+      from: (table: string) => {
+        select: (columns: string) => {
+          gte: (column: string, value: string) => {
+            eq: (column: string, value: string) => Promise<{
+              data: { doctor_id: string | null; created_at: string | null }[] | null
+              error: { message?: string } | null
+            }>
+          }
+        }
+      }
+    }
+    const since = new Date(now.getTime() - 20 * 3_600_000).toISOString()
+    const recent = await admin.from('founder_nudges').select('doctor_id, created_at').gte('created_at', since).eq('kind', 'nudge')
+    if (recent.error) return null
+    const rows: NudgeStamp[] = []
+    for (const row of recent.data || []) {
+      const doctorId = row.doctor_id ? String(row.doctor_id) : ''
+      const at = row.created_at ? String(row.created_at) : ''
+      if (doctorId && at) rows.push({ doctorId, at })
+    }
+    return rows
+  } catch {
+    return null
+  }
 }
 
 export async function deliverBroadcast(input: {
@@ -174,32 +204,42 @@ export async function nudgeWaitingDoctors(actorId: string, expected: number, lim
     list.push(row)
     byDoctor.set(row.doctorId, list)
   }
-  if (byDoctor.size !== expected) return { ok: false, error: `${byDoctor.size} doctors are waiting now. Confirm that count.` }
+  const recent = await loadRecentNudges()
+  if (!recent) return { ok: false, error: 'Could not check who was nudged in the last 20 hours. Nothing was sent.' }
+  const plan = doctorsToNudge([...byDoctor.keys()], recent, new Date())
+  if (plan.send.length !== expected) {
+    return { ok: false, error: `${plan.send.length} doctors would get this now. ${plan.skipped.length} were nudged in the last 20 hours. Confirm that count.` }
+  }
   const admin = createAdminClient() as any
   let emailed = 0
   let notified = 0
-  for (const [doctorId, rows] of byDoctor) {
+  for (const doctorId of plan.send) {
+    const rows = byDoctor.get(doctorId) || []
     const doctor = roster.doctors.find((item) => item.id === doctorId)
-    if (!doctor) continue
-    const message = `You have ${rows.length} community member request${rows.length === 1 ? '' : 's'} waiting more than 48 hours. Reply in NeuroChiro: ${siteUrl()}/doctor`
-    if (doctor.email && await sendEmail(doctor.email, 'A community member is waiting', message)) emailed += 1
+    if (!doctor || !rows.length) continue
+    const copy = nudgeCopy(rows.length, nudgeLeadsUrl(siteUrl()))
+    const mailed = Boolean(doctor.email) && await sendEmail(doctor.email || '', copy.subject, copy.text, wrapEmail(copy.html))
+    if (mailed) emailed += 1
+    let noted = false
     if (doctor.userId) {
       const note = await admin.from('notifications').insert({
         user_id: doctor.userId,
-        title: 'A community member is waiting',
-        body: message,
+        title: copy.subject,
+        body: copy.text,
         type: 'lead',
         priority: 'important',
         link: '/doctor/leads',
       })
-      if (!note.error) notified += 1
+      noted = !note.error
+      if (noted) notified += 1
     }
     await admin.from('founder_nudges').insert({
       actor_id: actorId,
       doctor_id: doctorId,
       kind: 'nudge',
       request_ids: rows.map((row) => row.id),
-      detail: { emailed: Boolean(doctor.email), notified: Boolean(doctor.userId) },
+      created_at: new Date().toISOString(),
+      detail: { emailed: mailed, notified: noted },
     })
   }
   await writeAudit({ actorId, action: 'nudge_waiting', summary: `Nudged ${byDoctor.size} doctors about ${waiting.length} waiting requests`, detail: { emailed, notified } })
@@ -394,11 +434,12 @@ export async function runAutoNudge(): Promise<SendResult> {
   if (probe.error) return { ok: true, count: 0, detail: 'Auto-nudge stays off until the nudge log table exists.' }
   const roster = await loadFounderRoster()
   const waiting = waitingRequests(roster)
-  const recent = await admin.from('founder_nudges').select('doctor_id, created_at').gte('created_at', new Date(Date.now() - 20 * 3_600_000).toISOString()).eq('kind', 'nudge')
-  const recentIds = new Set((recent.data || []).map((row: { doctor_id: string }) => row.doctor_id))
-  const doctorIds = [...new Set(waiting.map((row) => row.doctorId).filter((id): id is string => Boolean(id) && !recentIds.has(id)))]
-  if (!doctorIds.length) return { ok: true, count: 0, detail: 'Nobody new to nudge.' }
-  return nudgeWaitingDoctors('automation', doctorIds.length, doctorIds)
+  const recent = await loadRecentNudges()
+  if (!recent) return { ok: true, count: 0, detail: 'Auto-nudge stays off until the nudge log can be read.' }
+  const waitingIds = [...new Set(waiting.map((row) => row.doctorId).filter((id): id is string => Boolean(id)))]
+  const plan = doctorsToNudge(waitingIds, recent, new Date())
+  if (!plan.send.length) return { ok: true, count: 0, detail: 'Nobody new to nudge.' }
+  return nudgeWaitingDoctors('automation', plan.send.length, plan.send)
 }
 
 export function demandAround(roster: Awaited<ReturnType<typeof loadFounderRoster>>, lat: number, lng: number) {

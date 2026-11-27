@@ -15,7 +15,7 @@ function safeNotice(value: string | undefined): string {
 export default async function ApplicationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ notice?: string }>
+  searchParams: Promise<{ notice?: string; queue?: string }>
 }) {
   try {
     await checkAdminAuth()
@@ -24,6 +24,7 @@ export default async function ApplicationsPage({
   }
 
   const params = await searchParams
+  const queue = params.queue === 'progress' || params.queue === 'all' || params.queue === 'decision' ? params.queue : 'decision'
   const { rows, error } = await listAdminApplications()
-  return <ApplicationsClient rows={rows} loadError={error} initialNotice={safeNotice(params.notice)} />
+  return <ApplicationsClient rows={rows} loadError={error} initialNotice={safeNotice(params.notice)} initialQueue={queue} />
 }
