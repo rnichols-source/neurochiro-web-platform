@@ -7,7 +7,15 @@ import { useSearchParams } from "next/navigation";
 import { DoctorBand } from "@/components/doctor/chrome";
 import StudentOptIn from "@/components/doctor/StudentOptIn";
 import VerifiedBadge from "@/components/doctor/VerifiedBadge";
-import { getDoctorProfile, updateDoctorProfile, uploadAvatar, uploadGalleryImage, uploadBannerImage, uploadTeamPhoto } from "./actions";
+import { getDoctorProfile, updateDoctorProfile, startProfileImageUpload, finishProfileImageUpload } from "./actions";
+import { createClient } from "@/lib/supabase";
+import {
+  friendlyUploadError,
+  PROFILE_IMAGE_MAX_BYTES,
+  PROFILE_IMAGE_MAX_ORIGINAL_BYTES,
+  tooLargeMessage,
+  type ProfileImageKind,
+} from "@/lib/doctor/profile-image-upload";
 import { ALL_COUNTRIES, getCountryByIso2 } from "@/config/countries";
 import { profileChecklist } from "@/lib/doctor/places";
 
@@ -162,6 +170,59 @@ function compressImage(file: File, maxWidth: number, quality: number): Promise<F
     img.onerror = reject;
     img.src = URL.createObjectURL(file);
   });
+}
+
+/**
+ * Shrinks the photo in the browser, then sends it straight to Storage with a
+ * signed URL. The server action only sees the file name and path, never the
+ * image itself, so no photo can hit the 1 MB server action limit.
+ */
+async function uploadProfileImage(
+  file: File,
+  kind: ProfileImageKind,
+  maxWidth: number,
+  quality: number,
+): Promise<{ publicUrl: string; error?: undefined } | { publicUrl?: undefined; error: string }> {
+  try {
+    if (file.size > PROFILE_IMAGE_MAX_ORIGINAL_BYTES) return { error: tooLargeMessage(file.size) };
+    let prepared: File = file;
+    if (isHeic(prepared)) {
+      try { prepared = await convertToJpeg(prepared); } catch { /* the server converts HEIC after upload */ }
+    }
+    if (!isHeic(prepared) && prepared.size > 1 * 1024 * 1024) {
+      try {
+        const smaller = await compressImage(prepared, maxWidth, quality);
+        if (smaller.size < prepared.size) prepared = smaller;
+      } catch { /* keep the original; it can still upload directly */ }
+    }
+    if (prepared.size > PROFILE_IMAGE_MAX_BYTES) return { error: tooLargeMessage(prepared.size) };
+
+    const start = await startProfileImageUpload({ kind, fileName: prepared.name, contentType: prepared.type, size: prepared.size });
+    if (!("token" in start) || !start.token) return { error: ("error" in start && start.error) || "Upload failed. Please try again." };
+
+    const { error: storageError } = await createClient()
+      .storage.from("clinic-photos")
+      .uploadToSignedUrl(start.path, start.token, prepared, { contentType: start.contentType, cacheControl: "3600" });
+    if (storageError) return { error: friendlyUploadError(storageError, "Upload failed. Please try again.") };
+
+    const done = await finishProfileImageUpload({ kind, path: start.path });
+    if (!("publicUrl" in done) || !done.publicUrl) return { error: ("error" in done && done.error) || "Upload failed. Please try again." };
+    return { publicUrl: done.publicUrl };
+  } catch (err) {
+    return { error: friendlyUploadError(err, "Upload failed. Please try again.") };
+  }
+}
+
+/** Opens the file picker for a team or co-owner photo. */
+function pickImage(onPicked: (file: File) => void) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
+  input.onchange = () => {
+    const file = input.files?.[0];
+    if (file) onPicked(file);
+  };
+  input.click();
 }
 
 function ProfileFold({ title, children }: { title: string; openOnDesktop?: boolean; children: React.ReactNode }) {
@@ -332,7 +393,12 @@ function ProfileEditor() {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
-    const result = await updateDoctorProfile(new FormData(e.currentTarget));
+    let result: { success?: boolean; error?: string };
+    try {
+      result = await updateDoctorProfile(new FormData(e.currentTarget));
+    } catch (err) {
+      result = { error: friendlyUploadError(err, "We could not save your profile. Please try again.") };
+    }
     setSaving(false);
     if (result.success) {
       setHasUnsavedChanges(false);
@@ -361,38 +427,14 @@ function ProfileEditor() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
-
-    let processedFile = file;
-    if (isHeic(file)) {
-      try {
-        processedFile = await convertToJpeg(file);
-      } catch {
-        processedFile = file;
-      }
-    }
-
-    if (processedFile.size > 5 * 1024 * 1024) {
-      toast("Image too large. Please use a photo under 5MB.", "error");
-      return;
-    }
-
-    let uploadFile = processedFile;
-    if (processedFile.size > 1 * 1024 * 1024) {
-      try {
-        uploadFile = await compressImage(processedFile, 800, 0.8);
-      } catch {
-        // If compression fails, use original
-      }
-    }
-
     setSaving(true);
-    const formData = new FormData();
-    formData.append("file", uploadFile);
-    const result = await uploadAvatar(formData);
+    const result = await uploadProfileImage(file, "avatar", 800, 0.8);
     setSaving(false);
-    if (result.success) {
-      setProfile((p) => (p ? { ...p, photo_url: result.publicUrl } : p));
+    if (result.publicUrl) {
+      const url = result.publicUrl;
+      setProfile((p) => (p ? { ...p, photo_url: url } : p));
       toast("Photo updated.");
     } else toast(result.error || "Upload failed.", "error");
   };
@@ -400,45 +442,50 @@ function ProfileEditor() {
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
     setUploadingBanner(true);
-    let processedFile = file;
-    if (isHeic(file)) {
-      try { processedFile = await convertToJpeg(file); } catch { processedFile = file; }
-    }
-    let uploadFile = processedFile;
-    if (processedFile.size > 1 * 1024 * 1024) {
-      try { uploadFile = await compressImage(processedFile, 1400, 0.85); } catch { /* use original */ }
-    }
-    const fd = new FormData();
-    fd.append("file", uploadFile);
-    const result = await uploadBannerImage(fd);
+    const result = await uploadProfileImage(file, "banner", 1400, 0.85);
     setUploadingBanner(false);
-    if (result.success) { setProfile((p) => (p ? { ...p, banner_url: result.publicUrl } : p)); toast("Banner updated."); }
-    else toast(result.error || "Upload failed.", "error");
+    if (result.publicUrl) {
+      const url = result.publicUrl;
+      setProfile((p) => (p ? { ...p, banner_url: url } : p));
+      toast("Banner updated.");
+    } else toast(result.error || "Upload failed.", "error");
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (files.length === 0) return;
     setUploadingGallery(true);
-    for (let i = 0; i < Math.min(files.length, 10 - galleryUrls.length); i++) {
-      let processedFile: File = files[i];
-      if (isHeic(processedFile)) {
-        try { processedFile = await convertToJpeg(processedFile); } catch { /* server handles it */ }
-      }
-      let uploadFile = processedFile;
-      if (processedFile.size > 1 * 1024 * 1024) {
-        try { uploadFile = await compressImage(processedFile, 1000, 0.8); } catch { /* use original */ }
-      }
-      const fd = new FormData();
-      fd.append("file", uploadFile);
-      const result = await uploadGalleryImage(fd);
-      if (result.success && result.publicUrl) setGalleryUrls((prev) => [...prev, result.publicUrl!]);
+    let added = 0;
+    let firstError = "";
+    for (const file of files.slice(0, Math.max(0, 10 - galleryUrls.length))) {
+      const result = await uploadProfileImage(file, "gallery", 1000, 0.8);
+      if (result.publicUrl) {
+        const url = result.publicUrl;
+        added += 1;
+        setGalleryUrls((prev) => [...prev, url]);
+      } else if (!firstError) firstError = result.error || "Upload failed.";
     }
     setUploadingGallery(false);
-    setHasUnsavedChanges(true);
-    toast("Photos added. Save to keep them.");
+    if (added) setHasUnsavedChanges(true);
+    if (firstError && added) toast(`${added} photo${added === 1 ? "" : "s"} added. One or more did not upload: ${firstError}`, "error");
+    else if (firstError) toast(firstError, "error");
+    else toast("Photos added. Save to keep them.");
+  };
+
+  const uploadTeamImage = (onUrl: (url: string) => void) => {
+    pickImage(async (file) => {
+      toast("Uploading photo...");
+      const result = await uploadProfileImage(file, "team", 800, 0.8);
+      if (result.publicUrl) {
+        onUrl(result.publicUrl);
+        markDirty();
+        toast("Photo added. Save to keep it.");
+      } else toast(result.error || "Upload failed.", "error");
+    });
   };
 
   const openLiveProfile = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -781,7 +828,7 @@ function ProfileEditor() {
                         <input placeholder="Credentials (for example, DC, CACCP)" value={owner.credentials} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], credentials: e.target.value }; setCoOwners(next); markDirty(); }} className={INPUT} />
                         <textarea placeholder="Bio" value={owner.bio} onChange={(e) => { const next = [...coOwners]; next[i] = { ...next[i], bio: e.target.value }; setCoOwners(next); markDirty(); }} rows={4} className={AREA} />
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.onchange = async () => { const f = input.files?.[0]; if (!f) return; const fd = new FormData(); fd.append("file", f); const r = await uploadTeamPhoto(fd); if (r.success && r.publicUrl) { const next = [...coOwners]; next[i] = { ...next[i], photo_url: r.publicUrl }; setCoOwners(next); markDirty(); } }; input.click(); }} className="min-h-11 text-sm font-bold text-portal-accent">Upload photo</button>
+                          <button type="button" onClick={() => uploadTeamImage((url) => setCoOwners((prev) => prev.map((owner, index) => (index === i ? { ...owner, photo_url: url } : owner))))} className="min-h-11 text-sm font-bold text-portal-accent">Upload photo</button>
                           <button type="button" onClick={() => { setCoOwners((prev) => prev.filter((_, j) => j !== i)); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-red-600">
                             <Trash2 className="w-4 h-4" /> Remove
                           </button>
@@ -808,7 +855,7 @@ function ProfileEditor() {
                         <input placeholder="Name" value={member.name} onChange={(e) => { const u = [...teamMembers]; u[i] = { ...u[i], name: e.target.value }; setTeamMembers(u); markDirty(); }} className={INPUT} />
                         <input placeholder="Role (for example, Chiropractic Assistant)" value={member.role} onChange={(e) => { const u = [...teamMembers]; u[i] = { ...u[i], role: e.target.value }; setTeamMembers(u); markDirty(); }} className={INPUT} />
                         <div className="flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = "image/*"; input.onchange = async () => { const f = input.files?.[0]; if (!f) return; const fd = new FormData(); fd.append("file", f); const r = await uploadTeamPhoto(fd); if (r.success && r.publicUrl) { const u = [...teamMembers]; u[i] = { ...u[i], photo_url: r.publicUrl }; setTeamMembers(u); markDirty(); } }; input.click(); }} className="min-h-11 text-sm font-bold text-portal-accent">Upload Photo</button>
+                          <button type="button" onClick={() => uploadTeamImage((url) => setTeamMembers((prev) => prev.map((member, index) => (index === i ? { ...member, photo_url: url } : member))))} className="min-h-11 text-sm font-bold text-portal-accent">Upload Photo</button>
                           <button type="button" onClick={() => { setTeamMembers((prev) => prev.filter((_, j) => j !== i)); markDirty(); }} className="min-h-11 inline-flex items-center gap-1 text-sm font-bold text-red-600">
                             <Trash2 className="w-4 h-4" /> Remove
                           </button>

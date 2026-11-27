@@ -655,3 +655,105 @@ export async function uploadBannerImage(formData: FormData) {
 export async function uploadTeamPhoto(formData: FormData) {
     return uploadImage('team', formData)
 }
+
+/**
+ * Step 1 of a photo upload: hand the browser a signed URL so the file goes
+ * straight to Storage. Only small text crosses the server action, so large
+ * phone photos no longer hit the 1 MB server action body limit.
+ */
+export async function startProfileImageUpload(input: { kind: string; fileName: string; contentType: string; size: number }) {
+    try {
+        const {
+            isProfileImageKind,
+            profileImageExt,
+            profileImagePath,
+            contentTypeForExt,
+            PROFILE_IMAGE_MAX_BYTES,
+            tooLargeMessage,
+        } = await import('@/lib/doctor/profile-image-upload')
+        if (!isProfileImageKind(input?.kind)) return { error: "Unknown photo type." }
+        const supabase = createServerSupabase()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return { error: "Please log in again, then try the upload." }
+
+        const ext = profileImageExt(String(input.fileName || ''), String(input.contentType || ''))
+        if (!ext) return { error: "Supported formats: JPEG, PNG, WebP, or HEIC." }
+        const size = Number(input.size) || 0
+        if (size > PROFILE_IMAGE_MAX_BYTES) return { error: tooLargeMessage(size) }
+
+        const nonce = Math.random().toString(36).slice(2, 10)
+        const path = profileImagePath({ userId: user.id, kind: input.kind, ext, now: Date.now(), nonce })
+        const { createAdminClient } = await import('@/lib/supabase-admin')
+        const admin = createAdminClient()
+        const { data, error } = await admin.storage.from('clinic-photos').createSignedUploadUrl(path)
+        if (error || !data?.token) {
+            console.error('[PROFILE_UPLOAD_START]', error)
+            return { error: "We could not start the upload. Please try again." }
+        }
+        return { success: true as const, path, token: data.token, contentType: contentTypeForExt(ext) }
+    } catch (err) {
+        console.error('[PROFILE_UPLOAD_START]', err)
+        return { error: "We could not start the upload. Please try again." }
+    }
+}
+
+/**
+ * Step 2: confirm the uploaded file, convert HEIC to JPEG on the server when
+ * the browser could not, and save avatar or banner URLs on the listing.
+ * Gallery and team photos are saved with the rest of the form, as before.
+ */
+export async function finishProfileImageUpload(input: { kind: string; path: string }) {
+    try {
+        const { isProfileImageKind, pathBelongsTo } = await import('@/lib/doctor/profile-image-upload')
+        const kind = input?.kind
+        if (!isProfileImageKind(kind)) return { error: "Unknown photo type." }
+        const supabase = createServerSupabase()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return { error: "Please log in again, then try the upload." }
+        let path = String(input.path || '')
+        if (!pathBelongsTo(path, user.id, kind)) return { error: "That upload could not be matched to your account." }
+
+        const { createAdminClient } = await import('@/lib/supabase-admin')
+        const admin = createAdminClient()
+        const bucket = admin.storage.from('clinic-photos')
+
+        if (/\.(heic|heif)$/i.test(path)) {
+            const { data: original, error: downloadError } = await bucket.download(path)
+            if (downloadError || !original) return { error: "We could not read that photo. Please try again." }
+            try {
+                const sharp = (await import('sharp')).default
+                const jpeg = await sharp(Buffer.from(await original.arrayBuffer()))
+                    .rotate()
+                    .resize({ width: 2000, withoutEnlargement: true })
+                    .jpeg({ quality: 85 })
+                    .toBuffer()
+                const jpegPath = path.replace(/\.(heic|heif)$/i, '.jpg')
+                const { error: putError } = await bucket.upload(jpegPath, jpeg, { cacheControl: '3600', upsert: true, contentType: 'image/jpeg' })
+                if (putError) return { error: "We could not save that photo. Please try again." }
+                await bucket.remove([path])
+                path = jpegPath
+            } catch (convErr) {
+                console.error('[HEIC_CONVERT] Failed:', convErr)
+                return { error: "We could not convert that HEIC photo. Please choose a JPEG or PNG instead." }
+            }
+        }
+
+        const publicUrl = bucket.getPublicUrl(path).data?.publicUrl || ''
+        if (!publicUrl) return { error: "We could not save that photo. Please try again." }
+
+        if (kind === 'avatar' || kind === 'banner') {
+            const column = kind === 'avatar' ? { photo_url: publicUrl } : { banner_url: publicUrl }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- banner_url is not in the generated types, same as uploadBannerImage
+            const { error: updateError } = await admin.from('doctors').update(column as any).eq('user_id', user.id)
+            if (updateError) {
+                console.error('[PROFILE_UPLOAD_FINISH]', updateError)
+                return { error: "Your photo uploaded but did not attach to your profile. Please try again." }
+            }
+            revalidatePath('/doctor/profile')
+        }
+        return { success: true as const, publicUrl }
+    } catch (err) {
+        console.error('[PROFILE_UPLOAD_FINISH]', err)
+        return { error: "We could not save that photo. Please try again." }
+    }
+}

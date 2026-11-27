@@ -4,6 +4,11 @@ import { JOB_REDIRECTS } from "./src/lib/jobs/redirects";
 
 const nextConfig: NextConfig = {
   experimental: {
+    // Backstop only. Profile photos now upload straight to Storage, so server
+    // actions carry text. 4 MB stays under Vercel's 4.5 MB function body cap.
+    serverActions: {
+      bodySizeLimit: '4mb',
+    },
     staleTimes: {
       dynamic: 0,
       static: 30,
