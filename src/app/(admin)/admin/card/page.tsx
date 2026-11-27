@@ -1,3 +1,4 @@
+import { CouldNotLoad } from '@/components/founder/load-error'
 import { StatsCardView } from '@/components/founder/stats-card'
 import { PlaceHeader } from '@/components/founder/header'
 import { openRequests } from '@/lib/founder/model'
@@ -11,7 +12,13 @@ export const dynamic = 'force-dynamic'
 
 export default async function StatsCardPage() {
   await requireAdminPage()
-  const [roster, settings] = await Promise.all([loadFounderRoster(), loadFounderSettings()])
+  let roster
+  let settings
+  try {
+    ;[roster, settings] = await Promise.all([loadFounderRoster(), loadFounderSettings()])
+  } catch {
+    return <CouldNotLoad what="the stats card" />
+  }
   const open = openRequests(roster)
   const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed').length
   const live = roster.doctors.filter((doctor) => doctor.verified)

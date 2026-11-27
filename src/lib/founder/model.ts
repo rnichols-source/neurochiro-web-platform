@@ -13,6 +13,14 @@ export type FunnelStep = {
   width: number
   tone: 'growth' | 'people' | 'pulse'
   tracking: boolean
+  tag?: string
+  href?: string
+}
+
+export type ReachCount = {
+  label: string
+  detail: string
+  value: string
 }
 
 export type NeedItem = {
@@ -25,7 +33,11 @@ export type NeedItem = {
 }
 
 export function openRequests(roster: FounderRoster, now = new Date()): RequestRecord[] {
-  return roster.requests.filter((row) => row.status !== 'withdrawn' && row.createdAt && new Date(row.createdAt).getTime() <= now.getTime())
+  return roster.requests.filter((row) => {
+    if (row.status === 'withdrawn' || row.status === 'spam') return false
+    if (!row.createdAt) return false
+    return new Date(row.createdAt).getTime() <= now.getTime()
+  })
 }
 
 export function waitingRequests(roster: FounderRoster, now = new Date()): RequestRecord[] {
@@ -46,53 +58,123 @@ function hoursBetween(start: string, end: string): number | null {
   return (b - a) / HOUR
 }
 
-export function buildFunnel(roster: FounderRoster, now = new Date()): FunnelStep[] {
-  const open = openRequests(roster, now)
-  const replied = open.filter((row) => row.acknowledgedAt)
-  const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed')
-  const reached = open.filter((row) => row.checkinResponse === 'reached')
-  const asked = open.filter((row) => row.checkinSent)
-  const max = Math.max(roster.demandCount, roster.searches || 0, roster.profileViews || 0, 1)
-  const book = (roster.bookTaps || 0) + (roster.callTaps || 0)
-  const visitTotal = open.length + (roster.communityVisits || 0)
-  const steps: FunnelStep[] = [
-    { label: 'Asked for a doctor', detail: 'IG comments + coverage searches', value: String(roster.demandCount), width: barPercent(roster.demandCount, max), tone: 'growth', tracking: false },
-    { label: 'Searched the directory', detail: 'site searches', value: roster.searches == null ? '—' : String(roster.searches), width: barPercent(roster.searches || 0, max), tone: 'growth', tracking: false },
-    { label: 'Viewed a doctor', detail: 'profile views (tracked)', value: roster.profileViews == null ? '—' : String(roster.profileViews), width: barPercent(roster.profileViews || 0, max), tone: 'growth', tracking: false },
-    { label: 'Tapped book / call', detail: roster.bookTaps == null ? 'book and call taps' : `${roster.bookTaps} book · ${roster.callTaps ?? 0} call`, value: roster.bookTaps == null ? '—' : String(book), width: barPercent(book, max), tone: 'people', tracking: false },
-    { label: 'Requested a visit', detail: `${new Set(open.map((row) => row.doctorId).filter(Boolean)).size} doctors${roster.communityVisits ? ` · ${roster.communityVisits} community-portal` : ''}`, value: String(visitTotal), width: barPercent(visitTotal, max), tone: 'pulse', tracking: false },
-    { label: 'Doctor replied', detail: visitTotal ? `${Math.round((replied.length / visitTotal) * 100)}% replied` : 'no requests yet', value: String(replied.length), width: barPercent(replied.length, max), tone: 'pulse', tracking: false },
-    { label: 'Contact confirmed', detail: visitTotal ? `${Math.round((confirmed.length / visitTotal) * 100)}% of requests` : 'no requests yet', value: String(confirmed.length), width: barPercent(confirmed.length, max), tone: 'pulse', tracking: false },
+function countOrMissing(value: number | null, ok = true): string {
+  if (!ok || value == null) return 'Unavailable'
+  return value.toLocaleString('en-US')
+}
+
+export function buildReach(roster: FounderRoster): ReachCount[] {
+  return [
+    {
+      label: 'Searched the directory',
+      detail: 'Site searches. People who opened a profile from Google or Instagram are not in this count.',
+      value: countOrMissing(roster.searches),
+    },
+    {
+      label: 'Viewed a doctor',
+      detail: 'Profile views recorded on the site. Each listing also keeps its own view counter. Those add up separately.',
+      value: countOrMissing(roster.profileViews),
+    },
+    {
+      label: 'Asked for a doctor',
+      detail: 'Instagram comments and coverage searches. This is not a count of site visitors.',
+      value: countOrMissing(roster.demandCount, roster.mentionsOk),
+    },
   ]
-  if (!roster.office.ready) {
-    steps.push({
-      label: 'Went into the office',
-      detail: asked.length ? `${reached.length} said the office reached them, of ${asked.length} asked. That is not an office visit.` : 'No office-visit answers yet.',
-      value: '?',
-      width: 18,
-      tone: 'pulse',
-      tracking: true,
-    })
-  } else if (roster.office.sent === 0 && roster.office.yes === 0) {
-    steps.push({
-      label: 'Went into the office',
-      detail: 'The question is ready. Nothing has been sent.',
-      value: '0',
-      width: 12,
-      tone: 'pulse',
-      tracking: true,
-    })
-  } else {
-    steps.push({
-      label: 'Went into the office',
-      detail: `${roster.office.yes} yes · ${roster.office.no} no · ${roster.office.sent} asked`,
-      value: String(roster.office.yes),
-      width: barPercent(roster.office.yes, max),
+}
+
+export function listingViewTotal(roster: FounderRoster): number {
+  return roster.doctors.reduce((sum, doctor) => sum + (doctor.views || 0), 0)
+}
+
+export function buildRequestFunnel(roster: FounderRoster, now = new Date(), officeOn = false): FunnelStep[] {
+  const open = openRequests(roster, now)
+  const replied = open.filter((row) => row.acknowledgedAt).length
+  const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed').length
+  const requested = open.length + (roster.communityVisits || 0)
+  const base = Math.max(requested, 1)
+  const share = (count: number) => requested ? `${Math.round((count / requested) * 100)}% of requests` : 'No requests yet'
+  const doctorCount = new Set(open.map((row) => row.doctorId).filter(Boolean)).size
+  const steps: FunnelStep[] = [
+    {
+      label: 'Requested a visit',
+      detail: `all time · ${doctorCount} doctors${roster.communityVisits ? ` · ${roster.communityVisits} from the patient portal` : ''}`,
+      value: String(requested),
+      width: requested ? 100 : 8,
       tone: 'pulse',
       tracking: false,
-    })
-  }
+    },
+    {
+      label: 'Doctor replied',
+      detail: share(replied),
+      value: String(replied),
+      width: barPercent(replied, base),
+      tone: 'pulse',
+      tracking: false,
+    },
+    {
+      label: 'Contact confirmed',
+      detail: share(confirmed),
+      value: String(confirmed),
+      width: barPercent(confirmed, base),
+      tone: 'pulse',
+      tracking: false,
+    },
+  ]
+  steps.push(officeVisitStep(roster, requested, officeOn))
   return steps
+}
+
+function officeVisitStep(roster: FounderRoster, requested: number, officeOn: boolean): FunnelStep {
+  if (!officeOn) {
+    return {
+      label: 'Went into the office',
+      detail: 'Off. Turn on in Settings.',
+      value: 'Off',
+      width: 0,
+      tone: 'pulse',
+      tracking: true,
+      tag: 'Off',
+      href: '/admin/settings',
+    }
+  }
+  if (!roster.office.ready) {
+    return {
+      label: 'Went into the office',
+      detail: 'The switch is on. The office-visit columns are not in the database yet.',
+      value: 'Not ready',
+      width: 0,
+      tone: 'pulse',
+      tracking: true,
+      tag: 'On',
+    }
+  }
+  if (roster.office.sent === 0 && roster.office.yes === 0) {
+    return {
+      label: 'Went into the office',
+      detail: 'On. No one has been asked yet.',
+      value: '0',
+      width: 8,
+      tone: 'pulse',
+      tracking: false,
+      tag: 'On',
+    }
+  }
+  const base = Math.max(requested, 1)
+  return {
+    label: 'Went into the office',
+    detail: `${roster.office.yes} yes · ${roster.office.no} no · ${roster.office.sent} asked`,
+    value: String(roster.office.yes),
+    width: barPercent(roster.office.yes, base),
+    tone: 'pulse',
+    tracking: false,
+    tag: 'On',
+  }
+}
+
+/** @deprecated Use buildReach and buildRequestFunnel. Kept so older imports still compile. */
+export function buildFunnel(roster: FounderRoster, now = new Date(), officeOn = false): FunnelStep[] {
+  return buildRequestFunnel(roster, now, officeOn)
 }
 
 export function buildNeeds(roster: FounderRoster, now = new Date()): NeedItem[] {
@@ -101,7 +183,7 @@ export function buildNeeds(roster: FounderRoster, now = new Date()): NeedItem[] 
   const review = roster.applications.filter((row) => row.status === 'under_review')
   const drafts = roster.applications.filter((row) => row.status === 'draft')
   const days = daysUntil(now, FOUNDING_END)
-  const founding = roster.doctors.filter((doctor) => doctor.founding).length
+  const founding = roster.doctors.filter((doctor) => doctor.founding && doctor.verified).length
   const needs: NeedItem[] = []
   if (waiting.length) {
     needs.push({
@@ -113,22 +195,32 @@ export function buildNeeds(roster: FounderRoster, now = new Date()): NeedItem[] 
       tone: 'alert',
     })
   }
-  if (review.length || drafts.length) {
+  if (review.length) {
     needs.push({
       id: 'applications',
-      title: `${review.length} application${review.length === 1 ? '' : 's'} to review${drafts.length ? ` · ${drafts.length} stalled draft${drafts.length === 1 ? '' : 's'}` : ''}`,
-      detail: 'drafts stopped before payment',
+      title: `${review.length} application${review.length === 1 ? '' : 's'} waiting on a decision`,
+      detail: 'Approve and charge, or decline. Each one asks you to confirm.',
       action: 'Review',
       href: '/admin/applications',
       tone: 'people',
     })
   }
-  if (roster.gapAsks) {
+  if (drafts.length) {
+    needs.push({
+      id: 'drafts',
+      title: `${drafts.length} doctor${drafts.length === 1 ? '' : 's'} started but didn't pay`,
+      detail: 'A scheduled note may already have gone out. Check the last reminder before you send another.',
+      action: 'Send a reminder',
+      href: '/admin/broadcast?audience=stalled',
+      tone: 'people',
+    })
+  }
+  if (roster.gapAsks || roster.unmeasured) {
     const names = roster.gaps.slice(0, 3).map((gap) => gap.city).join(', ')
     needs.push({
       id: 'gaps',
-      title: `${roster.gapAsks} asks are 50+ miles from a doctor`,
-      detail: names || 'Measured mentions only',
+      title: `${roster.gapAsks.toLocaleString('en-US')} confirmed far · ${roster.unmeasured.toLocaleString('en-US')} not measured yet`,
+      detail: names || 'Distance is missing on the ones not measured yet.',
       action: 'See targets',
       href: '/admin/growth#targets',
       tone: 'growth',
@@ -138,7 +230,7 @@ export function buildNeeds(roster: FounderRoster, now = new Date()): NeedItem[] 
     needs.push({
       id: 'founding',
       title: `Founding rate ends Dec 1 · ${days} day${days === 1 ? '' : 's'}`,
-      detail: `${founding} founding members · send the heads-up`,
+      detail: `${founding} live founding doctors. The email list leaves out hidden and unverified doctors.`,
       action: 'Draft email',
       href: '/admin/money#heads-up',
       tone: 'money',
@@ -181,6 +273,8 @@ export type DoctorListRow = {
   slug: string | null
   founding: boolean
   verified: boolean
+  listing: DoctorRecord['listing']
+  paid: boolean
   timeline: string[]
 }
 
@@ -234,6 +328,8 @@ export function doctorRows(roster: FounderRoster, now = new Date()): DoctorListR
       slug: doctor.slug,
       founding: doctor.founding,
       verified: doctor.verified,
+      listing: doctor.listing,
+      paid: doctor.paid,
       timeline,
     }
   }).sort((a, b) => a.health - b.health || b.waiting - a.waiting || a.name.localeCompare(b.name))
@@ -243,12 +339,13 @@ function titleCase(value: string): string {
   return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
-export function roiCard(roster: FounderRoster, now = new Date(), carePlansStarted = 0, averageCarePlan = 0) {
+export function roiCard(roster: FounderRoster, now = new Date(), carePlansStarted: number | null = null, averageCarePlan: number | null = null) {
   const open = openRequests(roster, now)
   const confirmed = open.filter((row) => row.outcome === 'patient_contacted_confirmed').length
   const prices = roster.doctors.map((doctor) => parseVisitPrice(doctor.priceText)).filter((value): value is number => value != null)
   const visit = median(prices)
   const doctors = new Set(open.map((row) => row.doctorId).filter(Boolean)).size
+  const plans = carePlansStarted == null || averageCarePlan == null ? null : carePlansStarted * averageCarePlan
   return {
     monthly: 99,
     visit,
@@ -259,8 +356,8 @@ export function roiCard(roster: FounderRoster, now = new Date(), carePlansStarte
     confirmed,
     carePlansStarted,
     averageCarePlan,
-    carePlanValue: carePlansStarted * averageCarePlan,
-    carePlanVisitValue: visit == null ? null : carePlansStarted * visit,
+    carePlanValue: plans,
+    carePlanVisitValue: visit == null || carePlansStarted == null ? null : carePlansStarted * visit,
   }
 }
 

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { PlaceHeader } from '@/components/founder/header'
 import { Card, Tag } from '@/components/founder/bits'
 import { requireAdminPage } from '@/lib/founder/guard'
@@ -21,10 +22,22 @@ export default async function GoLivePage() {
     <div>
       <PlaceHeader
         place="people"
-        title="Doctor go-live"
-        subtitle="Each paid membership runs seven steps. Failed steps can be retried. Test doctors do not email or text anyone."
+        title="New doctor setup"
+        subtitle="Research the profile, then watch the seven go-live steps. Test doctors do not email or text anyone."
       />
       <div className="space-y-4 px-4 py-4 lg:px-8">
+        <div className="grid gap-3 md:grid-cols-2">
+          <Link href="/admin/profile-builds" className="rounded-[22px] bg-white p-4">
+            <p className="fd-ui text-[12px] font-extrabold uppercase tracking-wide text-[#0A6159]">Step 1</p>
+            <h2 className="fd-ui text-[16px] font-extrabold">Profile research</h2>
+            <p className="text-[13px] text-[#5b6773]">Fill a new listing from the public site. Failed research waits here.</p>
+          </Link>
+          <div className="rounded-[22px] border border-[#D7DEE6] bg-white p-4">
+            <p className="fd-ui text-[12px] font-extrabold uppercase tracking-wide text-[#0A6159]">Step 2</p>
+            <h2 className="fd-ui text-[16px] font-extrabold">Go live</h2>
+            <p className="text-[13px] text-[#5b6773]">Each paid membership runs seven steps. Failed steps can be retried below.</p>
+          </div>
+        </div>
         {!board.ready ? (
           <Card>
             <h2 className="fd-ui text-[17px] font-extrabold">The log is not on yet</h2>

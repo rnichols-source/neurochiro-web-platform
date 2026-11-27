@@ -57,7 +57,7 @@ export default function DeliveryClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 text-neuro-navy md:p-6 max-w-7xl mx-auto space-y-6">
       <TabNav />
       <h1 className="text-2xl font-bold">Clip Delivery Tracker</h1>
 

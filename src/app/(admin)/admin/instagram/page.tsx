@@ -74,7 +74,7 @@ export default async function InstagramPage() {
       <div>
         <p className="text-sm font-bold text-[#D66829]">Instagram</p>
         <h1 className="text-2xl font-bold text-[#15202B]">DMs to send</h1>
-        <p className="mt-1 max-w-2xl text-sm text-[#5b6773]">These are not sent from the site. Each person has a comment to post on their original comment and a DM. Both use the doctor&apos;s request form. Copy a batch into Muse. Mark each one sent so the same person is not queued twice for the same doctor.</p>
+        <p className="mt-1 max-w-2xl text-sm text-[#5b6773]">These are not sent from the site. Each person has a comment to post on their original comment and a DM. Both use the doctor&apos;s request form. Copy a batch, then paste it into Instagram yourself. Mark each one sent so the same person is not queued twice for the same doctor.</p>
       </div>
       <InstagramImport />
       <section className="rounded-[22px] bg-white p-4 shadow-sm">

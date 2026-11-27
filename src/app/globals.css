@@ -191,8 +191,11 @@ html[data-cookie-bar="1"] .nc-seminar-cta {
 .admin-canvas .bg-\[\#0F172A\],
 .admin-canvas .bg-\[\#0f172a\],
 .admin-canvas .bg-\[\#1E293B\],
-.admin-canvas .bg-\[\#1e293b\] {
+.admin-canvas .bg-\[\#1e293b\],
+.admin-canvas .from-\[\#1a2e40\],
+.admin-canvas .to-\[\#162231\] {
   background-color: #fff;
+  background-image: none;
 }
 .admin-canvas .bg-white\/5,
 .admin-canvas .bg-white\/10,

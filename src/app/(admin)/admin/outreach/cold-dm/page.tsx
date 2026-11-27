@@ -173,7 +173,7 @@ export default function ColdDmQueuePage() {
     : "0";
 
   return (
-    <div className="min-h-screen bg-[#0B1118] text-white">
+    <div className="text-neuro-navy">
       {/* Header */}
       <div className="px-4 sm:px-6 py-4 border-b border-white/5">
         <div className="flex items-center justify-between">

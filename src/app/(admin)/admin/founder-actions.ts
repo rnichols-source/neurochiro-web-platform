@@ -123,5 +123,4 @@ export async function recordDoctorPreview(doctorId: string, name: string): Promi
     targetType: 'doctor',
     targetId: doctorId,
   })
-  refreshRoster()
 }

@@ -77,7 +77,6 @@ function emptyBilling(): DoctorBilling {
 }
 
 async function loadDoctorBillingFresh(): Promise<DoctorBilling> {
-  const empty = emptyBilling()
   try {
     const since = Math.floor((Date.now() - 30 * 86_400_000) / 1000)
     const [snap, canceled, inputs] = await Promise.all([
@@ -103,33 +102,40 @@ async function loadDoctorBillingFresh(): Promise<DoctorBilling> {
       disputeMinor += dispute.amount || 0
       disputeCurrency = dispute.currency || disputeCurrency
     }
+    if (!snap.ok) throw new Error('stripe')
     return {
-      stripeOk: snap.ok,
-      mrrUsd: snap.ok ? snap.mrrUsd : null,
+      stripeOk: true,
+      mrrUsd: snap.mrrUsd,
       mrrOther: [],
-      paying: snap.ok ? snap.payingSubscriptions : null,
-      payingCustomers: snap.ok ? snap.payingCustomers : null,
-      plans: snap.ok ? snap.segments.map((segment) => ({ label: segment.label, n: segment.subscriptions })) : [],
-      segments: snap.ok ? snap.segments : [],
+      paying: snap.payingSubscriptions,
+      payingCustomers: snap.payingCustomers,
+      plans: snap.segments.map((segment) => ({ label: segment.label, n: segment.subscriptions })),
+      segments: snap.segments,
       rateDate: snap.rateDate,
       churn30: churn,
-      pastDue: snap.ok ? snap.pastDue.count : null,
-      pastDueUsd: snap.ok ? snap.pastDue.amountUsd : null,
-      trialing: snap.ok ? snap.trialing.count : null,
-      trialingUsd: snap.ok ? snap.trialing.amountUsd : null,
-      scheduled: snap.ok ? snap.scheduled.count : null,
-      scheduledUsd: snap.ok ? snap.scheduled.amountUsd : null,
+      pastDue: snap.pastDue.count,
+      pastDueUsd: snap.pastDue.amountUsd,
+      trialing: snap.trialing.count,
+      trialingUsd: snap.trialing.amountUsd,
+      scheduled: snap.scheduled.count,
+      scheduledUsd: snap.scheduled.amountUsd,
       refunds30: refunds,
       disputesOpen: disputes,
       disputeAmount: disputes ? formatMoney(disputeMinor / 100, disputeCurrency.toUpperCase()) : null,
     }
   } catch (err) {
     console.error('founder money', err instanceof Error ? err.name : 'error')
-    return empty
+    throw err
   }
 }
 
-const loadDoctorBillingCached = unstable_cache(loadDoctorBillingFresh, ['founder-doctor-billing-v2'], { revalidate: 180 })
+const loadDoctorBillingCached = unstable_cache(loadDoctorBillingFresh, ['founder-doctor-billing-v3'], { revalidate: 180 })
 
-/** Stripe membership totals. Cached 3 minutes so a page click never waits on Stripe after the first read. */
-export const loadDoctorBilling = cache(loadDoctorBillingCached)
+/** Stripe membership totals. A failed read is not cached. */
+export const loadDoctorBilling = cache(async () => {
+  try {
+    return await loadDoctorBillingCached()
+  } catch {
+    return emptyBilling()
+  }
+})

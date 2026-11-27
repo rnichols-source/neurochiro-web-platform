@@ -10,6 +10,7 @@ export function greeting(now: Date, timeZone: string): string {
 }
 
 export function firstName(fullName: string | null | undefined): string {
-  const part = (fullName || '').trim().split(/\s+/)[0] || '';
-  return part.replace(/^dr\.?/i, '') || 'there';
+  const withoutTitle = (fullName || '').trim().replace(/^dr\.?\s+/i, '');
+  const part = withoutTitle.split(/\s+/).filter(Boolean)[0] || '';
+  return part.replace(/^dr\.?$/i, '') || 'there';
 }

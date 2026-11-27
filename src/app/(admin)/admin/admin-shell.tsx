@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Activity, Bell, Megaphone, Menu, Search, TrendingUp, Users, Wallet, X } from 'lucide-react'
 import PerspectiveBanner from '@/components/admin/PerspectiveBanner'
-import { MORE, PLACES, placeById, placeForPath, type PlaceId } from '@/lib/founder/places'
+import { MORE, PLACES, placeById, placeForPath } from '@/lib/founder/places'
 import { AuthProvider } from '@/context/AuthContext'
 import { logoutAdmin } from './SidebarActions'
 import '@/styles/founder.css'
@@ -51,8 +51,6 @@ export function AdminShell({
   const pathname = usePathname()
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
-  const placeId = placeForPath(pathname)
-  const active: PlaceId = placeId === 'more' ? 'pulse' : placeId
   const initial = name.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase() || '').join('') || 'A'
 
   async function signOut() {
@@ -64,7 +62,7 @@ export function AdminShell({
 
   const sidebar = (
     <aside className="flex h-full w-[250px] flex-col bg-white px-3 py-5">
-      <Link prefetch href="/admin" className="mb-4 flex items-center gap-2.5 px-2">
+      <Link prefetch={false} href="/admin" className="mb-4 flex items-center gap-2.5 px-2">
         <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#F5F3EF]">
           <Image src="/logo-mark.png" alt="" width={32} height={32} sizes="32px" className="h-8 w-8 object-contain" />
         </span>
@@ -78,7 +76,7 @@ export function AdminShell({
           const on = placeForPath(pathname) === place.id
           const Icon = ICONS[place.id]
           return (
-            <Link prefetch
+            <Link prefetch={false}
               key={place.id}
               href={place.href}
               aria-current={on ? 'page' : undefined}
@@ -101,7 +99,7 @@ export function AdminShell({
       <p className="fd-ui mb-1 mt-5 px-3 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#8a95a1]">More</p>
       <div className="flex flex-col">
         {MORE.map((item) => (
-          <Link prefetch key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`flex min-h-11 items-center rounded-xl px-3 text-[14px] font-bold ${pathname === item.href ? 'bg-[#F5F3EF] text-[#15202B]' : 'text-[#5b6773]'}`}>
+          <Link prefetch={false} key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className={`flex min-h-11 items-center rounded-xl px-3 text-[14px] font-bold ${pathname === item.href ? 'bg-[#F5F3EF] text-[#15202B]' : 'text-[#5b6773]'}`}>
             {item.label}
           </Link>
         ))}
@@ -126,7 +124,7 @@ export function AdminShell({
             <div className="hidden shrink-0 border-r border-[#ECE8E1] lg:block">{sidebar}</div>
             <div className="flex min-w-0 flex-1 flex-col">
               {ownsHeader(pathname) ? null : <LegacyBand pathname={pathname} />}
-              <main className="min-h-0 flex-1 overflow-y-auto pb-24 lg:pb-6">{children}</main>
+              <main className={`min-h-0 flex-1 overflow-y-auto pb-24 lg:pb-6 ${ownsHeader(pathname) ? '' : 'admin-canvas'}`}>{children}</main>
             </div>
           </div>
           <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e3e0da] bg-white px-1 pb-[max(8px,env(safe-area-inset-bottom))] pt-1 shadow-[0_-8px_24px_rgba(21,32,43,0.06)] lg:hidden" aria-label="Founder admin">
@@ -135,7 +133,7 @@ export function AdminShell({
                 const on = placeForPath(pathname) === place.id
                 const Icon = ICONS[place.id]
                 return (
-                  <Link prefetch key={place.id} href={place.href} className="relative flex min-h-11 flex-1 flex-col items-center gap-0.5" style={{ color: on ? place.ink : '#5b6773' }}>
+                  <Link prefetch={false} key={place.id} href={place.href} className="relative flex min-h-11 flex-1 flex-col items-center gap-0.5" style={{ color: on ? place.ink : '#5b6773' }}>
                     {on ? <span className="absolute -top-1 h-1 w-8 rounded-b" style={{ background: place.color }} /> : null}
                     <span className="grid h-8 w-12 place-items-center rounded-2xl" style={on ? { background: place.tint } : undefined}>
                       <Icon className="h-5 w-5" aria-hidden />
@@ -165,9 +163,11 @@ export function AdminShell({
         <button type="button" className="grid h-11 w-11 place-items-center rounded-xl bg-white/15 lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu">
           <Menu className="h-5 w-5" />
         </button>
-        <p className="fd-ui min-w-0 flex-1 truncate text-[18px] font-extrabold">{titleFor(path)}</p>
-        <Link prefetch href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[13px] font-extrabold text-[#5C3473]">
-          <Megaphone className="h-4 w-4" aria-hidden /> Reach anyone
+        <p className="fd-ui min-w-0 flex-1 truncate text-[16px] font-extrabold">{titleFor(path)}</p>
+        <FindButton />
+        <AlertBell />
+        <Link prefetch={false} href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[13px] font-extrabold text-[#5C3473]">
+          <Megaphone className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Reach anyone</span>
         </Link>
       </header>
     )
@@ -182,8 +182,8 @@ function titleFor(pathname: string): string {
     ['/admin/contact-requests', 'Visit requests'],
     ['/admin/coverage', 'Coverage'],
     ['/admin/revenue', 'Revenue detail'],
-    ['/admin/content', 'Content & IG Live'],
-    ['/admin/marketplace', 'Synapse'],
+    ['/admin/content', 'Content'],
+    ['/admin/marketplace', 'Marketplace'],
     ['/admin/seminars', 'Seminars'],
     ['/admin/jobs', 'Jobs'],
     ['/admin/logs', 'Older logs'],
@@ -192,6 +192,7 @@ function titleFor(pathname: string): string {
     ['/admin/notifications', 'Notifications'],
     ['/admin/inbox', 'Inbox'],
     ['/admin/settings', 'Settings'],
+    ['/admin/go-live', 'New doctor setup'],
     ['/admin/profile-builds', 'Profile research'],
   ]
   const hit = known.find(([href]) => pathname === href || pathname.startsWith(`${href}/`))
@@ -243,10 +244,10 @@ function FindPalette() {
     <>
       <button type="button" onClick={() => setOpen(true)} className="hidden min-h-11 items-center gap-2 rounded-[14px] bg-white/15 px-3 text-[14px] md:flex md:w-[220px]">
         <Search className="h-4 w-4" aria-hidden />
-        <span className="flex-1 text-left opacity-90">Find anyone</span>
+        <span className="flex-1 text-left opacity-90">Search</span>
         <kbd className="fd-ui rounded-md bg-white/20 px-1.5 py-0.5 text-[11px] font-bold">⌘K</kbd>
       </button>
-      <button type="button" onClick={() => setOpen(true)} className="grid h-11 w-11 place-items-center rounded-xl bg-white/15 md:hidden" aria-label="Find anyone">
+      <button type="button" onClick={() => setOpen(true)} className="grid h-11 w-11 place-items-center rounded-xl bg-white/15 md:hidden" aria-label="Search">
         <Search className="h-4 w-4" />
       </button>
       {open ? (
@@ -259,7 +260,7 @@ function FindPalette() {
             </div>
             <div className="mt-2 max-h-80 overflow-y-auto">
               {hits.length === 0 ? <p className="px-2 py-3 text-[13px] text-[#6b7785]">Type two letters. Doctors, community members, students, subscribers, and applications.</p> : hits.map((hit) => (
-                <Link key={hit.href + hit.title} href={hit.href} prefetch onClick={() => setOpen(false)} className="flex min-h-11 w-full flex-col items-start rounded-xl px-2 py-2 text-left hover:bg-[#F5F3EF]">
+                <Link key={hit.href + hit.title} href={hit.href} prefetch={false} onClick={() => setOpen(false)} className="flex min-h-11 w-full flex-col items-start rounded-xl px-2 py-2 text-left hover:bg-[#F5F3EF]">
                   <span className="fd-ui text-[14px] font-extrabold">{hit.title}</span>
                   <span className="text-[12px] text-[#6b7785]">{hit.subtitle}</span>
                 </Link>
@@ -284,9 +285,9 @@ export function AlertBell() {
       {open ? (
         <div className="absolute right-0 z-30 mt-2 w-72 rounded-2xl bg-white p-3 text-[#15202B] shadow-xl">
           {alerts.length === 0 ? <p className="text-[13px] text-[#6b7785]">Nothing is waiting.</p> : alerts.map((alert) => (
-            <Link prefetch key={alert.id} href={alert.href} onClick={() => setOpen(false)} className="block min-h-11 rounded-xl px-2 py-2 text-[13px] font-bold hover:bg-[#F5F3EF]">{alert.title}</Link>
+            <Link prefetch={false} key={alert.id} href={alert.href} onClick={() => setOpen(false)} className="block min-h-11 rounded-xl px-2 py-2 text-[13px] font-bold hover:bg-[#F5F3EF]">{alert.title}</Link>
           ))}
-          <Link prefetch href="/admin/notifications" className="mt-1 block text-[12px] font-bold text-[#5b6773]">All notifications</Link>
+          <Link prefetch={false} href="/admin/notifications" className="mt-1 block text-[12px] font-bold text-[#5b6773]">All notifications</Link>
         </div>
       ) : null}
     </div>
@@ -295,7 +296,7 @@ export function AlertBell() {
 
 export function ReachLink() {
   return (
-    <Link prefetch href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[14px] font-extrabold text-[#5C3473] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.4)]">
+    <Link prefetch={false} href="/admin/broadcast" className="fd-ui inline-flex min-h-11 items-center gap-2 rounded-[14px] bg-white px-3 text-[14px] font-extrabold text-[#5C3473] shadow-[0_6px_16px_-8px_rgba(0,0,0,0.4)]">
       <Megaphone className="h-4 w-4" aria-hidden /> <span className="hidden sm:inline">Reach anyone</span>
     </Link>
   )

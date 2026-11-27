@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { checkAdminAuth } from '@/lib/admin-auth'
-import { PageHeader } from '@/components/admin/ui/PageHeader'
 import { Tabs } from '@/components/admin/ui/Tabs'
 import ClipsPage from '../clips/page'
 import SpotlightPage from '../spotlight/page'
@@ -34,7 +33,7 @@ export default async function ContentPage({
 
   return (
     <div className="space-y-4 px-4 py-6">
-      <PageHeader title="Content" description="Clips, Spotlight, announcements, and the content tracker." />
+      <p className="max-w-2xl text-sm text-neuro-gray">Clips, Spotlight, announcements, and the content tracker.</p>
       <Tabs
         active={active}
         items={TABS.map((tab) => ({ id: tab.id, label: tab.label, href: `/admin/content?tab=${tab.id}` }))}

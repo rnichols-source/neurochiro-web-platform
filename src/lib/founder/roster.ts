@@ -31,6 +31,8 @@ export type DoctorRecord = {
   priceText: string | null
   sms: boolean
   test: boolean
+  listing: 'live' | 'hidden' | 'pending' | 'unverified'
+  paid: boolean
 }
 
 export type RequestRecord = {
@@ -74,6 +76,7 @@ export type ApplicationRecord = {
   step: number | null
   plan: string | null
   price: string | null
+  lastReminder: string | null
 }
 
 export type SubscriberRecord = {
@@ -121,6 +124,8 @@ export type FounderRoster = {
   callTaps: number | null
   communityVisits: number | null
   office: OfficeTracking
+  paidKnown: boolean
+  remindersKnown: boolean
 }
 
 const DOCTOR_COLUMNS = 'id, user_id, first_name, last_name, clinic_name, email, phone, city, state, country, latitude, longitude, verification_status, membership_tier, is_founding_member, is_test, created_at, profile_views, slug, photo_url, first_visit_price, sms_alerts_enabled, lead_alert_phones'
@@ -210,6 +215,8 @@ async function rosterFromBundle(payload: any): Promise<FounderRoster | null> {
     callTaps: payload.callTaps == null ? null : Number(payload.callTaps),
     communityVisits: payload.communityVisits == null ? null : Number(payload.communityVisits),
     office,
+    paidKnown: false,
+    remindersKnown: false,
   }
 }
 
@@ -223,16 +230,17 @@ async function loadFounderRosterFresh(): Promise<FounderRoster> {
   const officeProbePromise = admin.from('contact_requests').select('office_visit_response, office_visit_sent_at').limit(1)
   const requestRowsPromise = officeProbePromise.then((probe: { error: { message?: string; code?: string } | null }) => {
     const columns = probe.error ? REQUEST_COLUMNS : `${REQUEST_COLUMNS}, office_visit_response, office_visit_sent_at`
-    return fetchAllRows(admin, 'contact_requests', columns).catch(() => [])
+    return fetchAllRows(admin, 'contact_requests', columns, undefined, 'created_at', true, { throwOnError: true })
   })
+  const strict = { throwOnError: true as const }
   const [officeProbe, requestRows, mentionRows, doctorRows, profileRows, applicationRows, subscriberRows, searches, profileViews, bookTaps, callTaps, visitCount, mentionHead] = await Promise.all([
     officeProbePromise,
     requestRowsPromise,
-    fetchAllRows(admin, 'demand_mentions', MENTION_COLUMNS).catch(() => []),
-    fetchAllRows(admin, 'doctors', DOCTOR_COLUMNS).catch(() => []),
-    fetchAllRows(admin, 'profiles', 'id, full_name, email, role, is_test, last_sign_in_at, created_at').catch(() => []),
-    fetchAllRows(admin, 'doctor_applications', 'id, user_id, status, city, state, country, created_at, step_reached, plan, price_label').catch(() => []),
-    fetchAllRows(admin, 'subscribers', 'id, email, status, state, country, latitude, longitude, sms_consent, sms_phone').catch(() => []),
+    fetchAllRows(admin, 'demand_mentions', MENTION_COLUMNS, undefined, 'created_at', true, strict),
+    fetchAllRows(admin, 'doctors', DOCTOR_COLUMNS, undefined, 'created_at', true, strict),
+    fetchAllRows(admin, 'profiles', 'id, full_name, email, role, is_test, last_sign_in_at, created_at', undefined, 'created_at', true, strict),
+    fetchAllRows(admin, 'doctor_applications', 'id, user_id, status, city, state, country, created_at, step_reached, plan, price_label', undefined, 'created_at', true, strict),
+    fetchAllRows(admin, 'subscribers', 'id, email, status, state, country, latitude, longitude, sms_consent, sms_phone', undefined, 'created_at', true, strict),
     headCount('site_activity', 'event_type', 'search'),
     headCount('site_activity', 'event_type', 'profile_view'),
     headCount('conversion_events', 'event_type', 'book'),
@@ -286,16 +294,52 @@ async function loadFounderRosterFresh(): Promise<FounderRoster> {
     callTaps,
     communityVisits,
     office,
+    paidKnown: false,
+    remindersKnown: false,
   }
 }
 
-const loadFounderRosterCached = unstable_cache(loadFounderRosterFresh, ['founder-roster-v3'], {
+async function attachPlanAndReminders(roster: FounderRoster): Promise<FounderRoster> {
+  roster.doctors = roster.doctors.map((doctor) => ({ ...doctor }))
+  roster.applications = roster.applications.map((row) => ({ ...row }))
+  const admin = createAdminClient() as any
+  const strict = { throwOnError: true as const }
+  try {
+    const rows = await fetchAllRows(admin, 'doctors', 'id, stripe_subscription_id, paid_at', undefined, 'created_at', true, strict)
+    const paid = new Map(rows.map((row) => [String(row.id), Boolean(text(row.stripe_subscription_id) || text(row.paid_at))]))
+    for (const doctor of roster.doctors) doctor.paid = paid.get(doctor.id) === true
+    roster.paidKnown = true
+  } catch (error) {
+    console.error('[founder] paid plans failed', error instanceof Error ? error.message : 'error')
+    roster.paidKnown = false
+  }
+  try {
+    const rows = await fetchAllRows(admin, 'doctor_applications', 'id, reminder_1h_sent_at, reminder_24h_sent_at', undefined, 'created_at', true, strict)
+    const latest = new Map(rows.map((row) => {
+      const hour = text(row.reminder_1h_sent_at)
+      const day = text(row.reminder_24h_sent_at)
+      const stamp = hour && day ? (hour > day ? hour : day) : hour || day
+      return [String(row.id), stamp || null]
+    }))
+    for (const application of roster.applications) application.lastReminder = latest.get(application.id) || null
+    roster.remindersKnown = true
+  } catch (error) {
+    console.error('[founder] reminders failed', error instanceof Error ? error.message : 'error')
+    roster.remindersKnown = false
+  }
+  return roster
+}
+
+const loadFounderRosterCached = unstable_cache(loadFounderRosterFresh, ['founder-roster-v4'], {
   revalidate: 60,
   tags: ['founder-roster'],
 })
 
-/** Shared roster for the founder admin. Cached 60 seconds so tab switches do not rebuild it. */
-export const loadFounderRoster = cache(loadFounderRosterCached)
+/** Shared roster for the founder admin. A failed read throws and is not cached. */
+export const loadFounderRoster = cache(async () => {
+  const roster = await loadFounderRosterCached()
+  return attachPlanAndReminders(roster)
+})
 
 function mapDoctor(row: any): DoctorRecord {
   const phones = Array.isArray(row.lead_alert_phones) ? row.lead_alert_phones.filter((item: unknown) => typeof item === 'string' && item) : []
@@ -324,7 +368,16 @@ function mapDoctor(row: any): DoctorRecord {
     priceText: text(row.first_visit_price) || null,
     sms: flag(row.sms_alerts_enabled) && Boolean(text(row.phone) || phones[0]),
     test: flag(row.is_test),
+    listing: listingOf(text(row.verification_status)),
+    paid: false,
   }
+}
+
+function listingOf(status: string): DoctorRecord['listing'] {
+  if (status === 'verified') return 'live'
+  if (status === 'hidden' || status === 'rejected') return 'hidden'
+  if (status === 'pending') return 'pending'
+  return 'unverified'
 }
 
 function mapRequest(row: any): RequestRecord {
@@ -374,6 +427,7 @@ function mapApplication(row: any): ApplicationRecord {
     step: Number.isFinite(step) ? step : null,
     plan: text(row.plan) || null,
     price: text(row.price_label) || null,
+    lastReminder: null,
   }
 }
 

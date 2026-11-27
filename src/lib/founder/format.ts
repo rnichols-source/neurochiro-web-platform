@@ -1,5 +1,8 @@
 export const FOUNDING_END = new Date('2026-12-01T05:00:00.000Z')
 
+/** Published Doctor Pro price. This is the plan price, not a measured result. */
+export const DOCTOR_PRO_MONTHLY = 99
+
 export function daysUntil(now: Date, end: Date): number {
   return Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86_400_000))
 }

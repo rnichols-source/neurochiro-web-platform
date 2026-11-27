@@ -173,7 +173,7 @@ export default function ClipsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-4xl mx-auto space-y-8">
+    <div className="p-4 text-neuro-navy md:p-6 max-w-4xl mx-auto space-y-8">
       <TabNav />
 
       <h1 className="text-2xl font-bold">Clip Caption Generator</h1>

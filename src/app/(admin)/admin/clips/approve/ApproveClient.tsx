@@ -169,7 +169,7 @@ export default function ApproveClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-4xl mx-auto space-y-8">
+      <div className="p-4 text-neuro-navy md:p-6 max-w-4xl mx-auto space-y-8">
         <TabNav />
         <p className="text-white/30 text-center py-20">Loading drafts...</p>
       </div>
@@ -178,7 +178,7 @@ export default function ApproveClient() {
 
   if (drafts.length === 0) {
     return (
-      <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-4xl mx-auto space-y-8">
+      <div className="p-4 text-neuro-navy md:p-6 max-w-4xl mx-auto space-y-8">
         <TabNav />
         <h1 className="text-2xl font-bold">Approve Clips</h1>
         <div className="bg-[#1a2744] rounded-xl p-12 text-center">
@@ -191,7 +191,7 @@ export default function ApproveClient() {
 
   if (!current || !generated) {
     return (
-      <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-4xl mx-auto space-y-8">
+      <div className="p-4 text-neuro-navy md:p-6 max-w-4xl mx-auto space-y-8">
         <TabNav />
         <p className="text-white/30 text-center py-20">No clip data available</p>
       </div>
@@ -199,7 +199,7 @@ export default function ApproveClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#15202B] text-white p-6 md:p-10 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 text-neuro-navy md:p-6 max-w-4xl mx-auto space-y-6">
       <TabNav />
 
       {/* Header */}
