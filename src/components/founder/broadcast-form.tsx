@@ -35,13 +35,23 @@ const AUDIENCE_WHO: Record<string, string> = {
   unconfirmed: 'subscribers who never confirmed',
 }
 
-export function BroadcastForm({ presets, initialAudience = '' }: { presets: { id: string; count: number; label: string }[]; initialAudience?: string }) {
+export function BroadcastForm({
+  presets,
+  initialAudience = '',
+  initialSubject = '',
+  initialBody = '',
+}: {
+  presets: { id: string; count: number; label: string }[]
+  initialAudience?: string
+  initialSubject?: string
+  initialBody?: string
+}) {
   const [audience, setAudience] = useState(initialAudience)
   const [channels, setChannels] = useState<Channel[]>(['email'])
   const [state, setState] = useState('')
   const [country, setCountry] = useState('')
-  const [subject, setSubject] = useState('')
-  const [body, setBody] = useState('')
+  const [subject, setSubject] = useState(initialSubject)
+  const [body, setBody] = useState(initialBody)
   const [href, setHref] = useState('https://neurochiro.co/doctor')
   const [startsAt, setStartsAt] = useState('')
   const [endsAt, setEndsAt] = useState('')
