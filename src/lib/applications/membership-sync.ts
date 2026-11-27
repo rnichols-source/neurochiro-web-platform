@@ -38,11 +38,11 @@ export async function syncDoctorMembershipByCustomer(
       }).eq('id', row.id)
     }
     if (row.user_id && tier) {
+      // profiles.tier is an enum (standard, pro, admin) and profiles has no subscription_status column.
       await client.from('profiles').update({
-        tier: tier === 'pro' ? 'pro' : 'free',
+        tier: tier === 'pro' ? 'pro' : 'standard',
         stripe_customer_id: customerId,
       }).eq('id', row.user_id)
-      await client.from('profiles').update({ subscription_status: stripeStatus }).eq('id', row.user_id)
     }
   }
 }
